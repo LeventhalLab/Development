@@ -60,3 +60,9 @@ for iFiles=1:length(filenames)
     end
 end
 %%%%%
+% 
+% [sevPd,header] = ezSEV();
+% fdata=wavefilter(sev,6);
+% figure;plot(fdata)
+% hold on
+% plot(sevPd/100000,'r')
