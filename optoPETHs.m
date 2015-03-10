@@ -1,5 +1,5 @@
 % do the spike sorting, export to NEX files
-
+% 
 %%%%% Step 1: Extract on-off laser times
 % select ch68 for your session
 [sev,header] = ezSEV();
@@ -13,6 +13,9 @@ figure;hold on;
 plot(linspace(0,length(sev)/header.Fs,length(sev)),sev);
 plot(laserOn,ones(1,length(laserOn))*thresh,'o');
 plot(laserOff,ones(1,length(laserOff))*thresh,'x');
+xlabel('time (s)');
+ylabel('laser (Vo)');
+title('Laser on/off (ch68)');
 
 % are these the same? should be!
 disp([num2str(length(laserOn)),' laser on epochs.']);
@@ -22,17 +25,19 @@ disp([num2str(length(laserOff)),' laser off epochs.']);
 
 %%%% Step 2: Bring in spike data from NEX file
 % select all your NEX files (exported from Offline Sorter)
+[filenames, pathname, filterindex] = uigetfile('*.nex','Pick a file','MultiSelect', 'on');
+
 pethHalfWidth = 10; %seconds
+binSize = 50;
 allTs = {};
 totalUnits = 1;
-[filenames, pathname, filterindex] = uigetfile('*.nex','Pick a file','MultiSelect', 'on');
 for iFiles=1:length(filenames)
     [nvar, names, types] = nex_info(fullfile(pathname,filenames{iFiles}));
     names = cellstr(names);
     % how many units?
-    pethEntries = [];
     unitCount = length(cell2mat(regexp(names,'(T\d+)_(W\d+[abcdefg]$)')));
     for iUnit=1:unitCount
+        pethEntries = [];
         unitName = names{iUnit};
         [n, ts] = nex_ts(fullfile(pathname,filenames{iFiles}),names{iUnit});
         for iOnOff=1:length(laserOn)
@@ -47,7 +52,9 @@ for iFiles=1:length(filenames)
         totalUnits = totalUnits + 1;
         
         figure;
-        hist(pethEntries,100);
+        hist(pethEntries,binSize);
+        xlabel('time (s)');
+        ylabel('spikes');
         title([strrep(names(iUnit),'_','-')]);
         disp(length(pethEntries));
     end
