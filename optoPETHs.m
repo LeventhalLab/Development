@@ -75,9 +75,33 @@ allTsArr = {};
 for ii=1:length(allTs)
     allTsArr{ii} = allTs{1,ii}{1};
 end
-plotSpikeRaster(allTsArr,'PlotType','vertline');
+LineFormat = struct();
+LineFormat.Color = [0.3 0.3 0.3];
+LineFormat.LineWidth = 0.1;
+LineFormat.LineStyle = ':';
+figure;
+plotSpikeRaster(allTsArr,'LineFormat',LineFormat,'PlotType','vertline');
 hold on;
 for ii=1:length(laserOn)
     p = patch([laserOn(ii) laserOff(ii) laserOff(ii) laserOn(ii)],[0 0 length(allTsArr)+1 length(allTsArr)+1],'g');
     set(p,'EdgeColor','none','FaceAlpha',0.1);
+end
+
+for jj=1:length(allTsArr)
+    targetUnit = jj;
+    targetUnitSpikes = allTsArr{targetUnit};
+    spikeOnCount = 0;
+    timeOn = 0;
+    for ii=1:length(laserOn)
+        spikeOnCount = sum([spikeOnCount,...
+            length(find(targetUnitSpikes > laserOn(ii) & targetUnitSpikes < laserOff(ii)))]);
+        timeOn = sum([timeOn,laserOff(1)-laserOn(1)]);
+    end
+    timeOff = max(targetUnitSpikes)-timeOn; %estimated by last spike time
+    spikeOffCount = length(targetUnitSpikes)-spikeOnCount;
+    figure;
+    bar([spikeOffCount/timeOff,spikeOnCount/timeOn]);
+    ylabel('spikes/s');
+    xlabel('laser off / laser on');
+    title(['Unit ',num2str(jj)]);
 end
