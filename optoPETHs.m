@@ -71,17 +71,17 @@ end
 % hold on
 % plot(sevPd/100000,'r')
 
-allTsArr = {};
-for ii=1:length(allTs)
-    allTsArr{ii} = allTs{1,ii}{1};
-end
-figure;
-plotSpikeRaster(allTsArr,'PlotType','vertline');
-hold on;
-for ii=1:length(laserOn)
-    p = patch([laserOn(ii) laserOff(ii) laserOff(ii) laserOn(ii)],[0 0 length(allTsArr)+1 length(allTsArr)+1],'g');
-    set(p,'EdgeColor','none','FaceAlpha',0.1);
-end
+% allTsArr = {};
+% for ii=1:length(allTs)
+%     allTsArr{ii} = allTs{1,ii}{1};
+% end
+% figure;
+% plotSpikeRaster(allTsArr,'PlotType','vertline');
+% hold on;
+% for ii=1:length(laserOn)
+%     p = patch([laserOn(ii) laserOff(ii) laserOff(ii) laserOn(ii)],[0 0 length(allTsArr)+1 length(allTsArr)+1],'g');
+%     set(p,'EdgeColor','none','FaceAlpha',0.1);
+% end
 
 for jj=1:length(allTsArr)
     targetUnit = jj;
