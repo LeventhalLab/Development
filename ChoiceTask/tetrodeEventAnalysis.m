@@ -1,11 +1,13 @@
 function tetrodeEventAnalysis(sessionName,nexStruct,varargin)
-
+    
     decimateFactor = 10;
-    spectHalfWidth = 1; %seconds
-    pethHalfWidth = 1; %seconds
+    spectHalfWidth = 2; %seconds
+    pethHalfWidth = 2; %seconds
     histBin = 50;
-    spectCaxis = [15 50];
-    fontSize = 5;
+    fontSize = 6;
+    
+    spectFpass = [1 80];
+    spectCaxis = [10 60];
     
     for iarg = 1 : 2 : nargin - 2
         switch varargin{iarg}
@@ -33,11 +35,11 @@ function tetrodeEventAnalysis(sessionName,nexStruct,varargin)
     events = nexs_getEvents(nexStruct);
     compiledEvents = {};
     compiledEvents.cueOn = [1,3,5,7,9];
-    compiledEvents.houselightOn = 11;
-    compiledEvents.foodOn = 13;
     compiledEvents.noseIn = [17,19,21,23,25];
-    compiledEvents.foodportOn = 27;
     compiledEvents.toneOn = [33,35];
+    compiledEvents.foodOn = 13;
+    compiledEvents.foodportOn = 27;
+    compiledEvents.houselightOn = 11;
     compiledEvents.goTrial = 39;
     eventFieldnames = fieldnames(compiledEvents);
 
@@ -56,14 +58,12 @@ function tetrodeEventAnalysis(sessionName,nexStruct,varargin)
 
         movingwin = [0.5 0.05];
         params.tapers=[5 9];
-        params.Fs = header.Fs/10;
-        params.fpass = [5 80];
-        params.trialave = 1;
-        params.err = 0;
+        params.Fs = header.Fs/decimateFactor;
+        params.fpass = spectFpass;
         [S1,t,f] = mtspecgramc(sevDec,movingwin,params);
         spectHalfWidthSamples = length(find(t <= spectHalfWidth));
 
-        h = figure('position',[0 0 800 800]);
+        h = formatSheet;
         for iEvent=1:length(eventFieldnames)
             eventName = eventFieldnames{iEvent};
             disp(['Working on event ',eventName]);
@@ -77,7 +77,7 @@ function tetrodeEventAnalysis(sessionName,nexStruct,varargin)
                     allEventTsS1(iTs,:,:) = S1(centerIdx-spectHalfWidthSamples:centerIdx+spectHalfWidthSamples,:);
                 end
             end
-            subplot(3,3,iEvent);
+            subplot(2,4,iEvent);
             spectPethT = [fliplr(t(1:spectHalfWidthSamples))*-1 0 t(1:spectHalfWidthSamples)];
             plot_matrix(squeeze(mean(allEventTsS1,1)),spectPethT,f);
             hold on;
@@ -86,15 +86,16 @@ function tetrodeEventAnalysis(sessionName,nexStruct,varargin)
             caxis(spectCaxis);
             xlabel('Time (s)','FontSize',fontSize);
             ylabel('Frequency (Hz)','FontSize',fontSize);
-            title([tetrodeName,':',eventName,', ',num2str(length(allEventTsS1)),' trials'],'FontSize',fontSize);
+            title([tetrodeName,':',eventName,', ',num2str(length(allEventTsS1)),' events'],'FontSize',fontSize);
         end
+        
         saveas(h,fullfile(figurePath,[tetrodeName,'_eventSpectograms']),'pdf');
         close(h);
     end
 
     if isfield(nexStruct,'neurons')
         for iNeuron=1:length(nexStruct.neurons)
-            h = figure('position',[0 0 800 800]);
+            h = formatSheet;
             neuronName = formatNeuronName(nexStruct.neurons{iNeuron}.name);
             disp(['Creating PETH for ',neuronName]);
             for iEvent=1:length(eventFieldnames)
@@ -111,20 +112,30 @@ function tetrodeEventAnalysis(sessionName,nexStruct,varargin)
                         allEventTsPeth = [allEventTsPeth;nexStruct.neurons{iNeuron}.timestamps(pethTsRawIdx) - eventTs(iTs)];
                     end
                 end
-                subplot(3,3,iEvent);
+                subplot(2,4,iEvent);
                 [counts,centers] = hist(allEventTsPeth,histBin);
                 bar(centers,counts,1,'EdgeColor','none','FaceColor',[0 0.5 0.5]);
                 hold on;
                 plot([0 0],[0,max(counts)],':','color','k');
                 xlabel('Time (s)','FontSize',fontSize);
-                ylabel('Frequency (Hz)','FontSize',fontSize);
-                title([neuronName,':',eventName,', ',num2str(length(allEventTsPeth)),' spikes'],'FontSize',fontSize);
+                ylabel('Spikes','FontSize',fontSize);
+                title([neuronName,':',eventName,', ',num2str(eventTs),' events, ',num2str(length(allEventTsPeth)),' spikes'],'FontSize',fontSize);
             end
             saveas(h,fullfile(figurePath,[neuronName,'_eventUnits']),'pdf');
             close(h);
         end
     end
+    
     disp('end')
+end
+
+function h = formatSheet()
+    h = figure;
+    set(h,'PaperOrientation','landscape');
+    set(h,'PaperType','A4');
+    set(h,'PaperUnits','centimeters');
+    set(h,'PaperPositionMode','auto');
+    set(h,'PaperPosition', [1 1 28 19]);
 end
 
 function neuronName = formatNeuronName(neuronName)
