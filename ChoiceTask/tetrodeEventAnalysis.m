@@ -1,8 +1,8 @@
 function tetrodeEventAnalysis(sessionConf,nexStruct)
     
     decimateFactor = 10;
-    spectHalfWidth = 2; %seconds
-    pethHalfWidth = 2; %seconds
+    spectHalfWidth = 1; %seconds
+    pethHalfWidth = 1; %seconds
     histBin = 50;
     fontSize = 6;
     
@@ -39,7 +39,7 @@ function tetrodeEventAnalysis(sessionConf,nexStruct)
         [sev,header] = read_tdt_sev(fullSevFiles{lfpChannel});
         sevDec = decimate(double(sev),decimateFactor);
 
-        movingwin = [0.5 0.05];
+        movingwin = [0.35 0.05];
         params.tapers=[5 9];
         params.Fs = header.Fs/decimateFactor;
         params.fpass = spectFpass;
@@ -80,9 +80,10 @@ function tetrodeEventAnalysis(sessionConf,nexStruct)
             h2 = formatSheet;
             for ii=1:size(allEventTsS1,1)
                 hold on;
-                colormapline(mean(squeeze(allEventTsS1(ii,:,thetaIdxs)),2),...
-                    mean(squeeze(allEventTsS1(ii,:,betaIdxs)),2),...
-                    mean(squeeze(allEventTsS1(ii,:,gammaIdxs)),2));
+                subplot(311);
+                colormapline(smoothn(mean(squeeze(allEventTsS1(ii,:,thetaIdxs)),2),3,'robust'),...
+                    smoothn(mean(squeeze(allEventTsS1(ii,:,betaIdxs)),2),3,'robust'),...
+                    smoothn(mean(squeeze(allEventTsS1(ii,:,gammaIdxs)),2),3,'robust'));
             end
             xlabel('theta');
             ylabel('beta');
