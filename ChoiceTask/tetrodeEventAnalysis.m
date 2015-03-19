@@ -1,4 +1,4 @@
-function tetrodeEventAnalysis(sessionName,nexStruct,varargin)
+function tetrodeEventAnalysis(sessionConf,nexStruct)
     
     decimateFactor = 10;
     spectHalfWidth = 2; %seconds
@@ -8,25 +8,8 @@ function tetrodeEventAnalysis(sessionName,nexStruct,varargin)
     
     spectFpass = [1 80];
     spectCaxis = [10 60];
-    
-    for iarg = 1 : 2 : nargin - 2
-        switch varargin{iarg}
-            case 'nasPath',
-                nasPath = varargin{iarg + 1};
-            case 'sessionConf'
-                sessionConf = varargin{iarg + 1};
-        end
-    end
 
-    if ~exist('sessionConf','var')
-        if exist('nasPath','var')
-            sessionConf = exportSessionConf(sessionName,'nasPath',nasPath);
-        else
-            sessionConf = exportSessionConf(sessionName);
-        end
-    end
-
-    leventhalPaths = buildLeventhalPaths(sessionConf.nasPath,sessionName);
+    leventhalPaths = buildLeventhalPaths(sessionConf);
     figurePath = fullfile(leventhalPaths.graphs,'tetrodeAnalysis');
     if ~isdir(figurePath)
         mkdir(figurePath);
@@ -50,8 +33,8 @@ function tetrodeEventAnalysis(sessionName,nexStruct,varargin)
         disp(['Creating spectogram for ',tetrodeName]);
 
         %[] need real LFP channel
-        lfpChannel = sessionConf.chMap(iTet,2);
-        fullSevFiles = getChFileMap(leventhalPaths.session);
+        lfpChannel = sessionConf.lfpChannels(validTetrodes(iTet));
+        fullSevFiles = getChFileMap(leventhalPaths.channels);
         disp(['Reading ',fullSevFiles{lfpChannel}]);
         [sev,header] = read_tdt_sev(fullSevFiles{lfpChannel});
         sevDec = decimate(double(sev),decimateFactor);
@@ -62,6 +45,10 @@ function tetrodeEventAnalysis(sessionName,nexStruct,varargin)
         params.fpass = spectFpass;
         [S1,t,f] = mtspecgramc(sevDec,movingwin,params);
         spectHalfWidthSamples = length(find(t <= spectHalfWidth));
+        
+        thetaIdxs = f >= 8 & f <= 12;
+        betaIdxs = f >= 13 & f <= 30;
+        gammaIdxs = f > 30;
 
         h = formatSheet;
         for iEvent=1:length(eventFieldnames)
@@ -77,6 +64,8 @@ function tetrodeEventAnalysis(sessionName,nexStruct,varargin)
                     allEventTsS1(iTs,:,:) = S1(centerIdx-spectHalfWidthSamples:centerIdx+spectHalfWidthSamples,:);
                 end
             end
+            
+            figure(h);
             subplot(2,4,iEvent);
             spectPethT = [fliplr(t(1:spectHalfWidthSamples))*-1 0 t(1:spectHalfWidthSamples)];
             plot_matrix(squeeze(mean(allEventTsS1,1)),spectPethT,f);
@@ -87,6 +76,21 @@ function tetrodeEventAnalysis(sessionName,nexStruct,varargin)
             xlabel('Time (s)','FontSize',fontSize);
             ylabel('Frequency (Hz)','FontSize',fontSize);
             title([tetrodeName,':',eventName,', ',num2str(length(allEventTsS1)),' events'],'FontSize',fontSize);
+            
+            h2 = formatSheet;
+            for ii=1:size(allEventTsS1,1)
+                hold on;
+                colormapline(mean(squeeze(allEventTsS1(ii,:,thetaIdxs)),2),...
+                    mean(squeeze(allEventTsS1(ii,:,betaIdxs)),2),...
+                    mean(squeeze(allEventTsS1(ii,:,gammaIdxs)),2));
+            end
+            xlabel('theta');
+            ylabel('beta');
+            zlabel('gamma');
+            view(3);
+            title([tetrodeName,':',eventName,', ',num2str(length(allEventTsS1)),' events'],'FontSize',fontSize);
+            saveas(h2,fullfile(figurePath,[tetrodeName,'_',eventName,'_eventSpectspace']),'pdf');
+            close(h2);
         end
         
         saveas(h,fullfile(figurePath,[tetrodeName,'_eventSpectograms']),'pdf');
