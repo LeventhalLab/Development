@@ -47,15 +47,13 @@ function tetrodeEventAnalysis(sessionConf,nexStruct)
         [S1,t,f] = mtspecgramc(sevDec,movingwin,params);
         spectHalfWidthSamples = length(find(t <= spectHalfWidth));
         
-        thetaIdxs = f >= 4 & f <= 8;
-        thetaNormS1 = normalize(mean(S1(:,thetaIdxs),2));
+        thetaIdxs = f >= 8 & f <= 12;
         betaIdxs = f >= 13 & f <= 30;
         betaNormS1 = normalize(mean(S1(:,betaIdxs),2));
         gammaIdxs = f > 30;
         gammaNormS1 = normalize(mean(S1(:,gammaIdxs),2));
 
         h = formatSheet;
-        h2 = formatSheet;
         for iEvent=1:length(eventFieldnames)
             eventName = eventFieldnames{iEvent};
             disp(['Working on event ',eventName]);
@@ -88,7 +86,7 @@ function tetrodeEventAnalysis(sessionConf,nexStruct)
             xlabel('Time (s)','FontSize',fontSize);
             ylabel('Frequency (Hz)','FontSize',fontSize);
             title([tetrodeName,':',eventName,', ',num2str(length(allEventTsS1)),' events'],'FontSize',fontSize);
-            
+           
             figure(h2);
             subplot(2,4,iEvent);
             plot(spectPethT,mean(allThetaTsS1),'LineWidth',4);
@@ -118,13 +116,14 @@ function tetrodeEventAnalysis(sessionConf,nexStruct)
             legend('theta','beta','gamma');
             xlabel('Time (s)','FontSize',fontSize);
             ylabel('Norm. Power','FontSize',fontSize);
+
             title([tetrodeName,':',eventName,', ',num2str(length(allEventTsS1)),' events'],'FontSize',fontSize);
+            saveas(h2,fullfile(figurePath,[tetrodeName,'_',eventName,'_eventSpectspace']),'pdf');
+            close(h2);
         end
         
         saveas(h,fullfile(figurePath,[tetrodeName,'_eventSpectrograms']),'pdf');
         close(h);
-        saveas(h2,fullfile(figurePath,[tetrodeName,'_eventLFPBands']),'pdf');
-        close(h2);
     end
 
     if isfield(nexStruct,'neurons')
@@ -153,7 +152,7 @@ function tetrodeEventAnalysis(sessionConf,nexStruct)
                 plot([0 0],[0,max(counts)],':','color','k');
                 xlabel('Time (s)','FontSize',fontSize);
                 ylabel('Spikes','FontSize',fontSize);
-                title([neuronName,':',eventName,', ',num2str(length(eventTs)),' events, ',num2str(length(allEventTsPeth)),' spikes'],'FontSize',fontSize);
+                title([neuronName,':',eventName,', ',num2str(eventTs),' events, ',num2str(length(allEventTsPeth)),' spikes'],'FontSize',fontSize);
             end
             saveas(h,fullfile(figurePath,[neuronName,'_eventUnits']),'pdf');
             close(h);
