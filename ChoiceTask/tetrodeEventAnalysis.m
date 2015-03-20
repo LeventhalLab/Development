@@ -20,6 +20,7 @@ function tetrodeEventAnalysis(sessionConf,nexStruct)
     compiledEvents.cueOn = [1,3,5,7,9];
     compiledEvents.noseIn = [17,19,21,23,25];
     compiledEvents.toneOn = [33,35];
+    compiledEvents.noseOut = [18,20,22,24,26];
     compiledEvents.foodOn = 13;
     compiledEvents.foodportOn = 27;
     compiledEvents.houselightOn = 11;
@@ -29,7 +30,7 @@ function tetrodeEventAnalysis(sessionConf,nexStruct)
     validTetrodes = find(any(sessionConf.validMasks,2).*sessionConf.chMap(:,1));
     % plot spectrums
     for iTet=1:length(validTetrodes)
-        tetrodeName = sessionConf.tetrodeNames{iTet};
+        tetrodeName = sessionConf.tetrodeNames{validTetrodes(iTet)};
         disp(['Creating spectogram for ',tetrodeName]);
 
         %[] need real LFP channel
@@ -39,16 +40,19 @@ function tetrodeEventAnalysis(sessionConf,nexStruct)
         [sev,header] = read_tdt_sev(fullSevFiles{lfpChannel});
         sevDec = decimate(double(sev),decimateFactor);
 
-        movingwin = [0.35 0.05];
-        params.tapers=[5 9];
+        movingwin = [0.5 0.05];
+        params.tapers = [3 5];
         params.Fs = header.Fs/decimateFactor;
         params.fpass = spectFpass;
         [S1,t,f] = mtspecgramc(sevDec,movingwin,params);
         spectHalfWidthSamples = length(find(t <= spectHalfWidth));
         
         thetaIdxs = f >= 4 & f <= 8;
+        thetaNormS1 = normalize(mean(S1(:,thetaIdxs),2));
         betaIdxs = f >= 13 & f <= 30;
+        betaNormS1 = normalize(mean(S1(:,betaIdxs),2));
         gammaIdxs = f > 30;
+        gammaNormS1 = normalize(mean(S1(:,gammaIdxs),2));
 
         h = formatSheet;
         h2 = formatSheet;
@@ -59,10 +63,17 @@ function tetrodeEventAnalysis(sessionConf,nexStruct)
             eventTs = compileEventTs(nexStruct,compiledEvents,eventFieldnames,iEvent);
             % compile mean spectogram
             allEventTsS1 = [];
+            allThetaTsS1 = [];
+            allBetaTsS1 = [];
+            allGammaTsS1 = [];
             for iTs=1:length(eventTs)
                 centerIdx = length(find(t <= eventTs(iTs)));
                 if centerIdx >= spectHalfWidthSamples && size(S1,1) >= centerIdx + spectHalfWidthSamples
-                    allEventTsS1(iTs,:,:) = S1(centerIdx-spectHalfWidthSamples:centerIdx+spectHalfWidthSamples,:);
+                    spectIdxs = centerIdx-spectHalfWidthSamples:centerIdx+spectHalfWidthSamples;
+                    allEventTsS1(iTs,:,:) = S1(spectIdxs,:);
+                    allThetaTsS1(iTs,:) = thetaNormS1(spectIdxs);
+                    allBetaTsS1(iTs,:) = betaNormS1(spectIdxs);
+                    allGammaTsS1(iTs,:) = gammaNormS1(spectIdxs);
                 end
             end
             
@@ -80,20 +91,30 @@ function tetrodeEventAnalysis(sessionConf,nexStruct)
             
             figure(h2);
             subplot(2,4,iEvent);
+            
+            thetaMin = min(min(S1(:,thetaIdxs)));
+            thetaMax = max(max(S1(:,thetaIdxs)));
             thetaRaw = squeeze(mean(allEventTsS1(:,:,thetaIdxs),3));
             thetaStd = std(thetaRaw);
-            thetaMean = squeeze(mean(thetaRaw,1));
-            plot(spectPethT,normalize(thetaMean),'LineWidth',4);
+            thetaPlot = (squeeze(mean(thetaRaw,1)) - thetaMin) / thetaMax;
+            plot(spectPethT,thetaPlot,'LineWidth',4);
+            
             hold on;
+            betaMin = min(min(S1(:,betaIdxs)));
+            betaMax = max(max(S1(:,betaIdxs)));
             betaRaw = squeeze(mean(allEventTsS1(:,:,betaIdxs),3));
             betaStd = std(betaRaw);
-            betaMean = squeeze(mean(betaRaw,1));
-            plot(spectPethT,normalize(betaMean),'LineWidth',4);
+            betaPlot = (squeeze(mean(betaRaw,1)) - betaMin) / betaMax;
+            plot(spectPethT,betaPlot,'LineWidth',4);
+            
             hold on;
+            gammaMin = min(min(S1(:,gammaIdxs)));
+            gammaMax = max(max(S1(:,gammaIdxs)));
             gammaRaw = squeeze(mean(allEventTsS1(:,:,gammaIdxs),3));
             gammaStd = std(gammaRaw);
-            gammaMean = squeeze(mean(gammaRaw,1));
-            plot(spectPethT,normalize(gammaMean),'LineWidth',4);
+            gammaPlot = (squeeze(mean(gammaRaw,1)) - gammaMin) / gammaMax;
+            plot(spectPethT,gammaPlot,'LineWidth',4);
+            
             hold on;
             plot([0 0],[0 1],':','color','k');
             legend('theta','beta','gamma');
@@ -102,7 +123,7 @@ function tetrodeEventAnalysis(sessionConf,nexStruct)
             title([tetrodeName,':',eventName,', ',num2str(length(allEventTsS1)),' events'],'FontSize',fontSize);
         end
         
-        saveas(h,fullfile(figurePath,[tetrodeName,'_eventSpectograms']),'pdf');
+        saveas(h,fullfile(figurePath,[tetrodeName,'_eventSpectrograms']),'pdf');
         close(h);
         saveas(h2,fullfile(figurePath,[tetrodeName,'_eventLFPBands']),'pdf');
         close(h2);
