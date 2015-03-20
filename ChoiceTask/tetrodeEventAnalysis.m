@@ -91,13 +91,11 @@ function tetrodeEventAnalysis(sessionConf,nexStruct)
             
             figure(h2);
             subplot(2,4,iEvent);
-            
-            thetaMin = min(min(S1(:,thetaIdxs)));
-            thetaMax = max(max(S1(:,thetaIdxs)));
-            thetaRaw = squeeze(mean(allEventTsS1(:,:,thetaIdxs),3));
-            thetaStd = std(thetaRaw);
-            thetaPlot = (squeeze(mean(thetaRaw,1)) - thetaMin) / thetaMax;
-            plot(spectPethT,thetaPlot,'LineWidth',4);
+            plot(spectPethT,mean(allThetaTsS1),'LineWidth',4);
+            hold on;
+            plot(spectPethT,mean(allBetaTsS1),'LineWidth',4);
+            hold on;
+            plot(spectPethT,mean(allGammaTsS1),'LineWidth',4);
             
             hold on;
             betaMin = min(min(S1(:,betaIdxs)));
