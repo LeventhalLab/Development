@@ -130,11 +130,12 @@ function tetrodeEventAnalysis(sessionConf,nexStruct)
                 end
                 subplot(2,4,iEvent);
                 [counts,centers] = hist(allEventTsPeth,histBin);
-                bar(centers,counts,1,'EdgeColor','none','FaceColor',[0 0.5 0.5]);
+                spikesPerSecond = (counts/((pethHalfWidth*2)/histBin))/length(eventTs);
+                bar(centers,spikesPerSecond,1,'EdgeColor','none','FaceColor',[0 0.5 0.5]);
                 hold on;
-                plot([0 0],[0,max(counts)],':','color','k');
+                plot([0 0],[0,max(spikesPerSecond)],':','color','k');
                 xlabel('Time (s)','FontSize',fontSize);
-                ylabel('Spikes','FontSize',fontSize);
+                ylabel('Spikes/Second','FontSize',fontSize);
                 title([neuronName,':',eventName,', ',num2str(length(eventTs)),' events, ',num2str(length(allEventTsPeth)),' spikes'],'FontSize',fontSize);
             end
             saveas(h,fullfile(figurePath,[neuronName,'_eventUnits']),'pdf');
