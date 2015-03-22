@@ -124,7 +124,7 @@ GO_markEnd_ts   = events{GO_markEndIdx}.timestamps(2:end);
 % end
 
 %look for a sequeunce of trials, use the first as the starting index
-GO_startIdx = strfind(round((GO_markEnd_ts-GO_markStart_ts)/.005),[1 2 3 4]);
+GO_startIdx = strfind(round((GO_markEnd_ts-GO_markStart_ts)/.005),[2 2 3 4]);
 %why are there two Idxs? is this legacy for some system that had these
 %times on different rows or something?
 if isempty(GO_startIdx)
@@ -173,7 +173,8 @@ for iTrial = 1 : numTrials
     % marker for this trial, but before the GO trial marker for the next
     % trial
     trialInterval(1) = GO_markStart_ts(GO_startIdx + iTrial - 1);
-    if iTrial == length(GO_markStart_ts)
+    if iTrial == numTrials
+%     if iTrial == length(GO_markStart_ts)
         trialInterval(2) = 0;
     else
         trialInterval(2) = GO_markStart_ts(GO_startIdx + iTrial);
@@ -670,31 +671,31 @@ else
     trialData.timing.reactionTime = ...
         trialData.timestamps.centerOut - trialData.timestamps.tone;
 
-    if trialData.timing.reactionTime > logTrial.responseDurationLimit
-        % nose-out occurred after limited hold expired.
-        trialData.countsAsTrial = 1;
-        trialData.valid = 1;
-        trialData.invalidNP = 0;
-        trialData.holdTooLong = 1;
-        trialData.movementTooLong = 0;
-        trialData.falseStart = 0;
-
-        trialData.timing.wrongAnswerDelay = ...
-            trialEvents{HLidx}.timestamps - ...
-            (trialData.timestamps.tone + logTrial.responseDurationLimit);
-
-        % check that outcome, center port, and pre-tone interval match with .log file
-        boxLogConflicts.outcome = ~(logTrial.outcome == 4);
-        boxLogConflicts.centerNP = ~(logTrial.Center == trialData.centerNP);
-        boxLogConflicts.pretone = ~(abs(logTrial.pretone - trialData.timing.pretone) < timingTolerance);
-
-        trialData.logConflict.isConflict = boxLogConflicts.outcome | ...
-                                           boxLogConflicts.centerNP | ...
-                                           boxLogConflicts.pretone;
-        trialData.logConflict.boxLogConflicts = boxLogConflicts;
-        return;
-
-    end    % end if trialData.timing.reactionTime > logTrial.responseDurationLimit
+%     if trialData.timing.reactionTime > logTrial.responseDurationLimit
+%         % nose-out occurred after limited hold expired.
+%         trialData.countsAsTrial = 1;
+%         trialData.valid = 1;
+%         trialData.invalidNP = 0;
+%         trialData.holdTooLong = 1;
+%         trialData.movementTooLong = 0;
+%         trialData.falseStart = 0;
+% 
+%         trialData.timing.wrongAnswerDelay = ...
+%             trialEvents{HLidx}.timestamps - ...
+%             (trialData.timestamps.tone + logTrial.responseDurationLimit);
+% 
+%         % check that outcome, center port, and pre-tone interval match with .log file
+%         boxLogConflicts.outcome = ~(logTrial.outcome == 4);
+%         boxLogConflicts.centerNP = ~(logTrial.Center == trialData.centerNP);
+%         boxLogConflicts.pretone = ~(abs(logTrial.pretone - trialData.timing.pretone) < timingTolerance);
+% 
+%         trialData.logConflict.isConflict = boxLogConflicts.outcome | ...
+%                                            boxLogConflicts.centerNP | ...
+%                                            boxLogConflicts.pretone;
+%         trialData.logConflict.boxLogConflicts = boxLogConflicts;
+%         return;
+% 
+%     end    % end if trialData.timing.reactionTime > logTrial.responseDurationLimit
 
 
 
@@ -708,8 +709,7 @@ else
         trialData.timing.movementTime = ...
             NoseInTS(2) - trialData.timestamps.centerOut;
     end
-    if (max(size(NoseInTS)) == 1 || ...     % only one nose-in event for this trial
-            trialData.timing.movementTime + trialData.timing.reactionTime > logTrial.responseDurationLimit)  % 2nd nose-in after movement hold expired
+    if (max(size(NoseInTS))) == 1
 
         trialData.countsAsTrial = 1;
         trialData.valid = 1;
@@ -719,9 +719,9 @@ else
         trialData.falseStart = 0;
 
 
-        trialData.timing.wrongAnswerDelay = ...
-            trialEvents{HLidx}.timestamps - ...
-            (trialData.timestamps.tone + logTrial.responseDurationLimit);
+%         trialData.timing.wrongAnswerDelay = ...
+%             trialEvents{HLidx}.timestamps - ...
+%             (trialData.timestamps.tone + logTrial.responseDurationLimit);
 
         % check that outcome was movement hold violation, RT, pre-tone interval,
         % center ports match up
