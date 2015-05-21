@@ -33,7 +33,6 @@ function tetrodeEventAnalysis(sessionConf,nexStruct)
         tetrodeName = sessionConf.tetrodeNames{validTetrodes(iTet)};
         disp(['Creating spectogram for ',tetrodeName]);
 
-        %[] need real LFP channel
         lfpChannel = sessionConf.chMap(validTetrodes(iTet),sessionConf.lfpChannels(validTetrodes(iTet))+1);
         fullSevFiles = getChFileMap(leventhalPaths.channels);
         disp(['Reading ',fullSevFiles{lfpChannel}]);
