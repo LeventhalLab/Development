@@ -1,4 +1,4 @@
-function startTime = behaviorStartTime(nexStruct)
+function startTime = getBehaviorStartTime(nexStruct)
 videoOn = 47;
 % finds first instance of video trigger
 startIdx = find(round(diff(nexStruct.events{videoOn,1}.timestamps),2) == 0.05,1);

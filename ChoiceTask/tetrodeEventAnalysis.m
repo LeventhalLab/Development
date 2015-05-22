@@ -15,16 +15,8 @@ function tetrodeEventAnalysis(sessionConf,nexStruct)
         mkdir(figurePath);
     end
 
-    events = nexs_getEvents(nexStruct);
-    compiledEvents = {};
-    compiledEvents.cueOn = [1,3,5,7,9];
-    compiledEvents.noseIn = [17,19,21,23,25];
-    compiledEvents.toneOn = [33,35];
-    compiledEvents.noseOut = [18,20,22,24,26];
-    compiledEvents.foodOn = 13;
-    compiledEvents.foodportOn = 27;
-    compiledEvents.houselightOn = 11;
-    compiledEvents.goTrial = 39;
+%     events = nexs_getEvents(nexStruct);
+    compiledEvents = loadCompiledEvents();
     eventFieldnames = fieldnames(compiledEvents);
 
     validTetrodes = find(any(sessionConf.validMasks,2).*sessionConf.chMap(:,1));
@@ -157,12 +149,4 @@ end
 function neuronName = formatNeuronName(neuronName)
     parts = strsplit(neuronName,'_');
     neuronName = strjoin(parts(end-1:end),'-');
-end
-
-function eventTs = compileEventTs(nexStruct,compiledEvents,eventFieldnames,iEvent)
-    eventTs = [];
-    for iSubFields=1:length(compiledEvents.(eventFieldnames{iEvent}))
-        theEvent = nexStruct.events(compiledEvents.(eventFieldnames{iEvent}));
-        eventTs = [eventTs;theEvent{iSubFields}.timestamps];
-    end
 end
