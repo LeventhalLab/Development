@@ -1,5 +1,5 @@
 function burstLFPAnalysis(data,Fs,burstLocs)
-spectHalfWindow = 1; % seconds
+spectHalfWindow = 2; % seconds
 nDownsample = 10;
 fpass = [5 80];
 numfreqs = 50;
@@ -21,7 +21,7 @@ spectHalfSamples = round(spectHalfWindow * Fs);
 
 Wlfp = [];
 burstCount = 1;
-burstLocsSample = sort(datasample(burstLocs,100));
+burstLocsSample = sort(datasample(burstLocs,min(length(burstLocs),10000),'Replace',false));
 for ii=1:length(burstLocsSample)
     % skip if near beginning or end of recording
     if ~(burstLocsSample(ii) > spectHalfSamples * 2 || burstLocsSample(ii) > length(data) - spectHalfSamples * 2)
@@ -29,21 +29,41 @@ for ii=1:length(burstLocsSample)
     end
     % pad with Fs for processing (1 second)
     processRange = (burstLocsSample(ii) - spectHalfSamples + 1) - round(Fs):(burstLocsSample(ii) + spectHalfSamples) + round(Fs);
-    [W,freqList] = calculateComplexScalograms_EnMasse(data(processRange)','Fs',Fs,'fpass',fpass,'numfreqs',numfreqs);
-    halfW = size(W,1) / 2;
-    lfpRange = halfW - spectHalfSamples + 1:halfW + spectHalfSamples;
-    Wlfp(burstCount,:,:) = W(lfpRange,1,:);
-    burstCount = burstCount + 1
+    %[W,freqList] = calculateComplexScalograms_EnMasse(data(processRange)','Fs',Fs,'fpass',fpass,'numfreqs',numfreqs);
+    movingwin=[0.5 0.05];
+    params.fpass = [0 80];
+    params.tapers = [5 9];
+    params.Fs = Fs;
+    [S1,t,f] = mtspecgramc(data(processRange)',movingwin,params);
+%     halfW = size(W,1) / 2;
+%     lfpRange = halfW - spectHalfSamples + 1:halfW + spectHalfSamples;
+%     Wlfp(burstCount,:,:) = W(lfpRange,1,:);
+    Wlfp(burstCount,:,:) = S1(:,:);
+    burstCount = burstCount + 1;
+    
+%     figure;
+%     plot_matrix(S1,t,f);
+%     colormap(jet);
+%     caxis([0 60]);
+    
+    disp(num2str(max(processRange)/length(data)));
 end
-Wavg = squeeze(abs(mean(Wlfp,1)).^2)';
-t = linspace(-spectHalfWindow,spectHalfWindow,size(Wavg,2));
 
+% Wavg = squeeze(abs(mean(Wlfp,1)).^2)';
+% t = linspace(-spectHalfWindow,spectHalfWindow,size(Wavg,2));
+% 
+% figure;
+% imagesc(t, freqList, log(Wavg));
+% ylabel('Frequency (Hz)');
+% xlabel('Time (s)');
+% set(gca, 'YDir', 'normal');
+% colormap(jet);
+% caxis([0 7])
+
+Wavg = squeeze(mean(Wlfp,1));
 figure;
-imagesc(t, freqList, log(Wavg));
-ylabel('Frequency (Hz)');
-xlabel('Time (s)');
-set(gca, 'YDir', 'normal');
+plot_matrix(Wavg,t,f);
 colormap(jet);
-caxis([0 7])
+caxis([0 60]);
 
 disp('end');
