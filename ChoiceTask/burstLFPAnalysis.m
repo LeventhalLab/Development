@@ -1,7 +1,7 @@
 function [Wlfp,t,f,validBursts] = burstLFPAnalysis(data,Fs,burstLocs)
 spectHalfWindow = 1; % seconds
 nDownsample = 10;
-fpass = [5 80];
+fpass = [5 100];
 
 [b,a] = butter(2, 0.015); % 183Hz lowpass
 data = filtfilt(b,a,double(data)); % filter both ways

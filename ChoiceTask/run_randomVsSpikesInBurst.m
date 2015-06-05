@@ -6,30 +6,24 @@
 % 
 % ts = tsCell{1,2};
 % [burstEpochs,burstFreqs] = findBursts(ts);
-
-
-burstIdx = burstEpochs(burstFreqs >= 191,1);
-slowIdx = burstEpochs(burstFreqs < 191,1);
-slowLocs = ts(slowIdx) * header.Fs;
-burstLocs = ts(burstIdx) * header.Fs;
-randomLocs = sort(datasample(min(burstLocs):max(burstLocs),length(burstLocs),'Replace',false));
+% burstIdx = burstEpochs(burstEpochs(:,2)-burstEpochs(:,1) <= 2,1);
+% slowIdx = burstEpochs(burstEpochs(:,2)-burstEpochs(:,1) > 2,1);
+% slowLocs = ts(slowIdx) * header.Fs;
+% burstLocs = ts(burstIdx) * header.Fs;
+% randomLocs = sort(datasample(min(burstLocs):max(burstLocs),length(burstLocs),'Replace',false));
 
 % figure;plot(burstLocs);hold on;plot(randomLocs);plot(slowLocs); %sanity
-nLocs = 1500;
 
-slowLocsSample = sort(randsample(slowLocs,nLocs));
-[WlfpS,t,f,validBursts] = burstLFPAnalysis(sev,header.Fs,slowLocsSample);
-WavgS = 10*log10(squeeze(mean(WlfpS,1)));
+% [WlfpB,t,f,validBursts] = burstLFPAnalysis(sev,header.Fs,burstLocs);
+% WavgB = 10*log10(squeeze(mean(WlfpB,1)));
+% 
+% [WlfpS,t,f,validBursts] = burstLFPAnalysis(sev,header.Fs,slowLocs);
+% WavgS = 10*log10(squeeze(mean(WlfpS,1)));
+% 
+% [WlfpR,t,f,validBursts] = burstLFPAnalysis(sev,header.Fs,randomLocs);
+% WavgR = 10*log10(squeeze(mean(WlfpR,1)));
 
-burstLocsSample = sort(randsample(burstLocs,nLocs));
-[WlfpB,t,f,validBursts] = burstLFPAnalysis(sev,header.Fs,burstLocsSample);
-WavgB = 10*log10(squeeze(mean(WlfpB,1)));
-
-randomLocsSample = sort(randsample(randomLocs,nLocs));
-[WlfpR,t,f,validBursts] = burstLFPAnalysis(sev,header.Fs,randomLocsSample);
-WavgR = 10*log10(squeeze(mean(WlfpR,1)));
-
-prependText = '20150518a Ch1 UnitA';
+prependText = '20150518a Ch7 UnitA';
 figure('position',[100 100 300 800]);
 
 subplot(511);
@@ -48,7 +42,7 @@ imagesc(t,f,WavgS');
 axis xy; 
 colorbar;
 colormap(jet);
-title({prependText,'< 200Hz Burst'});
+title({prependText,'>2 Spikes'});
 caxis(c);
 xlim([-1 1]);
 xlabel('time (s)');
@@ -59,7 +53,7 @@ imagesc(t,f,WavgB');
 axis xy; 
 colorbar;
 colormap(jet);
-title({prependText,'> 200Hz Burst'});
+title({prependText,'2 Spikes'});
 caxis(c);
 xlim([-1 1]);
 xlabel('time (s)');
