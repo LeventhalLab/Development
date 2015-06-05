@@ -1,4 +1,4 @@
-function burstLFPAnalysis(data,Fs,burstLocs)
+function [Wavg,t,f] = burstLFPAnalysis(data,Fs,burstLocs,nAvg,titleText)
 spectHalfWindow = 1; % seconds
 nDownsample = 10;
 fpass = [5 80];
@@ -15,18 +15,12 @@ params.fpass = fpass;
 params.tapers = [5 9];
 params.Fs = Fs;
 
-% filename = '/Users/mattgaidica/Documents/Data/ChoiceTask/R0075/R0075-processed/R0075_20150518a/R0075_20150518a_T05_WL48_PL16_DT24-03-hs.nex';
-% tsCell = leventhalNexTs(filename);
-% ts = tsCell{1,2};
-% [burstEpochs,burstFreqs] = findBursts(ts);
-% burstIdx = burstEpochs(burstFreqs > 200,1);
-% burstLocs = ts(burstIdx) * Fs;
-
 spectHalfSamples = round(spectHalfWindow * Fs);
 
 Wlfp = [];
 burstCount = 1;
-burstLocsSample = sort(datasample(burstLocs,min(length(burstLocs),25),'Replace',false));
+burstLocsSample = sort(datasample(burstLocs,min(length(burstLocs),nAvg),'Replace',false));
+h = waitbar(0,'Processing...');
 for ii=1:length(burstLocsSample)
     % skip if near beginning or end of recording
     if ~(burstLocsSample(ii) > spectHalfSamples * 2 || burstLocsSample(ii) > length(data) - spectHalfSamples * 2)
@@ -47,9 +41,12 @@ for ii=1:length(burstLocsSample)
 %     plot_matrix(S1,t,f);
 %     colormap(jet);
 %     caxis([0 60]);
-    
-    disp(num2str(max(processRange)/length(data)));
+    progress = max(processRange)/length(data);
+%     disp(num2str(progress));
+    h = waitbar(progress,h,'Processing...');
 end
+
+close(h);
 
 % Wavg = squeeze(abs(mean(Wlfp,1)).^2)';
 % t = linspace(-spectHalfWindow,spectHalfWindow,size(Wavg,2));
@@ -66,9 +63,13 @@ Wavg = squeeze(mean(Wlfp,1));
 halfT = (max(t) - min(t)) / 2;
 t = linspace(-halfT,halfT,size(t,2));
 figure;
-plot_matrix(Wavg,t,f);
+Wavg = 10*log10(Wavg);
+imagesc(t,f,Wavg');
+axis xy; 
+colorbar;
+title(titleText);
 colormap(jet);
 caxis([0 60]);
 xlim([-spectHalfWindow spectHalfWindow]);
 
-disp('end');
+% disp('end');
