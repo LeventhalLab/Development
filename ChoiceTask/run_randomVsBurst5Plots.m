@@ -16,11 +16,9 @@ randomLocs = sort(datasample(min(burstLocs):max(burstLocs),length(burstLocs),'Re
 nLocs = 1000;
 
 slowLocsSample = randsample(slowLocs,nLocs);
-[WlfpR,t,f] = burstLFPAnalysis(sev,header.Fs,slowLocsSample);
+[WlfpR,t,f,validBursts] = burstLFPAnalysis(sev,header.Fs,slowLocsSample);
 WavgR = squeeze(mean(WlfpR,1));
 WavgR = 10*log10(WavgR);
-
-
 
 prependText = '20150518a Ch7 UnitA';
 figure('position',[100 100 300 800]);

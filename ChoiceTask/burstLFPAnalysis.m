@@ -1,4 +1,4 @@
-function [Wlfp,t,f] = burstLFPAnalysis(data,Fs,burstLocs)
+function [Wlfp,t,f,validBursts] = burstLFPAnalysis(data,Fs,burstLocs)
 spectHalfWindow = 1; % seconds
 nDownsample = 10;
 fpass = [5 80];
@@ -19,10 +19,12 @@ spectHalfSamples = round(spectHalfWindow * Fs);
 Wlfp = [];
 burstCount = 1;
 h = waitbar(0,'Processing...');
+validBursts = zeros(length(burstLocs),1);
 for ii=1:length(burstLocs)
     % skip if near beginning or end of recording
     if (burstLocs(ii) < spectHalfSamples * 2 || burstLocs(ii) > length(data) - spectHalfSamples * 2)
         disp(['Skipping burst location ',num2str(burstLocs(ii))]);
+        validBursts(ii) = 0;
         continue;
     end
     % pad with Fs for processing (1 second)
@@ -30,6 +32,7 @@ for ii=1:length(burstLocs)
     
     [S1,t,f] = mtspecgramc(data(processRange)',movingwin,params);
     Wlfp(burstCount,:,:) = S1(:,:);
+    validBursts(ii) = 1;
     burstCount = burstCount + 1;
 
     progress = max(processRange)/length(data);
