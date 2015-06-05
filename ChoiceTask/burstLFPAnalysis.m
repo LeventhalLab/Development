@@ -23,7 +23,8 @@ burstLocsSample = sort(datasample(burstLocs,min(length(burstLocs),nAvg),'Replace
 h = waitbar(0,'Processing...');
 for ii=1:length(burstLocsSample)
     % skip if near beginning or end of recording
-    if ~(burstLocsSample(ii) > spectHalfSamples * 2 || burstLocsSample(ii) > length(data) - spectHalfSamples * 2)
+    if (burstLocsSample(ii) < spectHalfSamples * 2 || burstLocsSample(ii) > length(data) - spectHalfSamples * 2)
+        disp(['Skipping burst location ',num2str(burstLocsSample(ii))]);
         continue;
     end
     % pad with Fs for processing (1 second)
@@ -60,16 +61,17 @@ close(h);
 % caxis([0 7])
 
 Wavg = squeeze(mean(Wlfp,1));
-halfT = (max(t) - min(t)) / 2;
-t = linspace(-halfT,halfT,size(t,2));
-figure;
 Wavg = 10*log10(Wavg);
-imagesc(t,f,Wavg');
-axis xy; 
-colorbar;
-title(titleText);
-colormap(jet);
-caxis([0 60]);
-xlim([-spectHalfWindow spectHalfWindow]);
+
+% halfT = (max(t) - min(t)) / 2;
+% t = linspace(-halfT,halfT,size(t,2));
+% figure;
+% imagesc(t,f,Wavg');
+% axis xy; 
+% colorbar;
+% title(titleText);
+% colormap(jet);
+% caxis([0 60]);
+% xlim([-spectHalfWindow spectHalfWindow]);
 
 % disp('end');
