@@ -62,9 +62,9 @@ close(h);
 
 Wavg = squeeze(mean(Wlfp,1));
 Wavg = 10*log10(Wavg);
+halfT = (max(t) - min(t)) / 2;
+t = linspace(-halfT,halfT,size(t,2));
 
-% halfT = (max(t) - min(t)) / 2;
-% t = linspace(-halfT,halfT,size(t,2));
 % figure;
 % imagesc(t,f,Wavg');
 % axis xy; 
