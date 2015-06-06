@@ -8,8 +8,8 @@
 % [burstEpochs,burstFreqs] = findBursts(ts);
 
 
-burstIdx = burstEpochs(burstFreqs >= 191,1);
-slowIdx = burstEpochs(burstFreqs < 191,1);
+burstIdx = burstEpochs(burstFreqs >= 162,1);
+slowIdx = burstEpochs(burstFreqs < 162,1);
 slowLocs = ts(slowIdx) * header.Fs;
 burstLocs = ts(burstIdx) * header.Fs;
 randomLocs = sort(datasample(min(burstLocs):max(burstLocs),length(burstLocs),'Replace',false));
@@ -29,7 +29,7 @@ randomLocsSample = sort(randsample(randomLocs,nLocs));
 [WlfpR,t,f,validBursts] = burstLFPAnalysis(sev,header.Fs,randomLocsSample);
 WavgR = 10*log10(squeeze(mean(WlfpR,1)));
 
-prependText = '20150518a Ch1 UnitA';
+prependText = '20150518a Ch7 UnitA';
 figure('position',[100 100 300 800]);
 
 subplot(511);
