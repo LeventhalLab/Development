@@ -16,14 +16,6 @@ for iarg = 1: 2 : nargin - 5
     end
 end
 
-% %Calculate the mean for each column in the waveform vector
-% meanWave = mean(waveforms,1);
-% 
-% %Calculate the standard deviations
-% stdDev = std(waveforms);
-% upperStd = meanWave + stdDev;
-% lowerStd = meanWave - stdDev;
-
 %Plot the waveform and shade upper and lower standard deviations
 figure
 grid on
@@ -33,8 +25,6 @@ alpha(.25);
 hold on
 plot(t, meanWaveforms, 'color', color, 'lineWidth', 2)
 hold on
-% plot(t, upperStd, 'k');
-% plot(t, lowerStd, 'k');
 xlabel('time (s)');
 ylabel('uV');
 title(['Channel ', num2str(ch), ' Average Waveform'])

@@ -31,12 +31,5 @@ for ii = 1:size(tsCell,1)
         numSpikes = length(find(tsCell{ii,2} < x+binSize & tsCell{ii,2}>=x));
         firingRate = [firingRate numSpikes/binSize];
     end
-    
-    %plot in the histogram format
-%     t = linspace(0,time,(time*60)/binSize);
-%     figure
-%     bar(t, firingRate, 'hist')
-%     xlabel('time (min)');
-%     ylabel('Firing Rate (spikes/sec)');
 end
 end

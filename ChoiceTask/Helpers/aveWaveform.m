@@ -54,16 +54,4 @@ upperStd = meanWaveform + stdDev;
 lowerStd = meanWaveform - stdDev;
 ch = getSEVChFromFilename(SEVfilename);
 
-% %Plot the waveform and shade upper and lower standard deviations
-% figure
-% t = linspace(-windowSize, windowSize, length(meanWave));
-% fill([t fliplr(t)], [upperStd fliplr(lowerStd)], color, 'edgeColor', color);
-% alpha(.25);
-% hold on
-% plot(t, meanWave, 'color', color, 'lineWidth', 2)
-% hold on
-% % plot(t, upperStd, 'k');
-% % plot(t, lowerStd, 'k');
-% xlabel('time (ms)');
-% ylabel('uV');
 end
