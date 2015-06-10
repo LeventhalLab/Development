@@ -124,7 +124,7 @@ GO_markEnd_ts   = events{GO_markEndIdx}.timestamps(2:end);
 % end
 
 %look for a sequeunce of trials, use the first as the starting index
-GO_startIdx = strfind(round((GO_markEnd_ts-GO_markStart_ts)/.005),[2 2 3 4]);
+GO_startIdx = strfind(round((GO_markEnd_ts-GO_markStart_ts)/.005),[1 2 3 4]);
 %why are there two Idxs? is this legacy for some system that had these
 %times on different rows or something?
 if isempty(GO_startIdx)
