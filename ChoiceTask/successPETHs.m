@@ -22,35 +22,26 @@ function successPETHs(nexStruct, trials)
         %Loop through events, get current event name
         for iEvent = 1: length(eventFieldnames)
             eventName = eventFieldnames{iEvent};
+         
             disp(['Working on event ',eventName]);
-            %Compile all timestamps from nexStruct.neurons
-            neuronEventTs = compileEventTs(nexStruct, compiledEvents, neuronEventFieldnames, iEvent);
+            
             %Loop through each trial to find the correct ones
             trialEventTs = [];
+            allEventTsPeth = []; %not sure if this should go here or on line 32
             for iTrial = 1 : length(trials)
-                if trials(iTrial).correct
+                %allEventTsPeth = [];
+                if trials(iTrial).correct && ~isempty(trials(iTrial).timestamps.(eventName)) %issue with tone 2--no timestamps
                     %Get the time stamps for the trials that are correct
-                    tempTrialEventTs = trials(iTrial).timestamps;    
+                    tempTrialEventTs = trials(iTrial).timestamps.(eventName);    
                     trialEventTs = [trialEventTs tempTrialEventTs];
-                    allEventTsPeth = [];
-                    
-                    %Loop through the trial event timestamps
-                    for iTs = 1: length(trialEventTs)
-                        %Find the ids where the neuron timestamp is within
-                        %the PETH window
-                        pethTsRawIdx = nexStruct.neurons{iUnit}.timestamps > (trialEventTs.(eventName) - pethHalfWidth)...
-                            & nexStruct.neurons{iUnit}.timestamps < trialEventTs.(eventName) + pethHalfWidth;
-                        allEventTsPeth = [allEventTsPeth; nexStruct.neurons{iUnit}.timestamps(pethTsRawIdx) - trialEventTs.(eventName)];
-                            
-                    end
-%                     for iTs=1:length(neuronEventTs)
-%                         if neuronEventTs(iTs) > pethHalfWidth && max(neuronEventTs) - neuronEventTs(iTs) > pethHalfWidth
-%                             pethsRawIdx = nexStruct.neurons{iUnit}.timestamps > neuronEventTs(iTs) - pethHalfWidth...
-%                                 & nexStruct.neurons{iUnit}.timestamps < neuronEventTs(iTs) + pethHalfWidth;
-%                             allEventTsPeth = [allEventTsPeth; nexStruct.neurons{iUnit}.timestamps(pethsRawIdx) - neuronEventTs(iTs)];
-%                         end
-%                     end
-                end      
+                end
+                %Loop through the trial event timestamps
+                for iTs = 1: length(trialEventTs)
+                     %Find the ids where the neuron timestamp is within the PETH window
+                     neuronTimestamps = nexStruct.neurons{iUnit}.timestamps - trialEventTs(iTs);
+                     pethTsRawIdx = abs(neuronTimestamps) <= pethHalfWidth;
+                     allEventTsPeth = [allEventTsPeth; nexStruct.neurons{iUnit}.timestamps(pethTsRawIdx) - trialEventTs(iTs)];
+                end  
             end
             %plot
             subplot(2,4,iEvent);
