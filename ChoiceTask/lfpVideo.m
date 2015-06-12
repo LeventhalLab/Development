@@ -7,9 +7,12 @@ function lfpVideo(sessionConf,nexData,lfpChannels)
     end
     video = VideoReader(fullfile(leventhalPaths.rawdata,videos(1).name));
 
-    plotHalfWidth = 2; % seconds
+    plotHalfWidthSec = 4; % seconds
+    plotHalfWidthSample = plotHalfWidthSec * sessionConf.Fs;
     behaviorStartTime = getBehaviorStartTime(nexData);
-    iFrameStart = ceil((plotHalfWidth + behaviorStartTime) * video.FrameRate);
+    iFrameStart = ceil((plotHalfWidthSec + behaviorStartTime) * video.FrameRate);
+    
+    fullSevFiles = getChFileMap(leventhalPaths.channels);
     
     figureHeight = 800; % pixels
     videoDimDivider = 3;
@@ -24,11 +27,33 @@ function lfpVideo(sessionConf,nexData,lfpChannels)
         
         hs = []; % subplot handles
         f = 1:80;
-        window = round(header.Fs*.5);
+        hicutoff = 500;
+        decmiateFactor = 10;% floor((sessionConf.Fs/2) / hicutoff);
+        window = round((sessionConf.Fs/decmiateFactor)*.1);
         overlap = [];
+%         overlap = window/10;
         for iCh = 1:length(lfpChannels)
-            [s,f,t] = spectrogram(sev(5e6:1e7),window,overlap,f,header.Fs);
+            [sev,header] = read_tdt_sev(fullSevFiles{lfpChannels(iCh)});
+            data = sev(curEphysSample-plotHalfWidthSample+1:curEphysSample+plotHalfWidthSample);
+            smoothdata = eegfilt(data,header.Fs,[],hicutoff); % lowpass
+            smoothdata = decimate(smoothdata,decmiateFactor);
+            [s,f,t] = spectrogram(smoothdata,window,overlap,f,header.Fs/decmiateFactor);
+            sLog = 10*log10(abs(s));
             hs(iCh) = subplot(length(lfpChannels)+1,1,iCh+1);
+            
+            
+%             movingwin=[0.5 0.05];
+%             params.fpass = [0 80];
+%             params.tapers = [5 9];
+%             params.Fs = sessionConf.Fs/decmiateFactor;
+%             [S1,t,f] = mtspecgramc(smoothdata',movingwin,params);
+%             sLog = 10*log10(abs(S1));
+%             
+            imagesc(t,f,sLog);
+            set(gca,'YDir','normal');
+            axis xy; 
+            axis tight;
+            colormap('jet');
         end
         
         set(hVid,'Position',[1 figureHeight-ceil(video.Height/videoDimDivider)...
