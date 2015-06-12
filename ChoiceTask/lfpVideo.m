@@ -1,4 +1,5 @@
 function lfpVideo(sessionConf,nexData,lfpChannels)
+    tic
     % get video
     leventhalPaths = buildLeventhalPaths(sessionConf);
     videos = dir(fullfile(leventhalPaths.rawdata,'*.avi'));
@@ -19,7 +20,6 @@ function lfpVideo(sessionConf,nexData,lfpChannels)
     open(newVideo);
 
     plotHalfWidthSec = 4; % seconds
-    plotHalfWidthSample = round(plotHalfWidthSec * sessionConf.Fs);
     behaviorStartTime = getBehaviorStartTime(nexData);
     iFrameStart = ceil((plotHalfWidthSec + behaviorStartTime) * video.FrameRate);
     
@@ -38,17 +38,19 @@ function lfpVideo(sessionConf,nexData,lfpChannels)
     params.tapers = [5 9];
     params.Fs = dFs;
     
-    smoothdata = [];
+    S = [];
     for iCh = 1:length(lfpChannels)
         [sev,header] = read_tdt_sev(fullSevFiles{lfpChannels(iCh)});
-        sev = decimate(double(sev(1:1e6)),decimateFactor);
-        smoothdata(iCh,:) = eegfilt(sev,header.Fs,[],hicutoff); % lowpass
+        sev = decimate(double(sev),decimateFactor);
+        sev = eegfilt(sev,header.Fs,[],hicutoff); % lowpass
+        disp(['Computing sepctrogram for ch',num2str(lfpChannels(iCh)),'...']);
+        [S1,t,f] = mtspecgramc(sev',movingwin,params);
+        S(iCh,:,:) = 10*log10(abs(S1));
     end
         
-    for iFrame=iFrameStart:iFrameStart+10%video.NumberOfFrames
+    for iFrame=iFrameStart:iFrameStart+1000%video.NumberOfFrames
         curEphysTs = (1/video.FrameRate) * iFrame - behaviorStartTime;
-        curEphysSample = round(curEphysTs * dFs);
-        sampleRange = curEphysSample - round(plotHalfWidthSample/decimateFactor) + 1:curEphysSample + round(plotHalfWidthSample/decimateFactor);
+        
         frame = read(video,iFrame);
         hVid = subplot(length(lfpChannels)+1,1,1);
         set(hVid,'Units','pixels');
@@ -57,12 +59,9 @@ function lfpVideo(sessionConf,nexData,lfpChannels)
         hs = []; % subplot handles
         for iCh = 1:length(lfpChannels)
             hs(iCh) = subplot(length(lfpChannels)+1,1,iCh+1);
-            
-            [S1,t,f] = mtspecgramc(smoothdata(iCh,sampleRange)',movingwin,params);
-            sLog = 10*log10(abs(S1));
-            tAdj = t - plotHalfWidthSec;
           
-            imagesc(tAdj,f,sLog');
+            tRange = find(t >= curEphysTs - plotHalfWidthSec & t < curEphysTs + plotHalfWidthSec);
+            imagesc(linspace(-plotHalfWidthSec,plotHalfWidthSec,length(tRange)),f,squeeze(S(iCh,tRange,:))');
             hold on;
             plot([0 0],[min(f) max(f)],'k','LineWidth',2);
             set(gca,'YDir','normal');
@@ -87,6 +86,7 @@ function lfpVideo(sessionConf,nexData,lfpChannels)
     end
     
     close(newVideo);
+    toc
 end
 
 function h = subplottight(n,m,i)
