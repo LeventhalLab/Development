@@ -7,7 +7,7 @@ function plotAveWaveform(meanWaveforms, upperStd, lowerStd, ch, windowSize, vara
 %   windowSize - the number of milliseconds on either side of the peak
 %   optional color  in [R/255, G/255, B/255] format
 
-color = [145/255, 205/255, 114/255];
+color = [145/255, 205/255, 114/255]; %default color summer tree green
 
 for iarg = 1: 2 : nargin - 5
     switch varargin{iarg}

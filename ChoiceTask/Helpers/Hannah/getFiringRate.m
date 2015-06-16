@@ -10,8 +10,8 @@ function firingRate = getFiringRate(filename, varargin)
 % Outputs:
 %   firingRate - a vector with the firing rate for each bin to be used for
 %   plotting later
-binSize = 30;
-time = 60;
+binSize = 30; %seconds
+time = 60; %minutes
 for iarg = 1 : 2 : nargin - 1
     switch varargin{iarg}
         case 'time'

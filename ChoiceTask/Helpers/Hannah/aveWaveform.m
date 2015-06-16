@@ -19,7 +19,7 @@ function [meanWaveform, upperStd, lowerStd, ch, windowSize] = aveWaveform(ts, SE
 
 
 % color = [145/255, 205/255, 114/255];
-windowSize = .002;
+windowSize = .002; %2 milliseconds
 
 for iarg = 1: 2 : nargin - 2
     switch varargin{iarg}
