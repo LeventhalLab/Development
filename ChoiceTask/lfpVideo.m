@@ -79,7 +79,7 @@ function lfpVideo(sessionConf,nexStruct,lfpChannels,neurons)
     
     padSubplots = 20;
     disp('Working on video...');
-    
+    iFrame = 1;
     while hasFrame(video)
 %     for iFrame=1:video.NumberOfFrames
         disp(['Frame:',num2str(iFrame)]);
@@ -287,6 +287,7 @@ function lfpVideo(sessionConf,nexStruct,lfpChannels,neurons)
         clf(h);
         
         delete(findall(gcf,'Tag','subplotAnnotate'));
+        iFrame = iFrame + 1;
     end
     
     close(newVideo);
