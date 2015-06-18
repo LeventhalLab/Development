@@ -16,7 +16,7 @@ function lfpVideo(sessionConf,nexStruct,lfpChannels,neurons)
     end
     saveVideoAs = fullfile(lfpVideoPath,[sessionConf.sessionName,'_',strrep(num2str(lfpChannels),'  ','-')]);
     newVideo = VideoWriter(saveVideoAs,'Motion JPEG AVI');
-    newVideo.Quality = 100;
+    newVideo.Quality = 75;
     newVideo.FrameRate = video.FrameRate;
     open(newVideo);
 
@@ -141,9 +141,9 @@ function lfpVideo(sessionConf,nexStruct,lfpChannels,neurons)
                     foodport = true;
                 case 28
                     foodport = false;
-                case 33
+                case {33,35}
                     tone = true;
-                case 34
+                case {34,36}
                     tone = false;
                 case 39
                     gotrial = true;
@@ -152,6 +152,11 @@ function lfpVideo(sessionConf,nexStruct,lfpChannels,neurons)
                 otherwise
             end
         end
+        
+%         if iFrame < 22500
+%             iFrame = iFrame + 1;
+%             continue;
+%         end
         
         frame = readFrame(video);
         frame = imresize(frame,1/videoDimDivider);
@@ -165,10 +170,6 @@ function lfpVideo(sessionConf,nexStruct,lfpChannels,neurons)
         debugPos = zeros(length(debugString),2);
         debugPos(:,2) = linspace(0,length(debugString)*18,length(debugString))';
         frame = insertText(frame,debugPos,debugString,'FontSize',14,'BoxOpacity',0,'TextColor','green');
-        
-%         if iFrame < 500
-%             continue;
-%         end
         
         if cue1
             frame = insertShape(frame,'FilledCircle',[xEventCoords(1) yEventCoords(1) 25]);
@@ -203,7 +204,7 @@ function lfpVideo(sessionConf,nexStruct,lfpChannels,neurons)
         end
 
         if food
-            frame = insertShape(frame,'FilledCircle',[xEventCoords(5) yEventCoords(5) 25]);
+            frame = insertShape(frame,'FilledCircle',[xEventCoords(6) yEventCoords(6) 25]);
         end
         if foodport
             frame = insertShape(frame,'FilledCircle',[xEventCoords(6) yEventCoords(6) 15],'Color','blue');
