@@ -1,6 +1,6 @@
 function lfpVideo(sessionConf,nexStruct,lfpChannels,neurons)
     tic
-    FigureVisible = 'off';
+    FigureVisible = 'on';
     % get video
     leventhalPaths = buildLeventhalPaths(sessionConf);
     videos = dir(fullfile(leventhalPaths.rawdata,'*.avi'));
@@ -48,7 +48,7 @@ function lfpVideo(sessionConf,nexStruct,lfpChannels,neurons)
     S = [];
     for iLfp = 1:length(lfpChannels)
         [sev,header] = read_tdt_sev(fullSevFiles{lfpChannels(iLfp)});
-        sev = decimate(double(sev(1:1e6)),decimateFactor);
+        sev = decimate(double(sev),decimateFactor);
         sev = eegfilt(sev,header.Fs,[],hicutoff); % lowpass
         disp(['Computing sepctrogram for ch',num2str(lfpChannels(iLfp)),'...']);
         [S1,t,f] = mtspecgramc(sev',movingwin,params);
@@ -78,10 +78,10 @@ function lfpVideo(sessionConf,nexStruct,lfpChannels,neurons)
     neurons = fliplr(neurons);
     
     padSubplots = 20;
-    
-%     while hasFrame(video)
     disp('Working on video...');
-    for iFrame=1:5000 %video.NumberOfFrames
+    
+    while hasFrame(video)
+%     for iFrame=1:video.NumberOfFrames
         disp(['Frame:',num2str(iFrame)]);
         curEphysTs = (1/video.FrameRate) * (iFrame-1) + behaviorStartTime;
         frameEvents = orderedEventsTs(orderedEventsTs(:,2) >= curEphysTs - (1/video.FrameRate) &...
