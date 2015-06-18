@@ -1,5 +1,6 @@
 function lfpVideo(sessionConf,nexStruct,lfpChannels,neurons)
     tic
+    FigureVisible = 'off';
     % get video
     leventhalPaths = buildLeventhalPaths(sessionConf);
     videos = dir(fullfile(leventhalPaths.rawdata,'*.avi'));
@@ -7,11 +8,6 @@ function lfpVideo(sessionConf,nexStruct,lfpChannels,neurons)
         error('novideo');
     end
     video = VideoReader(fullfile(leventhalPaths.rawdata,videos(1).name));
-    % [] select nose ports, food port, house light?
-%     h = figure;
-%     imshow(read(video,20));
-%     [xEventCoords,yEventCoords] = ginput(7);
-%     close(h);
     
     % setup new video
     lfpVideoPath = fullfile(leventhalPaths.graphs,'lfpVideos');
@@ -20,7 +16,7 @@ function lfpVideo(sessionConf,nexStruct,lfpChannels,neurons)
     end
     saveVideoAs = fullfile(lfpVideoPath,[sessionConf.sessionName,'_',strrep(num2str(lfpChannels),'  ','-')]);
     newVideo = VideoWriter(saveVideoAs,'Motion JPEG AVI');
-    newVideo.Quality = 85;
+    newVideo.Quality = 100;
     newVideo.FrameRate = video.FrameRate;
     open(newVideo);
 
@@ -30,14 +26,15 @@ function lfpVideo(sessionConf,nexStruct,lfpChannels,neurons)
     fullSevFiles = getChFileMap(leventhalPaths.channels);
     
     videoDimDivider = 3;
-    xEventCoords = [783.500000000000;733.500000000000;711.500000000000;707.500000000000;721.500000000000;1695.50000000000;1525.50000000000]/videoDimDivider;
-    yEventCoords = [8.435000000000000e+02;6.915000000000000e+02;5.335000000000000e+02;3.795000000000000e+02;2.215000000000000e+02;4.755000000000000e+02;6.895000000000000e+02]/videoDimDivider;
+    xEventCoords = [783.500000000000;733.500000000000;711.500000000000;707.500000000000;721.500000000000;1695.50000000000;1525.50000000000]/3;
+    yEventCoords = [8.435000000000000e+02;6.915000000000000e+02;5.335000000000000e+02;3.795000000000000e+02;2.215000000000000e+02;4.755000000000000e+02;6.895000000000000e+02]/3;
     figureHeight = 800; % estimate figure height (pixels)
     subplotsHeight = (figureHeight - ceil(video.Height/videoDimDivider)); % remaining space for subplots
     lfpHeight = round(subplotsHeight / (round(length(neurons)/2) + length(lfpChannels))); % solve the problem
     neuronHeight = round(lfpHeight/2); % spikes get 1/2 space
     figureHeight = lfpHeight * length(lfpChannels) + neuronHeight * length(neurons) + ceil(video.Height/videoDimDivider); % adjust for rounding
     h = figure('Position',[0 0 ceil(video.Width/videoDimDivider) figureHeight]);
+    set(h,'visible',FigureVisible);
     set(h,'color','w');
     
     hicutoff = 500;
@@ -51,7 +48,7 @@ function lfpVideo(sessionConf,nexStruct,lfpChannels,neurons)
     S = [];
     for iLfp = 1:length(lfpChannels)
         [sev,header] = read_tdt_sev(fullSevFiles{lfpChannels(iLfp)});
-        sev = decimate(double(sev(1:1e7)),decimateFactor);
+        sev = decimate(double(sev(1:1e6)),decimateFactor);
         sev = eegfilt(sev,header.Fs,[],hicutoff); % lowpass
         disp(['Computing sepctrogram for ch',num2str(lfpChannels(iLfp)),'...']);
         [S1,t,f] = mtspecgramc(sev',movingwin,params);
@@ -84,7 +81,7 @@ function lfpVideo(sessionConf,nexStruct,lfpChannels,neurons)
     
 %     while hasFrame(video)
     disp('Working on video...');
-    for iFrame=1:1000 %video.NumberOfFrames
+    for iFrame=1:5000 %video.NumberOfFrames
         disp(['Frame:',num2str(iFrame)]);
         curEphysTs = (1/video.FrameRate) * (iFrame-1) + behaviorStartTime;
         frameEvents = orderedEventsTs(orderedEventsTs(:,2) >= curEphysTs - (1/video.FrameRate) &...
@@ -156,7 +153,7 @@ function lfpVideo(sessionConf,nexStruct,lfpChannels,neurons)
             end
         end
         
-        frame = rgb2gray(readFrame(video));
+        frame = readFrame(video);
         frame = imresize(frame,1/videoDimDivider);
         frame = insertShape(frame,'FilledRectangle',[0 0 150 size(frame,1)],'color',[0 0 0],'Opacity',0.5);
         debugString = {sessionConf.sessionName,...
@@ -246,7 +243,7 @@ function lfpVideo(sessionConf,nexStruct,lfpChannels,neurons)
             hs(curSubplot) = subplot(totalSubplots,1,curSubplot);
             neuronTs = nexStruct.neurons{neurons(iNeuron),1}.timestamps; % [] does this exist?
             neuronTs = neuronTs(neuronTs >= curEphysTs - plotHalfWidthSec & neuronTs < curEphysTs + plotHalfWidthSec) - curEphysTs;
-            plotSpikeRaster({neuronTs'},'PlotType','vertline');
+            plotSpikeRaster({neuronTs'},'PlotType','vertline','FigureVisible',FigureVisible);
             xlim([-plotHalfWidthSec plotHalfWidthSec]);
             curSubplot = curSubplot + 1;
         end
@@ -287,8 +284,9 @@ function lfpVideo(sessionConf,nexStruct,lfpChannels,neurons)
         
         figFrame = getframe(h);
         writeVideo(newVideo,figFrame);
+        clf(h);
         
-        delete(findall(gcf,'Tag','subplotAnnotate'))
+        delete(findall(gcf,'Tag','subplotAnnotate'));
     end
     
     close(newVideo);
