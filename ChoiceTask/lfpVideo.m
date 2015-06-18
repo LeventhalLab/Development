@@ -1,4 +1,4 @@
-function lfpVideo(sessionConf,nexData,lfpChannels)
+function lfpVideo(sessionConf,nexStruct,lfpChannels,neurons)
     tic
     % get video
     leventhalPaths = buildLeventhalPaths(sessionConf);
@@ -8,10 +8,10 @@ function lfpVideo(sessionConf,nexData,lfpChannels)
     end
     video = VideoReader(fullfile(leventhalPaths.rawdata,videos(1).name));
     % [] select nose ports, food port, house light?
-    h = figure;
-    imshow(read(video,20));
-    [xEventCoords,yEventCoords] = ginput(7);
-    close(h);
+%     h = figure;
+%     imshow(read(video,20));
+%     [xEventCoords,yEventCoords] = ginput(7);
+%     close(h);
     
     % setup new video
     lfpVideoPath = fullfile(leventhalPaths.graphs,'lfpVideos');
@@ -20,20 +20,25 @@ function lfpVideo(sessionConf,nexData,lfpChannels)
     end
     saveVideoAs = fullfile(lfpVideoPath,[sessionConf.sessionName,'_',strrep(num2str(lfpChannels),'  ','-')]);
     newVideo = VideoWriter(saveVideoAs,'Motion JPEG AVI');
-    newVideo.Quality = 100;
+    newVideo.Quality = 85;
     newVideo.FrameRate = video.FrameRate;
     open(newVideo);
 
     plotHalfWidthSec = 4; % seconds
-    behaviorStartTime = getBehaviorStartTime(nexData);
-    iFrameStart = ceil((plotHalfWidthSec + behaviorStartTime) * video.FrameRate);
-    
+    behaviorStartTime = getBehaviorStartTime(nexStruct);
+  
     fullSevFiles = getChFileMap(leventhalPaths.channels);
     
     videoDimDivider = 3;
-    figureHeight = 800; % pixels
-    subplotHeight = (figureHeight - ceil(video.Height/videoDimDivider)) / length(lfpChannels);
+    xEventCoords = [783.500000000000;733.500000000000;711.500000000000;707.500000000000;721.500000000000;1695.50000000000;1525.50000000000]/videoDimDivider;
+    yEventCoords = [8.435000000000000e+02;6.915000000000000e+02;5.335000000000000e+02;3.795000000000000e+02;2.215000000000000e+02;4.755000000000000e+02;6.895000000000000e+02]/videoDimDivider;
+    figureHeight = 800; % estimate figure height (pixels)
+    subplotsHeight = (figureHeight - ceil(video.Height/videoDimDivider)); % remaining space for subplots
+    lfpHeight = round(subplotsHeight / (round(length(neurons)/2) + length(lfpChannels))); % solve the problem
+    neuronHeight = round(lfpHeight/2); % spikes get 1/2 space
+    figureHeight = lfpHeight * length(lfpChannels) + neuronHeight * length(neurons) + ceil(video.Height/videoDimDivider); % adjust for rounding
     h = figure('Position',[0 0 ceil(video.Width/videoDimDivider) figureHeight]);
+    set(h,'color','w');
     
     hicutoff = 500;
     decimateFactor = floor((sessionConf.Fs/2) / hicutoff); % optimized
@@ -44,16 +49,16 @@ function lfpVideo(sessionConf,nexData,lfpChannels)
     params.Fs = dFs;
     
     S = [];
-    for iCh = 1:length(lfpChannels)
-        [sev,header] = read_tdt_sev(fullSevFiles{lfpChannels(iCh)});
-        sev = decimate(double(sev),decimateFactor);
+    for iLfp = 1:length(lfpChannels)
+        [sev,header] = read_tdt_sev(fullSevFiles{lfpChannels(iLfp)});
+        sev = decimate(double(sev(1:1e7)),decimateFactor);
         sev = eegfilt(sev,header.Fs,[],hicutoff); % lowpass
-        disp(['Computing sepctrogram for ch',num2str(lfpChannels(iCh)),'...']);
+        disp(['Computing sepctrogram for ch',num2str(lfpChannels(iLfp)),'...']);
         [S1,t,f] = mtspecgramc(sev',movingwin,params);
-        S(iCh,:,:) = 10*log10(abs(S1));
+        S(iLfp,:,:) = 10*log10(abs(S1));
     end
     
-    orderedEventsTs = orderAllNexTs(nexData);
+    orderedEventsTs = orderAllNexTs(nexStruct);
     cue1 = false;
     cue2 = false;
     cue3 = false;
@@ -70,43 +75,21 @@ function lfpVideo(sessionConf,nexData,lfpChannels)
     houselight = false;
     gotrial = false;
     
-    for iFrame=1:iFrameStart+5000 %video.NumberOfFrames
+    totalSubplots = 1 + length(lfpChannels) + length(neurons);
+    % flip these so we can plot from the bottom up, just easier
+    lfpChannels = fliplr(lfpChannels);
+    neurons = fliplr(neurons);
+    
+    padSubplots = 20;
+    
+%     while hasFrame(video)
+    disp('Working on video...');
+    for iFrame=1:1000 %video.NumberOfFrames
+        disp(['Frame:',num2str(iFrame)]);
         curEphysTs = (1/video.FrameRate) * (iFrame-1) + behaviorStartTime;
-        
-        frame = rgb2gray(read(video,iFrame));
         frameEvents = orderedEventsTs(orderedEventsTs(:,2) >= curEphysTs - (1/video.FrameRate) &...
             orderedEventsTs(:,2) < curEphysTs + (1/video.FrameRate));
         
-        hs = []; % subplot handles
-        for iCh = 1:length(lfpChannels)
-            hs(iCh) = subplot(length(lfpChannels)+1,1,iCh+1);
-            if iFrameStart <= iFrame
-                tRange = find(t >= curEphysTs - plotHalfWidthSec & t < curEphysTs + plotHalfWidthSec);
-                imagesc(linspace(-plotHalfWidthSec,plotHalfWidthSec,length(tRange)),f,squeeze(S(iCh,tRange,:))');
-                hold on;
-                plot([0 0],[min(f) max(f)],'k','LineWidth',2);
-            end
-            set(gca,'YDir','normal');
-            axis xy; 
-            axis tight;
-            colormap(hs(iCh),jet);
-            caxis([-4.5 65]);
-            ticklabelinside(hs(iCh));
-        end
-        
-        for iCh = 1:length(lfpChannels)
-            set(hs(iCh),'Units','pixels');
-            bottomPos = (length(lfpChannels) - iCh) * subplotHeight;
-            set(hs(iCh),'Position',[1 bottomPos ceil(video.Width/videoDimDivider) subplotHeight]);
-        end
-        
-        hVid = subplot(length(lfpChannels)+1,1,1);
-        set(hVid,'Units','pixels');
-        imshow(frame,'border','tight');
-        colormap(hVid,gray);
-        hold on;
-        set(hVid,'Position',[1 figureHeight-ceil(video.Height/videoDimDivider)...
-            ceil(video.Width/videoDimDivider) ceil(video.Height/videoDimDivider)]);
         for iEvent=1:length(frameEvents)
             switch frameEvents(iEvent)
                 case 1
@@ -173,59 +156,157 @@ function lfpVideo(sessionConf,nexData,lfpChannels)
             end
         end
         
-        markerLarge = 25;
-        markerSmall = 15;
-        markerColor1 = 'b';
-        markerColor2 = 'r';
-        lineWidth = 3;
-        marker1 = 'o';
-        marker2 = 'x';
+        frame = rgb2gray(readFrame(video));
+        frame = imresize(frame,1/videoDimDivider);
+        frame = insertShape(frame,'FilledRectangle',[0 0 150 size(frame,1)],'color',[0 0 0],'Opacity',0.5);
+        debugString = {sessionConf.sessionName,...
+            ['Frame: ',num2str(iFrame)],...
+            ['Behavior: ',num2str(round(curEphysTs-behaviorStartTime,3)),'s'],...
+            ['Ephys: ',num2str(round(curEphysTs,3)),'s'],...
+            ['Sample: ',num2str(round(curEphysTs * sessionConf.Fs))],...
+            ['Frame Events: ',num2str(length(frameEvents))]};
+        debugPos = zeros(length(debugString),2);
+        debugPos(:,2) = linspace(0,length(debugString)*18,length(debugString))';
+        frame = insertText(frame,debugPos,debugString,'FontSize',14,'BoxOpacity',0,'TextColor','green');
+        
+%         if iFrame < 500
+%             continue;
+%         end
+        
         if cue1
-            plot(hVid,xEventCoords(1),yEventCoords(1),marker1,'Color',markerColor1,'LineWidth',lineWidth,'MarkerSize',markerLarge);
+            frame = insertShape(frame,'FilledCircle',[xEventCoords(1) yEventCoords(1) 25]);
         end
         if cue2
-            plot(hVid,xEventCoords(2),yEventCoords(2),marker1,'Color',markerColor1,'LineWidth',lineWidth,'MarkerSize',markerLarge);
+            frame = insertShape(frame,'FilledCircle',[xEventCoords(2) yEventCoords(2) 25]);
         end
         if cue3
-            plot(hVid,xEventCoords(3),yEventCoords(3),marker1,'Color',markerColor1,'LineWidth',lineWidth,'MarkerSize',markerLarge);
+            frame = insertShape(frame,'FilledCircle',[xEventCoords(3) yEventCoords(3) 25]);
         end
         if cue4
-            plot(hVid,xEventCoords(4),yEventCoords(4),marker1,'Color',markerColor1,'LineWidth',lineWidth,'MarkerSize',markerLarge);
+            frame = insertShape(frame,'FilledCircle',[xEventCoords(4) yEventCoords(4) 25]);
         end
         if cue5
-            plot(hVid,xEventCoords(5),yEventCoords(5),marker1,'Color',markerColor1,'LineWidth',lineWidth,'MarkerSize',markerLarge);
+            frame = insertShape(frame,'FilledCircle',[xEventCoords(5) yEventCoords(5) 25]);
         end
 
         if nose1
-            plot(hVid,xEventCoords(1),yEventCoords(1),marker2,'Color',markerColor2,'LineWidth',lineWidth,'MarkerSize',markerSmall);
+            frame = insertShape(frame,'FilledCircle',[xEventCoords(1) yEventCoords(1) 15],'Color','blue');
         end
         if nose2
-            plot(hVid,xEventCoords(2),yEventCoords(2),marker2,'Color',markerColor2,'LineWidth',lineWidth,'MarkerSize',markerSmall);
+            frame = insertShape(frame,'FilledCircle',[xEventCoords(2) yEventCoords(2) 15],'Color','blue');
         end
         if nose3
-            plot(hVid,xEventCoords(3),yEventCoords(3),marker2,'Color',markerColor2,'LineWidth',lineWidth,'MarkerSize',markerSmall);
+            frame = insertShape(frame,'FilledCircle',[xEventCoords(3) yEventCoords(3) 15],'Color','blue');
         end
         if nose4
-            plot(hVid,xEventCoords(4),yEventCoords(4),marker2,'Color',markerColor2,'LineWidth',lineWidth,'MarkerSize',markerSmall);
+            frame = insertShape(frame,'FilledCircle',[xEventCoords(4) yEventCoords(4) 15],'Color','blue');
         end
         if nose5
-            plot(hVid,xEventCoords(5),yEventCoords(5),marker2,'Color',markerColor2,'LineWidth',lineWidth,'MarkerSize',markerSmall);
+            frame = insertShape(frame,'FilledCircle',[xEventCoords(5) yEventCoords(5) 15],'Color','blue');
         end
 
-        if foodport
-            plot(hVid,xEventCoords(6),yEventCoords(6),marker2,'Color',markerColor2,'LineWidth',lineWidth,'MarkerSize',markerSmall);
-        end
         if food
-            plot(hVid,xEventCoords(6),yEventCoords(6),marker1,'Color',markerColor1,'LineWidth',lineWidth,'MarkerSize',markerLarge);
+            frame = insertShape(frame,'FilledCircle',[xEventCoords(5) yEventCoords(5) 25]);
+        end
+        if foodport
+            frame = insertShape(frame,'FilledCircle',[xEventCoords(6) yEventCoords(6) 15],'Color','blue');
         end
         if houselight
-            plot(hVid,xEventCoords(7),yEventCoords(7),marker1,'Color',markerColor1,'LineWidth',lineWidth,'MarkerSize',markerLarge);
+            frame = insertShape(frame,'FilledCircle',[xEventCoords(7) yEventCoords(7) 25],'Color','red');
         end
-
+        if tone
+            frame  = insertText(frame,[size(frame,2)/2 0],'TONE','FontSize',34,'BoxOpacity',0.5);
+        end
+        
+        hVid = subplot(totalSubplots,1,1);
+        set(hVid,'Units','pixels');
+        imshow(frame,'border','tight');
+        colormap(hVid,gray);
+        hold on;
+        
+        curSubplot = 2; % subplot=1 is the video
+        hs = []; % subplot handles
+        
+        for iLfp = 1:length(lfpChannels)
+            hs(curSubplot) = subplot(totalSubplots,1,curSubplot);
+            tRange = find(t >= curEphysTs - plotHalfWidthSec & t < curEphysTs + plotHalfWidthSec);
+            tLin = linspace(-plotHalfWidthSec,plotHalfWidthSec,length(tRange));
+            hold on;
+            imagesc(tLin,f,squeeze(S(iLfp,tRange,:))');
+            plot([0 0],[min(f) max(f)],'k','LineWidth',2);
+            set(gca,'YDir','normal');
+            axis xy; 
+            axis tight;
+            colormap(hs(curSubplot),jet);
+            caxis([-4.5 65]);
+            curSubplot = curSubplot + 1;
+        end
+        
+        for iNeuron = 1:length(neurons)
+            hs(curSubplot) = subplot(totalSubplots,1,curSubplot);
+            neuronTs = nexStruct.neurons{neurons(iNeuron),1}.timestamps; % [] does this exist?
+            neuronTs = neuronTs(neuronTs >= curEphysTs - plotHalfWidthSec & neuronTs < curEphysTs + plotHalfWidthSec) - curEphysTs;
+            plotSpikeRaster({neuronTs'},'PlotType','vertline');
+            xlim([-plotHalfWidthSec plotHalfWidthSec]);
+            curSubplot = curSubplot + 1;
+        end
+        
+        % I dont know why formatting has to be separated
+        curBottom = 0;
+        curSubplot = 2; % subplot=1 is the video
+        for iLfp = 1:length(lfpChannels)
+            set(hs(curSubplot),'Units','pixels');
+            set(hs(curSubplot),'Position',[1+padSubplots curBottom size(frame,2)-2*padSubplots lfpHeight]);
+            set(hs(curSubplot), 'XTick', []);
+            set(hs(curSubplot),'YTick',linspace(params.fpass(1),params.fpass(2),3));
+            subplotAnnotate(padSubplots,curBottom,['Channel ',num2str(lfpChannels(iLfp))]);
+            curBottom = curBottom + lfpHeight;
+            curSubplot = curSubplot + 1;
+        end
+        for iNeuron = 1:length(neurons)
+            set(hs(curSubplot),'Units','pixels');
+            set(hs(curSubplot),'Position',[1+padSubplots curBottom size(frame,2)-2*padSubplots neuronHeight]);
+            set(hs(curSubplot),'xaxisLocation','top');
+            if iNeuron == length(neurons)
+                labels = get(hs(curSubplot),'xTickLabel');
+                for iLabel=1:length(labels)
+                    labels{iLabel} = [labels{iLabel} 's'];
+                end
+                set(hs(curSubplot),'xTickLabel',labels);
+                set(hs(curSubplot), 'YTick', []);
+            else
+                set(hs(curSubplot), 'XTick', []);
+                set(hs(curSubplot), 'YTick', []);
+            end
+            subplotAnnotate(padSubplots,curBottom,nexStruct.neurons{neurons(iNeuron),1}.name);
+            curBottom = curBottom + neuronHeight;
+            curSubplot = curSubplot + 1;
+        end
+        
+        set(hVid,'Position',[1 figureHeight-size(frame,1) size(frame,2) size(frame,1)]);
+        
         figFrame = getframe(h);
         writeVideo(newVideo,figFrame);
+        
+        delete(findall(gcf,'Tag','subplotAnnotate'))
     end
     
     close(newVideo);
+    close(h);
     toc
+end
+
+function subplotAnnotate(pad,bottom,subplotString)
+    t = annotation('Textbox');
+    t.Units = 'pixels';
+    t.Margin = 4;
+    t.String = strrep(subplotString,'_','-');
+    t.Color = 'black';
+    t.BackgroundColor = [1 1 1];
+    t.FaceAlpha = 0.0;
+    t.LineStyle = 'none';
+    t.Tag = 'subplotAnnotate';
+    t.Position = [pad bottom 200 11];
+%     t.FitBoxToText = 'on';
+%     t.Position = [pad bottom t.Position(3) 11];
 end
