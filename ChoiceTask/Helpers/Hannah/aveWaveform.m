@@ -34,10 +34,7 @@ end
 [sev, header] = read_tdt_sev(SEVfilename);
 window = round((windowSize* header.Fs)/2);
 [b,a] = butter(4, [.02, .2]);
-% why is this in a loop? size(sev,1) is just 1?
-for ii = 1:size(sev,1)
-    sev(ii,:) = filtfilt(b,a,double(sev));
-end
+sev = filtfilt(b,a,double(sev));
 
 waveforms = [];
 
