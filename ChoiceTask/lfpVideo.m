@@ -8,17 +8,16 @@ function lfpVideo(sessionConf,nexStruct,lfpChannels,neurons)
         error('novideo');
     end
     video = VideoReader(fullfile(leventhalPaths.rawdata,videos(1).name));
+    lastFrame = read(video, inf);
+    % slightly rediculous to call it twice, MATLAB said so
+    video = VideoReader(fullfile(leventhalPaths.rawdata,videos(1).name));
+    newVideoFrames = 10000;
     
     % setup new video
     lfpVideoPath = fullfile(leventhalPaths.graphs,'lfpVideos');
     if ~isdir(lfpVideoPath)
         mkdir(lfpVideoPath);
     end
-    saveVideoAs = fullfile(lfpVideoPath,[sessionConf.sessionName,'_',strrep(num2str(lfpChannels),'  ','-')]);
-    newVideo = VideoWriter(saveVideoAs,'Motion JPEG AVI');
-    newVideo.Quality = 75;
-    newVideo.FrameRate = video.FrameRate;
-    open(newVideo);
 
     plotHalfWidthSec = 4; % seconds
     behaviorStartTime = getBehaviorStartTime(nexStruct);
@@ -71,6 +70,8 @@ function lfpVideo(sessionConf,nexStruct,lfpChannels,neurons)
     foodport = false;
     houselight = false;
     gotrial = false;
+    trial = 1;
+    trialReset = true;
     
     totalSubplots = 1 + length(lfpChannels) + length(neurons);
     % flip these so we can plot from the bottom up, just easier
@@ -81,7 +82,16 @@ function lfpVideo(sessionConf,nexStruct,lfpChannels,neurons)
     disp('Working on video...');
     iFrame = 1;
     while hasFrame(video)
-%     for iFrame=1:video.NumberOfFrames
+        if isequal(iFrame,1) || mod(iFrame-1,newVideoFrames) == 0
+            saveVideoAs = fullfile(lfpVideoPath,[sessionConf.sessionName,'_',...
+%                 'LFP',strrep(num2str(lfpChannels),'  ','-'),'_',...
+%                 'UNITS',strrep(num2str(neurons),'  ','-'),...
+                'F',num2str(iFrame)]);
+            newVideo = VideoWriter(saveVideoAs,'Motion JPEG AVI');
+            newVideo.Quality = 75;
+            newVideo.FrameRate = video.FrameRate;
+            open(newVideo);
+        end
         disp(['Frame:',num2str(iFrame)]);
         curEphysTs = (1/video.FrameRate) * (iFrame-1) + behaviorStartTime;
         frameEvents = orderedEventsTs(orderedEventsTs(:,2) >= curEphysTs - (1/video.FrameRate) &...
@@ -146,9 +156,14 @@ function lfpVideo(sessionConf,nexStruct,lfpChannels,neurons)
                 case {34,36}
                     tone = false;
                 case 39
-                    gotrial = true;
+                    if trialReset
+                        gotrial = true;
+                        trial = trial + 1;
+                        trialReset = false;
+                    end
                 case 40
                     gotrial = false;
+                    trialReset = false;
                 otherwise
             end
         end
@@ -166,6 +181,7 @@ function lfpVideo(sessionConf,nexStruct,lfpChannels,neurons)
             ['Behavior: ',num2str(round(curEphysTs-behaviorStartTime,3)),'s'],...
             ['Ephys: ',num2str(round(curEphysTs,3)),'s'],...
             ['Sample: ',num2str(round(curEphysTs * sessionConf.Fs))],...
+            ['Trial: ',num2str(trial)]...
             ['Frame Events: ',num2str(length(frameEvents))]};
         debugPos = zeros(length(debugString),2);
         debugPos(:,2) = linspace(0,length(debugString)*18,length(debugString))';
@@ -213,8 +229,11 @@ function lfpVideo(sessionConf,nexStruct,lfpChannels,neurons)
             frame = insertShape(frame,'FilledCircle',[xEventCoords(7) yEventCoords(7) 25],'Color','red');
         end
         if tone
-            frame  = insertText(frame,[size(frame,2)/2 0],'TONE','FontSize',34,'BoxOpacity',0.5);
+            frame  = insertText(frame,[size(frame,2)/2 0],'TONE','FontSize',28,'BoxOpacity',0.5);
         end
+%         if gotrial
+%             frame  = insertText(frame,[size(frame,2)/2 0],['TRIAL ',num2str(trial)],'FontSize',28,'BoxOpacity',0.5);
+%         end
         
         hVid = subplot(totalSubplots,1,1);
         set(hVid,'Units','pixels');
@@ -288,10 +307,12 @@ function lfpVideo(sessionConf,nexStruct,lfpChannels,neurons)
         clf(h);
         
         delete(findall(gcf,'Tag','subplotAnnotate'));
+        if mod(iFrame,newVideoFrames) == 0 || isequal(iFrame,lastFrame)
+            close(newVideo);
+        end
         iFrame = iFrame + 1;
     end
     
-    close(newVideo);
     close(h);
     toc
 end

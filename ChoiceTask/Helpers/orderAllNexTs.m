@@ -1,6 +1,6 @@
 function tsArr = orderAllNexTs(nexData)
-% cue, nose, tone, food, foodport, houselight
-eventsOfInterest = [1:14 17:28]; % gotrial 39:40, what does this do?
+% cue, nose, tone, food, foodport, houselight, go trial
+eventsOfInterest = [1:14 17:28 33:36 39:40];
 tsCount = 1;
 for ii=1:length(nexData.events)
     if ismember(ii,eventsOfInterest)
