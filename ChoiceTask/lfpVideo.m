@@ -83,10 +83,9 @@ function lfpVideo(sessionConf,nexStruct,lfpChannels,neurons)
     iFrame = 1;
     while hasFrame(video)
         if isequal(iFrame,1) || mod(iFrame-1,newVideoFrames) == 0
-            saveVideoAs = fullfile(lfpVideoPath,[sessionConf.sessionName,'_',...
 %                 'LFP',strrep(num2str(lfpChannels),'  ','-'),'_',...
 %                 'UNITS',strrep(num2str(neurons),'  ','-'),...
-                'F',num2str(iFrame)]);
+            saveVideoAs = fullfile(lfpVideoPath,[sessionConf.sessionName,'_','F',num2str(iFrame)]);
             newVideo = VideoWriter(saveVideoAs,'Motion JPEG AVI');
             newVideo.Quality = 75;
             newVideo.FrameRate = video.FrameRate;
