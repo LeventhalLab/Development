@@ -1,4 +1,4 @@
-function [avgWF, upperStd, lowerStd] = avgWF(ts, HPdata,tBefore,tAfter,samplingRate, varargin)
+function [avgWF, tWidth upperStd, lowerStd] = avgWF(ts, HPdata,tBefore,tAfter,samplingRate, varargin)
 %Function to get average WF 
 %
 %Inputs: 
@@ -29,7 +29,7 @@ for i = 1:length(ts)
     waveforms(i,:) = HPdata(ts(i).*samplingRate-samplesBefore:ts(i).*samplingRate+samplesAfter);
 end
 
-twidth = linspace(tBefore,tAfter,samplesBefore+samplesAfter+1);
+tWidth = linspace(tBefore,tAfter,samplesBefore+samplesAfter+1);
 avgWF = mean(waveforms);
 
 upperStd = avgWF + std(avgWF); 
