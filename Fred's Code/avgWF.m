@@ -4,8 +4,8 @@ function [avgWF, tWidth upperStd, lowerStd] = avgWF(ts, HPdata,tBefore,tAfter,sa
 %Inputs: 
 %   ts - vector of time stamps
 %  HPdata - High passed version of data
-%  tBefore - time before WF detection in seconds
-%  tAfter - time after WF detection in seconds
+%  tBefore - time before WF detection in u seconds
+%  tAfter - time after WF detection in u seconds
 %  samplingRate
 
 %
@@ -16,8 +16,8 @@ function [avgWF, tWidth upperStd, lowerStd] = avgWF(ts, HPdata,tBefore,tAfter,sa
 %   ch - channel number
 %   windowSize 
 
-samplesBefore = round(timebefore*samplingRate);
-samplesAfter  = round(timeafter*samplingRate);
+samplesBefore = round(tBefore*samplingRate*1E-6);
+samplesAfter  = round(tAfter*samplingRate*1E-6);
 
 %make sure early signals don't clip
 if ts(1)*samplingRate-samplesBefore<0
@@ -29,7 +29,7 @@ for i = 1:length(ts)
     waveforms(i,:) = HPdata(ts(i).*samplingRate-samplesBefore:ts(i).*samplingRate+samplesAfter);
 end
 
-tWidth = linspace(tBefore,tAfter,samplesBefore+samplesAfter+1);
+tWidth = linspace(-tBefore,tAfter,samplesBefore+samplesAfter+1);
 avgWF = mean(waveforms);
 
 upperStd = avgWF + std(avgWF); 
