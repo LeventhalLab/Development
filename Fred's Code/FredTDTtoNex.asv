@@ -127,11 +127,9 @@ end
 %          'line16On','line16Off', 'tone1On','tone1Off', 'tone2On','tone2Off', 'line19On', 'line19Off', 'gotrialOn','gotrialOff', 'line21On', 'line21Off', 'line22On', 'line22Off', ...
 %          'line23On', 'line23Off', 'videoOn', 'videoOff','VoBlue','VoGreen','VpdBlue','VpdGreen'};
 linenames = {'A0','A0off','A1','A1off','A2','A2off','TTL3on','TTL3off',...
-    'TTL4on','TTL4off','A5','A5off','A6','A6off','A7','A7off',...
-    'B0','B0off','B1','B1off','B2','B2off','B3','B3off',...
-    'TTL6on','TTL6off','B5','B5off','B6','B6off','B7','B7off',...
-    'TTL1on','TTL1off','C1','C1off','C2','C2off','C3','C3off',...
-    'TTL2on','TTL2off','TTL5on','TTL5off','C6','C6off','C7','C7off'};
+    'TTL4on','TTL4off','A5','A5off','A6','A6off','A7','A7off','B0','B0off',...
+    'B1','B1off','B2','B2off','B3','B3off','TTL6on','TTL6off','B5','B5off',...
+    'B6','B6',,'B7','TTL1','C1','C2','C3','TTL2','TTL5','C6','C7'};
 
 
 % Set up the NEX file data structure
@@ -227,7 +225,6 @@ end
 %     
 %         if ~isempty(linesOff)
 %             for k=1:length(linesOff)
-
 %                 nexData2.events{2*linesOff(k)}.timestamps(channelCount(2*linesOff(k)),1) = nexData2.raw.chan_info(i_ts+1)-nexData.data.timestamp(2);
 %                 channelCount(2*linesOff(k)) = channelCount(2*linesOff(k))+1;
 %             end
@@ -235,8 +232,8 @@ end
 %     end
 % end
 
-%nexData.events{47}.name = 'videoOn';
-%nexData.events{48}.name = 'videoOff';
+nexData.events{47}.name = 'videoOn';
+nexData.events{48}.name = 'videoOff';
 %nexData.events{47}.timestamps = nexData2.events{51}.timestamps;
 %nexData.events{48}.timestamps = nexData2.events{52}.timestamps;
 
