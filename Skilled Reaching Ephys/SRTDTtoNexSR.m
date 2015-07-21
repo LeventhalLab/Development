@@ -113,19 +113,25 @@ for n=1:length(fp_loc)
     nexData.raw.sample_point(n,1:nsample(n)) = fread(tev,[1 nsample(n)],table{format,3});
 end
 
-% for n=1:length(fp_loc2)
-%     fseek(tev,fp_loc2(n),'bof');
-%     nexData2.raw.sample_point(n,1:nsample2(n)) = fread(tev,[1 nsample2(n)],table{format2,3});
-% end
-% For your specialized task,
-% replace these with your line names, 
-% and save a new box2nex.m file, and call it something specific, e.g.
-% box2nex_foodwatertask.m
-% linenames = {'cue1On','cue1Off', 'cue2On','cue2Off','cue3On','cue3Off','cue4On','cue4Off','cue5On','cue5Off','houselightOn','houselightOff', ...
-%          'foodOn','foodOff', 'line08On','line08Off', 'nose1In', 'nose1Out', 'nose2In', 'nose2Out', ...
-%          'nose3In', 'nose3Out', 'nose4In', 'nose4Out','nose5In', 'nose5Out', 'foodportOn', 'foodportOff','line15On','line15Off', ...
-%          'line16On','line16Off', 'tone1On','tone1Off', 'tone2On','tone2Off', 'line19On', 'line19Off', 'gotrialOn','gotrialOff', 'line21On', 'line21Off', 'line22On', 'line22Off', ...
-%          'line23On', 'line23Off', 'videoOn', 'videoOff','VoBlue','VoGreen','VpdBlue','VpdGreen'};
+
+%% TTL/Event Breakdown 
+
+% %EventlineNum       TTL
+% 33                    TTL1on actuator pos 1(all the way down)
+% 34                    TTL1off actuator pos 1(all the way down)
+% 41                    TTL2on actuator pos 2(pellet loaded but not fully extended)
+% 42                    TTL2on actuator pos 2(pellet loaded but not fully extended)
+% 7                     TTL3on actuator pos 3(pellet all the way up after triggered by ir)
+% 8                     TTL3off actuator pos 3(pellet all the way up after triggered by ir)
+% 9                     TTL4on Back IR sensor triggered
+% 10                    TTL4off Back IR sensor triggered
+% 43                    TTL5on Frame Triggered
+% 44                    TTL5off Frame Trigger
+% 25                    TTL6on GreenVideo Trigger
+% 26                    TTL6on GreenVideo Trigger
+
+
+
 linenames = {'A0','A0off','A1','A1off','A2','A2off','TTL3on','TTL3off',...
     'TTL4on','TTL4off','A5','A5off','A6','A6off','A7','A7off',...
     'B0','B0off','B1','B1off','B2','B2off','B3','B3off',...
