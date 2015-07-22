@@ -24,7 +24,7 @@
 
 
 %%
-function timeArrayMatrix = ExtractTimeEventsfromNexMatlab(NexMatStruct)
+function allTTLTs = ExtractTimeEventsfromNexMatlab(NexMatStruct)
 
     timeArrayMatrix = [];
 
@@ -53,12 +53,9 @@ function timeArrayMatrix = ExtractTimeEventsfromNexMatlab(NexMatStruct)
     TTL6offTS = events{26,1}.timestamps;
     
     
-    timeArrayMatrix{:,1} = TTL1onTS;
-    timeArrayMatrix{:,2} = TTL2onTS;
-    timeArrayMatrix{:,3} = TTL3onTS;
-    timeArrayMatrix{:,4} = TTL4onTS;
-    timeArrayMatrix{:,5} = TTL5onTS;
-    timeArrayMatrix{:,6} = TTL6onTS;
+    allTTLTs = padcat(TTL1onTS,TTL2onTS,TTL3onTS,TTL4onTS,TTL6onTS);
     
     
 end
+
+
