@@ -1,4 +1,4 @@
-function nexData = TDTtoNex()
+function nexData = TDTtoNexSR()
 %
 % usage:
 %

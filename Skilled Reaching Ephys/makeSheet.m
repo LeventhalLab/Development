@@ -1,24 +1,52 @@
 %%Create sheet of information for one neuron
 
-function [] = makeSheet(neuron)
-%sessionName is the folder where the data is located
-%Neuron is the sorted neuron #
+function [] = makeSheet(varargin)
+%Inputs: 
+%   -sessionConf 
+%   -whichNeuron = name of tetrode/wire and which sorted neuron to look at 
+%   -i.e. "T01_01" for 1st sorted neuron on tetrode1 or "100_1" for wire100
+%Assumes that combined nex file stored in
+%               '..R00XX\R0098-proceessed\Processed'
 %
-%
+%If no inputs, then it will allow you to select everything yourself
+if nargin == 0
+    nexPath     = uigetfile({'*.nex'});
+    whichNeuron = input('Neuron Name(i.e. T01_01)=')
+    [f,p]=uigetfile({'*.sev'});
+    [sev,header] = read_tdt_sev(fullfile(p,f));
+   
+    
+    
+else
+    for iarg=1:2:nargin-1
+        switch varargin{iarg}
+            case 'sessionConf'
+                sessionConf = varargin{iarg+1};
+                samplingRate = sessionConf.Fs;
+            case 'whichNeuron'    
+                whichNeuron = varargin{iarg+1};
+        end
+    end
+    leventhalPaths = buildLeventhalPaths(sessionConf);
+    if whichNeuron(1) == 'T'
+        tetrodeNum = str2num(whichNeuron(2:3)) ;
+        tetrodeChannels = sessionConf.validMasks.*sessionConf.chMap(:,2:end);
+        tetrodeIdx = find(tetrodeChannels(tetrodeNum,2)>0);
+        neuronCh = sessionConf.chMap(tetrodeNum,tetrodeIdx(1)+1) 
+    elseif whichNeuron(1) =='W'
+        neuronCh = str2num(whichNeuron(2:3))
+    end
+    fullSevFiles = getChFileMap(leventhalPaths.channels);
+    [sev,header] = read_tdt_sev(fullSevFiles{neuronCh});
+    nexPath = sessionConf.nexPath;
+    whichNeuron = [sessionConf.sessionName '_' whichNeuron]
+end
 
 
-samplingRate = 24414;
+%load time stamp data
+[n,ts] = nex_ts(nexPath,whichNeuron);
 
-%load data
-temp = cellstr(['Channel01b'; 'Channel01c'; 'Channel01d';'Channel01e';'Channel01f']);
-whichUnit = temp{neuron};
-[f,p]=uigetfile({'*.nex'});
-
-
-[n,ts] = nex_ts(fullfile(p,f),whichUnit);
-
-[f,p]=uigetfile({'*.sev'});
-[sev,header] = read_tdt_sev(fullfile(p,f));
+%High Pass filter data
 t = linspace(0,length(sev)/header.Fs, length(sev));
 data = double(sev);
 [b,a] = butter(4, [0.02 0.2]);
@@ -27,10 +55,10 @@ HPdata = filtfilt(b,a,data);
 
 
 %Get Average Waveform
-[meanWF, tWidth, upperStd, lowerStd]  = avgWF(ts, HPdata, 500,500,samplingRate);
+[meanWF, tWidth, upperStd, lowerStd]  = avgWF(ts,HPdata, 500,500,samplingRate);
 
 %Valley peak duration
-VPD = abs((find(meanWF == max(meanWF)) - find(meanWF == min(meanWF)))./samplingRate);
+HPVPD = abs((find(meanWF == max(meanWF)) - find(meanWF == min(meanWF)))./samplingRate);
 
 %plot average WF
 figure(1);clf
