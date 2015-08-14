@@ -1,6 +1,6 @@
 function FR = eventSmoothFR(neuronTS,tStart,tEnd,dt,varargin)
 %neuronTS is a 1xn array of spike timestamps
-%tStart is what part of the neuron timeline to start analyzing
+%tStart is what part of the neuron timeline to start analyzing(in seconds)
 %tEnd is what part of the neuron timeline to stop analyzing
 %dt is the time step (usually .001)
 %Can pass in 'plot' for varargin to have it plot the firing rate

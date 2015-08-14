@@ -24,7 +24,6 @@ function fredCombineNex(sessionConf)
     for i=1:length(nexfn) % Add the full directory path to each filename
         nexfn{i} = fullfile(pathname, nexfn{i});
     end
-    
     nexData.version = 100;
 nexData.comment = 'Combined nex files by combineNex.m. Dan Leventhal, 2010';
 nexData.freq = sessionConf.Fs;

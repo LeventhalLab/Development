@@ -21,7 +21,7 @@ samplesAfter  = round(tAfter*samplingRate*1E-6);
 
 %make sure early signals don't clip
 if ts(1)*samplingRate-samplesBefore<0
-  ts = ts(find(ts.*samplingRate-samplesBefore>0)) 
+  ts = ts(find(ts.*samplingRate-samplesBefore>0)) ;
 end
 
 waveforms = zeros(length(ts), samplesBefore+samplesAfter+1);
