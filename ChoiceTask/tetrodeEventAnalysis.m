@@ -6,8 +6,8 @@ function tetrodeEventAnalysis(sessionConf,nexStruct)
     histBin = 50;
     fontSize = 6;
     
-    spectFpass = [1 80];
-    spectCaxis = [10 60];
+    spectFpass = [10 80];
+    spectCaxis = []; %set with auto
 
     leventhalPaths = buildLeventhalPaths(sessionConf);
     figurePath = fullfile(leventhalPaths.graphs,'tetrodeAnalysis');
@@ -31,8 +31,8 @@ function tetrodeEventAnalysis(sessionConf,nexStruct)
         [sev,header] = read_tdt_sev(fullSevFiles{lfpChannel});
         sevDec = decimate(double(sev),decimateFactor);
 
-        movingwin = [0.35 0.05];
-        params.tapers=[5 9];
+        movingwin = [0.5 0.05];
+        params.tapers=[3 5];
         params.Fs = header.Fs/decimateFactor;
         params.fpass = spectFpass;
         [S1,t,f] = mtspecgramc(sevDec,movingwin,params);
@@ -43,7 +43,7 @@ function tetrodeEventAnalysis(sessionConf,nexStruct)
         gammaIdxs = f > 30;
 
         h = formatSheet;
-        h2 = formatSheet;
+%         h2 = formatSheet;
         for iEvent=1:length(eventFieldnames)
             eventName = eventFieldnames{iEvent};
             disp(['Working on event ',eventName]);
@@ -61,49 +61,59 @@ function tetrodeEventAnalysis(sessionConf,nexStruct)
             figure(h);
             subplot(2,4,iEvent);
             spectPethT = [fliplr(t(1:spectHalfWidthSamples))*-1 0 t(1:spectHalfWidthSamples)];
-            plot_matrix(squeeze(mean(allEventTsS1,1)),spectPethT,f);
+%             plot_matrix(squeeze(mean(allEventTsS1,1)),spectPethT,f);
+%             matrixData = log10(abs(squeeze(mean(allEventTsS1,1))));
+            matrixData = squeeze(mean(allEventTsS1,1));
+            plot_matrix(matrixData,spectPethT,f);
+            
             hold on;
             plot([0 0],params.fpass,':','color','k');
             colormap(jet);
-            caxis(spectCaxis);
+            % auto
+%             caxis([mean(mean(matrixData)) - std(mean(matrixData)) mean(mean(matrixData)) + std(mean(matrixData))]);
+            caxis auto;
             xlabel('Time (s)','FontSize',fontSize);
             ylabel('Frequency (Hz)','FontSize',fontSize);
             title([tetrodeName,':',eventName,', ',num2str(length(allEventTsS1)),' events'],'FontSize',fontSize);
             
-            figure(h2);
-            subplot(2,4,iEvent);
-            thetaRaw = squeeze(mean(allEventTsS1(:,:,thetaIdxs),3));
-            thetaStd = std(thetaRaw);
-            thetaMean = squeeze(mean(thetaRaw,1));
-            plot(spectPethT,normalize(thetaMean),'LineWidth',4);
-            hold on;
-            betaRaw = squeeze(mean(allEventTsS1(:,:,betaIdxs),3));
-            betaStd = std(betaRaw);
-            betaMean = squeeze(mean(betaRaw,1));
-            plot(spectPethT,normalize(betaMean),'LineWidth',4);
-            hold on;
-            gammaRaw = squeeze(mean(allEventTsS1(:,:,gammaIdxs),3));
-            gammaStd = std(gammaRaw);
-            gammaMean = squeeze(mean(gammaRaw,1));
-            plot(spectPethT,normalize(gammaMean),'LineWidth',4);
-            hold on;
-            plot([0 0],[0 1],':','color','k');
-            legend('theta','beta','gamma');
-            xlabel('Time (s)','FontSize',fontSize);
-            ylabel('Norm. Power','FontSize',fontSize);
-            title([tetrodeName,':',eventName,', ',num2str(length(allEventTsS1)),' events'],'FontSize',fontSize);
+% exlude this analysis until we know if this power calculation is correct
+% and just focus on  beta for now
+%             figure(h2);
+%             subplot(2,4,iEvent);
+%             thetaRaw = squeeze(mean(allEventTsS1(:,:,thetaIdxs),3));
+%             thetaStd = std(thetaRaw);
+%             thetaMean = squeeze(mean(thetaRaw,1));
+%             plot(spectPethT,normalize(thetaMean),'LineWidth',4);
+%             hold on;
+%             betaRaw = squeeze(mean(allEventTsS1(:,:,betaIdxs),3));
+%             betaStd = std(betaRaw);
+%             betaMean = squeeze(mean(betaRaw,1));
+%             plot(spectPethT,normalize(betaMean),'LineWidth',4);
+%             hold on;
+%             gammaRaw = squeeze(mean(allEventTsS1(:,:,gammaIdxs),3));
+%             gammaStd = std(gammaRaw);
+%             gammaMean = squeeze(mean(gammaRaw,1));
+%             plot(spectPethT,normalize(gammaMean),'LineWidth',4);
+%             hold on;
+%             plot([0 0],[0 1],':','color','k');
+%             legend('theta','beta','gamma');
+%             xlabel('Time (s)','FontSize',fontSize);
+%             ylabel('Norm. Power','FontSize',fontSize);
+%             title([tetrodeName,':',eventName,', ',num2str(length(allEventTsS1)),' events'],'FontSize',fontSize);
         end
         
         saveas(h,fullfile(figurePath,[tetrodeName,'_eventSpectograms']),'pdf');
+        saveas(h,fullfile(figurePath,[tetrodeName,'_eventSpectograms']),'fig');
         close(h);
-        saveas(h2,fullfile(figurePath,[tetrodeName,'_eventLFPBands']),'pdf');
-        close(h2);
+%         saveas(h2,fullfile(figurePath,[tetrodeName,'_eventLFPBands']),'pdf');
+%         close(h2);
     end
 
     if isfield(nexStruct,'neurons')
         for iNeuron=1:length(nexStruct.neurons)
             h = formatSheet;
-            neuronName = formatNeuronName(nexStruct.neurons{iNeuron}.name);
+%             neuronName = formatNeuronName(nexStruct.neurons{iNeuron}.name);
+            neuronName = nexStruct.neurons{iNeuron}.name;
             disp(['Creating PETH for ',neuronName]);
             for iEvent=1:length(eventFieldnames)
                 eventName = eventFieldnames{iEvent};
