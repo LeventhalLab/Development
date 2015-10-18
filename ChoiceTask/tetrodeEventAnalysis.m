@@ -1,4 +1,5 @@
 function tetrodeEventAnalysis(sessionConf,nexStruct)
+    % [] should remove nexstruct and find it automagically
     
     decimateFactor = 10;
     spectHalfWidth = 2; %seconds

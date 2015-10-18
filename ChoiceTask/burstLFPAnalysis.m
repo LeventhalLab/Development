@@ -1,24 +1,27 @@
 function [Wlfp,t,f,validBursts] = burstLFPAnalysis(data,Fs,burstLocs)
-spectHalfWindow = 1; % seconds
+spectHalfWindow = 4; % seconds
 nDownsample = 10;
-fpass = [10 80];
+fpass = [0 80];
 
 [b,a] = butter(2, 0.015); % 183Hz lowpass
+data = artifactThresh(data,1,500);
 data = filtfilt(b,a,double(data)); % filter both ways
 data = downsample(data,nDownsample); % make smaller to run faster
 Fs = Fs / nDownsample;
 burstLocs = round(burstLocs / nDownsample);
 
-movingwin=[0.5 0.05];
+movingwin=[1 0.05];
 params.fpass = fpass;
-params.tapers = [5 9];
+params.tapers = [3 5];
 params.Fs = Fs;
+params.trialave = 1;
+params.err = 0;
 
 spectHalfSamples = round(spectHalfWindow * Fs);
 
 Wlfp = [];
 burstCount = 1;
-h = waitbar(0,'Processing...');
+h = waitbar(0,['Processing ',num2str(burstCount-1),'/',num2str(length(burstLocs))]);
 validBursts = zeros(length(burstLocs),1);
 for ii=1:length(burstLocs)
     % skip if near beginning or end of recording
@@ -36,7 +39,7 @@ for ii=1:length(burstLocs)
     burstCount = burstCount + 1;
 
     progress = max(processRange)/length(data);
-    h = waitbar(progress,h,'Processing...');
+    h = waitbar(progress,h,['Processing ',num2str(burstCount-1),'/',num2str(length(burstLocs))]);
 end
 
 close(h);
