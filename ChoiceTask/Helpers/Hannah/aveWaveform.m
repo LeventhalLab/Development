@@ -19,7 +19,7 @@ function [meanWaveform, upperStd, lowerStd, ch, windowSize] = aveWaveform(ts, SE
 
 
 % color = [145/255, 205/255, 114/255];
-windowSize = .002; %2 milliseconds
+windowSize = .004; %2 milliseconds
 
 for iarg = 1: 2 : nargin - 2
     switch varargin{iarg}
@@ -33,13 +33,14 @@ end
 %Read in data and filter
 [sev, header] = read_tdt_sev(SEVfilename);
 window = round((windowSize* header.Fs)/2);
-[b,a] = butter(4, [.02, .2]);
+[b,a] = butter(4, [0.02 0.5]);
 sev = filtfilt(b,a,double(sev));
 
 waveforms = [];
 
 %Create the segments of the wave form
-for ii = 1:length(ts)
+maxWaveforms = min(length(ts),5000); % minimize processing time
+for ii = 1:maxWaveforms
     waveforms = [waveforms; sev(round(header.Fs*ts(ii))-window:round(header.Fs*ts(ii))+window)];     
 end    
 

@@ -1,24 +1,2 @@
-% figure;
-% hold on;
-% plot(data);
-% butterdata = filtfilt(b,a,double(data));
-% % [smoothdata] = eegfilt(sev(1:1e6),header.Fs,500,2500);
-% % plot(smoothdata);
-% % [smoothdata] = eegfilt(sev(1:1e6),header.Fs,750,2500);
-% % plot(smoothdata);
-% % [smoothdata] = eegfilt(sev(1:1e6),header.Fs,1000,2500);
-% % plot(smoothdata);
-% 
-% % [smoothdata] = eegfilt(sev(1:1e6),header.Fs,750,2000);
-% % plot(smoothdata);
-% [smoothdata] = eegfilt(sev(1:1e6),header.Fs,750,3000);
-% plot(smoothdata);
-% plot(butterdata);
-% % [smoothdata] = eegfilt(sev(1:1e6),header.Fs,750,4000);
-% % plot(smoothdata);
-% 
-% % legend({'500,2500','750,2500','1000,2500','500,4000','500,5000','500,7500'});
-
-for ii=1:40
-    disp(eventNames{tsArr(ii,1)});
-end
+[meanWaveform, upperStd, lowerStd, ch, windowSize] = aveWaveform(ts_ch37_1, '/Volumes/BOOTCAMP/Users/Matt/Documents/Data/R0088_20151027a/R0088_20151027_R0088_20151027-1_data_ch37.sev');
+plotAveWaveform(meanWaveform, upperStd, lowerStd, ch, windowSize);
