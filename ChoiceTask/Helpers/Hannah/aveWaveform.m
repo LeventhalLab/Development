@@ -41,7 +41,9 @@ waveforms = [];
 %Create the segments of the wave form
 maxWaveforms = min(length(ts),5000); % minimize processing time
 for ii = 1:maxWaveforms
-    waveforms = [waveforms; sev(round(header.Fs*ts(ii))-window:round(header.Fs*ts(ii))+window)];     
+    if round(header.Fs*ts(ii))-window > 0 %full waveform must be within window
+        waveforms = [waveforms; sev(round(header.Fs*ts(ii))-window:round(header.Fs*ts(ii))+window)];
+    end
 end    
 
 %Calculate the mean for each column in the waveform vector
