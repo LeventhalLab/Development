@@ -429,7 +429,7 @@ if NoseInTS(1) > tone_ts    % the first nose-in can only occur after the tone if
     NoseInID = [CueID(1), NoseInID];
 end
     
-if ~isempty(trialEvents{FHidx}.timestamps)
+if ~isempty(trialEvents{FHidx}.timestamps) & (~isempty(trialEvents{Tone1idx}.timestamps) || ~isempty(trialEvents{Tone2idx}.timestamps))
     % this was a correct trial because the food hopper was activated
     trialData.countsAsTrial = 1;
     trialData.valid = 1;
