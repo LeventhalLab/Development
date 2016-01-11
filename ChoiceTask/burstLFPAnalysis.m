@@ -27,7 +27,7 @@ for ii=1:length(burstLocs)
     
     [S1,t,f] = mtspecgramc(data(round(processRange))',movingwin,params);
     
-    figure; plot_matrix(S1,t,f); %debug
+%     plot_matrix(S1,t,f); %debug
     
     Wlfp(burstCount,:,:) = S1(:,:);
     validBursts(ii) = 1;

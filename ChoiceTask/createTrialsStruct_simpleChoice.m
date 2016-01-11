@@ -604,8 +604,9 @@ else
         % actually occur after the next trial has started
         noseOut = events{NoseOutidx(NoseInID(1))}.timestamps - trialInterval(1);
         trialData.timestamps.centerOut = min(noseOut(noseOut > 0));
-        trialData.timing.wrongAnswerDelay = trialEvents{HLidx}.timestamps(1) - ...
-            trialData.timestamps.centerIn;
+        % I don't know what this is, it throws an error -Matt 20160110
+%         trialData.timing.wrongAnswerDelay = trialEvents{HLidx}.timestamps(1) - ...
+%             trialData.timestamps.centerIn;
 
         boxLogConflicts.outcome = ~(logTrial.outcome == 3);
         isConflict = boxLogConflicts.outcome;

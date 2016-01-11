@@ -1,5 +1,6 @@
 function tetrodeEventAnalysis(sessionConf,nexStruct)
-    % [] should remove nexstruct and find it automagically
+    % [] should remove nexstruct and find it automagically, see
+    % burstEventAnalysis.m
     
     decimateFactor = 10;
     spectHalfWidth = 2; %seconds

@@ -1,8 +1,8 @@
 function plotBurstLFPs(sessionConf)
     %[] should do burst detection first and save results, then process LFPs
-    oldFs = 24414;
-    newFs = 24414.0625;
-    nLocs = 10; % old was 400
+%     oldFs = 24414;
+%     newFs = 24414.0625;
+    nLocs = 400; % old was 400
     nDownsample = 10;
     
     leventhalPaths = buildLeventhalPaths(sessionConf);
@@ -25,12 +25,12 @@ function plotBurstLFPs(sessionConf)
 
     for ii=neuronIds
         neuronName = nexStruct.neurons{ii}.name;
-        tetrodeName = getTetrodeName(neuronName);
+        [tetrodeName,tetrodeId] = getTetrodeInfo(neuronName);
         disp(neuronName);
         disp(tetrodeName);
-        tetrodeIndex = getTetrodeIndex(sessionConf,tetrodeName);
-        lfpWire = sessionConf.lfpChannels(tetrodeIndex);
-        lfpChannel = sessionConf.chMap(tetrodeIndex,lfpWire+1);
+%         tetrodeIndex = getTetrodeIndex(sessionConf,tetrodeName);
+        lfpWire = sessionConf.lfpChannels(tetrodeId);
+        lfpChannel = sessionConf.chMap(tetrodeId,lfpWire+1);
         % get SEV file itself of LFP channel
         fullSevFiles = getChFileMap(leventhalPaths.channels);
         [sev,header] = read_tdt_sev(fullSevFiles{lfpChannel});
@@ -43,7 +43,7 @@ function plotBurstLFPs(sessionConf)
         Fs = header.Fs / nDownsample;
         
         % do burst detection
-        ts = adjustTs(nexStruct.neurons{ii,1}.timestamps,oldFs,newFs);
+        ts = nexStruct.neurons{ii,1}.timestamps;
         %[] save figure?
         [burstEpochs,burstFreqs] = findBursts(ts);
         disp('Analyzing LFP based on burst locs...');
