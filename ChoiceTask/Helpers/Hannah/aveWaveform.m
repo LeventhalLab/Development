@@ -33,7 +33,7 @@ end
 %Read in data and filter
 [sev, header] = read_tdt_sev(SEVfilename);
 window = round((windowSize* header.Fs)/2);
-[b,a] = butter(4, [0.02 0.5]);
+[b,a] = butter(4, [0.02 0.2]);
 sev = filtfilt(b,a,double(sev));
 
 waveforms = [];
