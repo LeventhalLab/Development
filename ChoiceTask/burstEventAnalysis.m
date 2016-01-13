@@ -55,9 +55,9 @@ function burstEventAnalysis(sessionConf)
 %         for ii=1:length(burstEpochs)
 %             burstTs = [burstTs; ts(burstEpochs(ii,1):burstEpochs(ii,2))];
 %         end
+
         burstIdx = burstEpochs(:,1);
         burstTs = ts(burstIdx);
-    %     burstLocs = round(burstTs * sessionConf.Fs);
 
         pethCell = {};
         initCell = true;

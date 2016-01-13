@@ -33,16 +33,17 @@ end
 %Read in data and filter
 [sev, header] = read_tdt_sev(SEVfilename);
 window = round((windowSize* header.Fs)/2);
-[b,a] = butter(4, [0.02 0.2]);
+[b,a] = butter(4, [0.02 0.5]);
 sev = filtfilt(b,a,double(sev));
 
 waveforms = [];
 
 %Create the segments of the wave form
 maxWaveforms = min(length(ts),5000); % minimize processing time
+tsRand = randsample(ts,maxWaveforms);
 for ii = 1:maxWaveforms
-    if round(header.Fs*ts(ii))-window > 0 %full waveform must be within window
-        waveforms = [waveforms; sev(round(header.Fs*ts(ii))-window:round(header.Fs*ts(ii))+window)];
+    if round(header.Fs*tsRand(ii))-window > 0 %full waveform must be within window
+        waveforms = [waveforms; sev(round(header.Fs*tsRand(ii))-window:round(header.Fs*tsRand(ii))+window)];
     end
 end    
 
