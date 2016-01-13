@@ -1,8 +1,8 @@
 function [Wlfp,t,f,validBursts] = burstLFPAnalysis(data,Fs,burstLocs)
-spectHalfWindow = 4; % seconds
+spectHalfWindow = 1; % seconds
 fpass = [0 80];
 
-movingwin=[1 0.05];
+movingwin=[0.5 0.05];
 params.fpass = fpass;
 params.tapers = [3 5];
 params.Fs = Fs;
