@@ -1,4 +1,6 @@
 function lfpEventAnalysis(sessionConf,tetrodes)
+% UNFINISHED!
+decimateFactor = 10;
 
 leventhalPaths = buildLeventhalPaths(sessionConf);
 rawDataPath = fullfile(sessionConf.nasPath,sessionConf.ratID,[sessionConf.ratID,'-rawdata']);
@@ -33,9 +35,11 @@ for iDir=dirIds
     logData = readLogData(fullfile(leventhalPaths.rawdata,logFile));
     trials = createTrialsStruct_simpleChoice(logData,nexStruct);
     correctTrials = find([trials.correct]==1);
+    
+    
     for iTet=1:length(tetrodes)
         lfpChannel = sessionConf.lfpChannels(tetrodes(iTet));
-        [sev,header] = read_tdt_sev(fullSevFiles(sessionConf.chMap(5,lfpChannel+1)));
+        [sev,header] = read_tdt_sev(fullSevFiles{sessionConf.chMap(5,lfpChannel+1)});
         for iTrial=correctTrials
             
         end

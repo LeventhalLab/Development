@@ -1,6 +1,6 @@
 function burstEventAnalysis(sessionConf)
 % the zscore is calculated by adding more events at random times to each
-% trial. The added events are at random times.
+% trial. Not perfect.
 
     pethHalfWidth = 1; % seconds
     histBin = 20;
@@ -128,6 +128,7 @@ function burstEventAnalysis(sessionConf)
 % %         end
 % %         saveas(h,fullfile(figurePath,[neuronName,'_burstEvents']),'pdf');
 % %         close(h);
+
         save(fullfile(figurePath,[neuronName,'_burstEvents'])); % mat file, could be more restrictive for necessary variables
         disp('end');
     end

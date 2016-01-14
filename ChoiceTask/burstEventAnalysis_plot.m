@@ -31,19 +31,8 @@ function burstEventAnalysis_plot(sessionConf)
         for iEvent=1:length(plotEventIdx)
             iField = plotEventIdx(iEvent);
             subplot(saveRows,7,iSubplot);
-            
-            % first analysis on firing rates
-% %             [tsCounts,tsCenters] = hist(pethCell{iField,1},histBin);
-% %             [tsBurstCounts,~] = hist(pethCell{iField,2},histBin);
-% %             ax = plotyy(tsCenters,(tsCounts/spikesPerSecondFactor)*histBin,tsCenters,(tsBurstCounts/spikesPerSecondFactor)*histBin);
-% %             set(ax,'FontSize',fontSize);
-% %             xlabel('Time (s)','FontSize',fontSize);
-% %             ylabel('Spikes/Second','FontSize',fontSize);
-% %             if iFile==1 && iEvent==1
-% %                 legend('all spikes','burst spikes','location','northwest','FontSize',fontSize);
-% %             end
 
-            % second anaylsis on zscores
+            % anaylsis on zscores
             ax = plotyy(tsCenters,zTs(:,plotEventIdx(iEvent)),tsCenters,zBurstTs(:,plotEventIdx(iEvent)));
             set(ax,'FontSize',fontSize);
             xlabel('Time (s)','FontSize',fontSize);
