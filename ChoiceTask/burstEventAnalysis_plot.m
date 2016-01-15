@@ -30,7 +30,7 @@ function burstEventAnalysis_plot(sessionConf)
 
         for iEvent=1:length(plotEventIdx)
             iField = plotEventIdx(iEvent);
-            subplot(saveRows,7,iSubplot);
+            subplot(saveRows,7,iSubplot); 
 
             % anaylsis on zscores
             ax = plotyy(tsCenters,zTs(:,plotEventIdx(iEvent)),tsCenters,zBurstTs(:,plotEventIdx(iEvent)));
