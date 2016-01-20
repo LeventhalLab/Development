@@ -8,7 +8,8 @@ fdata = filtfilt(b,a,double(sev));
 figure;
 plot(fdata)
 hold on;
-plot(ts(LTS)*header.Fs, zeros(1,length(LTS)),'o');
+%plots the first spike of each burst
+plot(ts(LTS(:,1)*header.Fs, zeros(1,length(LTS)),'o');
 hold on;
-plot(ts(nonLTS)*header.Fs, zeros(1, length(nonLTS)), '+');
+plot(ts(nonLTS(:,1)*header.Fs, zeros(1, length(nonLTS)), '+');
 
