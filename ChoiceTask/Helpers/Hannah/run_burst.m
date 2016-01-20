@@ -2,6 +2,8 @@
 [sev,header] = ezSEV();
 [n, ts] = nex_ts('/Users/mattgaidica/Documents/Data/ChoiceTask/R0088/R0088-processed/R0088_20151027a/R0088_20151027a_T5_ch[33 35 37 39].nex', 'Channel01c');
 [archive_burst_RS,archive_burst_length,archive_burst_start]=burst(ts);
+
+%Get first 20 starting points
 rand_start = archive_burst_start(1:20);
 
 %Get timestamps for rest of burst
