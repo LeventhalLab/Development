@@ -9,7 +9,10 @@ figure;
 plot(fdata)
 hold on;
 %plots the first spike of each burst
-plot(ts(LTS(:,1)*header.Fs, zeros(1,length(LTS)),'o');
+plot(ts(LTS(:,1))*header.Fs, zeros(1,length(LTS)),'*');
 hold on;
-plot(ts(nonLTS(:,1)*header.Fs, zeros(1, length(nonLTS)), '+');
+plot(ts(LTS(:,2))*header.Fs, zeros(1,length(LTS)),'o');
+hold on;
+plot(ts(nonLTS(:,1))*header.Fs, zeros(1, length(nonLTS)), '+');
+legend('data','start', 'end', 'non LTS spike start');
 
