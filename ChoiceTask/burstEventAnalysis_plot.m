@@ -3,7 +3,7 @@ function burstEventAnalysis_plot(sessionConf)
     
     saveRows = 4;
     burstFiles = rdir(fullfile(sessionConf.nasPath,sessionConf.ratID,[sessionConf.ratID,'-graphs'],'*','burstEventAnalysis','*burstEvents.mat'));
-    plotEventIdx = [1 2 4 3 5 6 8]; % removed foodClick becaue it mirrors SideIn
+    plotEventIdx = [1 2 4 3 5 6 8]; % removed foodClick because it mirrors SideIn
 
     fileNames = {burstFiles.name};
     fileIds = listdlg('PromptString','Select neurons:',...

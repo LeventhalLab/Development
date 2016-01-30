@@ -1,6 +1,9 @@
-function lfpEventAnalysis(sessionConf,tetrodes)
-% UNFINISHED!
+function lfpEventAnalysis(sessionConf)
+
 decimateFactor = 10;
+scalogramWindow = 2; % seconds
+plotEventIdx = [1 2 4 3 5 6 8]; % removed foodClick because it mirrors SideIn
+fpass = [1 100];
 
 leventhalPaths = buildLeventhalPaths(sessionConf);
 rawDataPath = fullfile(sessionConf.nasPath,sessionConf.ratID,[sessionConf.ratID,'-rawdata']);
@@ -40,8 +43,30 @@ for iDir=dirIds
     for iTet=1:length(tetrodes)
         lfpChannel = sessionConf.lfpChannels(tetrodes(iTet));
         [sev,header] = read_tdt_sev(fullSevFiles{sessionConf.chMap(5,lfpChannel+1)});
-        for iTrial=correctTrials
-            
+        sev = decimate(double(sev),decimateFactor);
+        Fs = header.Fs/decimateFactor;
+        scalogramWindowSamples = round(scalogramWindow * Fs);
+        allScalograms = [];
+        for iField=plotEventIdx
+            for iTrial=correctTrials
+                eventFieldnames = fieldnames(trials(iTrial).timestamps);
+                eventTs = getfield(trials(iTrial).timestamps, eventFieldnames{iField});
+                eventSample = round(eventTs * Fs);
+                data(:,iTrial) = sev((eventSample - scalogramWindowSamples):(eventSample + scalogramWindowSamples - 1));
+            end
+            [W, freqList] = calculateComplexScalograms_EnMasse(data,'Fs',Fs,'fpass',fpass);
+            allScalograms(iField,:,:) = squeeze(mean(abs(W).^2, 2))';
         end
+        t = [0:size(W,1)-1]./Fs;
+        for iField=plotEventIdx
+            figure;
+            imagesc(t,freqList,log(squeeze(allScalograms(iField,:,:))))
+            ylabel('Frequency (Hz)')
+            xlabel('Time (s)');
+            set(gca, 'YDir', 'normal')
+            colormap(jet);
+            title([eventFieldnames{iField}]);
+        end
+        disp('here');
     end
 end
