@@ -7,7 +7,7 @@ xBursts = [0.0035 0.010 0.0200]; % experimentally determined
 [burstEpochs,burstFreqs] = findBursts(ts,xBursts);
 
 numSpikes = diff(burstEpochs,1,2);
-burstEpochs(numSpikes < 2, :) = [];
+burstEpochs(numSpikes < minSpikes, :) = [];
 
 LTS = [];
 nonLTS = [];
