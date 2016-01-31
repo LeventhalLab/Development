@@ -4,6 +4,10 @@ plotEventIdx = [1 2 4 3 5 6 8];
 saveRows = 4;
 fontSize = 6;
 iSubplot = 1;
+histBinSec = 0.05; % seconds
+scalogramWindow = 2; % seconds (this needs to be passed back I think)
+histBin = scalogramWindow / histBinSec;
+smoothZ = 5;
 
 for iNeuron=1:size(analysisConf.neurons,1)
     if (iSubplot - 1) / length(plotEventIdx) == saveRows
@@ -14,10 +18,10 @@ for iNeuron=1:size(analysisConf.neurons,1)
         iSubplot = 1;
     end
         
-    eventScalogramData = lfpEventData{iNeuron};
+    eventData = lfpEventData{iNeuron};
     for iEvent=plotEventIdx
         subplot(saveRows,length(plotEventIdx),iSubplot);
-        imagesc(t,freqList,log(squeeze(eventScalogramData(iEvent,:,:)))); 
+        imagesc(t,freqList,log(squeeze(eventData(iEvent,:,:)))); 
         ylabel('Frequency (Hz)');
         xlabel('Time (s)');
         set(gca, 'YDir', 'normal');
@@ -29,14 +33,34 @@ for iNeuron=1:size(analysisConf.neurons,1)
         iSubplot = iSubplot + 1;
     end
     
-    eventBurstData = burstEventData{iNeuron};
+    eventData = burstEventData{iNeuron};
     for iEvent=plotEventIdx
         subplot(saveRows,length(plotEventIdx),iSubplot);
-        [counts,centers] = hist(eventBurstData.all{iEvent},50);
-        plot(centers,counts);
         hold on;
-        [counts,centers] = hist(eventBurstData.burst{iEvent},50);
-        plot(centers,counts);
+        
+        [zMean,zStd] = helpZscore(eventData.ts,scalogramWindow,histBin);
+        [counts,centers] = hist(eventData.tsEvents{iEvent},histBin);
+        counts = counts / length(correctTrials);
+        zCounts = (counts - zMean)/zStd;
+        plot(centers,smooth(zCounts,smoothZ));
+        
+        [zMean,zStd] = helpZscore(eventData.tsBurst,scalogramWindow,histBin);
+        [counts,centers] = hist(eventData.tsBurstEvents{iEvent},histBin);
+        counts = counts / length(correctTrials);
+        zCounts = (counts - zMean)/zStd;
+        plot(centers,smooth(zCounts,smoothZ));
+        
+        [zMean,zStd] = helpZscore(eventData.tsLTS,scalogramWindow,histBin);
+        [counts,centers] = hist(eventData.tsLTSEvents{iEvent},histBin);
+        counts = counts / length(correctTrials);
+        zCounts = (counts - zMean)/zStd;
+        plot(centers,smooth(zCounts,smoothZ));
+        
+        if iEvent == 1
+            legend('All','Burst','LTS');
+        end
+        ylabel('Z');
+        xlabel('t');
         xlim([-1 1]);
         title({analysisConf.neurons{iNeuron},eventFieldnames{iEvent}});
         

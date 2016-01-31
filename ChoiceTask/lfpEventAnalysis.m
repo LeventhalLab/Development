@@ -1,4 +1,5 @@
-function [burstEventData,lfpEventData,t,freqList,eventFieldnames] = lfpEventAnalysis(analysisConf)
+function [burstEventData,lfpEventData,t,freqList,eventFieldnames,correctTrials] = ...
+    lfpEventAnalysis(analysisConf)
 
 % [] LFP analysis doesn't need to be done on every neuron if it's from the
 % same tetrode
@@ -40,7 +41,8 @@ for iNeuron=1:size(analysisConf.neurons,1)
     % get the burst start times
     burstIdx = find(diff(ts) > 0 & diff(ts) <= maxBurstISI);
     burstStartIdx = [1;diff(burstIdx)>1];
-    burstTs = ts(burstIdx(logical(burstStartIdx)));
+    tsBurst = ts(burstIdx(logical(burstStartIdx)));
+    tsLTS = filterLTS(tsBurst);
 
     logFile = getLogPath(leventhalPaths.rawdata);
     logData = readLogData(logFile);
@@ -56,17 +58,23 @@ for iNeuron=1:size(analysisConf.neurons,1)
     scalogramWindowSamples = round(scalogramWindow * Fs);
     allScalograms = [];
     tsPeths = struct;
-    tsPeths.all = {};
-    tsPeths.burst = {};
+    tsPeths.ts = ts;
+    tsPeths.tsBurst = tsBurst;
+    tsPeths.tsBurst = tsLTS;
+    tsPeths.tsEvents = {};
+    tsPeths.tsBurstEvents = {};
+    tsPeths.tsLTSEvents = {};
     for iField=plotEventIdx
-        tsPeths.all{iField} = [];
-        tsPeths.burst{iField} = [];
+        tsPeths.tsEvents{iField} = [];
+        tsPeths.tsBurstEvents{iField} = [];
+        tsPeths.tsLTSEvents{iField} = [];
         for iTrial=correctTrials
             eventFieldnames = fieldnames(trials(iTrial).timestamps);
             eventTs = getfield(trials(iTrial).timestamps, eventFieldnames{iField});
             
-            tsPeths.all{iField} = [tsPeths.all{iField}; ts(ts < eventTs+scalogramWindow & ts >= eventTs-scalogramWindow) - eventTs];
-            tsPeths.burst{iField} = [tsPeths.burst{iField}; burstTs(burstTs < eventTs+scalogramWindow & burstTs >= eventTs-scalogramWindow) - eventTs];
+            tsPeths.tsEvents{iField} = [tsPeths.tsEvents{iField}; ts(ts < eventTs+scalogramWindow & ts >= eventTs-scalogramWindow) - eventTs];
+            tsPeths.tsBurstEvents{iField} = [tsPeths.tsBurstEvents{iField}; tsBurst(tsBurst < eventTs+scalogramWindow & tsBurst >= eventTs-scalogramWindow) - eventTs];
+            tsPeths.tsLTSEvents{iField} = [tsPeths.tsLTSEvents{iField}; tsLTS(tsLTS < eventTs+scalogramWindow & tsLTS >= eventTs-scalogramWindow) - eventTs];
             
             eventSample = round(eventTs * Fs);
             data(:,iTrial) = sev((eventSample - scalogramWindowSamples):(eventSample + scalogramWindowSamples - 1));
