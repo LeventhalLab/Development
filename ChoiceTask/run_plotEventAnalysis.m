@@ -56,12 +56,19 @@ for iNeuron=1:size(analysisConf.neurons,1)
         zCounts = (counts - zMean)/zStd;
         plot(centers,smooth(zCounts,smoothZ));
         
+        [zMean,zStd] = helpZscore(eventData.tsPoisson,scalogramWindow,histBin);
+        [counts,centers] = hist(eventData.tsPoissonEvents{iEvent},histBin);
+        counts = counts / length(correctTrials);
+        zCounts = (counts - zMean)/zStd;
+        plot(centers,smooth(zCounts,smoothZ));
+        
         if iEvent == 1
-            legend('All','Burst','LTS');
+            legend('All','Burst','LTS','Poisson');
         end
         ylabel('Z');
         xlabel('t');
         xlim([-1 1]);
+        ylim([-10 10]);
         title({analysisConf.neurons{iNeuron},eventFieldnames{iEvent}});
         
         iSubplot = iSubplot + 1;
