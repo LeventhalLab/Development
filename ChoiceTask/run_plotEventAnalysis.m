@@ -38,25 +38,25 @@ for iNeuron=1:size(analysisConf.neurons,1)
         
         [zMean,zStd] = helpZscore(eventData.ts,scalogramWindow,histBin);
         [counts,centers] = hist(eventData.tsEvents{iEvent},histBin);
-        counts = counts / correctTrialCount(iNeurons);
+        counts = counts / correctTrialCount(iNeuron);
         zCounts = (counts - zMean)/zStd;
         plot(centers,smooth(zCounts,smoothZ));
         
         [zMean,zStd] = helpZscore(eventData.tsBurst,scalogramWindow,histBin);
         [counts,centers] = hist(eventData.tsBurstEvents{iEvent},histBin);
-        counts = counts / correctTrialCount(iNeurons);
+        counts = counts / correctTrialCount(iNeuron);
         zCounts = (counts - zMean)/zStd;
         plot(centers,smooth(zCounts,smoothZ));
         
         [zMean,zStd] = helpZscore(eventData.tsLTS,scalogramWindow,histBin);
         [counts,centers] = hist(eventData.tsLTSEvents{iEvent},histBin);
-        counts = counts / correctTrialCount(iNeurons);
+        counts = counts / correctTrialCount(iNeuron);
         zCounts = (counts - zMean)/zStd;
         plot(centers,smooth(zCounts,smoothZ));
         
         [zMean,zStd] = helpZscore(eventData.tsPoisson,scalogramWindow,histBin);
         [counts,centers] = hist(eventData.tsPoissonEvents{iEvent},histBin);
-        counts = counts / correctTrialCount(iNeurons);
+        counts = counts / correctTrialCount(iNeuron);
         zCounts = (counts - zMean)/zStd;
         plot(centers,smooth(zCounts,smoothZ));
         
