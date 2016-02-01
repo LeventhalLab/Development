@@ -165,7 +165,7 @@ lastStartIdx = GO_startIdx + numTrials - 1;
 GO_markDuration = GO_markEnd_ts(GO_endIdx:lastEndIdx) - GO_markStart_ts(GO_startIdx:lastStartIdx);
 trialInterval = zeros(1, 2);
 for iTrial = 1 : numTrials
-    disp(num2str(iTrial));
+%     disp(num2str(iTrial));
     
     logTrialIdx = iTrial + first_logTrialIdx - 1;
     

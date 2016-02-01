@@ -1,4 +1,4 @@
-function [burstEventData,lfpEventData,t,freqList,eventFieldnames,correctTrials] = ...
+function [burstEventData,lfpEventData,t,freqList,eventFieldnames,correctTrialCount] = ...
     lfpEventAnalysis(analysisConf)
 
 % [] LFP analysis doesn't need to be done on every neuron if it's from the
@@ -11,9 +11,10 @@ fpass = [1 100];
 lfpEventData = {};
 burstEventData = {};
 maxBurstISI = 0.007; % seconds
+correctTrialCount = [];
             
 for iNeuron=1:size(analysisConf.neurons,1)
-    disp(['Working on ',analysisConf.neurons{iNeuron}]);
+    disp(['----- Working on ',analysisConf.neurons{iNeuron}]);
     
     [tetrodeName,tetrodeId] = getTetrodeInfo(analysisConf.neurons{iNeuron});
     % save time if the sessionConf is already for the correct session
@@ -26,6 +27,7 @@ for iNeuron=1:size(analysisConf.neurons,1)
     % load nexStruct
     nexMatFile = [sessionConf.nexPath,'.mat'];
     if exist(nexMatFile)
+        disp(['Loading ',nexMatFile]);
         load(nexMatFile);
     else
         error('No NEX .mat file');
@@ -33,8 +35,9 @@ for iNeuron=1:size(analysisConf.neurons,1)
     
     % load timestamps for neuron
     for iNexNeurons=1:length(nexStruct.neurons)
-        if strcmp(nexStruct.neurons{iNeuron}.name,analysisConf.neurons{iNeuron});
-            ts = nexStruct.neurons{iNeuron}.timestamps;
+        if strcmp(nexStruct.neurons{iNexNeurons}.name,analysisConf.neurons{iNeuron});
+            disp(['Using timestamps from ',nexStruct.neurons{iNexNeurons}.name]);
+            ts = nexStruct.neurons{iNexNeurons}.timestamps;
         end
     end
     
@@ -50,14 +53,17 @@ for iNeuron=1:size(analysisConf.neurons,1)
     logData = readLogData(logFile);
     trials = createTrialsStruct_simpleChoice(logData,nexStruct);
     correctTrials = find([trials.correct]==1);
-    
-    disp(['Reading from ',tetrodeName]);
+    correctTrialCount(iNeuron) = length(correctTrials);
     
     lfpChannel = sessionConf.lfpChannels(tetrodeId);
-    [sev,header] = read_tdt_sev(fullSevFiles{sessionConf.chMap(tetrodeId,lfpChannel+1)});
+    sevFile = fullSevFiles{sessionConf.chMap(tetrodeId,lfpChannel+1)};
+    disp(['Reading LFP (SEV file) for ',tetrodeName]);
+    disp(sevFile);
+    [sev,header] = read_tdt_sev(sevFile);
     sev = decimate(double(sev),decimateFactor);
     Fs = header.Fs/decimateFactor;
     scalogramWindowSamples = round(scalogramWindow * Fs);
+    
     allScalograms = [];
     tsPeths = struct;
     tsPeths.ts = ts;
@@ -91,5 +97,5 @@ for iNeuron=1:size(analysisConf.neurons,1)
     t = linspace(-scalogramWindow,scalogramWindow,size(W,1));
     
     lfpEventData{iNeuron} = allScalograms;
-    burstEventData{iNeuron} = tsPeths;   
+    burstEventData{iNeuron} = tsPeths;
 end
