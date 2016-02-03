@@ -6,13 +6,11 @@
 [b, a] = butter(4, [.02, .5]);
 fdata = filtfilt(b,a,double(sev));
 figure;
-plot(fdata)
+plot(fdata(1:400000)/header.Fs)
 hold on;
 %plots the first spike of each burst
-plot(ts(LTS(:,1))*header.Fs, zeros(1,length(LTS)),'*');
+plot(ts(LTS(1:20,1)), zeros(1,20),'*');
 hold on;
-plot(ts(LTS(:,2))*header.Fs, zeros(1,length(LTS)),'o');
-hold on;
-plot(ts(nonLTS(:,1))*header.Fs, zeros(1, length(nonLTS)), '+');
-legend('data','start', 'end', 'non LTS spike start');
+plot(ts(LTS(1:20,2)), zeros(1,20),'o');
+legend('data','start', 'end');
 
