@@ -55,11 +55,13 @@ while hasFrame(v1)
         xlabel('Time (s)');
         hold on;
         %Plot the point corresponding to the video time
-        plot(ii, z(ii), '.', 'MarkerSize', 20)
-        hold off;
-        figFrame = getframe;
-        writeVideo(newVideo, figFrame);
-        ii = ii + 1;
+        if ii <= length(z)
+            plot(ii, z(ii), '.', 'MarkerSize', 20)
+            hold off;
+            figFrame = getframe;
+            writeVideo(newVideo, figFrame);
+            ii = ii + 1;
+        end
    end
    k = k + 1;
    
