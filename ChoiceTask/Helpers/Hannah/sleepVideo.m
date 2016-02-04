@@ -1,71 +1,66 @@
-v = VideoReader('R0088_20151101_19-20-11_compressed.m4v');
-%Take every 20th frame
-frames = 20;
-numFrames = v.NumberOfFrames;
-difference = [];
-jj = 1;
+% % v = VideoReader('R0088_20151101_19-20-11_compressed.m4v');
+% % %Take every 20th frame
+% % framesInterval = 20;
+% % diffArray = [];
+% % ii = 1;
+% % 
+% % %Go through frames and find difference in pixels
+% % hWait = waitbar(0,'Analyzing Frames');
+% % for f = 1 : framesInterval : v.NumberOfFrames - framesInterval
+% %     waitbar(f/v.NumberOfFrames,hWait);
+% %     %Read one frame
+% %     curFrame = read(v, f);
+% %     %Convert to B&W
+% %     curFrame = im2bw(curFrame, .5);
+% %     %Read next frame
+% %     nextFrame = read(v, f + framesInterval);
+% %     %Convert to B&W
+% %     nextFrame = im2bw(nextFrame, .5);
+% %     d = nextFrame - curFrame;
+% %     %Get number of pixels that are different
+% %     d = sum(d(:));
+% %     %Store difference in array
+% %     diffArray(ii) = d;
+% %     ii = ii + 1;
+% % end
+% % close(hWait); clear('hWait');
 
-%Go through frames and find difference in pixels
-for f = 1 : frames : numFrames - frames
-    %Read one frame
-    video = read(v, f);
-    %Convert to B&W
-    bw = im2bw(video, .5);
-    %Read next frame
-    video2 = read(v, f + frames);
-    %Convert to B&W
-    bw2 = im2bw(video2, .5);
-    d = bw2 - bw;
-    %Get number of pixels that are different
-    d = sum(d);
-    d = sum(d);
-    d = sum(d);
-    %Store difference in array
-    difference(jj) = d;
-    jj = jj + 1;
-end
 
-
-v1 = VideoReader('R0088_20151101_19-20-11_compressed.m4v');
-ii = 1;
 %Create VideoWriter Object
 newVideo = VideoWriter('file.avi', 'Motion JPEG AVI');
 newVideo.Quality = 75;
-newVideo.FrameRate = v1.FrameRate;
+newVideo.FrameRate = v.FrameRate;
 open(newVideo);
-k = 0;
-x = linspace(0, length(difference) - 1, length(difference));
-z = smooth(abs(difference));
-%Read through frames
-while hasFrame(v1)
-   frame = readFrame(v1);
-   frame = imresize(frame, 1/3);
-   %Only take every 20th frame
-   if mod(k, 20) == 0   
-       %Display video
-       hVid = subplot(2,1,1);
-       set(hVid,'Units','pixels');
-       imshow(frame,'border','tight');
-       colormap(hVid,gray);
-       hold on;
-       %Plot the difference array
-        subplot(212);
-        plot(x, z)
-        axis([0 500 0 2500])
-        xlabel('Time (s)');
-        hold on;
-        %Plot the point corresponding to the video time
-        if ii <= length(z)
-            plot(ii, z(ii), '.', 'MarkerSize', 20)
-            hold off;
-            figFrame = getframe;
-            writeVideo(newVideo, figFrame);
-            ii = ii + 1;
-        end
-   end
-   k = k + 1;
-   
+t = linspace(0, length(diffArray) - 1, length(diffArray));
+h = figure('Position',[0 0 600 600]);
+ii = 1;
+smoothDiffArray = smooth(abs(diffArray));
+for f = 1 : framesInterval : v.NumberOfFrames - framesInterval
+    %Read one frame
+    curFrame = read(v, f);
+    curFrame = imresize(curFrame, 1/3);
+    hVid = subplot(2,1,1);
+    set(hVid,'Units','pixels');
+    imshow(curFrame,'border','tight');
+%     colormap(hVid,gray);
+    hold on;
+    %Plot the difference array
+    subplot(212);
+    plot(t, smoothDiffArray)
+    axis([0 500 0 2500])
+    xlabel('Time (s)');
+    hold on;
+    if ii <= length(smoothDiffArray)
+        plot(ii, smoothDiffArray(ii), '.', 'MarkerSize', 20)
+        hold off;
+        %set(hVid,'Position',[1 figureHeight-size(frame,1) size(frame,2) size(frame,1)]);
+        figFrame = getframe(h);
+        writeVideo(newVideo, figFrame);
+        ii = ii + 1;
+    end
 end
+
+close(h);
 close(newVideo)
 
 
