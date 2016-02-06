@@ -1,5 +1,5 @@
 function [burstEventData,lfpEventData,t,freqList,eventFieldnames,correctTrialCount] = ...
-    lfpEventAnalysis(analysisConf)
+    lfpBurtsZEventAnalysis(analysisConf)
 
 % [] LFP analysis doesn't need to be done on every neuron if it's from the
 % same tetrode
