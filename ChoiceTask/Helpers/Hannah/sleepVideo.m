@@ -5,38 +5,6 @@ function sleepVideo(v, diffArray, filename)
 %   diffArray - output from getFrameDiff
 %   filename - the name of the video being created
 
-
-% v = VideoReader('R0088_20151101_19-20-11_compressed.m4v');
-% % % %Take every 20th frame
-% framesInterval = 20;
-% diffArray = [];
-% ii = 1;
-% % % 
-% % % %Go through frames and find difference in pixels
-% hWait = waitbar(0,'Analyzing Frames');
-% for f = 1 : framesInterval : v.NumberOfFrames - framesInterval
-%     waitbar(f/v.NumberOfFrames,hWait);
-% % %     %Read one frame
-%     curFrame = read(v, f);
-% % %     %Convert to B&W
-%     curFrame = im2bw(curFrame, .5);
-% % %     %Read next frame
-%     nextFrame = read(v, f + framesInterval);
-% % %     %Convert to B&W
-%     nextFrame = im2bw(nextFrame, .5);
-%     d = nextFrame - curFrame;
-% % %     %Get number of pixels that are different
-%     d = sum(d(:));
-% % %     %Store difference in array
-%     diffArray(ii) = d;
-%     ii = ii + 1;
-% end
-% close(hWait); clear('hWait');
-% 
-% smoothDiffArray = smooth(abs(diffArray), .2);
-% plot(t, smoothDiffArray)
-% axis([0 500 0 2500])
-
 framesInterval = 20;
 
 %Create VideoWriter Object
