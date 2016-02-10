@@ -32,7 +32,7 @@ for f = 1 : framesInterval : v.NumberOfFrames - framesInterval
     plot(t, smoothDiffArray)
     hold on;
     plot(t, threshArray, '--')
-    axis([0 500 0 2500])
+    axis([0 3600 0 2500])
     xlabel('Time (s)');
     hold on;
     if ii <= length(smoothDiffArray)
