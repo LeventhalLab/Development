@@ -48,7 +48,7 @@ for jj = 2:length(smoothDiffArray) - 1
     end
 end
 
-sleepEpochs = [sleepEpochStart, sleepEpochEnd];
+sleepEpochs = [sleepEpochStart; sleepEpochEnd];
 %to get time stamps, multiply by framesInterval and then divide by
 %frameRate
 
