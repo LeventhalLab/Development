@@ -3,11 +3,11 @@ function burstSpectrograms(analysisConf)
     % LFP wire based on the unit (i.e. two units from the same wire will result in
     % the same results)
 
-    decimateFactor = 50;
+    decimateFactor = 100;
     scalogramWindow = 2; % seconds
-    fpass = [0 50];
-    maxBurstISI = 0.007; % seconds
-    nSample = 1500;
+    fpass = [0 45];
+    maxBurstISI = 0.01; % seconds
+    nSample = 2000;
 
     for iNeuron=1:size(analysisConf.neurons,1)
         disp(['----- Working on ',analysisConf.neurons{iNeuron}]);
@@ -80,7 +80,7 @@ function burstSpectrograms(analysisConf)
         
         t = linspace(-scalogramWindow,scalogramWindow,size(ts_realW,1));
         
-        figure('position',[0 0 400 800]);
+        h = figure('position',[0 0 400 800]);
         nSubplots = 5;
         
         subplot(nSubplots,1,1);
@@ -107,6 +107,8 @@ function burstSpectrograms(analysisConf)
         imagesc(t,freqList,log(tsPoisson_realW));
         title({analysisConf.neurons{iNeuron},'Poisson ts'});
         formatSubplot;
+        
+        saveas(h,fullfile('C:\Users\admin\Desktop\Matts Temp',analysisConf.neurons{iNeuron}),'fig');
     end
 end
 
@@ -116,7 +118,7 @@ function formatSubplot()
     set(gca, 'YDir', 'normal');
     colormap(jet);
     xlim([-1 1]);
-    ylim([0 40]);
+    ylim([0 45]);
 end
 
 function [realW, freqList] = pluckScalogram(sev,ts,scalogramWindowSamples,Fs,fpass)
