@@ -4,10 +4,17 @@ function burstSpectrograms(analysisConf)
     % the same results)
 
     decimateFactor = 100;
+<<<<<<< HEAD
     scalogramWindow = 2; % seconds
     fpass = [0 45];
     maxBurstISI = 0.01; % seconds
     nSample = 2000;
+=======
+    scalogramWindow = 1.2; % seconds
+    fpass = [0 80];
+    maxBurstISI = 0.007; % seconds
+    nSample = 500;
+>>>>>>> origin/master
 
     for iNeuron=1:size(analysisConf.neurons,1)
         disp(['----- Working on ',analysisConf.neurons{iNeuron}]);
@@ -55,28 +62,27 @@ function burstSpectrograms(analysisConf)
         sev = filtfilt(b,a,double(sev));
         sev = decimate(sev,decimateFactor);
         Fs = header.Fs/decimateFactor;
-        scalogramWindowSamples = round(scalogramWindow * Fs);
         % --- copy end
 
         disp(['Making tsRnd_realW']);
-        tsSample = randsample(linspace(0,(length(sev)/Fs),1e5),nSample,true); % using replacement
-        [tsRnd_realW, freqList] = pluckScalogram(sev,tsSample,scalogramWindowSamples,Fs,fpass);
+        tsSample = randsample(linspace(0,(length(sev)/Fs),1e5),nSample,true);
+        [tsRnd_realW, freqList] = pluckScalogram(sev,tsSample,scalogramWindow,Fs,fpass);
         
         disp(['Making ts_realW']);
-        tsSample = randsample(ts,nSample,true); % using replacement
-        [ts_realW, freqList] = pluckScalogram(sev,tsSample,scalogramWindowSamples,Fs,fpass);
+        tsSample = randsample(ts,nSample,true);
+        [ts_realW, freqList] = pluckScalogram(sev,tsSample,scalogramWindow,Fs,fpass);
         
         disp(['Making tsBurst_realW']);
-        tsSample = randsample(tsBurst,nSample,true); % using replacement
-        [tsBurst_realW, freqList] = pluckScalogram(sev,tsSample,scalogramWindowSamples,Fs,fpass);
+        tsSample = randsample(tsBurst,nSample,true);
+        [tsBurst_realW, freqList] = pluckScalogram(sev,tsSample,scalogramWindow,Fs,fpass);
         
         disp(['Making tsLTS_realW']);
-        tsSample = randsample(tsLTS,nSample,true); % using replacement
-        [tsLTS_realW, freqList] = pluckScalogram(sev,tsSample,scalogramWindowSamples,Fs,fpass);
+        tsSample = randsample(tsLTS,nSample,true);
+        [tsLTS_realW, freqList] = pluckScalogram(sev,tsSample,scalogramWindow,Fs,fpass);
         
         disp(['Making tsPoisson_realW']);
-        tsSample = randsample(tsPoisson,nSample,true); % using replacement
-        [tsPoisson_realW, freqList] = pluckScalogram(sev,tsSample,scalogramWindowSamples,Fs,fpass);
+        tsSample = randsample(tsPoisson,nSample,true);
+        [tsPoisson_realW, freqList] = pluckScalogram(sev,tsSample,scalogramWindow,Fs,fpass);
         
         t = linspace(-scalogramWindow,scalogramWindow,size(ts_realW,1));
         
@@ -118,10 +124,15 @@ function formatSubplot()
     set(gca, 'YDir', 'normal');
     colormap(jet);
     xlim([-1 1]);
+<<<<<<< HEAD
     ylim([0 45]);
+=======
+    ylim([0 80]);
+>>>>>>> origin/master
 end
 
-function [realW, freqList] = pluckScalogram(sev,ts,scalogramWindowSamples,Fs,fpass)
+function [realW, freqList] = pluckScalogram(sev,ts,scalogramWindow,Fs,fpass)
+    scalogramWindowSamples = round(scalogramWindow * Fs);
     data = [];
     for ii=1:length(ts)
         tsSample = round(ts(ii) * Fs);
@@ -131,11 +142,39 @@ function [realW, freqList] = pluckScalogram(sev,ts,scalogramWindowSamples,Fs,fpa
     end
     % remove artifacts
     [W, freqList] = calculateComplexScalograms_EnMasse(data,'Fs',Fs,'fpass',fpass);
+    
+% --- insert
+% %     tIdx = floor((scalogramWindowSamples)/2):3*floor((scalogramWindowSamples)/2);
+% %     t = linspace(-1,1,length(tIdx));
+% %     betaIdx = (freqList >= 13 & freqList <= 30);
+% %     allBetaPower = [];
+% %     highBetaPower = [];
+% %     highBetaIdx = [];
+% %     figure;
+% %     for ii=1:size(W,2)
+% %         realW = squeeze(mean(abs(W(:,ii,:)).^2,2))';
+% %         betaPower = mean(realW(betaIdx,tIdx),1);
+% %         if max(betaPower) < 1e4 && max(betaPower) > 5e3
+% %             allBetaPower = [allBetaPower;betaPower];
+% %             hold on;
+% %             plot(t,betaPower);
+% %         else
+% %             highBetaIdx = [highBetaIdx;ii];
+% %             highBetaPower = [highBetaPower;betaPower];
+% %         end
+% %     end
+% % 
+% %     hold on;
+% %     plot(t,mean(allBetaPower,1),'LineWidth',5);
+%     ylim([0 2*max(mean(allBetaPower,1))]);
+% --- insert
+    
     WIdx = [];
     for ii=1:length(ts)
-        if max(max(squeeze(abs(W(:,ii,:)).^2))) < 1e6
+        if mean(mean(squeeze(abs(W(:,ii,:)).^2))) > mean(mean(mean(abs(W(:,:,:)).^2)))
             WIdx = [WIdx;ii];
         end
     end
+    disp(['Using ',num2str(length(WIdx)),' of ',num2str(length(ts)), ' based on power']);
     realW = squeeze(mean(abs(W(:,WIdx,:)).^2, 2))';
 end

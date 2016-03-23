@@ -38,13 +38,18 @@ close(hWait); clear('hWait');
 smoothDiffArray = smooth(abs(diffArray), smoothFactor);
 
 for jj = 2:length(smoothDiffArray) - 1
-    if smoothDiffArray(jj) < thresh && smoothDiffArray(jj - 1) >= thresh
+    if smoothDiffArray(jj) >= thresh && smoothDiffArray(jj + 1) < thresh
         sleepEpochStart = [sleepEpochStart jj];
     elseif smoothDiffArray(jj) < thresh && smoothDiffArray(jj + 1) > thresh
         sleepEpochEnd = [sleepEpochEnd jj];
     else
     end
 end
+% sleepEpochStart
+% sleepEpochEnd
+% length(sleepEpochStart)
+% length(sleepEpochEnd)
+    
 
 sleepEpochs = [sleepEpochStart; sleepEpochEnd];
 %to get time stamps, multiply by framesInterval and then divide by
