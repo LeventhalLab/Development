@@ -8,7 +8,7 @@ function [smoothDiffArray, sleepEpochs] = getFrameDiff(videoFileName)
 %                   periods of inactivity, determined by threshold
 
 v = VideoReader(videoFileName);
-framesInterval = 20;
+framesInterval = 200;
 diffArray = [];
 ii = 1;
 smoothFactor = .2;
@@ -40,14 +40,21 @@ close(hWait); clear('hWait');
 smoothDiffArray = smooth(abs(diffArray), smoothFactor);
 
 for jj = 2:length(smoothDiffArray) - 1
-    if smoothDiffArray(jj) < thresh && smoothDiffArray(jj - 1) >= thresh
+    if smoothDiffArray(jj) >= thresh && smoothDiffArray(jj + 1) < thresh
         sleepEpochStart = [sleepEpochStart jj];
-    elseif smoothDiffArray(jj) < thresh && smoothDiffArray(jj + 1) > thresh
+    elseif smoothDiffArray(jj) < thresh && smoothDiffArray(jj + 1) >= thresh
         sleepEpochEnd = [sleepEpochEnd jj];
     else
     end
 end
 
+if length(sleepEpochStart) > length(sleepEpochEnd)
+    l = length(sleepEpochStart) - length(sleepEpochEnd);
+    L = zeros(1, l);
+    L = L + length(smoothDiffArray);
+    sleepEpochEnd = [sleepEpochEnd L];
+end
+    
 sleepEpochs = [sleepEpochStart; sleepEpochEnd];
 %to get time stamps, multiply by framesInterval and then divide by
 %frameRate
