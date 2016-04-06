@@ -1,11 +1,11 @@
-function [sleepEpochs] = sleepVideo(inputFile,outputFile)
+function [sleepEpochs, smoothDiffArray] = sleepVideo(inputFile,outputFile)
 % Function to create a video file with rat and plot of activity
 % Input: 
 %   inputFile - path of sleep video to be analyzed
 %   outputFile - path where output video should go with new name
 % Output:
 %   sleepEpochs - 2D matrix with start and end times of sleep in seconds
-%
+%   smoothDiffArray - array of differences between pixels
 
 
 v = VideoReader(inputFile);
