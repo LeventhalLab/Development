@@ -63,26 +63,26 @@ if length(sleepEpochStart) > length(sleepEpochEnd)
     L = zeros(1, l);
     L = L + length(smoothDiffArray);
     sleepEpochEnd = [sleepEpochEnd L];
-end 
+end
+
+
+sleepEpochs = [sleepEpochStart; sleepEpochEnd];  
 
 sleepEpochs = [sleepEpochStart; sleepEpochEnd];
+%to get time stamps, multiply by framesInterval and then divide by
+%frameRate
 
-%Put sleepEpochs in seconds
-sleepEpochs = sleepEpochs.*framesInterval./v.FrameRate;
+thresh = 400;
 
 %Create VideoWriter Object
 newVideo = VideoWriter(outputFile);
 newVideo.Quality = 75;
 newVideo.FrameRate = v.FrameRate;
 open(newVideo);
-
-%Time array for plot
 t = linspace(0, length(smoothDiffArray) - 1, length(smoothDiffArray));
 threshArray = zeros(1, length(t)) + thresh;
 h = figure('Position',[0 0 600 600]);
 ii = 1;
-
-%Create new video
 for f = 1 : framesInterval : v.NumberOfFrames - framesInterval
     %Read one frame
     curFrame = read(v, f);
@@ -100,7 +100,6 @@ for f = 1 : framesInterval : v.NumberOfFrames - framesInterval
 %    ylim([0 2500])
     xlabel('Time (s)');
     hold on;
-    %Plot the marker on the graph
     if ii <= length(smoothDiffArray)
         plot(ii, smoothDiffArray(ii), '.', 'MarkerSize', 20)
         hold off;

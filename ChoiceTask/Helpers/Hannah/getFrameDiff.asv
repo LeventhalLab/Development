@@ -4,7 +4,7 @@ function [smoothDiffArray, sleepEpochs] = getFrameDiff(videoFileName)
 %   videoFileName - rat video file to analyze
 % Output: 
 %   smoothDiffArray - array of differences between pixels
-%`  sleepEpochs - 2 x n array of frame indexes, start and end points of
+%`  sleepEpochs - n x 2 array of frame indexes, start and end points of
 %                   periods of inactivity, determined by threshold
 
 v = VideoReader(videoFileName);
@@ -15,7 +15,7 @@ smoothFactor = .2;
 sleepEpochStart = [];
 sleepEpochEnd = [];
 thresh = 390;
-
+diffArray = zeros(v.NumberOfFrames/(framesInterval/ 
 %Go through frames and find difference in pixels
 hWait = waitbar(0,'Analyzing Frames');
 for f = 1 : framesInterval : v.NumberOfFrames - framesInterval
