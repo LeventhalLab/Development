@@ -1,6 +1,6 @@
 plotEventIdx = [1 2 4 3 5 6 8];
 saveRows = 4;
-fontSize = 6;
+fontSize = 6; 
 iSubplot = 1;
 histBinSec = 0.05; % seconds
 scalogramWindow = 2; % seconds (this needs to be passed back I think)
