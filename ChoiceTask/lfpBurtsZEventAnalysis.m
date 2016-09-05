@@ -42,6 +42,7 @@ for iNeuron=1:size(analysisConf.neurons,1)
     end
     
     % get the burst start times
+    % [] what if burstIdx is empty?
     burstIdx = find(diff(ts) > 0 & diff(ts) <= maxBurstISI);
     burstStartIdx = [1;diff(burstIdx)>1];
     tsBurst = ts(burstIdx(logical(burstStartIdx)));

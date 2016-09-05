@@ -86,8 +86,9 @@ events = nexData.events;
 GO_markStartIdx = getEventIdx( events, 'gotrialoff');   % index of GO trial marker on events
 GO_markEndIdx   = getEventIdx( events, 'gotrialon');  % index of GO trial marker off events
 
-GO_markStart_ts = events{GO_markStartIdx}.timestamps(1:end-1);
+% GO_markStart_ts = events{GO_markStartIdx}.timestamps(1:end-1);
 GO_markEnd_ts   = events{GO_markEndIdx}.timestamps(2:end);
+GO_markStart_ts = events{GO_markStartIdx}.timestamps(1:length(GO_markEnd_ts));
 
 %old
 % GO_markStart_ts = events{GO_markStartIdx}.timestamps;

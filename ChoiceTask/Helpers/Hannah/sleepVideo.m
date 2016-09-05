@@ -10,7 +10,7 @@ function [sleepEpochs, smoothDiffArray] = sleepVideo(inputFile,outputFile)
 
 v = VideoReader(inputFile);
 %Read every 40th frame
-framesInterval = 40;
+framesInterval = 10;
 diffArray = [];
 ii = 1;
 smoothFactor = .2;
