@@ -7,11 +7,7 @@ paramIdxISIPrev = 8;
 paramIdxISIThresh = 9;
 paramIdxArea = 10;
 
-
-scatterData = {};
-scatterLabels = {};
-scatterCount = 1;
-
+h2 = figure('position',[0 0 800 800]);
 for iCsv = 1:length(csvWaveformFiles)
     T = readtable(csvWaveformFiles{iCsv});
     unitTitles = {};
@@ -28,6 +24,9 @@ for iCsv = 1:length(csvWaveformFiles)
         title(unitTitles{ii});
     end
 
+    scatterData = {};
+    scatterLabels = {};
+    scatterCount = 1;
     for ii = 1:size(T,1)
         scatterData{1,scatterCount} = T{ii,paramIdxEnergy};
         scatterData{2,scatterCount} = T{ii,paramIdxISIPrev};
@@ -35,24 +34,27 @@ for iCsv = 1:length(csvWaveformFiles)
         scatterLabels{scatterCount} = unitTitles{ii};% num2str(scatterCount);
         scatterCount = scatterCount + 1;
     end
+    figure(h2);
+    subplot(311);
+    hold on;
+    plot(cell2mat(scatterData(1,:)),cell2mat(scatterData(2,:)),'.','MarkerSize',25);
+    labelpoints(cell2mat(scatterData(1,:)),cell2mat(scatterData(2,:)),scatterLabels);
+    xlabel('Energy');
+    ylabel('Mean ISI');
+
+    subplot(312);
+    hold on;
+    plot(cell2mat(scatterData(1,:)),cell2mat(scatterData(3,:)),'.','MarkerSize',25);
+    labelpoints(cell2mat(scatterData(1,:)),cell2mat(scatterData(3,:)),scatterLabels);
+    xlabel('Energy');
+    ylabel('ISI < 5ms');
+
+    subplot(313);
+    hold on;
+    plot(cell2mat(scatterData(2,:)),cell2mat(scatterData(3,:)),'.','MarkerSize',25);
+    labelpoints(cell2mat(scatterData(2,:)),cell2mat(scatterData(3,:)),scatterLabels);
+    xlabel('Mean ISI');
+    ylabel('ISI < 5ms');
 end
-figure('position',[0 0 800 800]);
-subplot(311);
-plot(cell2mat(scatterData(1,:)),cell2mat(scatterData(2,:)),'.','MarkerSize',25);
-labelpoints(cell2mat(scatterData(1,:)),cell2mat(scatterData(2,:)),scatterLabels);
-xlabel('Energy');
-ylabel('Mean ISI');
-
-subplot(312);
-plot(cell2mat(scatterData(1,:)),cell2mat(scatterData(3,:)),'.','MarkerSize',25);
-labelpoints(cell2mat(scatterData(1,:)),cell2mat(scatterData(3,:)),scatterLabels);
-xlabel('Energy');
-ylabel('ISI < 5ms');
-
-subplot(313);
-plot(cell2mat(scatterData(2,:)),cell2mat(scatterData(3,:)),'.','MarkerSize',25);
-labelpoints(cell2mat(scatterData(2,:)),cell2mat(scatterData(3,:)),scatterLabels);
-xlabel('Mean ISI');
-ylabel('ISI < 5ms');
 
 % legend(unitTitles,'Location','northoutside');
