@@ -1,6 +1,10 @@
 function [zMean,zStd] = helpZscore(ts,tsWindow,histBin)
 nRand = 1000;
-tsRand = randsample([tsWindow:ts(end)-tsWindow],nRand);
+if length(tsWindow:ts(end)-tsWindow) < nRand
+    tsRand = randsample([tsWindow:ts(end)-tsWindow],nRand,true); %replace
+else
+    tsRand = randsample([tsWindow:ts(end)-tsWindow],nRand,false);
+end
 tsPeth = [];
 
 for iRand=1:nRand

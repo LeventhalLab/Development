@@ -12,7 +12,8 @@ lfpEventData = {};
 burstEventData = {};
 maxBurstISI = 0.007; % seconds
 correctTrialCount = [];
-            
+sevFile = '';
+
 for iNeuron=1:size(analysisConf.neurons,1)
     disp(['----- Working on ',analysisConf.neurons{iNeuron}]);
     
@@ -61,13 +62,16 @@ for iNeuron=1:size(analysisConf.neurons,1)
     correctTrialCount(iNeuron) = length(correctTrials);
     
     lfpChannel = sessionConf.lfpChannels(tetrodeId);
-    sevFile = fullSevFiles{sessionConf.chMap(tetrodeId,lfpChannel+1)};
+    nextSevFile = fullSevFiles{sessionConf.chMap(tetrodeId,lfpChannel+1)};
     disp(['Reading LFP (SEV file) for ',tetrodeName]);
-    disp(sevFile);
-    [sev,header] = read_tdt_sev(sevFile);
-    sev = decimate(double(sev),decimateFactor);
-    Fs = header.Fs/decimateFactor;
-    scalogramWindowSamples = round(scalogramWindow * Fs);
+    disp(nextSevFile);
+    if ~isempty(sevFile) || strcmp(nextSevFile,sevFile) == 0 % if they are different
+        sevFile = nextSevFile;
+        [sev,header] = read_tdt_sev(sevFile);
+        sev = decimate(double(sev),decimateFactor);
+        Fs = header.Fs/decimateFactor;
+        scalogramWindowSamples = round(scalogramWindow * Fs);
+    end
     
     allScalograms = [];
     tsPeths = struct;
