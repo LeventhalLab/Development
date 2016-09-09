@@ -43,17 +43,19 @@ for iNeuron=1:size(analysisConf.neurons,1)
     end
     
     % get the burst start times
-    % [] what if burstIdx is empty?
+    tsBurst = [];
+    tsLTS = [];
     burstIdx = find(diff(ts) > 0 & diff(ts) <= maxBurstISI);
-    if isempty(burstIdx)
-        disp('no bursting, skipping...');
-        continue;
+    if ~isempty(burstIdx) % ISI-based bursts and TLS bursts exist
+        burstStartIdx = [1;diff(burstIdx)>1];
+        tsBurst = ts(burstIdx(logical(burstStartIdx)));
+        tsLTS = filterLTS(tsBurst);
     end
-    burstStartIdx = [1;diff(burstIdx)>1];
-    tsBurst = ts(burstIdx(logical(burstStartIdx)));
-    tsLTS = filterLTS(tsBurst);
     [~,~,poissonIdx]=burst(ts);
-    tsPoisson = ts(poissonIdx);
+    tsPoisson = [];
+    if ~isempty(poissonIdx)
+        tsPoisson = ts(poissonIdx);
+    end
 
     logFile = getLogPath(leventhalPaths.rawdata);
     logData = readLogData(logFile);
@@ -68,7 +70,7 @@ for iNeuron=1:size(analysisConf.neurons,1)
     if ~isempty(sevFile) || strcmp(nextSevFile,sevFile) == 0 % if they are different
         sevFile = nextSevFile;
         [sev,header] = read_tdt_sev(sevFile);
-        sev = decimate(double(sev),decimateFactor);
+        sev = decimate(double(sev),decimateFactor,'fir');
         Fs = header.Fs/decimateFactor;
         scalogramWindowSamples = round(scalogramWindow * Fs);
     end
@@ -94,14 +96,20 @@ for iNeuron=1:size(analysisConf.neurons,1)
             eventSample = round(eventTs * Fs);
             if eventSample - scalogramWindowSamples > 0 && eventSample + scalogramWindowSamples - 1 < length(sev)
                 tsPeths.tsEvents{iField} = [tsPeths.tsEvents{iField}; ts(ts < eventTs+scalogramWindow & ts >= eventTs-scalogramWindow) - eventTs];
-                tsPeths.tsBurstEvents{iField} = [tsPeths.tsBurstEvents{iField}; tsBurst(tsBurst < eventTs+scalogramWindow & tsBurst >= eventTs-scalogramWindow) - eventTs];
-                tsPeths.tsLTSEvents{iField} = [tsPeths.tsLTSEvents{iField}; tsLTS(tsLTS < eventTs+scalogramWindow & tsLTS >= eventTs-scalogramWindow) - eventTs];
-                tsPeths.tsPoissonEvents{iField} = [tsPeths.tsPoissonEvents{iField}; tsPoisson(tsPoisson < eventTs+scalogramWindow & tsPoisson >= eventTs-scalogramWindow) - eventTs];
+                if ~isempty(tsBurst)
+                    tsPeths.tsBurstEvents{iField} = [tsPeths.tsBurstEvents{iField}; tsBurst(tsBurst < eventTs+scalogramWindow & tsBurst >= eventTs-scalogramWindow) - eventTs];
+                end
+                if ~isempty(tsLTS)
+                    tsPeths.tsLTSEvents{iField} = [tsPeths.tsLTSEvents{iField}; tsLTS(tsLTS < eventTs+scalogramWindow & tsLTS >= eventTs-scalogramWindow) - eventTs];
+                end
+                if ~isempty(tsPoisson)
+                    tsPeths.tsPoissonEvents{iField} = [tsPeths.tsPoissonEvents{iField}; tsPoisson(tsPoisson < eventTs+scalogramWindow & tsPoisson >= eventTs-scalogramWindow) - eventTs];
+                end
 
                 data(:,iTrial) = sev((eventSample - scalogramWindowSamples):(eventSample + scalogramWindowSamples - 1));
             end
         end
-        [W, freqList] = calculateComplexScalograms_EnMasse(data,'Fs',Fs,'fpass',fpass);
+        [W, freqList] = calculateComplexScalograms_EnMasse(data,'Fs',Fs,'fpass',fpass,'doplot',false);
         allScalograms(iField,:,:) = squeeze(mean(abs(W).^2, 2))';
     end
     t = linspace(-scalogramWindow,scalogramWindow,size(W,1));

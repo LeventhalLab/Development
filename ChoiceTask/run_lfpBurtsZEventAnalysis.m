@@ -1,5 +1,5 @@
 plotEventIdx = [1 2 4 3 5 6 8];
-saveRows = 4;
+saveRows = 2;
 fontSize = 6; 
 iSubplot = 1;
 histBinSec = 0.05; % seconds
@@ -7,16 +7,13 @@ scalogramWindow = 2; % seconds (this needs to be passed back I think)
 histBin = scalogramWindow / histBinSec;
 smoothZ = 5;
 
-for iNeuron=1:size(analysisConf.neurons,1)
-    if (iSubplot - 1) / length(plotEventIdx) == saveRows
-        if exist('fig','var')
-            clear fig;
-        end
-        fig = formatSheet();
-        iSubplot = 1;
-    end
-        
+for iNeuron=2:2%size(analysisConf.neurons,1)
+    neuronName = strrep(analysisConf.neurons{iNeuron},'_','-');
+    fig = formatSheet();
+    set(fig,'PaperPosition', [1 8 28 10]);
     eventData = lfpEventData{iNeuron};
+    
+    %REMOVE, need to rerun lfpBurstsZEventAnalysis.m with updated code
     if isempty(eventData)
         disp('no bursting, skipping...');
         continue;
@@ -29,8 +26,13 @@ for iNeuron=1:size(analysisConf.neurons,1)
         set(gca, 'YDir', 'normal');
         xlim([-1 1]);
         ylim([0 80]);
-        title({analysisConf.neurons{iNeuron},eventFieldnames{iEvent}});
+        if iSubplot == 1
+            title({neuronName,eventFieldnames{iEvent}});
+        else
+            title({'',eventFieldnames{iEvent}});
+        end
         colormap(jet);
+        % ADD caxis
         
         iSubplot = iSubplot + 1;
     end
@@ -69,19 +71,15 @@ for iNeuron=1:size(analysisConf.neurons,1)
             plot(centers,smooth(zCounts,smoothZ));
         end
         if iEvent == 1
-            legend('All','Burst','LTS','Poisson');
+            legend({'All','Burst','LTS','Poisson'},'Position',[0 .25 .1 .1]);
         end
         ylabel('Z');
         xlabel('t');
         xlim([-1 1]);
         ylim([-10 10]);
-        title({analysisConf.neurons{iNeuron},eventFieldnames{iEvent}});
+%         title({analysisConf.neurons{iNeuron},eventFieldnames{iEvent}});
         
         iSubplot = iSubplot + 1;
     end
-    
-    % figure handling
-    if exist('fig','var')
-        clear fig;
-    end
+    saveas(fig,[neuronName,'.pdf']);
 end
