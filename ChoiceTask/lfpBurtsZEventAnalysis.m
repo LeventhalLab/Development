@@ -109,7 +109,8 @@ for iNeuron=1:size(analysisConf.neurons,1)
                 data(:,iTrial) = sev((eventSample - scalogramWindowSamples):(eventSample + scalogramWindowSamples - 1));
             end
         end
-        [W, freqList] = calculateComplexScalograms_EnMasse(data,'Fs',Fs,'fpass',fpass,'doplot',false);
+        freqList = exp(linspace(log(fpass(1)),log(fpass(2)),100));
+        [W, freqList] = calculateComplexScalograms_EnMasse(data,'Fs',Fs,'fpass',fpass,'freqList',freqList,'doplot',false);
         allScalograms(iField,:,:) = squeeze(mean(abs(W).^2, 2))';
     end
     t = linspace(-scalogramWindow,scalogramWindow,size(W,1));
