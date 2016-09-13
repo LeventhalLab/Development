@@ -4,13 +4,22 @@ function compileOFSWaveforms(waveformDir)
 % (Previous), ISI (Next), Area, Waveform
 waveformFiles = dir(fullfile(waveformDir,'*.txt'));
 waveforms = {};
+rowCount = 1;
 for iFile = 1:length(waveformFiles)
-    disp(waveformFiles(iFile).name);
-    waveform = csvread(fullfile(waveformDir,waveformFiles(iFile).name),2);
-    % convert ISI Next to percent ISI under 5ms
-    waveform(:,8) = length(find(waveform(:,7) < 5)) / length(waveform);
-    waveforms{iFile,1} = waveformFiles(iFile).name;
-    waveforms{iFile,2} = mean(waveform);
+    waveformFile = csvread(fullfile(waveformDir,waveformFiles(iFile).name),2);
+    units = sort(unique(waveformFile(:,2)));
+    for iUnit = 1:numel(units) % units are all exported to one file
+        disp([waveformFiles(iFile).name,' unit ',num2str(units(iUnit))]);
+        waveform = waveformFile(waveformFile(:,2) == units(iUnit),:);
+        % convert ISI Next to percent ISI under 5ms, very rough measure of
+        % firing rate of burstiness
+        waveform(:,8) = length(find(waveform(:,7) < 5)) / length(waveform);
+        parts = strsplit(waveformFiles(iFile).name,'_');
+        parts{1,3} = [parts{1,3} char(96 + units(iUnit))];
+        waveforms{rowCount,1} = strjoin(parts,'-');
+        waveforms{rowCount,2} = mean(waveform);
+        rowCount = rowCount + 1;
+    end
 end
 
 T = table(waveforms);

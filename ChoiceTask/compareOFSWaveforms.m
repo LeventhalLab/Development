@@ -16,10 +16,14 @@ for iCsv = 1:length(csvWaveformFiles)
     figure('position',[0 0 800 800]);
     for ii = 1:size(T,1)
         subplot(ceil(sqrt(size(T,1))),ceil(sqrt(size(T,1))),ii);
-        plot(T{ii,11:end});
+        waveform = T{ii,11:end};
+        waveform = waveform(~isnan(waveform));
+        plot(waveform);
         xlabel('sample');
         ylabel('uV');
-        parts = strsplit(T{ii,1}{1},'_');
+        xlim([1 length(waveform)]);
+        ylim([-400 400]);
+        parts = strsplit(T{ii,1}{1},'-');
         unitTitles{ii} = strjoin(parts(1:3));
         title(unitTitles{ii});
     end
