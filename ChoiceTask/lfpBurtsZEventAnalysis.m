@@ -7,7 +7,7 @@ function [burstEventData,lfpEventData,t,freqList,eventFieldnames,correctTrialCou
 decimateFactor = 10;
 scalogramWindow = 2; % seconds
 plotEventIdx = [1 2 4 3 5 6 8]; % removed foodClick because it mirrors SideIn
-fpass = [1 100];
+fpass = [10 100];
 lfpEventData = {};
 burstEventData = {};
 maxBurstISI = 0.007; % seconds
@@ -110,7 +110,7 @@ for iNeuron=1:size(analysisConf.neurons,1)
             end
         end
         freqList = exp(linspace(log(fpass(1)),log(fpass(2)),100));
-        [W, freqList] = calculateComplexScalograms_EnMasse(data,'Fs',Fs,'fpass',fpass,'freqList',freqList,'doplot',false);
+        [W, freqList] = calculateComplexScalograms_EnMasse(data,'Fs',Fs,'fpass',fpass,'freqList',freqList);
         allScalograms(iField,:,:) = squeeze(mean(abs(W).^2, 2))';
     end
     t = linspace(-scalogramWindow,scalogramWindow,size(W,1));

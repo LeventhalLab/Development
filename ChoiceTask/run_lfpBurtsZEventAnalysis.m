@@ -1,23 +1,19 @@
 plotEventIdx = [1 2 4 3 5 6 8];
-saveRows = 2;
+saveRows = 2; % top:LFP, bottom:Z-score
 fontSize = 6; 
-iSubplot = 1;
 histBinSec = 0.05; % seconds
 scalogramWindow = 2; % seconds (this needs to be passed back I think)
 histBin = scalogramWindow / histBinSec;
 smoothZ = 5;
 
-for iNeuron=2:2%size(analysisConf.neurons,1)
+for iNeuron=1:size(analysisConf.neurons,1)
+    iSubplot = 1;
     neuronName = strrep(analysisConf.neurons{iNeuron},'_','-');
     fig = formatSheet();
     set(fig,'PaperPosition', [1 8 28 10]);
     eventData = lfpEventData{iNeuron};
     
-    %REMOVE, need to rerun lfpBurstsZEventAnalysis.m with updated code
-    if isempty(eventData)
-        disp('no bursting, skipping...');
-        continue;
-    end
+    v = [];
     for iEvent=plotEventIdx
         subplot(saveRows,length(plotEventIdx),iSubplot);
         imagesc(t,freqList,log(squeeze(eventData(iEvent,:,:)))); 
@@ -25,16 +21,22 @@ for iNeuron=2:2%size(analysisConf.neurons,1)
         xlabel('Time (s)');
         set(gca, 'YDir', 'normal');
         xlim([-1 1]);
-        ylim([0 80]);
+%         ylim([1 80]);
         if iSubplot == 1
             title({neuronName,eventFieldnames{iEvent}});
         else
             title({'',eventFieldnames{iEvent}});
         end
         colormap(jet);
-        % ADD caxis
-        
+        v(iEvent,:) = caxis;
         iSubplot = iSubplot + 1;
+    end
+    
+    % set all caxis to 25% full range
+    caxisValues = upperLowerPrctile(v(:),25);
+    for ii=1:iSubplot-1
+        subplot(saveRows,length(plotEventIdx),ii);
+        caxis(caxisValues);
     end
     
     eventData = burstEventData{iNeuron};
@@ -81,5 +83,7 @@ for iNeuron=2:2%size(analysisConf.neurons,1)
         
         iSubplot = iSubplot + 1;
     end
-    saveas(fig,[neuronName,'.pdf']);
+    saveas(fig,fullfile('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp',...
+        ['lfpBurstZEventAnalysis_',neuronName,'.pdf']));
+    close(fig);
 end

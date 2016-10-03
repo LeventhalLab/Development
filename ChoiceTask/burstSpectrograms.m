@@ -1,20 +1,13 @@
-function burstSpectrograms(analysisConf)
+ function burstSpectrograms(analysisConf)
     % note: anaylsisConf is unit-based, whereas this analysis will pull out the
     % LFP wire based on the unit (i.e. two units from the same wire will result in
     % the same results)
 
     decimateFactor = 100;
-<<<<<<< HEAD
     scalogramWindow = 2; % seconds
-    fpass = [0 45];
-    maxBurstISI = 0.01; % seconds
-    nSample = 2000;
-=======
-    scalogramWindow = 1.2; % seconds
-    fpass = [0 80];
+    fpass = [1 80];
     maxBurstISI = 0.007; % seconds
-    nSample = 500;
->>>>>>> origin/master
+    nSample = 10;
 
     for iNeuron=1:size(analysisConf.neurons,1)
         disp(['----- Working on ',analysisConf.neurons{iNeuron}]);
@@ -58,31 +51,33 @@ function burstSpectrograms(analysisConf)
         disp(['Reading LFP (SEV file) for ',tetrodeName]);
         disp(sevFile);
         [sev,header] = read_tdt_sev(sevFile);
-        [b,a]=butter(4,200/(header.Fs/2)); % low-pass 200Hz
-        sev = filtfilt(b,a,double(sev));
-        sev = decimate(sev,decimateFactor);
+%         [b,a]=butter(4,200/(header.Fs/2)); % low-pass 200Hz
+%         sev = filtfilt(b,a,double(sev));
+        sev = decimate(double(sev),decimateFactor);
         Fs = header.Fs/decimateFactor;
         % --- copy end
+        
+        freqList = logFreqList(fpass,100);
 
         disp(['Making tsRnd_realW']);
         tsSample = randsample(linspace(0,(length(sev)/Fs),1e5),nSample,true);
-        [tsRnd_realW, freqList] = pluckScalogram(sev,tsSample,scalogramWindow,Fs,fpass);
+        [tsRnd_realW, freqList] = pluckScalogram(sev,tsSample,scalogramWindow,Fs,fpass,freqList);
         
         disp(['Making ts_realW']);
         tsSample = randsample(ts,nSample,true);
-        [ts_realW, freqList] = pluckScalogram(sev,tsSample,scalogramWindow,Fs,fpass);
+        [ts_realW, freqList] = pluckScalogram(sev,tsSample,scalogramWindow,Fs,fpass,freqList);
         
         disp(['Making tsBurst_realW']);
         tsSample = randsample(tsBurst,nSample,true);
-        [tsBurst_realW, freqList] = pluckScalogram(sev,tsSample,scalogramWindow,Fs,fpass);
+        [tsBurst_realW, freqList] = pluckScalogram(sev,tsSample,scalogramWindow,Fs,fpass,freqList);
         
         disp(['Making tsLTS_realW']);
         tsSample = randsample(tsLTS,nSample,true);
-        [tsLTS_realW, freqList] = pluckScalogram(sev,tsSample,scalogramWindow,Fs,fpass);
+        [tsLTS_realW, freqList] = pluckScalogram(sev,tsSample,scalogramWindow,Fs,fpass,freqList);
         
         disp(['Making tsPoisson_realW']);
         tsSample = randsample(tsPoisson,nSample,true);
-        [tsPoisson_realW, freqList] = pluckScalogram(sev,tsSample,scalogramWindow,Fs,fpass);
+        [tsPoisson_realW, freqList] = pluckScalogram(sev,tsSample,scalogramWindow,Fs,fpass,freqList);
         
         t = linspace(-scalogramWindow,scalogramWindow,size(ts_realW,1));
         
@@ -114,7 +109,7 @@ function burstSpectrograms(analysisConf)
         title({analysisConf.neurons{iNeuron},'Poisson ts'});
         formatSubplot;
         
-        saveas(h,fullfile('C:\Users\admin\Desktop\Matts Temp',analysisConf.neurons{iNeuron}),'fig');
+%         saveas(h,fullfile('C:\Users\admin\Desktop\Matts Temp',analysisConf.neurons{iNeuron}),'fig');
     end
 end
 
@@ -124,14 +119,10 @@ function formatSubplot()
     set(gca, 'YDir', 'normal');
     colormap(jet);
     xlim([-1 1]);
-<<<<<<< HEAD
-    ylim([0 45]);
-=======
-    ylim([0 80]);
->>>>>>> origin/master
+%     ylim([0 80]);
 end
 
-function [realW, freqList] = pluckScalogram(sev,ts,scalogramWindow,Fs,fpass)
+function [realW, freqList] = pluckScalogram(sev,ts,scalogramWindow,Fs,fpass,freqList)
     scalogramWindowSamples = round(scalogramWindow * Fs);
     data = [];
     for ii=1:length(ts)
@@ -141,7 +132,7 @@ function [realW, freqList] = pluckScalogram(sev,ts,scalogramWindow,Fs,fpass)
         end
     end
     % remove artifacts
-    [W, freqList] = calculateComplexScalograms_EnMasse(data,'Fs',Fs,'fpass',fpass);
+    [W, freqList] = calculateComplexScalograms_EnMasse(data,'Fs',Fs,'fpass',fpass,'freqList',freqList,'doplot',true);
     
 % --- insert
 % %     tIdx = floor((scalogramWindowSamples)/2):3*floor((scalogramWindowSamples)/2);
