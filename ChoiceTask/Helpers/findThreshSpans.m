@@ -8,7 +8,7 @@ function spans = findThreshSpans(s,thresh,occurs)
 % threshold mode
 if length(thresh) == 1
     if thresh < 0
-        [b,n] = RunLength(-s > thresh);
+        [b,n] = RunLength(-s > thresh & s > 0);
     else
         [b,n] = RunLength(s >= thresh);
     end
@@ -24,11 +24,13 @@ mask = RunLength(b,n);
 startIdxs = find(diff(mask) == 1) + 1;
 endIdxs = find(diff(mask) == -1);
 % handle ends
-if mask(1) == 1 % meets critera at start
-    startIdxs = [1 startIdxs];
-end
-if mask(end) == 1 % meets criteria at end
-    endIdxs = [endIdxs length(mask)];
+if any([startIdxs endIdxs])
+    if mask(1) == 1 % meets critera at start
+        startIdxs = [1 startIdxs];
+    end
+    if mask(end) == 1 % meets criteria at end
+        endIdxs = [endIdxs length(mask)];
+    end
 end
 
 spans = [startIdxs' endIdxs'];

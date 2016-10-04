@@ -19,13 +19,13 @@ trialLength = length(sevFilt) / Fs; % seconds
 upperPrctile = 90;
 lowerPrctile = 10;
 upperThresh = prctile(s,upperPrctile);
-lowerThresh = prctile(s,lowerPrctile);
+lowerThresh = prctile(s(s>0),lowerPrctile);
 
-sigma = 0.05; % 50ms
+sigma = 0.015; % 50ms
 [s,binned,kernel] = spikeDensityEstimate(ts,trialLength,sigma);
 t = linspace(0,trialLength,length(s));
 
-occurs = 1; % 50ms
+occurs = 50; % 50ms
 spansUpper = findThreshSpans(s,upperThresh,occurs);
 spansMiddle = findThreshSpans(s,[lowerThresh upperThresh],occurs);
 spansLower = findThreshSpans(s,-lowerThresh,occurs);
@@ -41,7 +41,7 @@ for iSpan = 1:3
     A = [];
     scaloData = [];
     curSpans = allSpans{iSpan};
-    for ii=1:size(curSpans,1)
+    for ii=1:1000%size(curSpans,1)
         midSpan = mean(curSpans(ii,:)) / 1000; % seconds
         sampleRange = [(round(midSpan * Fs) - windowSamples):(round(midSpan * Fs) + windowSamples)-1];
         if min(sampleRange) > 0 && max(sampleRange) < length(sevFilt)
