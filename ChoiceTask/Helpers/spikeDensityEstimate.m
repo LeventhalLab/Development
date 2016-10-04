@@ -4,7 +4,7 @@ function [s,binned,kernel] = spikeDensityEstimate(ts,trialLength,sigma)
 % sigma = std deviations for kernel edges
 % modified from: MATLAB for Neuroscientists, p.319-320
 
-trialLength = round(trialLength,3); % round to ms
+trialLength = round(trialLength,3); % round to ms-precision
 binned = hist(ts,[0:.001:trialLength]); % bin data
 % sigma = .05; % kernel std, 50ms
 edges = [-3*sigma:.001:3*sigma]; % time ranges
