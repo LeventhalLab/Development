@@ -14,7 +14,7 @@ for ii=useTrials
     cellCount = cellCount + 1;
 end
 [B,I] = sort(sortVals);
-theEvent = theEvent(I,1);
+% theEvent = theEvent(I,1);
 correctCount = cellCount;
 
 useTrials = find([trials.correct]==0);
@@ -29,8 +29,8 @@ figure;
 plotSpikeRaster(theEvent,'PlotType','vertline','AutoLabel',true);
 hold on;
 plot([-spikeWindow spikeWindow],[correctCount correctCount],'r');
-sortLine = length(find(B<0.4));
-plot([-spikeWindow spikeWindow],[sortLine sortLine],'g');
+% sortLine = length(find(B<0.4));
+% plot([-spikeWindow spikeWindow],[sortLine sortLine],'g');
 
 
 tSpans = [];

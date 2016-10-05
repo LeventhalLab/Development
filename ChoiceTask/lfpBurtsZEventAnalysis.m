@@ -1,4 +1,4 @@
-function [burstEventData,lfpEventData,t,freqList,eventFieldnames,correctTrialCount] = ...
+function [burstEventData,lfpEventData,t,freqList,eventFieldnames,correctTrialCount,scalogramWindow] = ...
     lfpBurtsZEventAnalysis(analysisConf)
 
 % [] LFP analysis doesn't need to be done on every neuron if it's from the
@@ -92,23 +92,25 @@ for iNeuron=1:size(analysisConf.neurons,1)
         tsPeths.tsLTSEvents{iField} = [];
         tsPeths.tsPoissonEvents{iField} = [];
         
+        trialCount = 1;
         for iTrial=correctTrials
             eventFieldnames = fieldnames(trials(iTrial).timestamps);
             eventTs = getfield(trials(iTrial).timestamps, eventFieldnames{iField});
             eventSample = round(eventTs * Fs);
             if eventSample - scalogramWindowSamples > 0 && eventSample + scalogramWindowSamples - 1 < length(sev)
-                tsPeths.tsEvents{iField} = [tsPeths.tsEvents{iField}; ts(ts < eventTs+scalogramWindow & ts >= eventTs-scalogramWindow) - eventTs];
+                tsPeths.tsEvents{trialCount,iField} = ts(ts < eventTs+scalogramWindow & ts >= eventTs-scalogramWindow)' - eventTs;
                 if ~isempty(tsBurst)
-                    tsPeths.tsBurstEvents{iField} = [tsPeths.tsBurstEvents{iField}; tsBurst(tsBurst < eventTs+scalogramWindow & tsBurst >= eventTs-scalogramWindow) - eventTs];
+                    tsPeths.tsBurstEvents{trialCount,iField} = tsBurst(tsBurst < eventTs+scalogramWindow & tsBurst >= eventTs-scalogramWindow)' - eventTs;
                 end
                 if ~isempty(tsLTS)
-                    tsPeths.tsLTSEvents{iField} = [tsPeths.tsLTSEvents{iField}; tsLTS(tsLTS < eventTs+scalogramWindow & tsLTS >= eventTs-scalogramWindow) - eventTs];
+                    tsPeths.tsLTSEvents{trialCount,iField} = tsLTS(tsLTS < eventTs+scalogramWindow & tsLTS >= eventTs-scalogramWindow)' - eventTs;
                 end
                 if ~isempty(tsPoisson)
-                    tsPeths.tsPoissonEvents{iField} = [tsPeths.tsPoissonEvents{iField}; tsPoisson(tsPoisson < eventTs+scalogramWindow & tsPoisson >= eventTs-scalogramWindow) - eventTs];
+                    tsPeths.tsPoissonEvents{trialCount,iField} = tsPoisson(tsPoisson < eventTs+scalogramWindow & tsPoisson >= eventTs-scalogramWindow)' - eventTs;
                 end
 
-                data(:,iTrial) = sev((eventSample - scalogramWindowSamples):(eventSample + scalogramWindowSamples - 1));
+                data(:,trialCount) = sev((eventSample - scalogramWindowSamples):(eventSample + scalogramWindowSamples - 1));
+                trialCount = trialCount + 1;
             end
         end
         [W, freqList] = calculateComplexScalograms_EnMasse(data,'Fs',Fs,'fpass',fpass,'freqList',freqList);

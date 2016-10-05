@@ -1,24 +1,23 @@
 plotEventIdx = [1 2 4 3 5 6 8];
-saveRows = 2; % top:LFP, bottom:Z-score
+totalRows = 6; % LFP, tsAll, tsBurst, tsLTS, tsPoisson, raster
 fontSize = 6; 
-histBinSec = 0.05; % seconds
-scalogramWindow = 2; % seconds (this needs to be passed back I think)
-histBin = scalogramWindow / histBinSec;
+histBins = 20;
 smoothZ = 5;
 
 for iNeuron=1:size(analysisConf.neurons,1)
     iSubplot = 1;
     neuronName = strrep(analysisConf.neurons{iNeuron},'_','-');
-    fig = formatSheet();
-    set(fig,'PaperPosition', [1 8 28 10]);
+    h = figure;
     eventData = lfpEventData{iNeuron};
     
-    v = [];
+    allCaxis = [];
+    adjSubplots = [];
     for iEvent=plotEventIdx
-        subplot(saveRows,length(plotEventIdx),iSubplot);
-        imagesc(t,freqList,log(squeeze(eventData(iEvent,:,:)))); 
-        ylabel('Frequency (Hz)');
-        xlabel('Time (s)');
+        subplot(totalRows,length(plotEventIdx),iSubplot);
+        imagesc(t,freqList,log(squeeze(eventData(iEvent,:,:))));
+        if iEvent == 1
+            ylabel('Freq (Hz)');
+        end
         set(gca, 'YDir', 'normal');
         xlim([-1 1]);
 %         ylim([1 80]);
@@ -27,63 +26,76 @@ for iNeuron=1:size(analysisConf.neurons,1)
         else
             title({'',eventFieldnames{iEvent}});
         end
+        set(gca,'YScale','log');
+        set(gca,'Ytick',round(exp(linspace(log(min(freqList)),log(max(freqList)),5))));
         colormap(jet);
-        v(iEvent,:) = caxis;
+        allCaxis(iEvent,:) = caxis;
+        adjSubplots = [adjSubplots iSubplot];
         iSubplot = iSubplot + 1;
     end
-    
     % set all caxis to 25% full range
-    caxisValues = upperLowerPrctile(v(:),25);
-    for ii=1:iSubplot-1
-        subplot(saveRows,length(plotEventIdx),ii);
+    caxisValues = upperLowerPrctile(allCaxis(:),25);
+    for ii=1:length(adjSubplots)
+        subplot(totalRows,length(plotEventIdx),adjSubplots(ii));
         caxis(caxisValues);
     end
+    adjSubplots = [];
     
     eventData = burstEventData{iNeuron};
+    
     for iEvent=plotEventIdx
-        subplot(saveRows,length(plotEventIdx),iSubplot);
-        hold on;
-        
-        if ~isempty(eventData.ts)
-            [zMean,zStd] = helpZscore(eventData.ts,scalogramWindow,histBin);
-            [counts,centers] = hist(eventData.tsEvents{iEvent},histBin);
-            counts = counts / correctTrialCount(iNeuron);
-            zCounts = (counts - zMean)/zStd;
-            plot(centers,smooth(zCounts,smoothZ));
-        end
-        if ~isempty(eventData.tsBurst)
-            [zMean,zStd] = helpZscore(eventData.tsBurst,scalogramWindow,histBin);
-            [counts,centers] = hist(eventData.tsBurstEvents{iEvent},histBin);
-            counts = counts / correctTrialCount(iNeuron);
-            zCounts = (counts - zMean)/zStd;
-            plot(centers,smooth(zCounts,smoothZ));
-        end
-        if ~isempty(eventData.tsLTS)
-            [zMean,zStd] = helpZscore(eventData.tsLTS,scalogramWindow,histBin);
-            [counts,centers] = hist(eventData.tsLTSEvents{iEvent},histBin);
-            counts = counts / correctTrialCount(iNeuron);
-            zCounts = (counts - zMean)/zStd;
-            plot(centers,smooth(zCounts,smoothZ));
-        end
-        if ~isempty(eventData.tsPoisson)
-            [zMean,zStd] = helpZscore(eventData.tsPoisson,scalogramWindow,histBin);
-            [counts,centers] = hist(eventData.tsPoissonEvents{iEvent},histBin);
-            counts = counts / correctTrialCount(iNeuron);
-            zCounts = (counts - zMean)/zStd;
-            plot(centers,smooth(zCounts,smoothZ));
-        end
+        subplot(totalRows,length(plotEventIdx),iSubplot);
+        rasterData = eventData.tsEvents(:,iEvent);
+        rasterData = rasterData(~cellfun('isempty',rasterData)); % remove empty rows (no spikes)
+        plotSpikeRaster(rasterData,'PlotType','scatter','AutoLabel',false);
         if iEvent == 1
-            legend({'All','Burst','LTS','Poisson'},'Position',[0 .25 .1 .1]);
+            ylabel('Trials');
         end
-        ylabel('Z');
-        xlabel('t');
         xlim([-1 1]);
-        ylim([-10 10]);
-%         title({analysisConf.neurons{iNeuron},eventFieldnames{iEvent}});
-        
         iSubplot = iSubplot + 1;
     end
-    saveas(fig,fullfile('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp',...
-        ['lfpBurstZEventAnalysis_',neuronName,'.pdf']));
-    close(fig);
+    
+    % all histograms
+    rowData = {eventData.tsEvents,eventData.tsBurstEvents,eventData.tsLTSEvents,eventData.tsPoissonEvents};
+    rowLabels = {'tsAll','tsBursts','tsLTS','tsPoisson'};
+    for iRowData = 1:length(rowData)
+        allRates = [];
+        for iEvent=plotEventIdx
+            subplot(totalRows,length(plotEventIdx),iSubplot);
+            curData = rowData{1,iRowData}(:,iEvent); % extract all trials for iEvent column
+            curData = cat(2,curData{:}); % concatenate all values into one vector
+            if ~isempty(curData)
+                [counts,centers] = hist(curData,histBins);
+                ratePerSecond = counts*(scalogramWindow*2)/histBins;
+                bar(centers,ratePerSecond,'k','EdgeColor','k');
+                title(rowLabels(iRowData));
+                if iEvent == 1
+                    ylabel('per second');
+                end
+                xlim([-1 1]);
+                allRates = [allRates ratePerSecond];
+            end
+            adjSubplots = [adjSubplots iSubplot];
+            iSubplot = iSubplot + 1;
+        end
+        for ii=1:length(adjSubplots)
+            subplot(totalRows,length(plotEventIdx),adjSubplots(ii));
+            ylim([min(allRates) max(allRates)]);
+        end
+        adjSubplots = [];
+        
+        if iRowData == length(rowData)
+            xlabel('Time (s)');
+        end
+    end
+    
+set(h,'PaperOrientation','landscape');
+set(h,'PaperUnits','normalized');
+set(h,'PaperPosition', [0 0 1 1]);
+print(gcf, '-dpdf', 'test3.pdf');
+
+
+%     saveas(fig,fullfile('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp',...
+%         ['lfpBurstZEventAnalysis_',neuronName,'.pdf']));
+%     close(h);
 end
