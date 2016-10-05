@@ -18,8 +18,8 @@ lowerPrctile = 10;
 upperThresh = prctile(s,upperPrctile);
 lowerThresh = prctile(s(s>0),lowerPrctile);
 
-sigma = 0.05; % 0.05 = 50ms
-% sigma = round(mean(diff(ts)),3); % use mean ISI?
+% sigma = 0.05; % 0.05 = 50ms
+sigma = round(mean(diff(ts)),3); % use mean ISI?
 [s,binned,kernel] = spikeDensityEstimate(ts,trialLength,sigma);
 t = linspace(0,trialLength,length(s));
 
@@ -49,13 +49,11 @@ for iSpan = 1:1
         sampleRange = [(round(midSpan * Fs) - windowSamples):(round(midSpan * Fs) + windowSamples)-1];
         if min(sampleRange) > 0 && max(sampleRange) < length(sevFilt)
             scaloData(:,ii) = sevFilt(sampleRange);
-            [W, freqList] = calculateComplexScalograms_EnMasse(scaloData(:,ii),'Fs',Fs,'fpass',fpass,'freqList',freqList,'doplot',true);
+        end
+    end
+    [W, freqList] = calculateComplexScalograms_EnMasse(scaloData,'Fs',Fs,'fpass',fpass,'freqList',freqList,'doplot',true);
     set(gca,'YScale','log');
     set(gca,'Ytick',round(exp(linspace(log(min(freqList)),log(max(freqList)),5))));
     colormap(jet);
     title(ii);
-        end
-        
-    end
-    
 end

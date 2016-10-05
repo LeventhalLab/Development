@@ -8,6 +8,8 @@ decimateFactor = 10;
 scalogramWindow = 2; % seconds
 plotEventIdx = [1 2 4 3 5 6 8]; % removed foodClick because it mirrors SideIn
 fpass = [10 100];
+nFreqs = 30;
+freqList = exp(linspace(log(fpass(1)),log(fpass(2)),30));
 lfpEventData = {};
 burstEventData = {};
 maxBurstISI = 0.007; % seconds
@@ -51,7 +53,7 @@ for iNeuron=1:size(analysisConf.neurons,1)
         tsBurst = ts(burstIdx(logical(burstStartIdx)));
         tsLTS = filterLTS(tsBurst);
     end
-    [~,~,poissonIdx]=burst(ts);
+    [~,~,poissonIdx] = burst(ts);
     tsPoisson = [];
     if ~isempty(poissonIdx)
         tsPoisson = ts(poissonIdx);
@@ -109,7 +111,6 @@ for iNeuron=1:size(analysisConf.neurons,1)
                 data(:,iTrial) = sev((eventSample - scalogramWindowSamples):(eventSample + scalogramWindowSamples - 1));
             end
         end
-        freqList = exp(linspace(log(fpass(1)),log(fpass(2)),100));
         [W, freqList] = calculateComplexScalograms_EnMasse(data,'Fs',Fs,'fpass',fpass,'freqList',freqList);
         allScalograms(iField,:,:) = squeeze(mean(abs(W).^2, 2))';
     end
