@@ -1,14 +1,11 @@
 % function tsScaloXcorr(ts,sevFile)
 
-% [ ] handle slow firing units like 20160504a T24
-
-% sevFile = '/Users/mattgaidica/Documents/Data/ChoiceTask/R0117/R0117-rawdata/R0117_20160504a/R0117_20160504a/R0117_20160504a_R0117_20160504a-2_data_ch102.sev';
-% [sev,header] = read_tdt_sev(sevFile);
+sevFile = '/Users/mattgaidica/Documents/Data/ChoiceTask/R0088/R0088-rawdata/R0088_20151102a/R0088_20151102a/R0088_20151102_R0088_20151102-1_data_ch35.sev';
+[sev,header] = read_tdt_sev(sevFile);
 ts = nexStruct.neurons{2,1}.timestamps;
 
 decimateFactor = 10;
 sevFilt = decimate(double(sev),decimateFactor);
-sevFilt = artifactThresh(sevFilt,1,500);
 Fs = header.Fs/decimateFactor;
 [b,a] = butter(4,200/(Fs/2)); % low-pass 200Hz
 sevFilt = filtfilt(b,a,sevFilt);
@@ -21,11 +18,12 @@ lowerPrctile = 10;
 upperThresh = prctile(s,upperPrctile);
 lowerThresh = prctile(s(s>0),lowerPrctile);
 
-sigma = 0.015; % 50ms
+sigma = 0.05; % 0.05 = 50ms
+% sigma = round(mean(diff(ts)),3); % use mean ISI?
 [s,binned,kernel] = spikeDensityEstimate(ts,trialLength,sigma);
 t = linspace(0,trialLength,length(s));
 
-occurs = 50; % 50ms
+occurs = 1; % 50 = 50ms, this is kind of redundant
 spansUpper = findThreshSpans(s,upperThresh,occurs);
 spansMiddle = findThreshSpans(s,[lowerThresh upperThresh],occurs);
 spansLower = findThreshSpans(s,-lowerThresh,occurs);
@@ -35,29 +33,29 @@ windowSamples = round(Fs * window);
 
 fpass = [10 100];
 freqList = logFreqList(fpass,30);
-% figure;
 allSpans = {spansLower,spansMiddle,spansUpper};
-for iSpan = 1:3
+nScalograms = 100;
+for iSpan = 1:1
     A = [];
     scaloData = [];
     curSpans = allSpans{iSpan};
-    for ii=1:1000%size(curSpans,1)
-        midSpan = mean(curSpans(ii,:)) / 1000; % seconds
+    if isempty(curSpans) 
+        continue; 
+    end
+    randSpanIdxs = randsample(1:min([size(curSpans,1),nScalograms]),min([size(curSpans,1),nScalograms]));
+    for ii=1:49%length(randSpanIdxs)
+        midSpan = mean(curSpans(randSpanIdxs(ii),:)) / 1000; % seconds
+        midSpan = tSpans(ii);
         sampleRange = [(round(midSpan * Fs) - windowSamples):(round(midSpan * Fs) + windowSamples)-1];
         if min(sampleRange) > 0 && max(sampleRange) < length(sevFilt)
             scaloData(:,ii) = sevFilt(sampleRange);
-%             [At,f] = simpleFFT(sevFilt(sampleRange),Fs);
-%             A(ii,:) = At;
-        end
-    end
-    [W, freqList] = calculateComplexScalograms_EnMasse(scaloData,'Fs',Fs,'fpass',fpass,'freqList',freqList,'doplot',true);
+            [W, freqList] = calculateComplexScalograms_EnMasse(scaloData(:,ii),'Fs',Fs,'fpass',fpass,'freqList',freqList,'doplot',true);
     set(gca,'YScale','log');
     set(gca,'Ytick',round(exp(linspace(log(min(freqList)),log(max(freqList)),5))));
-%     Am = mean(A);
-%     hold on;
-%     semilogy(f,smooth(Am,round(Fs/1000)));
+    colormap(jet);
+    title(ii);
+        end
+        
+    end
+    
 end
-% legend('Lower','Middle','Upper');
-% xlim([10 100]);
-% xlabel('Frequency (Hz)');
-% ylabel('|Y(f)|');
