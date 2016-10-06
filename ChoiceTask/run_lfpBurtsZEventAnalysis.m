@@ -1,7 +1,7 @@
 plotEventIdx = [1 2 4 3 5 6 8];
 totalRows = 6; % LFP, tsAll, tsBurst, tsLTS, tsPoisson, raster
 fontSize = 6; 
-histBins = 20;
+histBins = 40;
 smoothZ = 5;
 
 for iNeuron=1:size(analysisConf.neurons,1)
@@ -20,7 +20,6 @@ for iNeuron=1:size(analysisConf.neurons,1)
         end
         set(gca, 'YDir', 'normal');
         xlim([-1 1]);
-%         ylim([1 80]);
         if iSubplot == 1
             title({neuronName,eventFieldnames{iEvent}});
         else
@@ -47,6 +46,7 @@ for iNeuron=1:size(analysisConf.neurons,1)
         subplot(totalRows,length(plotEventIdx),iSubplot);
         rasterData = eventData.tsEvents(:,iEvent);
         rasterData = rasterData(~cellfun('isempty',rasterData)); % remove empty rows (no spikes)
+        rasterData = makeRasterReadable(rasterData,50); % limit to 100 data points
         plotSpikeRaster(rasterData,'PlotType','scatter','AutoLabel',false);
         if iEvent == 1
             ylabel('Trials');

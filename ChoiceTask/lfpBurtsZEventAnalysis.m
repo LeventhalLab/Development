@@ -3,7 +3,7 @@ function [burstEventData,lfpEventData,t,freqList,eventFieldnames,correctTrialCou
 
 % [] LFP analysis doesn't need to be done on every neuron if it's from the
 % same tetrode
-
+lfpThresh = 200; % diff of lfp in uV
 decimateFactor = 10;
 scalogramWindow = 2; % seconds
 plotEventIdx = [1 2 4 3 5 6 8]; % removed foodClick because it mirrors SideIn
@@ -69,11 +69,13 @@ for iNeuron=1:size(analysisConf.neurons,1)
     nextSevFile = fullSevFiles{sessionConf.chMap(tetrodeId,lfpChannel+1)};
     disp(['Reading LFP (SEV file) for ',tetrodeName]);
     disp(nextSevFile);
-    if ~isempty(sevFile) || strcmp(nextSevFile,sevFile) == 0 % if they are different
+    if isempty(sevFile) || ~strcmp(nextSevFile,sevFile) % if they are different
         sevFile = nextSevFile;
         [sev,header] = read_tdt_sev(sevFile);
-        sev = decimate(double(sev),decimateFactor,'fir');
         Fs = header.Fs/decimateFactor;
+        sev = decimate(double(sev),decimateFactor);
+        [b,a] = butter(4,200/(Fs/2)); % low-pass 200Hz
+        sev = filtfilt(b,a,sev); % needed for power criteria
         scalogramWindowSamples = round(scalogramWindow * Fs);
     end
     
@@ -98,6 +100,12 @@ for iNeuron=1:size(analysisConf.neurons,1)
             eventTs = getfield(trials(iTrial).timestamps, eventFieldnames{iField});
             eventSample = round(eventTs * Fs);
             if eventSample - scalogramWindowSamples > 0 && eventSample + scalogramWindowSamples - 1 < length(sev)
+                lfp = sev((eventSample - scalogramWindowSamples):(eventSample + scalogramWindowSamples - 1));
+                if max(abs(diff(lfp))) > lfpThresh
+                    disp(['skipping trial ',num2str(iTrial),' (lfp thresh)']);
+                    continue;
+                end
+                data(:,trialCount) = lfp;
                 tsPeths.tsEvents{trialCount,iField} = ts(ts < eventTs+scalogramWindow & ts >= eventTs-scalogramWindow)' - eventTs;
                 if ~isempty(tsBurst)
                     tsPeths.tsBurstEvents{trialCount,iField} = tsBurst(tsBurst < eventTs+scalogramWindow & tsBurst >= eventTs-scalogramWindow)' - eventTs;
@@ -108,8 +116,6 @@ for iNeuron=1:size(analysisConf.neurons,1)
                 if ~isempty(tsPoisson)
                     tsPeths.tsPoissonEvents{trialCount,iField} = tsPoisson(tsPoisson < eventTs+scalogramWindow & tsPoisson >= eventTs-scalogramWindow)' - eventTs;
                 end
-
-                data(:,trialCount) = sev((eventSample - scalogramWindowSamples):(eventSample + scalogramWindowSamples - 1));
                 trialCount = trialCount + 1;
             end
         end
