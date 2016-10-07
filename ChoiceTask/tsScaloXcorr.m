@@ -2,8 +2,8 @@ function [scaloData,allSpans,s,freqList]=tsScaloXcorr(ts,sevFile)
 % [] return scalogram W, lfp artifacts, allScaloData, s?
 
 decimateFactor = 50;
-upperPrctile = 90;
-lowerPrctile = 10;
+upperPrctile = 85;
+lowerPrctile = 15;
 lfpThresh = 0.5e6; % diff uV^2, *this depends on decimate factor, need to generalize it
 fpass = [10 100];
 freqList = logFreqList(fpass,30);
@@ -39,7 +39,7 @@ windowSamples = round(Fs * window);
 
 allSpans = {spansLower,spansMiddle,spansUpper};
 spanLabels = {'lower percentile','middle percentile','upper percentile'};
-nScalograms = 2000;
+nScalograms = 4000;
 for iSpan = 1:3
     scaloData = [];
     curSpans = allSpans{iSpan};
@@ -54,8 +54,8 @@ for iSpan = 1:3
     % if nScalograms >> curSpans or lfp thresh this takes forever
     while scaloCount < nScalograms
         randSpanIdx = randi([1,size(curSpans,1)]);
-%         midSpan = mean(curSpans(randSpanIdx,:)) / 1000; % seconds
-        midSpan = curSpans(randSpanIdx,1) / 1000; % seconds
+        midSpan = mean(curSpans(randSpanIdx,:)) / 1000; % seconds
+%         midSpan = curSpans(randSpanIdx,1) / 1000; % seconds
         sampleRange = [(round(midSpan * Fs) - windowSamples):(round(midSpan * Fs) + windowSamples)-1];
         if min(sampleRange) > 0 && max(sampleRange) < length(sevFilt)
             if max(abs(diff(sevFilt(sampleRange))).^2) < lfpThresh
@@ -70,5 +70,6 @@ for iSpan = 1:3
     set(gca,'YScale','log');
     set(gca,'Ytick',round(exp(linspace(log(min(freqList)),log(max(freqList)),5))));
     colormap(jet);
+    caxis([0 500]);
     title(spanLabels{iSpan});
 end
