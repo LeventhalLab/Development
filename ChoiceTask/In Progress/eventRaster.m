@@ -1,3 +1,6 @@
+function eventRaster(ts,event)
+% [] needs a lot of work to be a real function
+
 ts = nexStruct.neurons{2,1}.timestamps;
 
 spikeWindow = 1; % second
