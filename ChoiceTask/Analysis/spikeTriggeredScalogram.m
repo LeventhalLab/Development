@@ -1,4 +1,4 @@
-function [scaloData,allSpans,s,freqList]=tsScaloXcorr(ts,sevFile)
+function [scaloData,allSpans,s,freqList] = spikeTriggeredScalogram(ts,sevFile)
 % [] return scalogram W, lfp artifacts, allScaloData, s?
 
 decimateFactor = 50;
