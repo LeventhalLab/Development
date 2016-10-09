@@ -34,7 +34,6 @@ for iNeuron=1:size(analysisConf.neurons,1)
     
     plotEventIds = [1 2 4 3 5 6 8]; % removed foodClick because it mirrors SideIn
     trialIds = find([trials.correct]==1);
-    tWindow = 2; % seconds
     
     % prob need these in a cell
     tsPeths = eventsPeth(trials(trialIds),ts,tWindow);

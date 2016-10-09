@@ -31,7 +31,7 @@ for iNeuron=1:size(analysisConf.neurons,1)
             title({'',eventFieldnames{iEvent}});
         end
         set(gca,'YScale','log');
-        set(gca,'Ytick',round(exp(linspace(log(min(freqList)),log(max(freqList)),5))));
+        set(gca,'Ytick',round(logFreqList(fpass,5)));
         colormap(jet);
         allCaxis(iEvent,:) = caxis;
         adjSubplots = [adjSubplots iSubplot];

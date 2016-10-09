@@ -7,11 +7,7 @@ lfpThresh = 0.5e6; % diff uV^2, *this depends on decimate factor, need to genera
 fpass = [10 100];
 freqList = logFreqList(fpass,30);
 
-% ts = nexStruct.neurons{2,1}.timestamps;
-% sevFile = '/Users/mattgaidica/Documents/Data/ChoiceTask/R0088/R0088-rawdata/R0088_20151102a/R0088_20151102a/R0088_20151102_R0088_20151102-1_data_ch35.sev';
 [sev,header] = read_tdt_sev(sevFile);
-
-
 sevFilt = decimate(double(sev),decimateFactor);
 Fs = header.Fs/decimateFactor;
 [b,a] = butter(4,200/(Fs/2)); % low-pass 200Hz
