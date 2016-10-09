@@ -30,13 +30,19 @@ for iNeuron=1:size(analysisConf.neurons,1)
     end
     
     lfpChannel = sessionConf.lfpChannels(tetrodeId);
-    nextSevFile = sessionConf.sevFiles{sessionConf.chMap(tetrodeId,lfpChannel+1)};
+    sevFile = sessionConf.sevFiles{sessionConf.chMap(tetrodeId,lfpChannel+1)};
     
-    plotEventIdx = [1 2 4 3 5 6 8]; % removed foodClick because it mirrors SideIn
+    plotEventIds = [1 2 4 3 5 6 8]; % removed foodClick because it mirrors SideIn
     trialIds = find([trials.correct]==1);
-    pethWindow = 2; % seconds
+    tWindow = 2; % seconds
     
-    [peth] = eventsPeth(trials,trialIds,ts,pethWindow);
+    % prob need these in a cell
+    tsPeths = eventsPeth(trials(trialIds),ts,tWindow);
+    tsISIPeths = eventsPeth(trials(trialIds),tsISI,tWindow);
+    tsLTSPeths = eventsPeth(trials(trialIds),tsLTS,tWindow);
+    tsPoissonPeths = eventsPeth(trials(trialIds),tsPoisson,tWindow);
+    
+    [allScalograms,sevFilt] = eventsScalo(trials(trialIds),sevFile,tWindow);
     
 %     disp(['Reading LFP (SEV file) for ',tetrodeName]);
 %     disp(nextSevFile);
