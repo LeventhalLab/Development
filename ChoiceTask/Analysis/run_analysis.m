@@ -3,7 +3,7 @@
 for iNeuron=1:size(analysisConf.neurons,1)
     neuronName = analysisConf.neurons{iNeuron};
     disp(['Working on ',neuronName]);
-    [tetrodeName,tetrodeId] = getTetrodeInfo(neuronName);
+    [tetrodeName,tetrodeId,tetrodeChs] = getTetrodeInfo(neuronName);
     
     sessionConf = analysisConf.sessionConfs{iNeuron};
     
@@ -29,7 +29,12 @@ for iNeuron=1:size(analysisConf.neurons,1)
         end
     end
     
-    lfpChannel = sessionConf.lfpChannels(tetrodeId);
+    if sessionConf.singleWires(tetrodeID) == 0
+        lfpChannel = sessionConf.lfpChannels(tetrodeId);
+    else
+        lfpIdx = find(tetrodeChs~=0,1);
+        lfpChannel = tetrodeChs(lfpIdx);
+    end
     sevFile = sessionConf.sevFiles{sessionConf.chMap(tetrodeId,lfpChannel+1)};
     
     plotEventIds = [1 2 4 3 5 6 8]; % removed foodClick because it mirrors SideIn
