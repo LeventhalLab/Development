@@ -1,5 +1,4 @@
-function [scaloData,allSpans,s,freqList] = spikeTriggeredScalogram(ts,sevFile)
-% [] return scalogram W, lfp artifacts, allScaloData, s?
+function [allW,allScaloData,allSpans,s,freqList] = spikeTriggeredScalogram(ts,sevFile)
 
 decimateFactor = 50;
 upperPrctile = 85;
@@ -40,6 +39,8 @@ windowSamples = round(Fs * window);
 allSpans = {spansLower,spansMiddle,spansUpper};
 spanLabels = {'lower percentile','middle percentile','upper percentile'};
 nScalograms = 4000;
+allW = {};
+allScaloData = {};
 for iSpan = 1:3
     scaloData = [];
     curSpans = allSpans{iSpan};
@@ -66,10 +67,7 @@ for iSpan = 1:3
             end
         end
     end
-    [W, freqList] = calculateComplexScalograms_EnMasse(scaloData,'Fs',Fs,'fpass',fpass,'freqList',freqList,'doplot',true);
-    set(gca,'YScale','log');
-    set(gca,'Ytick',round(exp(linspace(log(min(freqList)),log(max(freqList)),5))));
-    colormap(jet);
-    caxis([0 500]);
-    title(spanLabels{iSpan});
+    [W, freqList] = calculateComplexScalograms_EnMasse(scaloData,'Fs',Fs,'fpass',fpass,'freqList',freqList,'doplot',false);
+    allW{iSpan} = W;
+    allScaloData{iSpan} = scaloData;
 end

@@ -1,3 +1,6 @@
+[burstEventData,lfpEventData,t,freqList,eventFieldnames,correctTrialCount,scalogramWindow] = ...
+    eventTriggeredAnalysis(analysisConf);
+
 plotEventIdx = [1 2 4 3 5 6 8];
 totalRows = 6; % LFP, tsAll, tsBurst, tsLTS, tsPoisson, raster
 fontSize = 6; 
@@ -5,8 +8,10 @@ histBins = 40;
 smoothZ = 5;
 
 for iNeuron=1:size(analysisConf.neurons,1)
+    sessionConf = exportSessionConf(analysisConf.sessionNames{iNeuron},analysisConf.nasPath);
+    
     iSubplot = 1;
-    neuronName = strrep(analysisConf.neurons{iNeuron},'_','-');
+    neuronName = analysisConf.neurons{iNeuron};
     h = figure;
     eventData = lfpEventData{iNeuron};
     
@@ -21,7 +26,7 @@ for iNeuron=1:size(analysisConf.neurons,1)
         set(gca, 'YDir', 'normal');
         xlim([-1 1]);
         if iSubplot == 1
-            title({neuronName,eventFieldnames{iEvent}});
+            title({neuronName,eventFieldnames{iEvent}},'interpreter',none);
         else
             title({'',eventFieldnames{iEvent}});
         end
@@ -89,13 +94,17 @@ for iNeuron=1:size(analysisConf.neurons,1)
         end
     end
     
-set(h,'PaperOrientation','landscape');
-set(h,'PaperUnits','normalized');
-set(h,'PaperPosition', [0 0 1 1]);
-print(gcf, '-dpdf', 'test3.pdf');
-
-
-%     saveas(fig,fullfile('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp',...
-%         ['lfpBurstZEventAnalysis_',neuronName,'.pdf']));
-%     close(h);
+    set(h,'PaperOrientation','landscape');
+    set(h,'PaperUnits','normalized');
+    set(h,'PaperPosition', [0 0 1 1]);
+    print(gcf, '-dpdf', 'test3.pdf');
+    
+    subFolder = 'eventTriggeredAnalysis';
+    leventhalPaths = buildLeventhalPaths(sessionConf,{'analysis'});
+    if ~exist(fullfile(leventhalPaths.analysis,subFolder),'dir')
+        mkdir(fullfile(leventhalPaths.analysis,subFolder));
+    end
+    saveas(fig,fullfile(leventhalPaths.analysis,subFolder,...
+        [subFolder,'_',neuronName,'.pdf']));
+    close(h);
 end
