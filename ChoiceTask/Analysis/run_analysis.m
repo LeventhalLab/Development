@@ -1,8 +1,5 @@
 % analysisConf = exportAnalysisConf('R0117',nasPath);
 
-% log git commit hash to file
-% sandbox and save session variables?
-
 for iNeuron=1:size(analysisConf.neurons,1)
     neuronName = analysisConf.neurons{iNeuron};
     disp(['Working on ',neuronName]);
@@ -22,7 +19,6 @@ for iNeuron=1:size(analysisConf.neurons,1)
     logFile = getLogPath(leventhalPaths.rawdata);
     logData = readLogData(logFile);
     trials = createTrialsStruct_simpleChoice(logData,nexStruct);
-%     correctTrials = find([trials.correct]==1);
     
     % load timestamps for neuron
     for iNexNeurons=1:length(nexStruct.neurons)
@@ -34,7 +30,13 @@ for iNeuron=1:size(analysisConf.neurons,1)
     end
     
     lfpChannel = sessionConf.lfpChannels(tetrodeId);
-    nextSevFile = fullSevFiles{sessionConf.chMap(tetrodeId,lfpChannel+1)};
+    nextSevFile = sessionConf.sevFiles{sessionConf.chMap(tetrodeId,lfpChannel+1)};
+    
+    plotEventIdx = [1 2 4 3 5 6 8]; % removed foodClick because it mirrors SideIn
+    trialIds = find([trials.correct]==1);
+    pethWindow = 2; % seconds
+    
+    [peth] = eventsPeth(trials,trialIds,ts,pethWindow);
     
 %     disp(['Reading LFP (SEV file) for ',tetrodeName]);
 %     disp(nextSevFile);
@@ -50,4 +52,4 @@ for iNeuron=1:size(analysisConf.neurons,1)
 
 end
 
-run_eventTriggeredAnalysis();
+% run_eventTriggeredAnalysis();
