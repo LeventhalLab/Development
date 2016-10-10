@@ -1,4 +1,16 @@
 % analysisConf = exportAnalysisConf('R0117',nasPath);
+
+% compiles all waveforms by averaging all waveforms
+% compileOFSWaveforms(waveformDir);
+% compares some of the unit properties in a scatter plot
+% compareOFSWaveforms(csvWaveformFiles);
+
+% produces waveform and ISI xcorr analyses
+% [] need to figure out where waveform files go (processed folder?) and
+% probably use sessionConf to write these (by unit instead of batching all
+% txt files)
+% makeUnitSummaries(waveformDir);
+
 fpass = [10 100];
 freqList = logFreqList(fpass,30);
 plotEventIds = [1 2 4 3 5 6 8]; % removed foodClick because it mirrors SideIn
@@ -54,7 +66,9 @@ for iNeuron=1:size(analysisConf.neurons,1)
     eventAnalysis();
     
     allScalograms = tsScalogram(ts,sevFilt,tWindow,Fs,fpass,freqList);
-    tsScalograms();
+    tsScalograms(); % finish these, run for tsISI...
+    
+    % lfpRaster
     
 %     disp(['Reading LFP (SEV file) for ',tetrodeName]);
 %     disp(nextSevFile);

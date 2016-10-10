@@ -1,4 +1,4 @@
-function [rasterTs,rasterEvents,allTs,allEvents] = lfpTriggeredSpikeRaster(ts,sevFile)
+function [rasterTs,rasterEvents,allTs,allEvents] = lfpRaster(ts,sevFile)
 %[ ] pass in or retrieve event times from trial structure
 % ts = nexStruct.neurons{4,1}.timestamps;
 % if false
