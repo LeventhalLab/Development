@@ -1,8 +1,6 @@
-function [allScalograms,sevFilt] = eventsScalo(trials,sevFile,tWindow)
+function [allScalograms,sevFilt,eventFieldnames] = eventsScalo(trials,sevFile,tWindow,fpass,freqList)
 % need better lfp thresh algorithm
 lfpThresh = 2000; % diff of lfp in uV
-fpass = [10 100];
-freqList = logFreqList(fpass,30);
 
 [sev,header] = read_tdt_sev(sevFile);
 decimateFactor = round(header.Fs / (fpass(2) * 10)); % 10x max filter freq

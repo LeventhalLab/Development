@@ -8,5 +8,5 @@ tetrodeId = str2double(tetrodeName(2:end));
 
 startChs = strfind(s,'[');
 endChs = strfind(s,']');
-tetrodeChs = s(startChs:endChs);
-tetrodeChs = num2str(tetrodeChs);
+tetrodeChs = s(startChs+1:endChs-1);
+tetrodeChs = str2num(tetrodeChs);

@@ -1,4 +1,6 @@
 % analysisConf = exportAnalysisConf('R0117',nasPath);
+fpass = [10 100];
+freqList = logFreqList(fpass,30);
 
 for iNeuron=1:size(analysisConf.neurons,1)
     neuronName = analysisConf.neurons{iNeuron};
@@ -29,13 +31,13 @@ for iNeuron=1:size(analysisConf.neurons,1)
         end
     end
     
-    if sessionConf.singleWires(tetrodeID) == 0
+    if sessionConf.singleWires(tetrodeId) == 0
         lfpChannel = sessionConf.lfpChannels(tetrodeId);
     else
         lfpIdx = find(tetrodeChs~=0,1);
         lfpChannel = tetrodeChs(lfpIdx);
     end
-    sevFile = sessionConf.sevFiles{sessionConf.chMap(tetrodeId,lfpChannel+1)};
+    sevFile = sessionConf.sevFiles{lfpChannel};
     
     plotEventIds = [1 2 4 3 5 6 8]; % removed foodClick because it mirrors SideIn
     trialIds = find([trials.correct]==1);
@@ -46,7 +48,7 @@ for iNeuron=1:size(analysisConf.neurons,1)
     tsLTSPeths = eventsPeth(trials(trialIds),tsLTS,tWindow);
     tsPoissonPeths = eventsPeth(trials(trialIds),tsPoisson,tWindow);
     
-    [allScalograms,sevFilt] = eventsScalo(trials(trialIds),sevFile,tWindow);
+    [allScalograms,sevFilt,freqList,eventFieldnames] = eventsScalo(trials(trialIds),sevFile,tWindow,fpass,freqList);
     
 %     disp(['Reading LFP (SEV file) for ',tetrodeName]);
 %     disp(nextSevFile);
