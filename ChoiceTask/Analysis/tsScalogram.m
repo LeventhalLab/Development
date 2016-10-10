@@ -1,4 +1,4 @@
-function allScalograms = tsScalogram(ts,sevFilt,tWindow,Fs,fpass,freqList)
+function [allScalograms,nScalograms] = tsScalogram(ts,sevFilt,tWindow,Fs,fpass,freqList)
 upperPrctile = 85;
 lowerPrctile = 15;
 lfpThresh = 0.5e6; % diff uV^2, *this depends on decimate factor, need to generalize it

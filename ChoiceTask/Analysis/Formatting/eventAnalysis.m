@@ -1,16 +1,14 @@
 totalRows = 6; % LFP, tsAll, tsBurst, tsLTS, tsPoisson, raster
 fontSize = 6; 
 histBins = 40;
-t = linspace(-tWindow,tWindow,size(allScalograms,3));
 iSubplot = 1;
-neuronName = analysisConf.neurons{iNeuron};
 h = figure;
 
 allCaxis = [];
 adjSubplots = [];
 for iEvent=plotEventIds
     subplot(totalRows,length(plotEventIds),iSubplot);
-    imagesc(t,freqList,log(squeeze(allScalograms(iEvent,:,:))));
+    imagesc(t,freqList,log(squeeze(eventScalograms(iEvent,:,:))));
     if iEvent == 1
         ylabel('Freq (Hz)');
     end
@@ -83,13 +81,6 @@ for iRowData = 1:length(allPeths)
     adjSubplots = [];
 end
 
-set(h,'PaperOrientation','landscape');
-set(h,'PaperUnits','normalized');
-set(h,'PaperPosition', [0 0 1 1]);
-
 subFolder = 'eventAnalysis';
-mkdir(sessionConf.leventhalPaths.analysis,subFolder);
-% print(h, '-dpdf', 'test3.pdf');
-docName = [subFolder,'_',neuronName,'.pdf'];
-saveas(h,fullfile(leventhalPaths.analysis,subFolder,docName));
-close(h);
+docName = [subFolder,'_',neuronName];
+savePDF(h,leventhalPaths,subFolder,docName);
