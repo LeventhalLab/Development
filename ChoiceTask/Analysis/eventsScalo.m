@@ -1,11 +1,7 @@
-function [allScalograms,sevFilt,eventFieldnames] = eventsScalo(trials,sevFile,tWindow,fpass,freqList)
+function [allScalograms,eventFieldnames] = eventsScalo(trials,sevFilt,tWindow,Fs,fpass,freqList)
 % need better lfp thresh algorithm
 lfpThresh = 2000; % diff of lfp in uV
 
-[sev,header] = read_tdt_sev(sevFile);
-decimateFactor = round(header.Fs / (fpass(2) * 10)); % 10x max filter freq
-sevFilt = decimate(double(sev),decimateFactor);
-Fs = header.Fs / decimateFactor;
 tWindowSamples = round(Fs * tWindow);
 
 allScalograms = [];
@@ -16,7 +12,7 @@ for iField=1:numel(eventFieldnames)
         centerTs = getfield(trials(iTrial).timestamps,eventFieldnames{iField});
         centerSample = round(centerTs*Fs);
         centerRangeSamples = (centerSample - tWindowSamples):(centerSample + tWindowSamples - 1);
-        if centerRangeSamples(1) > 0 && centerRangeSamples(end) < length(sev)
+        if centerRangeSamples(1) > 0 && centerRangeSamples(end) < length(sevFilt)
             lfp = sevFilt(centerRangeSamples);
             if max(abs(diff(lfp))) > lfpThresh
                 disp(['skipping trial ',num2str(iTrial),' (lfp thresh)']);

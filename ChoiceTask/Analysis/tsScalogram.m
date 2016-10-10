@@ -1,25 +1,13 @@
-function [allW,allScaloData,allSpans,s,freqList] = spikeTriggeredScalogram(ts,sevFile)
-
-decimateFactor = 50;
+function allScalograms = tsScalogram(ts,sevFilt,tWindow,Fs,fpass,freqList)
 upperPrctile = 85;
 lowerPrctile = 15;
 lfpThresh = 0.5e6; % diff uV^2, *this depends on decimate factor, need to generalize it
-fpass = [10 100];
-freqList = logFreqList(fpass,30);
-
-[sev,header] = read_tdt_sev(sevFile);
-sevFilt = decimate(double(sev),decimateFactor);
-Fs = header.Fs/decimateFactor;
-[b,a] = butter(4,200/(Fs/2)); % low-pass 200Hz
-sevFilt = filtfilt(b,a,sevFilt);
-sevFilt = sevFilt - mean(sevFilt);
 
 trialLength = length(sevFilt) / Fs; % seconds
 
 % sigma = 0.05; % 0.05 = 50ms
 sigma = round(mean(diff(ts))/3,3); % use mean ISI?
 [s,binned,kernel] = spikeDensityEstimate(ts,trialLength,sigma);
-t = linspace(0,trialLength,length(s));
 
 upperThresh = prctile(s,upperPrctile);
 lowerThresh = prctile(s(s>0),lowerPrctile);
@@ -29,14 +17,11 @@ spansUpper = findThreshSpans(s,upperThresh,occurs);
 spansMiddle = findThreshSpans(s,[lowerThresh upperThresh],occurs);
 spansLower = findThreshSpans(s,-lowerThresh,occurs);
 
-window = 1; % s
-windowSamples = round(Fs * window);
+windowSamples = round(Fs * tWindow);
 
 allSpans = {spansLower,spansMiddle,spansUpper};
-spanLabels = {'lower percentile','middle percentile','upper percentile'};
-nScalograms = 4000;
-allW = {};
-allScaloData = {};
+nScalograms = 100;
+disp(['Averaging ',num2str(nScalograms),' scalograms']);
 for iSpan = 1:3
     scaloData = [];
     curSpans = allSpans{iSpan};
@@ -64,6 +49,5 @@ for iSpan = 1:3
         end
     end
     [W, freqList] = calculateComplexScalograms_EnMasse(scaloData,'Fs',Fs,'fpass',fpass,'freqList',freqList,'doplot',false);
-    allW{iSpan} = W;
-    allScaloData{iSpan} = scaloData;
+    allScalograms(iSpan,:,:) = squeeze(mean(abs(W).^2,2))';
 end

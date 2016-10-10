@@ -1,6 +1,7 @@
 % analysisConf = exportAnalysisConf('R0117',nasPath);
 fpass = [10 100];
 freqList = logFreqList(fpass,30);
+plotEventIds = [1 2 4 3 5 6 8]; % removed foodClick because it mirrors SideIn
 
 for iNeuron=1:size(analysisConf.neurons,1)
     neuronName = analysisConf.neurons{iNeuron};
@@ -38,17 +39,22 @@ for iNeuron=1:size(analysisConf.neurons,1)
         lfpChannel = tetrodeChs(lfpIdx);
     end
     sevFile = sessionConf.sevFiles{lfpChannel};
+    [sev,header] = read_tdt_sev(sevFile);
+    decimateFactor = round(header.Fs / (fpass(2) * 10)); % 10x max filter freq
+    sevFilt = decimate(double(sev),decimateFactor);
+    Fs = header.Fs / decimateFactor;
     
-    plotEventIds = [1 2 4 3 5 6 8]; % removed foodClick because it mirrors SideIn
     trialIds = find([trials.correct]==1);
     
-    % prob need these in a cell
     tsPeths = eventsPeth(trials(trialIds),ts,tWindow);
     tsISIPeths = eventsPeth(trials(trialIds),tsISI,tWindow);
     tsLTSPeths = eventsPeth(trials(trialIds),tsLTS,tWindow);
-    tsPoissonPeths = eventsPeth(trials(trialIds),tsPoisson,tWindow);
+    tsPoissonPeths = eventsPeth(trials(trialIds),tsPoisson,tWindow); 
+    [allScalograms,eventFieldnames] = eventsScalo(trials(trialIds),sevFilt,tWindow,Fs,fpass,freqList);
+    eventAnalysis();
     
-    [allScalograms,sevFilt,freqList,eventFieldnames] = eventsScalo(trials(trialIds),sevFile,tWindow,fpass,freqList);
+    allScalograms = tsScalogram(ts,sevFilt,tWindow,Fs,fpass,freqList);
+    tsScalograms();
     
 %     disp(['Reading LFP (SEV file) for ',tetrodeName]);
 %     disp(nextSevFile);

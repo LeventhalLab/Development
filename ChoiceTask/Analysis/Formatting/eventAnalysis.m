@@ -87,7 +87,7 @@ set(h,'PaperOrientation','landscape');
 set(h,'PaperUnits','normalized');
 set(h,'PaperPosition', [0 0 1 1]);
 
-subFolder = 'eventTriggeredAnalysis';
+subFolder = 'eventAnalysis';
 mkdir(sessionConf.leventhalPaths.analysis,subFolder);
 % print(h, '-dpdf', 'test3.pdf');
 docName = [subFolder,'_',neuronName,'.pdf'];
