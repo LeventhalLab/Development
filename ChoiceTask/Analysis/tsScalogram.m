@@ -3,11 +3,11 @@ upperPrctile = 85;
 lowerPrctile = 15;
 lfpThresh = 0.5e6; % diff uV^2, *this depends on decimate factor, need to generalize it
 
-trialLength = length(sevFilt) / Fs; % seconds
+endTs = length(sevFilt) / Fs; % seconds
 
 % sigma = 0.05; % 0.05 = 50ms
 sigma = round(mean(diff(ts))/3,3); % use mean ISI?
-[s,binned,kernel] = spikeDensityEstimate(ts,trialLength,sigma);
+[s,binned,kernel] = spikeDensityEstimate(ts,endTs,sigma);
 
 upperThresh = prctile(s,upperPrctile);
 lowerThresh = prctile(s(s>0),lowerPrctile);

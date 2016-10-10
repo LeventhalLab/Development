@@ -5,12 +5,6 @@
 % compares some of the unit properties in a scatter plot
 % compareOFSWaveforms(csvWaveformFiles);
 
-% produces waveform and ISI xcorr analyses
-% [] need to figure out where waveform files go (processed folder?) and
-% probably use sessionConf to write these (by unit instead of batching all
-% txt files)
-% makeUnitSummaries(waveformDir);
-
 fpass = [10 100];
 freqList = logFreqList(fpass,30);
 plotEventIds = [1 2 4 3 5 6 8]; % removed foodClick because it mirrors SideIn
@@ -20,20 +14,26 @@ for iNeuron=1:size(analysisConf.neurons,1)
     disp(['Working on ',neuronName]);
     [tetrodeName,tetrodeId,tetrodeChs] = getTetrodeInfo(neuronName);
     
-    sessionConf = analysisConf.sessionConfs{iNeuron};
-    
-    % load nexStruct
-    nexMatFile = [sessionConf.leventhalPaths.nex,'.mat'];
-    if exist(nexMatFile,'file')
-        disp(['Loading ',nexMatFile]);
-        load(nexMatFile);
+    % only load different sessions
+    if ~exist('sessionConf','var') || ~strcmp(sessionConf.sessionName,analysisConf.sessionConfs{iNeuron})
+        sessionConf = analysisConf.sessionConfs{iNeuron};
+        isNewSession = true;
+        % load nexStruct.. I don't love using 'load'
+        nexMatFile = [sessionConf.leventhalPaths.nex,'.mat'];
+        if exist(nexMatFile,'file')
+            disp(['Loading ',nexMatFile]);
+            load(nexMatFile);
+        else
+            error('No NEX .mat file');
+        end
     else
-        error('No NEX .mat file');
+        isNewSession = false;
     end
     
-    logFile = getLogPath(leventhalPaths.rawdata);
+    logFile = getLogPath(sessionConf.leventhalPaths.rawdata);
     logData = readLogData(logFile);
     trials = createTrialsStruct_simpleChoice(logData,nexStruct);
+    trialIds = find([trials.correct]==1);
     
     % load timestamps for neuron
     for iNexNeurons=1:length(nexStruct.neurons)
@@ -41,22 +41,30 @@ for iNeuron=1:size(analysisConf.neurons,1)
             disp(['Using timestamps from ',nexStruct.neurons{iNexNeurons}.name]);
             ts = nexStruct.neurons{iNexNeurons}.timestamps;
             [tsISI,tsLTS,tsPoisson] = tsBurstFilters(ts);
+        else
+            warning([['No nexStruct timestamps for ',nexStruct.neurons{iNexNeurons}.name]);
         end
     end
     
+    % load SEV file and filter it for LFP analyses
     if sessionConf.singleWires(tetrodeId) == 0
         lfpChannel = sessionConf.lfpChannels(tetrodeId);
     else
         lfpIdx = find(tetrodeChs~=0,1);
         lfpChannel = tetrodeChs(lfpIdx);
     end
-    sevFile = sessionConf.sevFiles{lfpChannel};
-    [sev,header] = read_tdt_sev(sevFile);
-    decimateFactor = round(header.Fs / (fpass(2) * 10)); % 10x max filter freq
-    sevFilt = decimate(double(sev),decimateFactor);
-    Fs = header.Fs / decimateFactor;
+    if ~exist('sevFile','var') || ~strcmp(sevFile,sessionConf.sevFiles{lfpChannel})
+        sevFile = sessionConf.sevFiles{lfpChannel};
+        [sev,header] = read_tdt_sev(sevFile);
+        decimateFactor = round(header.Fs / (fpass(2) * 10)); % 10x max filter freq
+        sevFilt = decimate(double(sev),decimateFactor);
+        Fs = header.Fs / decimateFactor;
+    end
     
-    trialIds = find([trials.correct]==1);
+    % produces waveform and ISI xcorr analyses
+    if isNewSession
+        makeUnitSummaries(waveformDir);
+    end
     
     tsPeths = eventsPeth(trials(trialIds),ts,tWindow);
     tsISIPeths = eventsPeth(trials(trialIds),tsISI,tWindow);
