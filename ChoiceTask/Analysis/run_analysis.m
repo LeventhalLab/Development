@@ -84,6 +84,11 @@ for iNeuron=1:size(analysisConf.neurons,1)
     tsPrctlScalos(); % format
     
     % lfpRaster
+    fpass = [13 30];
+    tWindow = 5;
+    fieldname = 'centerOut';
+    [rasterTs,rasterEvents,allTs,allEvents] = lfpRaster(trials,trialIds,fieldname,ts,sev,header.Fs,fpass,tWindow);
+    lfpRasters();
     
 %     disp(['Reading LFP (SEV file) for ',tetrodeName]);
 %     disp(nextSevFile);
