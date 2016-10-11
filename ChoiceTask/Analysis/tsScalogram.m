@@ -18,19 +18,20 @@ spansMiddle = findThreshSpans(s,[lowerThresh upperThresh],occurs);
 spansLower = findThreshSpans(s,-lowerThresh,occurs);
 
 windowSamples = round(Fs * tWindow);
-
+allScalograms = [];
 allSpans = {spansLower,spansMiddle,spansUpper};
-nScalograms = 100;
-disp(['Averaging ',num2str(nScalograms),' scalograms']);
+nScalograms = 0;
 for iSpan = 1:3
     scaloData = [];
     curSpans = allSpans{iSpan};
-    if isempty(curSpans) 
+    if isempty(curSpans)
+        if ~isempty(allScalograms)
+            scaloSize = size(allScalograms);
+            allScalograms(iSpan,:,:) = zeros(scaloSize(2:3));
+        end
         continue; 
     end
-    if size(curSpans,1) < nScalograms
-        disp('not enough spans, reduce nScalograms');
-    end
+    nScalograms = min(length(curSpans),300);
     
     scaloCount = 1;
     % if nScalograms >> curSpans or lfp thresh this takes forever

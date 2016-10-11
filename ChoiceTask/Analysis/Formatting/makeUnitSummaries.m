@@ -6,7 +6,7 @@ waveformFile = fullfile(sessionConf.leventhalPaths.processed,[neuronName(1:end-1
 if ~exist(waveformFile,'file')
     warning(['No waveform file for ',neuronName]);
 end
-% waveforms = csvread(waveformFile,2);
+waveforms = csvread(waveformFile,2);
 units = sort(unique(waveforms(:,2)));
 
 % plot first figure

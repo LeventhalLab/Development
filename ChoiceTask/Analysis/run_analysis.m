@@ -41,14 +41,12 @@ for iNeuron=1:size(analysisConf.neurons,1)
             disp(['Using timestamps from ',nexStruct.neurons{iNexNeurons}.name]);
             ts = nexStruct.neurons{iNexNeurons}.timestamps;
             [tsISI,tsLTS,tsPoisson] = tsBurstFilters(ts);
-        else
-            warning([['No nexStruct timestamps for ',nexStruct.neurons{iNexNeurons}.name]);
         end
     end
     
     % load SEV file and filter it for LFP analyses
     if sessionConf.singleWires(tetrodeId) == 0
-        lfpChannel = sessionConf.lfpChannels(tetrodeId);
+        lfpChannel = sessionConf.lfpChannels(tetrodeId); % tetrode
     else
         lfpIdx = find(tetrodeChs~=0,1);
         lfpChannel = tetrodeChs(lfpIdx);
@@ -63,9 +61,10 @@ for iNeuron=1:size(analysisConf.neurons,1)
     
     % produces waveform and ISI xcorr analyses
     if isNewSession
-        makeUnitSummaries(waveformDir);
+        makeUnitSummaries();
     end
     
+    tWindow = 2; % for scalograms, xlim is set to -1/+1 in formatting
     tsPeths = eventsPeth(trials(trialIds),ts,tWindow);
     tsISIPeths = eventsPeth(trials(trialIds),tsISI,tWindow);
     tsLTSPeths = eventsPeth(trials(trialIds),tsLTS,tWindow);
@@ -85,7 +84,7 @@ for iNeuron=1:size(analysisConf.neurons,1)
     
     % lfpRaster
     fpass = [13 30];
-    tWindow = 5;
+    tWindow = 1; % [] need to standardize time windows somehow
     fieldname = 'centerOut';
     [rasterTs,rasterEvents,allTs,allEvents] = lfpRaster(trials,trialIds,fieldname,ts,sev,header.Fs,fpass,tWindow);
     lfpRasters();

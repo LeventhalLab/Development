@@ -38,7 +38,7 @@ for iEvent=plotEventIds
     subplot(totalRows,length(plotEventIds),iSubplot);
     rasterData = tsPeths(:,iEvent);
     rasterData = rasterData(~cellfun('isempty',rasterData)); % remove empty rows (no spikes)
-    rasterData = makeRasterReadable(rasterData,50); % limit to 100 data points
+    rasterData = makeRasterReadable(rasterData,100); % limit to 100 data points
     plotSpikeRaster(rasterData,'PlotType','scatter','AutoLabel',false);
     if iEvent == 1
         title('tsAll');
@@ -73,7 +73,9 @@ for iRowData = 1:length(allPeths)
     end
     for ii=1:length(adjSubplots)
         subplot(totalRows,length(plotEventIds),adjSubplots(ii));
-        ylim([min(allRates) max(allRates)]);
+        if ~isempty(allRates)
+            ylim([min(allRates) max(allRates)]);
+        end
         if iRowData == length(allPeths)
             xlabel('Time (s)');
         end

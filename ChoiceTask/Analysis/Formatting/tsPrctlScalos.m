@@ -14,7 +14,9 @@ for iRow=1:3
         end
         curScalograms = allTsScalograms{iScalogram};
         subplot(3,length(allTsScalograms),plotCount);
-        imagesc(t,freqList,log(squeeze(curScalograms(iRow,:,:))));
+        if ~isempty(curScalograms)
+            imagesc(t,freqList,log(squeeze(curScalograms(iRow,:,:))));
+        end
         title(plotTitle,'interpreter','none');
         if iRow==3
             xlabel('Time (s)');
