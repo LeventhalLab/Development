@@ -5,7 +5,8 @@
 % compares some of the unit properties in a scatter plot
 % compareOFSWaveforms(csvWaveformFiles);
 
-freqList = logFreqList([10 100],30);
+fpass = [10 100];
+freqList = logFreqList(fpass,30);
 plotEventIds = [1 2 4 3 5 6 8]; % removed foodClick because it mirrors SideIn
 
 for iNeuron=1:size(analysisConf.neurons,1)
@@ -62,7 +63,7 @@ for iNeuron=1:size(analysisConf.neurons,1)
     
     % produces waveform and ISI xcorr analyses
     if isNewSession
-        makeUnitSummaries();
+%         makeUnitSummaries();
     end
     
     % the big event-centered analysis
