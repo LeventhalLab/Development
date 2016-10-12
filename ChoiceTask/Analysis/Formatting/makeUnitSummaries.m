@@ -54,7 +54,7 @@ for iUnit = 1:numel(units) % units are all exported to one file
     plot(centers(1:end-1),counts,'k')
     title('ISI histogram');
     set(gca,'XScale','log');
-    xlabel('ms');
+    xlabel('Time (s)');
     ylabel('spikes');
     xlim([0 10^2]);
 end

@@ -1,4 +1,4 @@
-function [allScalograms,nScalograms] = tsScalogram(ts,sevFilt,tWindow,Fs,fpass,freqList)
+function [allScalograms,nScalograms] = tsScalogram(ts,sevFilt,tWindow,Fs,freqList)
 upperPrctile = 85;
 lowerPrctile = 15;
 lfpThresh = 0.5e6; % diff uV^2, *this depends on decimate factor, need to generalize it
@@ -49,6 +49,6 @@ for iSpan = 1:3
             end
         end
     end
-    [W, freqList] = calculateComplexScalograms_EnMasse(scaloData,'Fs',Fs,'fpass',fpass,'freqList',freqList,'doplot',false);
+    [W, freqList] = calculateComplexScalograms_EnMasse(scaloData,'Fs',Fs,'freqList',freqList,'doplot',false);
     allScalograms(iSpan,:,:) = squeeze(mean(abs(W).^2,2))';
 end

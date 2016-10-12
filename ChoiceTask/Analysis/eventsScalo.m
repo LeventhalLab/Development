@@ -1,4 +1,4 @@
-function [allScalograms,eventFieldnames] = eventsScalo(trials,sevFilt,tWindow,Fs,fpass,freqList)
+function [allScalograms,eventFieldnames] = eventsScalo(trials,sevFilt,tWindow,Fs,freqList)
 % need better lfp thresh algorithm
 lfpThresh = 2000; % diff of lfp in uV
 
@@ -21,6 +21,6 @@ for iField=1:numel(eventFieldnames)
             data(:,iTrial) = lfp;
         end
     end
-    [W, freqList] = calculateComplexScalograms_EnMasse(data,'Fs',Fs,'fpass',fpass,'freqList',freqList);
+    [W, freqList] = calculateComplexScalograms_EnMasse(data,'Fs',Fs,'freqList',freqList);
     allScalograms(iField,:,:) = squeeze(mean(abs(W).^2,2))';
 end
