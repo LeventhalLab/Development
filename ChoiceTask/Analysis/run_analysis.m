@@ -5,11 +5,13 @@
 % compares some of the unit properties in a scatter plot
 % compareOFSWaveforms(csvWaveformFiles);
 
-fpass = [10 100];
 freqList = logFreqList(fpass,30);
 plotEventIds = [1 2 4 3 5 6 8]; % removed foodClick because it mirrors SideIn
+sevFile = '';
 
 for iNeuron=1:size(analysisConf.neurons,1)
+    fpass = [10 100];
+    
     neuronName = analysisConf.neurons{iNeuron};
     disp(['Working on ',neuronName]);
     [tetrodeName,tetrodeId,tetrodeChs] = getTetrodeInfo(neuronName);
@@ -88,8 +90,9 @@ for iNeuron=1:size(analysisConf.neurons,1)
     tsPrctlScalos(); % format
     
     % high beta power centered analysis using ts raster
+    fpass = [13 30];
     tWindow = 1; % [] need to standardize time windows somehow
     fieldname = 'centerOut';
-    [rasterTs,rasterEvents,allTs,allEvents] = lfpRaster(trials,trialIds,fieldname,ts,sev,header.Fs,[13 30],tWindow);
+    [rasterTs,rasterEvents,allTs,allEvents] = lfpRaster(trials,trialIds,fieldname,ts,sev,header.Fs,fpass,tWindow);
     lfpRasters();
 end
