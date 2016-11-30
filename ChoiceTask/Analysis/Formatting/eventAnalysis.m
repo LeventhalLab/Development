@@ -1,4 +1,4 @@
-totalRows = 6; % LFP, tsAll, tsBurst, tsLTS, tsPoisson, raster
+totalRows = 7; % LFP, tsAll, tsBurst, tsLTS, tsPoisson, raster
 fontSize = 6; 
 histBins = 40;
 iSubplot = 1;
@@ -21,6 +21,7 @@ for iEvent=plotEventIds
     end
     set(gca,'YScale','log');
     set(gca,'Ytick',round(logFreqList(fpass,5)));
+    set(gca,'TickDir','out');
     colormap(jet);
     allCaxis(iEvent,:) = caxis;
     adjSubplots = [adjSubplots iSubplot];
@@ -49,8 +50,8 @@ for iEvent=plotEventIds
 end
 
 % all histograms
-allPeths = {tsPeths,tsISIPeths,tsLTSPeths,tsPoissonPeths};
-rowLabels = {'tsAll','tsISI','tsLTS','tsPoisson'};
+allPeths = {tsPeths,tsISIInvPeths,tsISIPeths,tsLTSPeths,tsPoissonPeths};
+rowLabels = {'tsAll','tsAll - tsISI','tsISI','tsLTS','tsPoisson'};
 for iRowData = 1:length(allPeths)
     allRates = [];
     for iEvent=plotEventIds

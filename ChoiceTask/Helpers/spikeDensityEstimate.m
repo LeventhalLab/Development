@@ -3,6 +3,9 @@ function [s,binned,kernel] = spikeDensityEstimate(ts,endTs,sigma)
 % trialLength = trial length in seconds (max(ts) is a rough estimate)
 % sigma = std deviations for kernel edges
 % modified from: MATLAB for Neuroscientists, p.319-320
+% s = SDE at every ms of recording
+% binned = integer of spikes for each ms of recording
+% kernel = smoothing kernel
 
 endTs = round(endTs,3); % round to ms-precision
 binned = hist(ts,[0:.001:endTs]); % bin data
@@ -14,9 +17,10 @@ s = conv(binned,kernel); % convolve
 center = ceil(length(edges)/2); % index of kernel center
 s = s(center:endTs*1000 + center);
 
+% [ ] only plot a subset, this plot is clunky
 if false
     figure;
-    t = linspace(0,trialLength,length(s));
+    t = linspace(0,endTs,length(s));
     plot(t,s)
     hold on;
     spikeIdx = find(binned == 1);

@@ -5,12 +5,12 @@
 % compares some of the unit properties in a scatter plot
 % compareOFSWaveforms(csvWaveformFiles);
 
-freqList = logFreqList(fpass,30);
 plotEventIds = [1 2 4 3 5 6 8]; % removed foodClick because it mirrors SideIn
 sevFile = '';
 
 for iNeuron=1:size(analysisConf.neurons,1)
     fpass = [10 100];
+    freqList = logFreqList(fpass,30);
     
     neuronName = analysisConf.neurons{iNeuron};
     disp(['Working on ',neuronName]);
@@ -43,6 +43,8 @@ for iNeuron=1:size(analysisConf.neurons,1)
             disp(['Using timestamps from ',nexStruct.neurons{iNexNeurons}.name]);
             ts = nexStruct.neurons{iNexNeurons}.timestamps;
             [tsISI,tsLTS,tsPoisson] = tsBurstFilters(ts);
+            Lia = ismember(ts,tsISI);
+            tsISIInv = ts(~Lia);
         end
     end
     
@@ -71,6 +73,7 @@ for iNeuron=1:size(analysisConf.neurons,1)
     % the big event-centered analysis
     tWindow = 2; % for scalograms, xlim is set to -1/+1 in formatting
     tsPeths = eventsPeth(trials(trialIds),ts,tWindow);
+    tsISIInvPeths = eventsPeth(trials(trialIds),tsISIInv,tWindow);
     tsISIPeths = eventsPeth(trials(trialIds),tsISI,tWindow);
     tsLTSPeths = eventsPeth(trials(trialIds),tsLTS,tWindow);
     tsPoissonPeths = eventsPeth(trials(trialIds),tsPoisson,tWindow); 
@@ -80,19 +83,21 @@ for iNeuron=1:size(analysisConf.neurons,1)
     
     % scalograms based on different ts bursts separated by low-med-high
     % spike density
-    tsScalograms = tsScalogram(ts,sevFilt,tWindow,Fs,freqList);
-    t = linspace(-tWindow,tWindow,size(tsScalograms,3)); % set one for all
-    tsISIScalograms = tsScalogram(tsISI,sevFilt,tWindow,Fs,freqList);
-    tsLTSScalograms = tsScalogram(tsLTS,sevFilt,tWindow,Fs,freqList);
-    tsPoissonScalograms = tsScalogram(tsPoisson,sevFilt,tWindow,Fs,freqList);
-    allTsScalograms = {tsScalograms,tsISIScalograms,tsLTSScalograms,tsPoissonScalograms};
-    allScalogramTitles = {'ts','tsISI','tsLTS','tsPoisson'};
-    tsPrctlScalos(); % format
+% %     tsScalograms = tsScalogram(ts,sevFilt,tWindow,Fs,freqList);
+% %     t = linspace(-tWindow,tWindow,size(tsScalograms,3)); % set one for all
+% %     tsISIScalograms = tsScalogram(tsISI,sevFilt,tWindow,Fs,freqList);
+% %     tsLTSScalograms = tsScalogram(tsLTS,sevFilt,tWindow,Fs,freqList);
+% %     tsPoissonScalograms = tsScalogram(tsPoisson,sevFilt,tWindow,Fs,freqList);
+% %     allTsScalograms = {tsScalograms,tsISIScalograms,tsLTSScalograms,tsPoissonScalograms};
+% %     allScalogramTitles = {'ts','tsISI','tsLTS','tsPoisson'};
+% %     tsPrctlScalos(); % format
     
     % high beta power centered analysis using ts raster
-    fpass = [13 30];
-    tWindow = 1; % [] need to standardize time windows somehow
-    fieldname = 'centerOut';
-    [rasterTs,rasterEvents,allTs,allEvents] = lfpRaster(trials,trialIds,fieldname,ts,sev,header.Fs,fpass,tWindow);
-    lfpRasters();
+% %     fpass = [13 30];
+% %     tWindow = 1; % [] need to standardize time windows somehow
+% %     fieldname = 'centerOut';
+% %     [rasterTs,rasterEvents,allTs,allEvents] = lfpRaster(trials,trialIds,fieldname,ts,sev,header.Fs,fpass,tWindow);
+% %     lfpRasters(); % format
+
+% % run_RTraster()
 end
