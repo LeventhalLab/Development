@@ -1,6 +1,7 @@
 
 % format: Channel, Unit, Timestamp, Energy, Peak-Valley, Average, ISI
 % (Previous), ISI (Next), Area, Waveform
+% [ ] generate unitHeaders
 
 waveformFile = fullfile(sessionConf.leventhalPaths.processed,[neuronName(1:end-1),'.txt']);
 if ~exist(waveformFile,'file')
