@@ -86,4 +86,4 @@ end
 
 subFolder = 'eventAnalysis';
 docName = [subFolder,'_',neuronName];
-savePDF(h,sessionConf.leventhalPaths,subFolder,docName);
+savePDF(h,sessionConf.leventhalPaths,subFolder,docName,true);

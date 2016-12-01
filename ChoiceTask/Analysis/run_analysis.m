@@ -67,19 +67,19 @@ for iNeuron=1:size(analysisConf.neurons,1)
     
     % produces waveform and ISI xcorr analyses
     if isNewSession
-%         makeUnitSummaries();
+        makeUnitSummaries();
     end
     
     % the big event-centered analysis
-    tWindow = 2; % for scalograms, xlim is set to -1/+1 in formatting
-    tsPeths = eventsPeth(trials(trialIds),ts,tWindow);
-    tsISIInvPeths = eventsPeth(trials(trialIds),tsISIInv,tWindow);
-    tsISIPeths = eventsPeth(trials(trialIds),tsISI,tWindow);
-    tsLTSPeths = eventsPeth(trials(trialIds),tsLTS,tWindow);
-    tsPoissonPeths = eventsPeth(trials(trialIds),tsPoisson,tWindow); 
-    [eventScalograms,eventFieldnames] = eventsScalo(trials(trialIds),sevFilt,tWindow,Fs,freqList);
-    t = linspace(-tWindow,tWindow,size(eventScalograms,3));
-    eventAnalysis(); % format
+% %     tWindow = 2; % for scalograms, xlim is set to -1/+1 in formatting
+% %     tsPeths = eventsPeth(trials(trialIds),ts,tWindow);
+% %     tsISIInvPeths = eventsPeth(trials(trialIds),tsISIInv,tWindow);
+% %     tsISIPeths = eventsPeth(trials(trialIds),tsISI,tWindow);
+% %     tsLTSPeths = eventsPeth(trials(trialIds),tsLTS,tWindow);
+% %     tsPoissonPeths = eventsPeth(trials(trialIds),tsPoisson,tWindow); 
+% %     [eventScalograms,eventFieldnames] = eventsScalo(trials(trialIds),sevFilt,tWindow,Fs,freqList);
+% %     t = linspace(-tWindow,tWindow,size(eventScalograms,3));
+% %     eventAnalysis(); % format
     
     % scalograms based on different ts bursts separated by low-med-high
     % spike density

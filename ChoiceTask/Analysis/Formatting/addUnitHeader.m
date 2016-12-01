@@ -12,6 +12,7 @@ function addUnitHeader(analysisPath)
         unitName = strjoin(parts(2:end),'_');
         for iUnitHeaderFiles=1:length(allUnitHeaderFiles)
             curUnitHeader = allUnitHeaderFiles(iUnitHeaderFiles).name;
+            % find correct file and don't include previous HEADER files
             if ~isempty(strfind(curUnitHeader,unitName)) && isempty(strfind(allAnalysisFiles(iAnalysisFiles).name,prependString))
                 fileIn = fullfile(analysisPath,allAnalysisFiles(iAnalysisFiles).name);
                 background = fullfile(parentPath,unitHeaderFolder,[unitHeaderFolder,'_',unitName]);
