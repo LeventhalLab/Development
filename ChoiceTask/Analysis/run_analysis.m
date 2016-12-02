@@ -4,11 +4,11 @@
 % compileOFSWaveforms(waveformDir);
 % compares some of the unit properties in a scatter plot
 % compareOFSWaveforms(csvWaveformFiles);
-
+tWindow = 2; % for scalograms, xlim is set to -1/+1 in formatting
 plotEventIds = [1 2 4 3 5 6 8]; % removed foodClick because it mirrors SideIn
 sevFile = '';
 
-for iNeuron=1:size(analysisConf.neurons,1)
+for iNeuron=2:size(analysisConf.neurons,1)
     fpass = [10 100];
     freqList = logFreqList(fpass,30);
     
@@ -67,11 +67,10 @@ for iNeuron=1:size(analysisConf.neurons,1)
     
     % produces waveform and ISI xcorr analyses
     if isNewSession
-        makeUnitSummaries();
+% %         makeUnitSummaries();
     end
     
     % the big event-centered analysis
-% %     tWindow = 2; % for scalograms, xlim is set to -1/+1 in formatting
 % %     tsPeths = eventsPeth(trials(trialIds),ts,tWindow);
 % %     tsISIInvPeths = eventsPeth(trials(trialIds),tsISIInv,tWindow);
 % %     tsISIPeths = eventsPeth(trials(trialIds),tsISI,tWindow);
@@ -83,14 +82,14 @@ for iNeuron=1:size(analysisConf.neurons,1)
     
     % scalograms based on different ts bursts separated by low-med-high
     % spike density
-% %     tsScalograms = tsScalogram(ts,sevFilt,tWindow,Fs,freqList);
-% %     t = linspace(-tWindow,tWindow,size(tsScalograms,3)); % set one for all
-% %     tsISIScalograms = tsScalogram(tsISI,sevFilt,tWindow,Fs,freqList);
-% %     tsLTSScalograms = tsScalogram(tsLTS,sevFilt,tWindow,Fs,freqList);
-% %     tsPoissonScalograms = tsScalogram(tsPoisson,sevFilt,tWindow,Fs,freqList);
-% %     allTsScalograms = {tsScalograms,tsISIScalograms,tsLTSScalograms,tsPoissonScalograms};
-% %     allScalogramTitles = {'ts','tsISI','tsLTS','tsPoisson'};
-% %     tsPrctlScalos(); % format
+    tsScalograms = tsScalogram(ts,sevFilt,tWindow,Fs,freqList);
+    t = linspace(-tWindow,tWindow,size(tsScalograms,3)); % set one for all
+    tsISIScalograms = tsScalogram(tsISI,sevFilt,tWindow,Fs,freqList);
+    tsLTSScalograms = tsScalogram(tsLTS,sevFilt,tWindow,Fs,freqList);
+    tsPoissonScalograms = tsScalogram(tsPoisson,sevFilt,tWindow,Fs,freqList);
+    allTsScalograms = {tsScalograms,tsISIScalograms,tsLTSScalograms,tsPoissonScalograms};
+    allScalogramTitles = {'ts','tsISI','tsLTS','tsPoisson'};
+    tsPrctlScalos(); % format
     
     % high beta power centered analysis using ts raster
 % %     fpass = [13 30];

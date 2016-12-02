@@ -1,9 +1,9 @@
 h = figure;
 
 allCaxis = [];
-densityLabels = {'low spike density','med spike density','high spike density'};
+densityLabels = {'all','low density','med density','high density'};
 plotCount = 1;
-for iRow=1:3
+for iRow=1:length(densityLabels)
     for iScalogram = 1:length(allTsScalograms)
         plotTitle = densityLabels{iRow};
         if iRow == 1
@@ -13,12 +13,12 @@ for iRow=1:3
             plotTitle = {neuronName,plotTitle{:}};
         end
         curScalograms = allTsScalograms{iScalogram};
-        subplot(3,length(allTsScalograms),plotCount);
+        subplot(length(densityLabels),length(allTsScalograms),plotCount);
         if ~isempty(curScalograms)
-            imagesc(t,freqList,log(squeeze(curScalograms(iRow,:,:))));
+            imagesc(t,freqList,squeeze(curScalograms(iRow,:,:)));
         end
         title(plotTitle,'interpreter','none');
-        if iRow==3
+        if iRow==length(densityLabels)
             xlabel('Time (s)');
         end
         ylabel('Freq (Hz)');
@@ -28,15 +28,16 @@ for iRow=1:3
         set(gca,'Ytick',round(logFreqList(fpass,5)));
         colormap(jet);
         allCaxis(plotCount,:) = caxis;
+        colorbar;
         plotCount = plotCount + 1;
     end
 end
 
-caxisValues = upperLowerPrctile(allCaxis,25);
-for iSubplot=1:plotCount-1
-    subplot(3,length(allTsScalograms),iSubplot);
-    caxis(caxisValues);
-end
+% % caxisValues = upperLowerPrctile(allCaxis,25);
+% % for iSubplot=1:plotCount-1
+% %     subplot(length(densityLabels),length(allTsScalograms),iSubplot);
+% %     caxis(caxisValues);
+% % end
 
 subFolder = 'tsPrctlScalos';
 docName = [subFolder,'_',neuronName];

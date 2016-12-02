@@ -13,15 +13,16 @@ upperThresh = prctile(s,upperPrctile);
 lowerThresh = prctile(s(s>0),lowerPrctile);
 
 occurs = 1; % 50 = 50ms, this is kind of redundant
+spansAll = round([ts*Fs,ts*Fs]);
 spansUpper = findThreshSpans(s,upperThresh,occurs);
 spansMiddle = findThreshSpans(s,[lowerThresh upperThresh],occurs);
 spansLower = findThreshSpans(s,-lowerThresh,occurs);
 
 windowSamples = round(Fs * tWindow);
 allScalograms = [];
-allSpans = {spansLower,spansMiddle,spansUpper};
+allSpans = {spansAll,spansLower,spansMiddle,spansUpper};
 nScalograms = 0;
-for iSpan = 1:3
+for iSpan = 1:length(allSpans)
     scaloData = [];
     curSpans = allSpans{iSpan};
     if isempty(curSpans)
@@ -34,7 +35,7 @@ for iSpan = 1:3
     nScalograms = min(length(curSpans),300);
     
     scaloCount = 1;
-    % if nScalograms >> curSpans or lfp thresh this takes forever
+    whileCount = 1;
     while scaloCount < nScalograms
         randSpanIdx = randi([1,size(curSpans,1)]);
         midSpan = mean(curSpans(randSpanIdx,:)) / 1000; % seconds
@@ -47,6 +48,11 @@ for iSpan = 1:3
             else
                 disp(['skipping ',num2str(randSpanIdx),' (lfp thresh)']);
             end
+        end
+        whileCount = whileCount + 1;
+        if whileCount > 2000
+            disp('exceeding while loop');
+            break;
         end
     end
     [W, freqList] = calculateComplexScalograms_EnMasse(scaloData,'Fs',Fs,'freqList',freqList,'doplot',false);
