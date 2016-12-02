@@ -28,13 +28,14 @@ for iEvent=plotEventIds
     iSubplot = iSubplot + 1;
 end
 % set all caxis to 25% full range
-caxisValues = upperLowerPrctile(allCaxis(plotEventIds,:),25);
-for ii=1:length(adjSubplots)
-    subplot(totalRows,length(plotEventIds),adjSubplots(ii));
-    caxis(caxisValues);
-end
+% % caxisValues = upperLowerPrctile(allCaxis(plotEventIds,:),25);
+% % for ii=1:length(adjSubplots)
+% %     subplot(totalRows,length(plotEventIds),adjSubplots(ii));
+% %     caxis(caxisValues);
+% % end
 adjSubplots = [];
 
+% spike rasters
 for iEvent=plotEventIds
     subplot(totalRows,length(plotEventIds),iSubplot);
     rasterData = tsPeths(:,iEvent);
