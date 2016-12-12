@@ -76,7 +76,7 @@ for iNeuron=1:size(analysisConf.neurons,1)
     tsISIPeths = eventsPeth(trials(trialIds),tsISI,tWindow);
     tsLTSPeths = eventsPeth(trials(trialIds),tsLTS,tWindow);
     tsPoissonPeths = eventsPeth(trials(trialIds),tsPoisson,tWindow); 
-    [eventScalograms,eventFieldnames] = eventsScalo(trials(trialIds),sevFilt,tWindow,Fs,freqList);
+    [eventScalograms,eventFieldnames,allLfpData] = eventsScalo(trials(trialIds),sevFilt,tWindow,Fs,freqList);
     t = linspace(-tWindow,tWindow,size(eventScalograms,3));
     eventAnalysis(); % format
     
