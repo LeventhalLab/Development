@@ -1,10 +1,10 @@
 totalRows = 7; % LFP, tsAll, tsBurst, tsLTS, tsPoisson, raster
-fontSize = 6; 
+fontSize = 6;
 histBins = 40;
 iSubplot = 1;
+caxisScaleIdx = 2; % centerOut
 h = figure;
 
-allCaxis = [];
 adjSubplots = [];
 for iEvent=plotEventIds
     subplot(totalRows,length(plotEventIds),iSubplot);
@@ -23,16 +23,17 @@ for iEvent=plotEventIds
     set(gca,'Ytick',round(logFreqList(fpass,5)));
     set(gca,'TickDir','out');
     colormap(jet);
-    allCaxis(iEvent,:) = caxis;
+    if iEvent == caxisScaleIdx
+        caxisValues = caxis;
+    end
     adjSubplots = [adjSubplots iSubplot];
     iSubplot = iSubplot + 1;
 end
-% set all caxis to 25% full range
-% % caxisValues = upperLowerPrctile(allCaxis(plotEventIds,:),25);
-% % for ii=1:length(adjSubplots)
-% %     subplot(totalRows,length(plotEventIds),adjSubplots(ii));
-% %     caxis(caxisValues);
-% % end
+
+for ii=1:length(adjSubplots)
+    subplot(totalRows,length(plotEventIds),adjSubplots(ii));
+    caxis(caxisValues);
+end
 adjSubplots = [];
 
 % spike rasters
