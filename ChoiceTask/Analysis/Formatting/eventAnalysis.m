@@ -2,7 +2,7 @@ totalRows = 8; % LFP, tsAll, tsBurst, tsLTS, tsPoisson, raster, high pass data
 fontSize = 6;
 histBins = 40;
 iSubplot = 1;
-caxisScaleIdx = 2; % centerOut
+caxisScaleIdx = 3; % centerOut
 h = figure;
 
 adjSubplots = [];
