@@ -51,7 +51,8 @@ for iUnit = 1:numel(units) % units are all exported to one file
 
     % ISI histogram
     subplot(numel(units),3,startSubplot+2);
-    ISI = waveformInfo(:,7);
+    ISI = waveformInfo(:,7); % ISI column
+    ISI = ISI(ISI~=0); % fix weird issue in one data set where ISI=0
     bins = exp(linspace(log(min(ISI)),log(max(ISI)),100));
     [counts,centers] = histcounts(ISI,bins);
     plot(centers(1:end-1),counts,'k')
@@ -126,6 +127,7 @@ for iUnit = 1:numel(units) % units are all exported to one file
     % ISI histogram
     subplot(rows,cols,3);
     ISI = waveformInfo(:,7);
+    ISI = ISI(ISI~=0); % fix weird issue in one data set where ISI=0
     bins = exp(linspace(log(min(ISI)),log(max(ISI)),100));
     [counts,centers] = histcounts(ISI,bins);
     plot(centers(1:end-1),counts,'k')

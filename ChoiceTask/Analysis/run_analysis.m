@@ -8,7 +8,7 @@ tWindow = 2; % for scalograms, xlim is set to -1/+1 in formatting
 plotEventIds = [1 2 4 3 5 6 8]; % removed foodClick because it mirrors SideIn
 sevFile = '';
 
-for iNeuron=1:size(analysisConf.neurons,1)
+for iNeuron=20:size(analysisConf.neurons,1)
     fpass = [10 100];
     freqList = logFreqList(fpass,30);
     
@@ -39,7 +39,7 @@ for iNeuron=1:size(analysisConf.neurons,1)
     
     % load timestamps for neuron
     for iNexNeurons=1:length(nexStruct.neurons)
-        if strcmp(nexStruct.neurons{iNexNeurons}.name,analysisConf.neurons{iNeuron});
+        if strcmp(nexStruct.neurons{iNexNeurons}.name,analysisConf.neurons{iNeuron})
             disp(['Using timestamps from ',nexStruct.neurons{iNexNeurons}.name]);
             ts = nexStruct.neurons{iNexNeurons}.timestamps;
             [tsISI,tsLTS,tsPoisson] = tsBurstFilters(ts);
@@ -67,7 +67,7 @@ for iNeuron=1:size(analysisConf.neurons,1)
     
     % produces waveform and ISI xcorr analyses
     if isNewSession
-%         makeUnitSummaries();
+        makeUnitSummaries();
     end
     
     % the big event-centered analysis
@@ -100,3 +100,5 @@ for iNeuron=1:size(analysisConf.neurons,1)
 
 % % run_RTraster()
 end
+
+addUnitHeader(analysisConf,{'eventAnalysis'});

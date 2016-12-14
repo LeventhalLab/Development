@@ -1,25 +1,39 @@
-function addUnitHeader(analysisPath)
+function addUnitHeader(analysisConf,analyses)
     unitHeaderFolder = 'unitHeader';
     prependString = 'HEADER-';
-
-    allAnalysisFiles = dir(fullfile(analysisPath,'*.pdf'));
-    parts = strsplit(analysisPath,filesep);
-    parentPath = strjoin(parts(1:end-1),filesep);
-    allUnitHeaderFiles = dir(fullfile(parentPath,unitHeaderFolder,'*.pdf'));
-    for iAnalysisFiles=1:length(allAnalysisFiles)
-        % will continue to work long as filename: analysisType_unitName.pdf
-        parts = strsplit(allAnalysisFiles(iAnalysisFiles).name,'_');
-        unitName = strjoin(parts(2:end),'_');
-        for iUnitHeaderFiles=1:length(allUnitHeaderFiles)
-            curUnitHeader = allUnitHeaderFiles(iUnitHeaderFiles).name;
-            % find correct file and don't include previous HEADER files
-            if ~isempty(strfind(curUnitHeader,unitName)) && isempty(strfind(allAnalysisFiles(iAnalysisFiles).name,prependString))
-                fileIn = fullfile(analysisPath,allAnalysisFiles(iAnalysisFiles).name);
-                background = fullfile(parentPath,unitHeaderFolder,[unitHeaderFolder,'_',unitName]);
-                fileOut = fullfile(analysisPath,[prependString,allAnalysisFiles(iAnalysisFiles).name]);
-                runPdftk(fileIn,background,fileOut);
+    for iAnalysis = 1:length(analyses)
+        for iSession = 1:length(analysisConf.sessionConfs)
+            analysisPathTemp = fullfile(analysisConf.sessionConfs{iSession}.leventhalPaths.analysis,analyses{iAnalysis});
+            if iSession == 1
+                analysisPath = analysisPathTemp;
+            else
+                if strcmp(analysisPath,analysisPathTemp)
+                    continue; % skip if script already ran
+                else
+                    analysisPath = analysisPathTemp;
+                end
+            end
+            allAnalysisFiles = dir(fullfile(analysisPath,[analyses{iAnalysis},'*.pdf'])); % not headers
+            parts = strsplit(analysisPath,filesep);
+            parentPath = strjoin(parts(1:end-1),filesep);
+            allUnitHeaderFiles = dir(fullfile(parentPath,unitHeaderFolder,'*.pdf'));
+            for iAnalysisFiles=1:length(allAnalysisFiles)
+                % will continue to work long as filename: analysisType_unitName.pdf
+                parts = strsplit(allAnalysisFiles(iAnalysisFiles).name,'_');
+                unitName = strjoin(parts(2:end),'_');
+                for iUnitHeaderFiles=1:length(allUnitHeaderFiles)
+                    curUnitHeader = allUnitHeaderFiles(iUnitHeaderFiles).name;
+                    % find correct file and don't include previous HEADER files
+                    if ~isempty(strfind(curUnitHeader,unitName))
+                        fileIn = fullfile(analysisPath,allAnalysisFiles(iAnalysisFiles).name);
+                        background = fullfile(parentPath,unitHeaderFolder,[unitHeaderFolder,'_',unitName]);
+                        fileOut = fullfile(analysisPath,[prependString,allAnalysisFiles(iAnalysisFiles).name]);
+                        runPdftk(fileIn,background,fileOut);
+                    end
+                end
             end
         end
+        
     end
 end
 
