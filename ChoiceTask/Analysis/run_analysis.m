@@ -83,21 +83,21 @@ for iNeuron=1:size(analysisConf.neurons,1)
     
     % scalograms based on different ts bursts separated by low-med-high
     % spike density
-% %     tsScalograms = tsScalogram(ts,sevFilt,tWindow,Fs,freqList);
-% %     t = linspace(-tWindow,tWindow,size(tsScalograms,3)); % set one for all
-% %     tsISIScalograms = tsScalogram(tsISI,sevFilt,tWindow,Fs,freqList);
-% %     tsLTSScalograms = tsScalogram(tsLTS,sevFilt,tWindow,Fs,freqList);
-% %     tsPoissonScalograms = tsScalogram(tsPoisson,sevFilt,tWindow,Fs,freqList);
-% %     allTsScalograms = {tsScalograms,tsISIScalograms,tsLTSScalograms,tsPoissonScalograms};
-% %     allScalogramTitles = {'ts','tsISI','tsLTS','tsPoisson'};
-% %     tsPrctlScalos(); % format
+    tsScalograms = tsScalogram(ts,sevFilt,tWindow,Fs,freqList);
+    t = linspace(-tWindow,tWindow,size(tsScalograms,3)); % set one for all
+    tsISIScalograms = tsScalogram(tsISI,sevFilt,tWindow,Fs,freqList);
+    tsLTSScalograms = tsScalogram(tsLTS,sevFilt,tWindow,Fs,freqList);
+    tsPoissonScalograms = tsScalogram(tsPoisson,sevFilt,tWindow,Fs,freqList);
+    allTsScalograms = {tsScalograms,tsISIScalograms,tsLTSScalograms,tsPoissonScalograms};
+    allScalogramTitles = {'ts','tsISI','tsLTS','tsPoisson'};
+    tsPrctlScalos(); % format
     
     % high beta power centered analysis using ts raster
-% %     fpass = [13 30];
-% %     tWindow = 1; % [] need to standardize time windows somehow
-% %     fieldname = 'centerOut';
-% %     [rasterTs,rasterEvents,allTs,allEvents] = lfpRaster(trials,trialIds,fieldname,ts,sev,header.Fs,fpass,tWindow);
-% %     lfpRasters(); % format
+    fpass = [13 30];
+    tWindow = 1; % [] need to standardize time windows somehow
+    fieldname = 'centerOut';
+    [rasterTs,rasterEvents,allTs,allEvents] = lfpRaster(trials,trialIds,fieldname,ts,sev,header.Fs,fpass,tWindow);
+    lfpRasters(); % format
 
 % % run_RTraster()
 end
