@@ -1,4 +1,5 @@
-% analysisConf = exportAnalysisConf('R0117',nasPath);
+nasPath = '/Volumes/RecordingsLeventhal2/ChoiceTask';
+analysisConf = exportAnalysisConf('R0088',nasPath);
 
 % compiles all waveforms by averaging all waveforms
 % compileOFSWaveforms(waveformDir);
