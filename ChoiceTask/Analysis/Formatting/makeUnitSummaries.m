@@ -3,6 +3,11 @@
 % (Previous), ISI (Next), Area, Waveform
 % [ ] generate unitHeaders
 
+axcorrRange = [-0.01 0.01];
+isiRange = [0 10^2];
+waveformScale = [-400 400];
+fontSize = 7;
+
 waveformFile = fullfile(sessionConf.leventhalPaths.processed,[neuronName(1:end-1),'.txt']);
 if ~exist(waveformFile,'file')
     warning(['No waveform file for ',neuronName]);
@@ -30,8 +35,9 @@ for iUnit = 1:numel(units) % units are all exported to one file
     xlabel('ms');
     ylabel('uV');
     xlim([0 (size(waveformTrace,2)/header.Fs)*1000]);
-    ax.XTick = [0 0.5 1 1.5 2];
-    ylim([-400 400]);
+    ax.XTick = [0 1 2];
+    ylim(waveformScale);
+    ay.YTick = waveformScale;
 
     % firing rate
     subplot(numel(units),3,startSubplot+1);
@@ -44,23 +50,24 @@ for iUnit = 1:numel(units) % units are all exported to one file
     firingRate = counts/binSeconds;
     plot(centers(1:end-1)/60,counts/binSeconds,'k');
     title(['mean: ',num2str(round(mean(firingRate))),' spikes/s']);
-    xlabel('minutes');
+    xlabel('min');
     ylabel('spikes/s');
     xlim([0 centers(end-1)/60]);
     ylim([0 max(firingRate) + std(firingRate)]);
 
     % ISI histogram
-    subplot(numel(units),3,startSubplot+2);
+    ax = subplot(numel(units),3,startSubplot+2);
     ISI = waveformInfo(:,7); % ISI column
     ISI = ISI(ISI~=0); % fix weird issue in one data set where ISI=0
     bins = exp(linspace(log(min(ISI)),log(max(ISI)),100));
     [counts,centers] = histcounts(ISI,bins);
     plot(centers(1:end-1),counts,'k')
-    title('ISI histogram');
+    title('ISI');
     set(gca,'XScale','log');
     xlabel('Time (s)');
     ylabel('spikes');
-    xlim([0 10^2]);
+    xlim(isiRange);
+    ax.XTick = isiRange;
 end
 
 subFolder = 'waveforms';
@@ -71,7 +78,7 @@ h = figure;
 for iUnit=1:numel(units)
     for jj=iUnit:numel(units)
         subplot(numel(units),numel(units),((iUnit-1) * numel(units)) + jj);
-        [tsOffsets, ts1idx, ts2idx] = crosscorrelogram(allTimestamps{iUnit},allTimestamps{jj},[-0.05 0.05]);
+        [tsOffsets, ts1idx, ts2idx] = crosscorrelogram(allTimestamps{iUnit},allTimestamps{jj},axcorrRange);
         [counts,centers] = hist(tsOffsets(tsOffsets ~= 0),100); % remove reference spike
         bar(centers,counts,'k','EdgeColor','k');
         plotTitle = [char(96+iUnit),' x ',char(96+jj)];
@@ -104,8 +111,10 @@ for iUnit = 1:numel(units) % units are all exported to one file
     xlabel('ms');
     ylabel('uV');
     xlim([0 (size(waveformTrace,2)/header.Fs)*1000]);
-    ax.XTick = [0 0.5 1 1.5 2];
+    ax.XTick = [0 1 2];
     ylim([-400 400]);
+    ay.YTick = waveformScale;
+    set(ax,'FontSize',fontSize);
     
     % firing rate
     ax = subplot(rows,cols,2);
@@ -118,14 +127,15 @@ for iUnit = 1:numel(units) % units are all exported to one file
     firingRate = counts/binSeconds;
     plot(centers(1:end-1)/60,counts/binSeconds,'k');
     title({'','FR'});
-    xlabel('minutes');
+    xlabel('min');
     ylabel('spikes/s');
     xlim([0 centers(end-1)/60]);
     ax.XTick = [0 round(centers(end-1)/60)];
     ylim([0 max(firingRate) + std(firingRate)]);
+    set(ax,'FontSize',fontSize);
     
     % ISI histogram
-    subplot(rows,cols,3);
+    ax = subplot(rows,cols,3);
     ISI = waveformInfo(:,7);
     ISI = ISI(ISI~=0); % fix weird issue in one data set where ISI=0
     bins = exp(linspace(log(min(ISI)),log(max(ISI)),100));
@@ -136,18 +146,23 @@ for iUnit = 1:numel(units) % units are all exported to one file
     xlabel('seconds');
     ylabel('spikes');
     xlim([0 10^2]);
+    set(ax,'FontSize',fontSize);
     
     % axcorr, arrange loop to first do acorr then xcorr
     unitRange = 1:numel(units);
     unitOrder = [iUnit unitRange(unitRange ~= iUnit)];
     for jj=1:numel(units)
-        subplot(rows,cols,3+jj);
-        [tsOffsets, ts1idx, ts2idx] = crosscorrelogram(allTimestamps{iUnit},allTimestamps{unitOrder(jj)},[-0.05 0.05]);
+        ax = subplot(rows,cols,3+jj);
+        [tsOffsets, ts1idx, ts2idx] = crosscorrelogram(allTimestamps{iUnit},allTimestamps{unitOrder(jj)},axcorrRange);
         [counts,centers] = hist(tsOffsets(tsOffsets ~= 0),50); % remove reference spike
         bar(centers,counts,'k','EdgeColor','k');
         title({'',[char(96+iUnit),' x ',char(96+unitOrder(jj))]}); % only unit
         xlabel('ms');
-        ylabel('spikes');
+        ax.XTick = axcorrRange;
+        if jj==1
+            ylabel('spikes');
+        end
+        set(ax,'FontSize',fontSize);
     end
     
     % savePDF

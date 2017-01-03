@@ -1,5 +1,5 @@
 totalRows = 8; % LFP, tsAll, tsBurst, tsLTS, tsPoisson, raster, high pass data
-fontSize = 6;
+fontSize = 7;
 histBins = 40;
 iSubplot = 1;
 caxisScaleIdx = 3; % centerOut
@@ -7,25 +7,26 @@ h = figure;
 
 adjSubplots = [];
 for iEvent=plotEventIds
-    subplot(totalRows,length(plotEventIds),iSubplot);
+    ax = subplot(totalRows,length(plotEventIds),iSubplot);
     imagesc(t,freqList,log(squeeze(eventScalograms(iEvent,:,:))));
     if iEvent == 1
         ylabel('Freq (Hz)');
     else
-        set(gca,'yTickLabel',[]);
+        set(ax,'yTickLabel',[]);
     end
-    set(gca,'YDir','normal');
+    set(ax,'YDir','normal');
     xlim([-1 1]);
     if iSubplot == 1
         title({neuronName,eventFieldnames{iEvent}},'interpreter','none');
     else
         title({'',eventFieldnames{iEvent}});
     end
-    set(gca,'YScale','log');
-    set(gca,'Ytick',round(logFreqList(fpass,5)));
-    set(gca,'TickDir','out');
+    set(ax,'YScale','log');
+    set(ax,'Ytick',round(logFreqList(fpass,5)));
+    set(ax,'TickDir','out');
+    set(ax,'FontSize',fontSize);
     colormap(jet);
-%     set(gca,'XTickLabel',[]);
+%     set(ax,'XTickLabel',[]);
     if iEvent == caxisScaleIdx
         yvals = caxis;
     end
@@ -34,49 +35,48 @@ for iEvent=plotEventIds
 end
 % set caxis
 for ii=1:length(adjSubplots)
-    subplot(totalRows,length(plotEventIds),adjSubplots(ii));
+    ax = subplot(totalRows,length(plotEventIds),adjSubplots(ii));
     caxis(yvals);
     if ii == length(adjSubplots)
         subplotPos = get(gca,'Position');
         colorbar('eastoutside');
-        set(gca,'Position',subplotPos);
+        set(ax,'Position',subplotPos);
     end
+    set(ax,'FontSize',fontSize);
 end
 
-% high pass filter
-adjSubplots = [];
-iField = 1;
+% high pass filter butterfly overlay trace
 adjSubplots = [];
 for iEvent=plotEventIds
-    subplot(totalRows,length(plotEventIds),iSubplot);
+    ax = subplot(totalRows,length(plotEventIds),iSubplot);
     for iTrial = 1:size(allLfpData,3)
-        lfpData = squeeze(allLfpData(iField,:,iTrial));
+        lfpData = squeeze(allLfpData(iEvent,:,iTrial));
         % inline baseline adjustment (weird DC offset in some data)
         patchline(linspace(-tWindow,tWindow,size(allLfpData,2)),lfpData - mean(lfpData),'edgealpha',0.05);
     end
     if iEvent == 1
         ylabel({'High Pass','uV'});
     else
-        set(gca,'yTickLabel',[]);
+        set(ax,'yTickLabel',[]);
     end
     xlim([-1 1]);
     if iEvent == caxisScaleIdx
         yvals =  max(abs(ylim));
     end
-    iSubplot = iSubplot + 1;
-    iField = iField + 1;
+    set(ax,'FontSize',fontSize);
     adjSubplots = [adjSubplots iSubplot];
+    iSubplot = iSubplot + 1;
 end
 % set y-axis
 for ii=1:length(adjSubplots)
-    subplot(totalRows,length(plotEventIds),adjSubplots(ii));
+    ax = subplot(totalRows,length(plotEventIds),adjSubplots(ii));
     ylim([-yvals yvals]);   
 end
 
 % spike rasters
 adjSubplots = [];
 for iEvent=plotEventIds
-    subplot(totalRows,length(plotEventIds),iSubplot);
+    ax = subplot(totalRows,length(plotEventIds),iSubplot);
     rasterData = tsPeths(:,iEvent);
     rasterData = rasterData(~cellfun('isempty',rasterData)); % remove empty rows (no spikes)
     rasterData = makeRasterReadable(rasterData,100); % limit to 100 data points
@@ -84,10 +84,12 @@ for iEvent=plotEventIds
     if iEvent == 1
         ylabel({'tsAll','Trials'});
     else
-        set(gca,'yTickLabel',[]);
+        set(ax,'yTickLabel',[]);
     end
     xlim([-1 1]);
-%     set(gca,'XTickLabel',[]);
+    set(ax,'FontSize',fontSize);
+    hold on; plot([0 0],[0 size(rasterData,1)],':','color','red'); % center line
+%     set(ax,'XTickLabel',[]);
     iSubplot = iSubplot + 1;
 end
 
@@ -97,7 +99,7 @@ rowLabels = {'tsAll','tsAll - tsISI','tsISI','tsLTS','tsPoisson'};
 for iRowData = 1:length(allPeths)
     allys = [];
     for iEvent=plotEventIds
-        subplot(totalRows,length(plotEventIds),iSubplot);
+        ax = subplot(totalRows,length(plotEventIds),iSubplot);
         curData = allPeths{1,iRowData}(:,iEvent); % extract all trials for iEvent column
         curData = cat(2,curData{:}); % concatenate all values into one vector
         if ~isempty(curData)
@@ -110,17 +112,19 @@ for iRowData = 1:length(allPeths)
             xlim([-1 1]);
             allys = [allys ratePerSecond];
         end
+        set(ax,'FontSize',fontSize);
         adjSubplots = [adjSubplots iSubplot];
         iSubplot = iSubplot + 1;
     end
     for ii=1:length(adjSubplots)
-        subplot(totalRows,length(plotEventIds),adjSubplots(ii));
+        ax = subplot(totalRows,length(plotEventIds),adjSubplots(ii));
         if ~isempty(allys)
-            ylim([min(allys) max(allys)]);
+            ylim([0 max(allys)]); % make FR start at 0
         end
         if iRowData ~= length(allPeths) % redundant?
-            set(gca,'XTickLabel',[]);
+            set(ax,'XTickLabel',[]);
         end
+        hold on; plot([0 0],[0 max(allys)],':','color','red'); % center line
     end
     adjSubplots = [];
 end
