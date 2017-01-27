@@ -1,5 +1,5 @@
 % nasPath = '/Volumes/RecordingsLeventhal2/ChoiceTask';
-% analysisConf = exportAnalysisConf('R0088',nasPath);
+% analysisConf = exportAnalysisConfv2('R0088',nasPath);
 
 % compiles all waveforms by averaging all waveforms
 % compileOFSWaveforms(waveformDir);
@@ -15,10 +15,10 @@ for iNeuron=1:size(analysisConf.neurons,1)
     
     neuronName = analysisConf.neurons{iNeuron};
     disp(['Working on ',neuronName]);
-    [tetrodeName,tetrodeId,tetrodeChs] = getTetrodeInfo(neuronName);
+    [electrodeName,electrodeSite,electrodeChannels] = getElectrodeInfo(neuronName)
     
     % only load different sessions
-    if ~exist('sessionConf','var') || ~strcmp(sessionConf.sessionName,analysisConf.sessionConfs{iNeuron})
+    if ~exist('sessionConf','var') || ~strcmp(sessionConf.sessions__name,analysisConf.sessionConfs{iNeuron})
         sessionConf = analysisConf.sessionConfs{iNeuron};
         isNewSession = true;
         % load nexStruct.. I don't love using 'load'
@@ -50,12 +50,10 @@ for iNeuron=1:size(analysisConf.neurons,1)
     end
     
     % load SEV file and filter it for LFP analyses
-    if sessionConf.singleWires(tetrodeId) == 0
-        lfpChannel = sessionConf.lfpChannels(tetrodeId); % tetrode
-    else
-        lfpIdx = find(tetrodeChs~=0,1);
-        lfpChannel = tetrodeChs(lfpIdx);
-    end
+    rows = sessionConf.session_electrodes.site == electrodeSite;
+    channels = sessionConf.session_electrodes.channel(rows);
+    lfpChannel = channels(1);
+    
     if ~exist('sevFile','var') || ~strcmp(sevFile,sessionConf.sevFiles{lfpChannel})
         sevFile = sessionConf.sevFiles{lfpChannel};
         [sev,header] = read_tdt_sev(sevFile);
