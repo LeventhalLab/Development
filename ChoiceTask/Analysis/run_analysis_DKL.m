@@ -1,18 +1,23 @@
 nasPath = '/Volumes/RecordingsLeventhal2/ChoiceTask';
 analysisConf = exportAnalysisConf('R0088',nasPath);
+
+plot_t_limits = [-1,1];
+
 % analysisConf = exportAnalysisConf('R0117',nasPath);
 
 % compiles all waveforms by averaging all waveforms
 % compileOFSWaveforms(waveformDir);
 % compares some of the unit properties in a scatter plot
 % compareOFSWaveforms(csvWaveformFiles);
-tWindow = 2; % for scalograms, xlim is set to -1/+1 in formatting
+tWindow = 2.5; % for scalograms, xlim is set to -1/+1 in formatting
+scaloWindow = 1;  % use this to pull out just +/- 1 second around each event
 plotEventIds = [1 2 4 3 5 6 8]; % removed foodClick because it mirrors SideIn
 sevFile = '';
 
 for iNeuron=1:size(analysisConf.neurons,1)
-    fpass = [10 100];
-    freqList = logFreqList(fpass,30);
+    fpass = [1 500];
+%     freqList = logFreqList(fpass,30);
+    freqList = logspace(0,2.7,50);            % DKL addition to match frequencies I've been using on my old data from Josh's lab
     
     neuronName = analysisConf.neurons{iNeuron};
     disp(['Working on ',neuronName]);
@@ -60,7 +65,7 @@ for iNeuron=1:size(analysisConf.neurons,1)
     if ~exist('sevFile','var') || ~strcmp(sevFile,sessionConf.sevFiles{lfpChannel})
         sevFile = sessionConf.sevFiles{lfpChannel};
         [sev,header] = read_tdt_sev(sevFile);
-        decimateFactor = round(header.Fs / (fpass(2) * 10)); % 10x max filter freq
+        decimateFactor = round(header.Fs / (fpass(2) * 2)); % 2x max desired LFP freq
         sevFilt = decimate(double(sev),decimateFactor);
         Fs = header.Fs / decimateFactor;
     end
@@ -84,14 +89,14 @@ for iNeuron=1:size(analysisConf.neurons,1)
     
     % scalograms based on different ts bursts separated by low-med-high
     % spike density
-    tsScalograms = tsScalogram(ts,sevFilt,tWindow,Fs,freqList);
+    [tsScalograms,tsMRL] = tsScalogram_DKL(ts,sevFilt,tWindow,scaloWindow,Fs,freqList);
     t = linspace(-tWindow,tWindow,size(tsScalograms,3)); % set one for all
-    tsISIScalograms = tsScalogram(tsISI,sevFilt,tWindow,Fs,freqList);
-    tsLTSScalograms = tsScalogram(tsLTS,sevFilt,tWindow,Fs,freqList);
-    tsPoissonScalograms = tsScalogram(tsPoisson,sevFilt,tWindow,Fs,freqList);
-    allTsScalograms = {tsScalograms,tsISIScalograms,tsLTSScalograms,tsPoissonScalograms};
+    [tsISIScalograms,tsISIMRL] = tsScalogram_DKL(tsISI,sevFilt,tWindow,scaloWindow,Fs,freqList);
+    [tsLTSScalograms,tsLTSSMRL] = tsScalogram_DKL(tsLTS,sevFilt,tWindow,scaloWindow,Fs,freqList);
+    [tsPoissonScalograms,tsPoissonMRL] = tsScalogram_DKL(tsPoisson,sevFilt,tWindow,scaloWindow,Fs,freqList);
+    [allTsScalograms] = {tsScalograms,tsISIScalograms,tsLTSScalograms,scaloWindow,tsPoissonScalograms};
     allScalogramTitles = {'ts','tsISI','tsLTS','tsPoisson'};
-    tsPrctlScalos(); % format
+    tsPrctlScalos_DKL(); % format
     
     % high beta power centered analysis using ts raster
     fpass = [13 30];
