@@ -1,4 +1,4 @@
-function [allScalograms,nScalograms] = tsScalogram_DKL(ts,sevFilt,tWindow,scaloWindow,Fs,freqList)
+function [allScalograms,allMRL,nScalograms,all_logScalograms] = tsScalogram_DKL(ts,sevFilt,tWindow,scaloWindow,Fs,freqList)
 upperPrctile = 85;
 lowerPrctile = 15;
 lfpThresh = 0.5e6; % diff uV^2, *this depends on decimate factor, need to generalize it
@@ -25,6 +25,7 @@ scaloSampleRange = (windowSamples - scaloSamples) : (windowSamples + scaloSample
 allSpans = {spansAll,spansLower,spansMiddle,spansUpper};
 nScalograms = 0;
 allScalograms = zeros(length(allSpans), length(freqList),scaloSamples*2);
+all_logScalograms = zeros(length(allSpans), length(freqList),scaloSamples*2);
 allMRL = zeros(length(allSpans), length(freqList),scaloSamples*2);
 
 for iSpan = 1:length(allSpans)
@@ -34,6 +35,7 @@ for iSpan = 1:length(allSpans)
         if ~isempty(allScalograms)
             scaloSize = size(allScalograms);
             allScalograms(iSpan,:,:) = zeros(scaloSize(2:3));
+            all_logScalograms(iSpan,:,:) = zeros(scaloSize(2:3));
         end
         continue; 
     end
@@ -62,6 +64,7 @@ for iSpan = 1:length(allSpans)
     end
     [W, freqList] = calculateComplexScalograms_EnMasse(scaloData,'Fs',Fs,'freqList',freqList,'doplot',false);
     allScalograms(iSpan,:,:) = squeeze(mean(abs(W(scaloSampleRange,:,:).^2),2))';
+    all_logScalograms(iSpan,:,:) = squeeze(mean(log10(abs(W(scaloSampleRange,:,:).^2)),2))';
     Wangle = angle(W(scaloSampleRange,:,:));
     mrl = squeeze(mean(exp(1i*Wangle), 2));
     allMRL(iSpan,:,:) = mrl';

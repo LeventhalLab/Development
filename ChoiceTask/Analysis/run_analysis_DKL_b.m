@@ -1,12 +1,12 @@
 nasPath = '/Volumes/RecordingsLeventhal2/ChoiceTask';
 analysis_storage_dir = '/Volumes/Tbolt_02/VM thal analysis';
 
-analysisConf = exportAnalysisConf('R0088',nasPath);
+% analysisConf = exportAnalysisConf('R0088',nasPath);
 
 
 plot_t_limits = [-1,1];
 
-% analysisConf = exportAnalysisConf('R0117',nasPath);
+analysisConf = exportAnalysisConf('R0117',nasPath);
 numRandomScalograms = 100;
 
 % compiles all waveforms by averaging all waveforms
