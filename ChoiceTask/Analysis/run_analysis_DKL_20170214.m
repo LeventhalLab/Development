@@ -1,12 +1,13 @@
 nasPath = '/Volumes/RecordingsLeventhal2/ChoiceTask';
 analysis_storage_dir = '/Volumes/Tbolt_02/VM thal analysis';
 
-% analysisConf = exportAnalysisConf('R0088',nasPath);
+sessions_to_analyze = {'R0088_20151030a','R0088_20151031a','R0088_20151101a','R0088_20151102a',...
+                       'R0117_20160503a','R0117_20160503b','R0117_20160504a','R0117_20160505a','R0117_20160506a','R0117_20160508a','R0117_20160510a'};
 
-
+lfpWire = [44,39,40,39];
 plot_t_limits = [-1,1];
 
-analysisConf = exportAnalysisConf('R0117',nasPath);
+analysisConf = exportAnalysisConf('R0088',nasPath);
 numRandomScalograms = 100;
 
 % compiles all waveforms by averaging all waveforms
@@ -60,19 +61,21 @@ for iNeuron=1:size(analysisConf.neurons,1)
     end
     
     % load SEV file and filter it for LFP analyses
-    if sessionConf.singleWires(tetrodeId) == 0
-        lfpChannel = sessionConf.lfpChannels(tetrodeId); % tetrode
-    else
-        lfpIdx = find(tetrodeChs~=0,1);
-        lfpChannel = tetrodeChs(lfpIdx);
-    end
-    if ~exist('sevFile','var') || ~strcmp(sevFile,sessionConf.sevFiles{lfpChannel})
-        sevFile = sessionConf.sevFiles{lfpChannel};
-        [sev,header] = read_tdt_sev(sevFile);
-        decimateFactor = round(header.Fs / (fpass(2) * 2)); % 2x max desired LFP freq
-        sevFilt = decimate(double(sev),decimateFactor);
-        Fs = header.Fs / decimateFactor;
-    end
+    
+    
+%     if sessionConf.singleWires(tetrodeId) == 0
+%         lfpChannel = sessionConf.lfpChannels(tetrodeId); % tetrode
+%     else
+%         lfpIdx = find(tetrodeChs~=0,1);
+%         lfpChannel = tetrodeChs(lfpIdx);
+%     end
+%     if ~exist('sevFile','var') || ~strcmp(sevFile,sessionConf.sevFiles{lfpChannel})
+%         sevFile = sessionConf.sevFiles{lfpChannel};
+%         [sev,header] = read_tdt_sev(sevFile);
+%         decimateFactor = round(header.Fs / (fpass(2) * 2)); % 2x max desired LFP freq
+%         sevFilt = decimate(double(sev),decimateFactor);
+%         Fs = header.Fs / decimateFactor;
+%     end
     
     % ----- ANALYSIS START -----
     
