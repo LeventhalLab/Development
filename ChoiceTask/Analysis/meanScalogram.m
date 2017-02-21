@@ -1,7 +1,8 @@
 function [meanScalo, stdScalo, log_meanScalo, log_stdScalo] = meanScalogram(sevFilt,tWindow,scaloWindow,Fs,freqList,num_iterations)
 
-lfpThresh = 0.5e6; % diff uV^2, *this depends on decimate factor, need to generalize it
-
+% lfpThresh = 0.5e6; % diff uV^2, *this depends on decimate factor, need to generalize it
+lfpThresh = 2500; % diff uV^2, *this depends on decimate factor, need to generalize it
+zeroThresh = 1e-10;
 endTs = length(sevFilt) / Fs; % seconds
 
 
@@ -21,17 +22,25 @@ while scaloCount <= num_iterations
     sampleRange = midSpan - windowSamples : midSpan + windowSamples;
     
     if min(sampleRange) > 0 && max(sampleRange) < length(sevFilt)
-        if max(abs(diff(sevFilt(sampleRange))).^2) < lfpThresh
-            scaloData = sevFilt(sampleRange);
+%         if max(abs(diff(sevFilt(sampleRange))).^2) < lfpThresh
+        scaloData = sevFilt(sampleRange)';
+        if range(sevFilt(sampleRange)) < lfpThresh % && all(abs(scaloData > zeroThresh))
+            [W, freqList] = calculateComplexScalograms_EnMasse(scaloData,'Fs',Fs,'freqList',freqList,'doplot',false);
+            W = squeeze(W);
+            q = abs(W);
+            if any(q(:)==0)
+                disp(['redoing ',num2str(scaloCount),' (W = 0)']);
+                continue;
+            end
             scaloCount = scaloCount + 1;
         else
             disp(['redoing ',num2str(scaloCount),' (lfp thresh)']);
+            continue;
         end
     end
     
-    [W, freqList] = calculateComplexScalograms_EnMasse(scaloData,'Fs',Fs,'freqList',freqList,'doplot',false);
-    W = squeeze(W);
     allScalo(scaloCount,:,:) = squeeze(abs(W(scaloSampleRange,:).^2))';
+    
 end
     
 meanScalo = squeeze(mean(allScalo,1));

@@ -4,25 +4,26 @@ analysis_storage_dir = '/Volumes/Tbolt_02/VM thal analysis';
 sessions_to_analyze = {'R0088_20151030a','R0088_20151031a','R0088_20151101a','R0088_20151102a',...
                        'R0117_20160503a','R0117_20160503b','R0117_20160504a','R0117_20160505a','R0117_20160506a','R0117_20160508a','R0117_20160510a'};
 
-lfpWire = [44,39,40,39];
+lfpWire = [44,39,40,39,93,120,100,93,120,93,120];
 plot_t_limits = [-1,1];
 
 analysisConf = exportAnalysisConfv2('R0088',nasPath);
-numRandomScalograms = 1000;
+numSurrogate_xcorrs = 100;
+fpass = [16 25];
 
 % compiles all waveforms by averaging all waveforms
 % compileOFSWaveforms(waveformDir);
 % compares some of the unit properties in a scatter plot
 % compareOFSWaveforms(csvWaveformFiles);
 tWindow = 2.5; % for scalograms, xlim is set to -1/+1 in formatting
-scaloWindow = 1;  % use this to pull out just +/- 1 second around each event
+xcorrWindow = 2;  % use this to pull out just +/- 1 second around each event
 plotEventIds = [1 2 4 3 5 6 8]; % removed foodClick because it mirrors SideIn
 sevFile = '';
 
 for iNeuron=1:size(analysisConf.neurons,1)
-    fpass = [1 500];
+    
 %     freqList = logFreqList(fpass,30);
-    freqList = logspace(0,2.7,50);            % DKL addition to match frequencies I've been using on my old data from Josh's lab
+%     freqList = logspace(0,2.7,50);            % DKL addition to match frequencies I've been using on my old data from Josh's lab
     
     neuronName = analysisConf.neurons{iNeuron};
     sessionName = analysisConf.sessionNames{iNeuron};
@@ -36,7 +37,10 @@ for iNeuron=1:size(analysisConf.neurons,1)
     [tetrodeName,tetrodeId,tetrodeChs] = getTetrodeInfo(neuronName);
     
     % only load different sessions
-    if ~exist('sessionConf','var') || ~strcmp(sessionConf.sessions__name,analysisConf.sessionConfs{iNeuron}.sessions__name)
+    if ~exist('sessionConf','var') || ...
+       ~strcmp(sessionConf.sessions__name,analysisConf.sessionConfs{iNeuron}.sessions__name) || ...
+       iNeuron == 1
+   
         sessionConf = analysisConf.sessionConfs{iNeuron};
         isNewSession = true;
         % load nexStruct.. I don't love using 'load'
@@ -47,22 +51,31 @@ for iNeuron=1:size(analysisConf.neurons,1)
         else
             error('No NEX .mat file');
         end
+        
     else
         isNewSession = false;
     end
     
     if isNewSession
         logFile = getLogPath(sessionConf.leventhalPaths.rawdata);
+        if exist(logFile,'file') ~= 2; continue; end
+        
         logData = readLogData(logFile);
         trials = createTrialsStruct_simpleChoice(logData,nexStruct);
         trialIds = find([trials.correct]==1);
+        event_ts = extractEvent_ts('centerOut', trials, true);
     end
     
     % load timestamps for neuron
     for iNexNeurons=1:length(nexStruct.neurons)
         if strcmp(nexStruct.neurons{iNexNeurons}.name,analysisConf.neurons{iNeuron})
             disp(['Using timestamps from ',nexStruct.neurons{iNexNeurons}.name]);
-            ts = nexStruct.neurons{iNexNeurons}.timestamps;
+            all_ts = nexStruct.neurons{iNexNeurons}.timestamps;
+            all_trial_ts = extractTrial_ts(all_ts, trials, false);
+            correct_ts = extractTrial_ts(all_ts, trials, true);
+            
+            ts = all_ts;
+            
             [tsISI,tsLTS,tsPoisson,tsPoissonLTS,ISI_n,LTS_n,Poisson_n,PoissonLTS_n] = tsBurstFilters(ts);
             Lia = ismember(ts,tsISI);
             tsISIInv = ts(~Lia);
@@ -111,57 +124,73 @@ for iNeuron=1:size(analysisConf.neurons,1)
 %     t = linspace(-tWindow,tWindow,size(eventScalograms,3));
 %     eventAnalysis(); % format
     
+    Wn = fpass / (Fs/2);
+    b = fir1(200,Wn);
+    
+    sigma = 0.025; % 0.05 = 50ms
+%     sigma = round(mean(diff(ts))/3,3); % use mean ISI?
+    endTs = length(sevFilt) / Fs;
+    [s,~,~] = spikeDensityEstimate_Fs(ts,endTs,sigma,Fs);
+    [sISI,~,~] = spikeDensityEstimate_Fs(tsISI,endTs,sigma,Fs);
+    [sLTS,~,~] = spikeDensityEstimate_Fs(tsLTS,endTs,sigma,Fs);
+    [sPoisson,~,~] = spikeDensityEstimate_Fs(tsPoisson,endTs,sigma,Fs);
+    
+    beta_sevFilt = filtfilt(b,1,sevFilt);
+    sevHilbert = hilbert(beta_sevFilt);
+    betaPower = abs(sevHilbert).^2;
+    betaMean = mean(betaPower);
+    betaStd = std(betaPower);
+    
     % filenames to store the analyzed scalogram data
-    tsScalo_name = [neuronName '_scalos.mat'];
-    tsScalo_subject_dir = fullfile(analysis_storage_dir, [analysisConf.subjects__name '_spike_triggered_scalos']);
-    if ~exist(tsScalo_subject_dir,'dir')
-        mkdir(tsScalo_subject_dir);
+    xcorr_name = [neuronName '_spike_beta_xcorr_trialsOnly_bursts.mat'];
+    xcorr_subject_dir = fullfile(analysis_storage_dir, [analysisConf.subjects__name '_spike_beta_xcorr']);
+    if ~exist(xcorr_subject_dir,'dir')
+        mkdir(xcorr_subject_dir);
     end
-    tsScalo_session_dir = fullfile(tsScalo_subject_dir, analysisConf.sessionNames{iNeuron});
-    if ~exist(tsScalo_session_dir,'dir')
-        mkdir(tsScalo_session_dir);
+    xcorr_session_dir = fullfile(xcorr_subject_dir, analysisConf.sessionNames{iNeuron});
+    if ~exist(xcorr_session_dir,'dir')
+        mkdir(xcorr_session_dir);
     end
-    tsScalo_name = fullfile(tsScalo_session_dir, tsScalo_name);
+    xcorr_name = fullfile(xcorr_session_dir, xcorr_name);
+
+    [ mean_all_xcorr ] = calc_trial_xcorr( s, event_ts, abs(sevHilbert), Fs, [-1,1]*xcorrWindow );
+    [ mean_ISI_xcorr ] = calc_trial_xcorr( sISI, event_ts, abs(sevHilbert), Fs, [-1,1]*xcorrWindow );
+    [ mean_LTS_xcorr ] = calc_trial_xcorr( sLTS, event_ts, abs(sevHilbert), Fs, [-1,1]*xcorrWindow );
+    [ mean_Poisson_xcorr ] = calc_trial_xcorr( sPoisson, event_ts, abs(sevHilbert), Fs, [-1,1]*xcorrWindow );
     
-    % scalograms based on different ts bursts separated by low-med-high
-    % spike density
-    if isNewSession
-        [meanScalo, stdScalo, log_meanScalo, log_stdScalo] = meanScalogram(sevFilt,tWindow,scaloWindow,Fs,freqList,numRandomScalograms);
-        mean_psd = mean(meanScalo,2);
-        mean_logpsd = mean(log_meanScalo,2);
-        std_psd = mean(stdScalo,2);
-        std_logpsd = mean(log_stdScalo,2);
-    end
+    [ mean_surr_all_xcorr, std_surr_all_xcorr ] = calc_trial_xcorr_surrogates( s, event_ts, abs(sevHilbert), Fs, [-1,1]*xcorrWindow, numSurrogate_xcorrs );
+    [ mean_surr_ISI_xcorr, std_surr_ISI_xcorr ] = calc_trial_xcorr_surrogates( sISI, event_ts, abs(sevHilbert), Fs, [-1,1]*xcorrWindow, numSurrogate_xcorrs );
+    [ mean_surr_LTS_xcorr, std_surr_LTS_xcorr ] = calc_trial_xcorr_surrogates( sLTS, event_ts, abs(sevHilbert), Fs, [-1,1]*xcorrWindow, numSurrogate_xcorrs );
+    [ mean_surr_Poisson_xcorr, std_surr_Poisson_xcorr ] = calc_trial_xcorr_surrogates( sPoisson, event_ts, abs(sevHilbert), Fs, [-1,1]*xcorrWindow, numSurrogate_xcorrs );
+
+
+%     [ mean_logxcorr ] = calc_trial_xcorr( s, event_ts, log10(betaPower), Fs, [-1 1]*xcorrWindow );
+%     [ mean_surr_xcorr,std_surr_xcorr ] = calc_trial_xcorr_surrogates( s, event_ts, abs(sevHilbert), Fs, [-1 1]*xcorrWindow, numSurrogate_xcorrs );
     
-    [tsScalograms,tsMRL,n_tsScalograms,ts_logScalograms] = tsScalogram_DKL_20170215(ts,sevFilt,tWindow,scaloWindow,Fs,freqList);
-    t = linspace(-scaloWindow,scaloWindow,size(tsScalograms,3)); % set one for all
+    pre_samps = floor(length(mean_all_xcorr)/2);
+    t = (-pre_samps:pre_samps)/Fs;
     
+    xcorrMetadata.neuron = analysisConf.neurons{iNeuron};
+    xcorrMetadata.Fs = Fs;
+    xcorrMetadata.tWindow = tWindow;    % how far to look before and after each timestamp when computing xcorrgrams
+    xcorrMetadata.xcorrWindow = xcorrWindow;
+    xcorrMetadata.fpass = fpass;
+    xcorrMetadata.t = t;
+    xcorrMetadata.numSurrogate_xcorrs = numSurrogate_xcorrs;
     
-    % MODIFIED HERE - MUST HAVE AT LEAST 3 SPIKES BUT LESS THAN 6 TO BE A
-    % BURST
-    burstIdx = (ISI_n > 2) & (ISI_n < 6);
-    [tsISIScalograms,tsISIMRL,n_tsISIScalograms,ts_ISIlogScalograms] = tsScalogram_DKL_20170215(tsISI(burstIdx),sevFilt,tWindow,scaloWindow,Fs,freqList);
-    burstIdx = (LTS_n > 2) & (LTS_n < 6);
-    [tsLTSScalograms,tsLTSMRL,n_tsLTSScalograms,ts_LTSlogScalograms] = tsScalogram_DKL_20170215(tsLTS(burstIdx),sevFilt,tWindow,scaloWindow,Fs,freqList);
-    burstIdx = (Poisson_n > 2) & (Poisson_n < 6);
-    [tsPoissonScalograms,tsPoissonMRL,n_tsPoissonScalograms,ts_PoissonlogScalograms] = tsScalogram_DKL_20170215(tsPoisson(burstIdx),sevFilt,tWindow,scaloWindow,Fs,freqList);
-    [allTsScalograms] = {tsScalograms,tsISIScalograms,tsLTSScalograms,tsPoissonScalograms};
-    [all_logTsScalograms] = {ts_logScalograms,ts_ISIlogScalograms,ts_LTSlogScalograms,ts_PoissonlogScalograms};
-    [allTsMRL] = {tsMRL,tsISIMRL,tsLTSMRL,tsPoissonMRL};
-    [allnScalograms] = [n_tsScalograms,n_tsISIScalograms,n_tsLTSScalograms,n_tsPoissonScalograms];
-    allScalogramTitles = {'ts','tsISI','tsLTS','tsPoisson'};
-    
-    scaloMetadata.neuron = analysisConf.neurons{iNeuron};
-    scaloMetadata.densityLabels = {'all','low density','med density','high density'};
-    scaloMetadata.allScalogramTitles = allScalogramTitles;
-    scaloMetadata.Fs = Fs;
-    scaloMetadata.tWindow = tWindow;    % how far to look before and after each timestamp when computing scalograms
-    scaloMetadata.scaloWindow = scaloWindow;
-    scaloMetadata.f = freqList;
-    scaloMetadata.t = t;
-    scaloMetadata.numRandomScalograms = numRandomScalograms;
-    
-    save(tsScalo_name,'allTsScalograms','all_logTsScalograms','allTsMRL','allnScalograms','scaloMetadata','mean_psd','mean_logpsd','std_psd','std_logpsd');
+    save(xcorr_name,'mean_all_xcorr',...
+                    'xcorrMetadata',...
+                    'mean_ISI_xcorr',...
+                    'mean_LTS_xcorr',...
+                    'mean_Poisson_xcorr',...
+                    'mean_surr_all_xcorr',...
+                    'mean_surr_ISI_xcorr',...
+                    'mean_surr_LTS_xcorr',...
+                    'mean_surr_Poisson_xcorr',...
+                    'std_surr_all_xcorr',...
+                    'std_surr_ISI_xcorr',...
+                    'std_surr_LTS_xcorr',...
+                    'std_surr_Poisson_xcorr');
 %     tsPrctlScalos_DKL(); % format
     
     % high beta power centered analysis using ts raster

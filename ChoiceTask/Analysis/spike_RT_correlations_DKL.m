@@ -4,11 +4,11 @@ analysis_storage_dir = '/Volumes/Tbolt_02/VM thal analysis';
 sessions_to_analyze = {'R0088_20151030a','R0088_20151031a','R0088_20151101a','R0088_20151102a',...
                        'R0117_20160503a','R0117_20160503b','R0117_20160504a','R0117_20160505a','R0117_20160506a','R0117_20160508a','R0117_20160510a'};
 
-lfpWire = [44,39,40,39];
+lfpWire = [44,39,40,39,93,120,100,93,120,93,120];
 plot_t_limits = [-1,1];
 
 analysisConf = exportAnalysisConfv2('R0088',nasPath);
-numRandomScalograms = 1000;
+numRandomScalograms = 100;
 
 % compiles all waveforms by averaging all waveforms
 % compileOFSWaveforms(waveformDir);
@@ -36,7 +36,10 @@ for iNeuron=1:size(analysisConf.neurons,1)
     [tetrodeName,tetrodeId,tetrodeChs] = getTetrodeInfo(neuronName);
     
     % only load different sessions
-    if ~exist('sessionConf','var') || ~strcmp(sessionConf.sessions__name,analysisConf.sessionConfs{iNeuron}.sessions__name)
+    if ~exist('sessionConf','var') || ...
+       ~strcmp(sessionConf.sessions__name,analysisConf.sessionConfs{iNeuron}.sessions__name) || ...
+       iNeuron == 1
+   
         sessionConf = analysisConf.sessionConfs{iNeuron};
         isNewSession = true;
         % load nexStruct.. I don't love using 'load'
@@ -47,6 +50,7 @@ for iNeuron=1:size(analysisConf.neurons,1)
         else
             error('No NEX .mat file');
         end
+        
     else
         isNewSession = false;
     end
@@ -62,7 +66,13 @@ for iNeuron=1:size(analysisConf.neurons,1)
     for iNexNeurons=1:length(nexStruct.neurons)
         if strcmp(nexStruct.neurons{iNexNeurons}.name,analysisConf.neurons{iNeuron})
             disp(['Using timestamps from ',nexStruct.neurons{iNexNeurons}.name]);
-            ts = nexStruct.neurons{iNexNeurons}.timestamps;
+            all_ts = nexStruct.neurons{iNexNeurons}.timestamps;
+            all_trial_ts = extractTrial_ts(all_ts, trials,false);
+            correct_ts = extractTrial_ts(all_ts, trials,true);
+            
+            ts = correct_ts;
+            
+%             tr_trialsOnly = extractTrial_ts(ts, trials);
             [tsISI,tsLTS,tsPoisson,tsPoissonLTS,ISI_n,LTS_n,Poisson_n,PoissonLTS_n] = tsBurstFilters(ts);
             Lia = ismember(ts,tsISI);
             tsISIInv = ts(~Lia);
@@ -112,7 +122,7 @@ for iNeuron=1:size(analysisConf.neurons,1)
 %     eventAnalysis(); % format
     
     % filenames to store the analyzed scalogram data
-    tsScalo_name = [neuronName '_scalos.mat'];
+    tsScalo_name = [neuronName '_scalos_correctOnly.mat'];
     tsScalo_subject_dir = fullfile(analysis_storage_dir, [analysisConf.subjects__name '_spike_triggered_scalos']);
     if ~exist(tsScalo_subject_dir,'dir')
         mkdir(tsScalo_subject_dir);

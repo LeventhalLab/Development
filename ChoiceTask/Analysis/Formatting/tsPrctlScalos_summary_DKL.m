@@ -1,20 +1,20 @@
 powerScalo_clim = [2 3.5];
 plot_t_limits = [-1,1];
-z_clim = [-2 2];
+z_clim = [-1 1];
 
 allCaxis = [];
-densityLabels = {'all','low density','med density','high density'};
+densityLabels = {'all'};%,'low density','med density','high density'};
 allScalogramTitles = {'ts','tsISI','tsLTS','tsPoisson'};
 
 rootDir = '/Volumes/Tbolt_02/VM thal analysis';
 cd(rootDir);
-
-ratDirs = dir;
+testName = '*_spike_triggered_scalos';
+ratDirs = dir(testName);
 
 numRowsPerPage = 3;
 
 plot_freqLim = [10, 50];
-for i_ratDir = 1 : length(ratDirs)
+for i_ratDir = 2 : length(ratDirs)
     
     cd(rootDir);
     
@@ -22,9 +22,10 @@ for i_ratDir = 1 : length(ratDirs)
     if ~isdir(cur_ratDir) || any(strcmp(cur_ratDir,{'.','..'}))
         continue;
     end
-    
+    ratID = cur_ratDir(1:5);
     cur_ratDir = fullfile(rootDir,cur_ratDir);
     cd(cur_ratDir);
+
     sessionDirs = dir;
     
     for i_sessionDir = 1 : length(sessionDirs)
@@ -36,13 +37,14 @@ for i_ratDir = 1 : length(ratDirs)
         
         cur_sessionDir = fullfile(cur_ratDir,cur_sessionDir);
         cd(cur_sessionDir);
-        unitFiles = dir;
+        testName = '*_scalos_trialsOnly.mat';
+        unitFiles = dir(testName);
         
         for iUnit = 1 : length(unitFiles)
             cur_unitFile = unitFiles(iUnit).name;
             if length(cur_unitFile) < 4;continue;end
             if strcmpi(cur_unitFile(1:2),'._'); continue; end
-            if ~strcmpi(cur_unitFile(end-3:end),'.mat'); continue; end
+            if ~strcmpi(cur_unitFile(end-13:end),'trialsOnly.mat'); continue; end
             
             ratID = cur_unitFile(1:5);
             switch ratID
