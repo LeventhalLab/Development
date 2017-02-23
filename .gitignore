@@ -2,3 +2,6 @@
 *.mat
 .DS_Store
 ChoiceTask/temp
+*.fig
+*.jpg
+*.png
