@@ -1,5 +1,5 @@
-nasPath = '/Volumes/RecordingsLeventhal2/ChoiceTask';
-analysisConf = exportAnalysisConf('R0088',nasPath);
+% nasPath = '/Volumes/RecordingsLeventhal2/ChoiceTask';
+% analysisConf = exportAnalysisConf('R0088',nasPath);
 
 % compiles all waveforms by averaging all waveforms
 % compileOFSWaveforms(waveformDir);
@@ -12,6 +12,7 @@ sevFile = '';
 for iNeuron=1:size(analysisConf.neurons,1)
     fpass = [10 100];
     freqList = logFreqList(fpass,30);
+    freqList = [0:80];
     
     neuronName = analysisConf.neurons{iNeuron};
     disp(['Working on ',neuronName]);
@@ -52,7 +53,7 @@ for iNeuron=1:size(analysisConf.neurons,1)
     % load SEV file and filter it for LFP analyses
     rows = sessionConf.session_electrodes.site == electrodeSite;
     channels = sessionConf.session_electrodes.channel(rows);
-    lfpChannel = channels(1);
+    lfpChannel = 108;%channels(1);
     
     if ~exist('sevFile','var') || ~strcmp(sevFile,sessionConf.sevFiles{lfpChannel})
         sevFile = sessionConf.sevFiles{lfpChannel};
@@ -66,7 +67,7 @@ for iNeuron=1:size(analysisConf.neurons,1)
     
     % produces waveform and ISI xcorr analyses
     if isNewSession
-        makeUnitSummaries();
+%         makeUnitSummaries();
     end
     
     % the big event-centered analysis
