@@ -1,30 +1,37 @@
-% % r153path = '/Users/mattgaidica/Documents/Data/ChoiceTask/R0153_20170214_openField-1';
-% % r154path = '/Users/mattgaidica/Documents/Data/ChoiceTask/R0154_20170214_openField-2';
-% % 
-% % r153files = dir(fullfile(r153path,'*.sev'));
-% % r153files = natsort({r153files.name});
-% % 
-% % r154files = dir(fullfile(r154path,'*.sev'));
-% % r154files = natsort({r154files.name});
-% % 
-% % % chs = [1:2:16 33:2:48];
-% % chs = [49 51 53 55 57 60 61 63]; %STR 50um
-% % params.fpass = [0 80];
-% % params.pad = 0;
-% % params.tapers = [3 5];
-% % 
-% % r153S = [];
-% % for iCh = 1:numel(chs)
-% %     disp(iCh);
-% %     [r153sev,header] = read_tdt_sev(fullfile(r153path,r153files{chs(iCh)}));
-% %     params.Fs = round(header.Fs);
-% %     [S,f] = mtspectrumc(r153sev',params);
-% %     r153S(:,iCh) = S;
-% %     
+r153path = '/Users/mattgaidica/Documents/Data/ChoiceTask/R0153_20170214_openField-1';
+r154path = '/Users/mattgaidica/Documents/Data/ChoiceTask/R0154_20170214_openField-2';
+r117path = '/Volumes/RecordingsLeventhal2/ChoiceTask/R0117/R0117-rawdata/R0117_20160503b/R0117_20160503b';
+
+r153files = dir(fullfile(r153path,'*.sev'));
+r153files = natsort({r153files.name});
+
+r154files = dir(fullfile(r154path,'*.sev'));
+r154files = natsort({r154files.name});
+
+r117files = dir(fullfile(r117path,'*.sev'));
+r117files = natsort({r117files.name});
+
+% chs = [1:2:16 33:2:48];
+r15xchs = [49 51 53 55 57 60 61 63]; %STR 50um
+
+params.fpass = [0 80];
+params.pad = 0;
+params.tapers = [3 5];
+
+r153S = [];
+for iCh = 1:numel(r15xchs)
+    disp(iCh);
+    [r153sev,header] = read_tdt_sev(fullfile(r153path,r153files{r15xchs(iCh)}));
+    params.Fs = round(header.Fs);
+    [S,f] = mtspectrumc(r153sev',params);
+    r153S(:,iCh) = S;
+    
 % %     [r154sev,~] = read_tdt_sev(fullfile(r154path,r154files{chs(iCh)}));
 % %     [S,f] = mtspectrumc(r154sev',params);
 % %     r154S(:,iCh) = S;
-% % end
+
+    [r117sev,header] = read_tdt_sev(fullfile(r117path,r117files{r15xchs(iCh)}));
+end
 
 markBeta = [16 24];
 xTickVals = [0 markBeta 40 80];

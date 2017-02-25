@@ -1,5 +1,5 @@
-% nasPath = '/Volumes/RecordingsLeventhal2/ChoiceTask';
-% analysisConf = exportAnalysisConf('R0088',nasPath);
+% % nasPath = '/Volumes/RecordingsLeventhal2/ChoiceTask';
+% % analysisConf = exportAnalysisConfv2('R0117',nasPath);
 
 % compiles all waveforms by averaging all waveforms
 % compileOFSWaveforms(waveformDir);
@@ -8,11 +8,13 @@
 tWindow = 2; % for scalograms, xlim is set to -1/+1 in formatting
 plotEventIds = [1 2 4 3 5 6 8]; % removed foodClick because it mirrors SideIn
 sevFile = '';
-
+longRasters = {};
+longRasterTimes = [];
+shortRasters = {};
+shortRasterTimes = [];
 for iNeuron=1:size(analysisConf.neurons,1)
     fpass = [10 100];
     freqList = logFreqList(fpass,30);
-    freqList = [0:80];
     
     neuronName = analysisConf.neurons{iNeuron};
     disp(['Working on ',neuronName]);
@@ -37,7 +39,8 @@ for iNeuron=1:size(analysisConf.neurons,1)
     logFile = getLogPath(sessionConf.leventhalPaths.rawdata);
     logData = readLogData(logFile);
     trials = createTrialsStruct_simpleChoice(logData,nexStruct);
-    trialIds = find([trials.correct]==1);
+    timingField = 'MT';
+    [trialIds,allTimes] = sortTrialsBy(trials,timingField); % forces to be 'correct'
     
     % load timestamps for neuron
     for iNexNeurons=1:length(nexStruct.neurons)
@@ -49,18 +52,21 @@ for iNeuron=1:size(analysisConf.neurons,1)
             tsISIInv = ts(~Lia);
         end
     end
-    
+
     % load SEV file and filter it for LFP analyses
-    rows = sessionConf.session_electrodes.site == electrodeSite;
-    channels = sessionConf.session_electrodes.channel(rows);
-    lfpChannel = 108;%channels(1);
-    
-    if ~exist('sevFile','var') || ~strcmp(sevFile,sessionConf.sevFiles{lfpChannel})
-        sevFile = sessionConf.sevFiles{lfpChannel};
-        [sev,header] = read_tdt_sev(sevFile);
-        decimateFactor = round(header.Fs / (fpass(2) * 10)); % 10x max filter freq
-        sevFilt = decimate(double(sev),decimateFactor);
-        Fs = header.Fs / decimateFactor;
+    needsLfp = false;
+    if needsLfp
+        rows = sessionConf.session_electrodes.site == electrodeSite;
+        channels = sessionConf.session_electrodes.channel(rows);
+        lfpChannel = channels(1);
+
+        if ~exist('sevFile','var') || ~strcmp(sevFile,sessionConf.sevFiles{lfpChannel})
+            sevFile = sessionConf.sevFiles{lfpChannel};
+            [sev,header] = read_tdt_sev(sevFile);
+            decimateFactor = round(header.Fs / (fpass(2) * 10)); % 10x max filter freq
+            sevFilt = decimate(double(sev),decimateFactor);
+            Fs = header.Fs / decimateFactor;
+        end
     end
     
     % ----- ANALYSIS START -----
@@ -70,35 +76,60 @@ for iNeuron=1:size(analysisConf.neurons,1)
 %         makeUnitSummaries();
     end
     
-    % the big event-centered analysis
+    % timing raster investigation
     tsPeths = eventsPeth(trials(trialIds),ts,tWindow);
     tsISIInvPeths = eventsPeth(trials(trialIds),tsISIInv,tWindow);
     tsISIPeths = eventsPeth(trials(trialIds),tsISI,tWindow);
     tsLTSPeths = eventsPeth(trials(trialIds),tsLTS,tWindow);
-    tsPoissonPeths = eventsPeth(trials(trialIds),tsPoisson,tWindow); 
-    [eventScalograms,eventFieldnames,allLfpData] = eventsScalo(trials(trialIds),sevFilt,tWindow,Fs,freqList);
-    t = linspace(-tWindow,tWindow,size(eventScalograms,3));
-    eventAnalysis(); % format
+    tsPoissonPeths = eventsPeth(trials(trialIds),tsPoisson,tWindow);
+    
+    iEvent = 3; % centerOut
+    rasterData = tsPeths(:,iEvent);
+%     rasterData = rasterData(~cellfun('isempty',rasterData)); % remove empty rows (no spikes)
+%     longRasterData = rasterData(~cellfun('isempty',rasterData(allTimes > .3)));
+    longRasterData = rasterData(allTimes > .4);
+    if ~isempty(longRasterData)
+        longRasters = [longRasters;longRasterData];
+        longRasterTimes = [longRasterTimes;allTimes(allTimes > .4)'];
+    end
+%     shortRasterData = rasterData(~cellfun('isempty',rasterData(allTimes < .3)));
+    shortRasterData = rasterData(allTimes < .2);
+    if ~isempty(shortRasterData)
+        shortRasters = [shortRasters;shortRasterData];
+        shortRasterTimes = [shortRasterTimes;allTimes(allTimes < .2)'];
+    end
+% %     rasterData = makeRasterReadable(rasterData,100); % limit to 100 data points
+% %     plotSpikeRaster(rasterData,'PlotType','scatter','AutoLabel',false);
+    
+    % event-centered analysis
+% %     tsPeths = eventsPeth(trials(trialIds),ts,tWindow);
+% %     tsISIInvPeths = eventsPeth(trials(trialIds),tsISIInv,tWindow);
+% %     tsISIPeths = eventsPeth(trials(trialIds),tsISI,tWindow);
+% %     tsLTSPeths = eventsPeth(trials(trialIds),tsLTS,tWindow);
+% %     tsPoissonPeths = eventsPeth(trials(trialIds),tsPoisson,tWindow);
+% %     [eventScalograms,eventFieldnames,allLfpData] = eventsScalo(trials(trialIds),sevFilt,tWindow,Fs,freqList);
+% %     t = linspace(-tWindow,tWindow,size(eventScalograms,3));
+% %     eventAnalysis(); % format
     
     % scalograms based on different ts bursts separated by low-med-high
     % spike density
-    tsScalograms = tsScalogram(ts,sevFilt,tWindow,Fs,freqList);
-    t = linspace(-tWindow,tWindow,size(tsScalograms,3)); % set one for all
-    tsISIScalograms = tsScalogram(tsISI,sevFilt,tWindow,Fs,freqList);
-    tsLTSScalograms = tsScalogram(tsLTS,sevFilt,tWindow,Fs,freqList);
-    tsPoissonScalograms = tsScalogram(tsPoisson,sevFilt,tWindow,Fs,freqList);
-    allTsScalograms = {tsScalograms,tsISIScalograms,tsLTSScalograms,tsPoissonScalograms};
-    allScalogramTitles = {'ts','tsISI','tsLTS','tsPoisson'};
-    tsPrctlScalos(); % format
+% %     tsScalograms = tsScalogram(ts,sevFilt,tWindow,Fs,freqList);
+% %     t = linspace(-tWindow,tWindow,size(tsScalograms,3)); % set one for all
+% %     tsISIScalograms = tsScalogram(tsISI,sevFilt,tWindow,Fs,freqList);
+% %     tsLTSScalograms = tsScalogram(tsLTS,sevFilt,tWindow,Fs,freqList);
+% %     tsPoissonScalograms = tsScalogram(tsPoisson,sevFilt,tWindow,Fs,freqList);
+% %     allTsScalograms = {tsScalograms,tsISIScalograms,tsLTSScalograms,tsPoissonScalograms};
+% %     allScalogramTitles = {'ts','tsISI','tsLTS','tsPoisson'};
+% %     tsPrctlScalos(); % format
     
-    % high beta power centered analysis using ts raster
-    fpass = [13 30];
-    tWindow = 1; % [] need to standardize time windows somehow
-    fieldname = 'centerOut';
-    [rasterTs,rasterEvents,allTs,allEvents] = lfpRaster(trials,trialIds,fieldname,ts,sev,header.Fs,fpass,tWindow);
-    lfpRasters(); % format
+% %     % high beta power centered analysis using ts raster
+% %     fpass = [13 30];
+% %     tWindow = 1; % [] need to standardize time windows somehow
+% %     fieldname = 'centerOut';
+% %     [rasterTs,rasterEvents,allTs,allEvents] = lfpRaster(trials,trialIds,fieldname,ts,sev,header.Fs,fpass,tWindow);
+% %     lfpRasters(); % format
 
 % % run_RTraster()
 end
 
-addUnitHeader(analysisConf,{'eventAnalysis'});
+% addUnitHeader(analysisConf,{'eventAnalysis'});

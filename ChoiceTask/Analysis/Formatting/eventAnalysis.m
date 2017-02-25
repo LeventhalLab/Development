@@ -86,9 +86,11 @@ for iEvent=plotEventIds
     else
         set(ax,'yTickLabel',[]);
     end
+    title(['sorted asc by ',timingField]);
     xlim([-1 1]);
     set(ax,'FontSize',fontSize);
-    hold on; plot([0 0],[0 size(rasterData,1)],':','color','red'); % center line
+    hold on;
+    plot([0 0],[0 size(rasterData,1)],':','color','red'); % center line
 %     set(ax,'XTickLabel',[]);
     iSubplot = iSubplot + 1;
 end
