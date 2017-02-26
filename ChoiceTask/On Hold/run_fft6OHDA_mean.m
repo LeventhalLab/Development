@@ -1,11 +1,12 @@
 r153path = '/Users/mattgaidica/Documents/Data/ChoiceTask/R0153_20170214_openField-1';
-r154path = '/Users/mattgaidica/Documents/Data/ChoiceTask/R0154_20170214_openField-2';
+r154pathNORM = '/Users/mattgaidica/Documents/Data/ChoiceTask/R0154_20170214_openField-2';
+r154pathNNC = '';
 r117path = '/Volumes/RecordingsLeventhal2/ChoiceTask/R0117/R0117-rawdata/R0117_20160503b/R0117_20160503b';
 
 r153files = dir(fullfile(r153path,'*.sev'));
 r153files = natsort({r153files.name});
 
-r154files = dir(fullfile(r154path,'*.sev'));
+r154files = dir(fullfile(r154pathNORM,'*.sev'));
 r154files = natsort({r154files.name});
 
 r117files = dir(fullfile(r117path,'*.sev'));
@@ -26,9 +27,9 @@ for iCh = 1:numel(r15xchs)
     [S,f] = mtspectrumc(r153sev',params);
     r153S(:,iCh) = S;
     
-% %     [r154sev,~] = read_tdt_sev(fullfile(r154path,r154files{chs(iCh)}));
-% %     [S,f] = mtspectrumc(r154sev',params);
-% %     r154S(:,iCh) = S;
+    [r154sev,~] = read_tdt_sev(fullfile(r154pathNORM,r154files{chs(iCh)}));
+    [S,f] = mtspectrumc(r154sev',params);
+    r154S(:,iCh) = S;
 
     [r117sev,header] = read_tdt_sev(fullfile(r117path,r117files{r15xchs(iCh)}));
 end
