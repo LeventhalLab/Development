@@ -1,5 +1,5 @@
-% % nasPath = '/Volumes/RecordingsLeventhal2/ChoiceTask';
-% % analysisConf = exportAnalysisConfv2('R0117',nasPath);
+nasPath = '/Volumes/RecordingsLeventhal2/ChoiceTask';
+analysisConf = exportAnalysisConfv2('R0088',nasPath);
 
 % compiles all waveforms by averaging all waveforms
 % compileOFSWaveforms(waveformDir);
@@ -73,33 +73,28 @@ for iNeuron=1:size(analysisConf.neurons,1)
     
     % produces waveform and ISI xcorr analyses
     if isNewSession
-%         makeUnitSummaries();
+        makeUnitSummaries();
     end
     
-    % timing raster investigation
-    tsPeths = eventsPeth(trials(trialIds),ts,tWindow);
-    tsISIInvPeths = eventsPeth(trials(trialIds),tsISIInv,tWindow);
-    tsISIPeths = eventsPeth(trials(trialIds),tsISI,tWindow);
-    tsLTSPeths = eventsPeth(trials(trialIds),tsLTS,tWindow);
-    tsPoissonPeths = eventsPeth(trials(trialIds),tsPoisson,tWindow);
-    
-    iEvent = 3; % centerOut
-    rasterData = tsPeths(:,iEvent);
-%     rasterData = rasterData(~cellfun('isempty',rasterData)); % remove empty rows (no spikes)
-%     longRasterData = rasterData(~cellfun('isempty',rasterData(allTimes > .3)));
-    longRasterData = rasterData(allTimes > .4);
-    if ~isempty(longRasterData)
-        longRasters = [longRasters;longRasterData];
-        longRasterTimes = [longRasterTimes;allTimes(allTimes > .4)'];
-    end
-%     shortRasterData = rasterData(~cellfun('isempty',rasterData(allTimes < .3)));
-    shortRasterData = rasterData(allTimes < .2);
-    if ~isempty(shortRasterData)
-        shortRasters = [shortRasters;shortRasterData];
-        shortRasterTimes = [shortRasterTimes;allTimes(allTimes < .2)'];
-    end
-% %     rasterData = makeRasterReadable(rasterData,100); % limit to 100 data points
-% %     plotSpikeRaster(rasterData,'PlotType','scatter','AutoLabel',false);
+% %     % timing raster investigation
+% %     tsPeths = eventsPeth(trials(trialIds),ts,tWindow);
+% %     tsISIInvPeths = eventsPeth(trials(trialIds),tsISIInv,tWindow);
+% %     tsISIPeths = eventsPeth(trials(trialIds),tsISI,tWindow);
+% %     tsLTSPeths = eventsPeth(trials(trialIds),tsLTS,tWindow);
+% %     tsPoissonPeths = eventsPeth(trials(trialIds),tsPoisson,tWindow);
+% %     
+% %     iEvent = 3; % centerOut
+% %     rasterData = tsPeths(:,iEvent);
+% %     longRasterData = rasterData(allTimes > .4);
+% %     if ~isempty(longRasterData)
+% %         longRasters = [longRasters;longRasterData];
+% %         longRasterTimes = [longRasterTimes;allTimes(allTimes > .4)'];
+% %     end
+% %     shortRasterData = rasterData(allTimes < .2);
+% %     if ~isempty(shortRasterData)
+% %         shortRasters = [shortRasters;shortRasterData];
+% %         shortRasterTimes = [shortRasterTimes;allTimes(allTimes < .2)'];
+% %     end
     
     % event-centered analysis
 % %     tsPeths = eventsPeth(trials(trialIds),ts,tWindow);
