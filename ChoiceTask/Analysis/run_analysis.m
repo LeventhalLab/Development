@@ -12,6 +12,9 @@ longRasters = {};
 longRasterTimes = [];
 shortRasters = {};
 shortRasterTimes = [];
+
+all_zMean = [];
+all_zStd = [];
 for iNeuron=1:size(analysisConf.neurons,1)
     fpass = [10 100];
     freqList = logFreqList(fpass,30);
@@ -55,7 +58,7 @@ for iNeuron=1:size(analysisConf.neurons,1)
     end
 
     % load SEV file and filter it for LFP analyses
-    needsLfp = true;
+    needsLfp = false;
     if needsLfp
         % !!! needs fix to handle 50um and tetrodes
         [a,b] = regexp(neuronName,'_ch[0-9]+');
@@ -79,18 +82,22 @@ for iNeuron=1:size(analysisConf.neurons,1)
     
     % produces waveform and ISI xcorr analyses
     if isNewSession
-        makeUnitSummaries();
+% %         makeUnitSummaries();
     end
     
-% %     % timing raster investigation
-% %     tsPeths = eventsPeth(trials(trialIds),ts,tWindow);
+    % timing raster investigation
+    tsPeths = eventsPeth(trials(trialIds),ts,tWindow);
 % %     tsISIInvPeths = eventsPeth(trials(trialIds),tsISIInv,tWindow);
 % %     tsISIPeths = eventsPeth(trials(trialIds),tsISI,tWindow);
 % %     tsLTSPeths = eventsPeth(trials(trialIds),tsLTS,tWindow);
 % %     tsPoissonPeths = eventsPeth(trials(trialIds),tsPoisson,tWindow);
-% %     
-% %     iEvent = 3; % centerOut
-% %     rasterData = tsPeths(:,iEvent);
+    
+    iEvent = 3; % centerOut
+    rasterData = tsPeths(:,iEvent);
+    [zMean,zStd] = meanPETZ(rasterData,tWindow);
+    all_zMean(iNeuron,:) = zMean;
+    all_zStd(iNeuron,:) = zStd;
+
 % %     longRasterData = rasterData(allTimes > .4);
 % %     if ~isempty(longRasterData)
 % %         longRasters = [longRasters;longRasterData];
@@ -103,14 +110,14 @@ for iNeuron=1:size(analysisConf.neurons,1)
 % %     end
     
     % event-centered analysis
-    tsPeths = eventsPeth(trials(trialIds),ts,tWindow);
-    tsISIInvPeths = eventsPeth(trials(trialIds),tsISIInv,tWindow);
-    tsISIPeths = eventsPeth(trials(trialIds),tsISI,tWindow);
-    tsLTSPeths = eventsPeth(trials(trialIds),tsLTS,tWindow);
-    tsPoissonPeths = eventsPeth(trials(trialIds),tsPoisson,tWindow);
-    [eventScalograms,eventFieldnames,allLfpData] = eventsScalo(trials(trialIds),sevFilt,tWindow,Fs,freqList);
-    t = linspace(-tWindow,tWindow,size(eventScalograms,3));
-    eventAnalysis(); % format
+% %     tsPeths = eventsPeth(trials(trialIds),ts,tWindow);
+% %     tsISIInvPeths = eventsPeth(trials(trialIds),tsISIInv,tWindow);
+% %     tsISIPeths = eventsPeth(trials(trialIds),tsISI,tWindow);
+% %     tsLTSPeths = eventsPeth(trials(trialIds),tsLTS,tWindow);
+% %     tsPoissonPeths = eventsPeth(trials(trialIds),tsPoisson,tWindow);
+% %     [eventScalograms,eventFieldnames,allLfpData] = eventsScalo(trials(trialIds),sevFilt,tWindow,Fs,freqList);
+% %     t = linspace(-tWindow,tWindow,size(eventScalograms,3));
+% %     eventAnalysis(); % format
     
     % scalograms based on different ts bursts separated by low-med-high
     % spike density

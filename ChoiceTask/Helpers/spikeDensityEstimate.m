@@ -7,20 +7,22 @@ function [s,binned,kernel] = spikeDensityEstimate(ts,endTs,sigma)
 % binned = integer of spikes for each ms of recording
 % kernel = smoothing kernel
 
+binWidth = .001;
+
 endTs = round(endTs,3); % round to ms-precision
-binned = hist(ts,[0:.001:endTs]); % bin data
+binned = hist(ts,[binWidth:binWidth:endTs]); % bin data
 % sigma = .05; % kernel std, 50ms
 edges = [-3*sigma:.001:3*sigma]; % time ranges
 kernel = normpdf(edges,0,sigma); % eval guassian kernel
 kernel = kernel*.001; % multiply by bin width
 s = conv(binned,kernel); % convolve
 center = ceil(length(edges)/2); % index of kernel center
-s = s(center:endTs*1000 + center);
+s = s(center:endTs*1000 + center-1);
 
 % [ ] only plot a subset, this plot is clunky
 if false
     figure;
-    t = linspace(0,endTs,length(s));
+    t = linspace(binWidth,endTs,length(s));
     plot(t,s)
     hold on;
     spikeIdx = find(binned == 1);
