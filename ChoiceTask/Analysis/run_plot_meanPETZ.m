@@ -21,14 +21,14 @@ grid on;
 edgeErr = 500;
 xs = -2;
 ys = 0;
+l1 = [];
+l2 = [];
 initLoop = true;
 while(true)
     if initLoop
         initLoop = false;
     else
         [xs,ys] = ginput(1);
-        delete(l1);
-        delete(l2);
     end
     if(ys > 1.7)
         break;
@@ -59,6 +59,10 @@ while(true)
     sorted_all_zMean = all_zMean(k,:);
     
     subplot(221);
+    if ~isempty(l1)
+        delete(l1);
+        delete(l2);
+    end
     l1 = plot([min(xLin) max(xLin)],[ys ys],'r--');
     l2 = plot([xs xs],[ZLims],'r--');
 
