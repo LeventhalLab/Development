@@ -12,6 +12,7 @@ longRasters = {};
 longRasterTimes = [];
 shortRasters = {};
 shortRasterTimes = [];
+allTrials = {};
 
 all_eventPetz = {};
 for iNeuron=1:size(analysisConf.neurons,1)
@@ -42,6 +43,7 @@ for iNeuron=1:size(analysisConf.neurons,1)
     logFile = getLogPath(sessionConf.leventhalPaths.rawdata);
     logData = readLogData(logFile);
     trials = createTrialsStruct_simpleChoice(logData,nexStruct);
+    allTrials{iNeuron} = trials;
     timingField = 'RT';
     [trialIds,allTimes] = sortTrialsBy(trials,timingField); % forces to be 'correct'
     

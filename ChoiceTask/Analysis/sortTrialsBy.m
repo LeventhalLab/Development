@@ -6,12 +6,16 @@ trialCount = 1;
 for iTrial = 1:length(trials)
     % might not want to force correct in the future
     if trials(iTrial).correct
-        allTimes(trialCount) = getfield(trials(iTrial).timing,timingField);
+        if ~isempty(timingField) % otherwise just filter correct trials
+            allTimes(trialCount) = getfield(trials(iTrial).timing,timingField);
+        end
         trialIds(trialCount) = iTrial;
         trialCount = trialCount + 1;
     end
 end
 
-[allTimes,k] = sort(allTimes);
-trialIds = trialIds(k);
-disp(['sortTrialsBy.m: ',timingField,' asc (low -> high)']);
+if ~isempty(timingField)
+    [allTimes,k] = sort(allTimes);
+    trialIds = trialIds(k);
+    disp(['sortTrialsBy.m: ',timingField,' asc (low -> high)']);
+end
