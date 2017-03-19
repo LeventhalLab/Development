@@ -67,7 +67,8 @@ for iNeuron=1:size(analysisConf.neurons,1)
         lfpChannel = channels(1);
 
         if ~exist('sevFile','var') || ~strcmp(sevFile,sessionConf.sevFiles{lfpChannel})
-            sevFile = sessionConf.sevFiles{lfpChannel};
+%             sevFile = sessionConf.sevFiles{lfpChannel};
+            sevFile = sessionConf.sevFiles{1}; % !!! CHANGE BACK
             [sev,header] = read_tdt_sev(sevFile);
             decimateFactor = 1;%round(header.Fs / (fpass(2) * 10)); % 10x max filter freq
 % %             sevFilt = decimate(double(sev),decimateFactor);
