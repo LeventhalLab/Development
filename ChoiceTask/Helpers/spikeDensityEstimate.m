@@ -1,4 +1,4 @@
-function [s,binned,kernel] = spikeDensityEstimate(ts,endTs,sigma)
+function [s,binned,kernel,sigma] = spikeDensityEstimate(ts,tsEnd,sigma)
 % ts = timestamps in seconds
 % trialLength = trial length in seconds (max(ts) is a rough estimate)
 % sigma = std deviations for kernel edges
@@ -7,22 +7,28 @@ function [s,binned,kernel] = spikeDensityEstimate(ts,endTs,sigma)
 % binned = integer of spikes for each ms of recording
 % kernel = smoothing kernel
 
-binWidth = .001;
+binWidth = .001; % 1ms
+if ~exist('tsEnd','var')
+    tsEnd = ts(end);
+end
+if ~exist('sigma','var')
+    % sigma = .05; % kernel std, 50ms
+    sigma = mean(diff(ts)) * 2;
+end
 
-endTs = round(endTs,3); % round to ms-precision
-binned = hist(ts,[binWidth:binWidth:endTs]); % bin data
-% sigma = .05; % kernel std, 50ms
+tsEnd = round(tsEnd,3); % round to ms-precision
+binned = hist(ts,[binWidth:binWidth:tsEnd]); % bin data
 edges = [-3*sigma:.001:3*sigma]; % time ranges
 kernel = normpdf(edges,0,sigma); % eval guassian kernel
 kernel = kernel*.001; % multiply by bin width
 s = conv(binned,kernel); % convolve
 center = ceil(length(edges)/2); % index of kernel center
-s = s(center:endTs*1000 + center-1);
+s = s(center:tsEnd*1000 + center-1);
 
 % [ ] only plot a subset, this plot is clunky
 if false
     figure;
-    t = linspace(binWidth,endTs,length(s));
+    t = linspace(binWidth,tsEnd,length(s));
     plot(t,s)
     hold on;
     spikeIdx = find(binned == 1);

@@ -1,3 +1,7 @@
+[s,binned,kernel,sigma] = spikeDensityEstimate(ts);
+sParams = [mean(s) std(s) sigma]; % to create Z-score
+[zMean,zStd] = meanPETZ(rasterData,sParams,tWindow);
+
 close all;
 figure('position',[0 0 1100 800]);
 

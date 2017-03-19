@@ -13,8 +13,7 @@ longRasterTimes = [];
 shortRasters = {};
 shortRasterTimes = [];
 
-all_zMean = [];
-all_zStd = [];
+all_eventPetz = {};
 for iNeuron=1:size(analysisConf.neurons,1)
     fpass = [10 100];
     freqList = logFreqList(fpass,30);
@@ -86,17 +85,13 @@ for iNeuron=1:size(analysisConf.neurons,1)
     end
     
     % timing raster investigation
-    tsPeths = eventsPeth(trials(trialIds),ts,tWindow);
+% %     tsPeths = eventsPeth(trials(trialIds),ts,tWindow);
 % %     tsISIInvPeths = eventsPeth(trials(trialIds),tsISIInv,tWindow);
 % %     tsISIPeths = eventsPeth(trials(trialIds),tsISI,tWindow);
 % %     tsLTSPeths = eventsPeth(trials(trialIds),tsLTS,tWindow);
 % %     tsPoissonPeths = eventsPeth(trials(trialIds),tsPoisson,tWindow);
     
-    iEvent = 3; % centerOut
-    rasterData = tsPeths(:,iEvent);
-    [zMean,zStd] = meanPETZ(rasterData,tWindow);
-    all_zMean(iNeuron,:) = zMean;
-    all_zStd(iNeuron,:) = zStd;
+    all_eventPetz{iNeuron} = eventPetz(trials,ts,tWindow);
 
 % %     longRasterData = rasterData(allTimes > .4);
 % %     if ~isempty(longRasterData)
