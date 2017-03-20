@@ -46,6 +46,7 @@ for iNeuron=1:size(analysisConf.neurons,1)
     allTrials{iNeuron} = trials;
     timingField = 'RT';
     [trialIds,allTimes] = sortTrialsBy(trials,timingField); % forces to be 'correct'
+    eventFieldnames = fieldnames(trials(trialIds(1)).timestamps);
     
     % load timestamps for neuron
     for iNexNeurons=1:length(nexStruct.neurons)
