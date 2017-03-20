@@ -1,8 +1,10 @@
 % close all;
+plotEventIds = [1 2 4 3 5 6 8];
+eventFieldnames = {'cueOn';'centerIn';'centerOut';'tone';'sideIn';'sideOut';'foodClick';'foodRetrieval'};
 totalRows = 1; % sorted by: trial #, RT, MT, Z-score (w/ RT&MT markers)
 % [sorted_petz,sorted_times] = sortEventPetz(all_eventPetz,allTrials,[3,0.5,1000]);
 timingField = 'RT';
-[sorted_petz,sorted_times] = sortEventPetz(all_eventPetz,allTrials,timingField,[3,1,1500]);
+[sorted_petz,sorted_times] = sortEventPetz(all_eventPetz,allTrials,timingField,[6,1,1500]);
 figure('position',[0 0 1200 800]);
 iSubplot = 1;
 for iEvent = plotEventIds
@@ -18,7 +20,7 @@ for iEvent = plotEventIds
     xlim([xtickVals(1) xtickVals(end)]);
     xlabel('time (s)');
     if iEvent == 1
-        ylabel('unit #');
+        ylabel('trial #');
     end
     title([eventFieldnames{iEvent}]);
     iSubplot = iSubplot + 1;
