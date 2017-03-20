@@ -2,8 +2,8 @@
 totalRows = 1; % sorted by: trial #, RT, MT, Z-score (w/ RT&MT markers)
 % [sorted_petz,sorted_times] = sortEventPetz(all_eventPetz,allTrials,[3,0.5,1000]);
 timingField = 'RT';
-[sorted_petz,sorted_times] = sortEventPetz(all_eventPetz,allTrials,timingField,[4,2,1500]);
-% [sorted_petz,sorted_times] = sortEventPetz(all_eventPetz,allTrials,timingField,[]);
+% [sorted_petz,sorted_times] = sortEventPetz(all_eventPetz,allTrials,timingField,[4,2,1500]);
+[sorted_petz,sorted_times] = sortEventPetz(all_eventPetz,allTrials,timingField,[]);
 figure('position',[0 0 1200 800]);
 iSubplot = 1;
 for iEvent = plotEventIds
