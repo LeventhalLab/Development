@@ -2,29 +2,28 @@
 % eventFieldnames = fieldnames(trials(2).timestamps);
 % tWindow = 2;
 
-sessionSeconds = header.fileSizeBytes/header.Fs/4; % seconds
-sessionFR = 1 / mean(diff(ts));
-neuronPeth = [];
-binSize = 0.03; % ms
-nBins = round((2*tWindow) / binSize);
-all_nBins = round(sessionSeconds / binSize);
-[allCounts,allCenters] = hist(ts,all_nBins);
-for iNeuron = 1:size(all_tsPeths,2)
-    tsPeth = all_tsPeths{1,iNeuron};
-    for iEvent = 1:size(tsPeth,2)
-        for iTrial = 1:size(tsPeth,1)
-            trialPeth = tsPeth{iTrial,iEvent};
-            [counts,centers] = hist(trialPeth,nBins);
-            zCounts = (counts - mean(allCounts)) / std(allCounts);
-            neuronPeth(iNeuron,iEvent
-        end
-    end
-end
+close all;
 
-for iNeuron = 1:size(neuronPeth,1)
-    
-end
+% max per peth of each event
+% use abs to capture neg z-scores
+[v,k] = max(abs(neuronPeth),[],3);
+% max peth within unit
+[v2,k2] = max(v,[],2);
+% unit order based on peak timing
+[v3,k3] = sort(k(k2));
+neuronPeth = neuronPeth(k3,:,:);
 
+figure('position',[0 0 900 800]);
+iSubplot = 1;
+for iEvent = plotEventIds
+    subplot(1,numel(plotEventIds),iSubplot);
+    imagesc(squeeze(neuronPeth(:,iEvent,:)));
+    colormap(jet);
+    caxis([-1 1]);
+    iSubplot = iSubplot + 1;
+end
+hcb = colorbar;
+title(hcb,'Z');
 % % 
 % % maxNeuronZ = [];
 % % for iNeuron = 1:size(all_eventPetz,2)

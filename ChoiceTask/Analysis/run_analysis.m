@@ -8,13 +8,10 @@
 tWindow = 2; % for scalograms, xlim is set to -1/+1 in formatting
 plotEventIds = [1 2 4 3 5 6 8]; % removed foodClick because it mirrors SideIn
 sevFile = '';
-longRasters = {};
-longRasterTimes = [];
-shortRasters = {};
-shortRasterTimes = [];
+
 allTrials = {};
-all_tsPeths = {};
-for iNeuron=1:size(analysisConf.neurons,1)
+neuronPeth = [];
+for iNeuron = 1:size(analysisConf.neurons,1)
     fpass = [10 100];
     freqList = logFreqList(fpass,30);
     
@@ -41,7 +38,7 @@ for iNeuron=1:size(analysisConf.neurons,1)
     logFile = getLogPath(sessionConf.leventhalPaths.rawdata);
     logData = readLogData(logFile);
     trials = createTrialsStruct_simpleChoice(logData,nexStruct);
-    allTrials{iNeuron} = trials;
+    allTrials{iNeuron} = trials; % for debugging
     timingField = 'RT';
     [trialIds,allTimes] = sortTrialsBy(trials,timingField); % forces to be 'correct'
     eventFieldnames = fieldnames(trials(trialIds(1)).timestamps);
@@ -95,10 +92,23 @@ for iNeuron=1:size(analysisConf.neurons,1)
 % %     tsISIPeths = eventsPeth(trials(trialIds),tsISI,tWindow);
 % %     tsLTSPeths = eventsPeth(trials(trialIds),tsLTS,tWindow);
 % %     tsPoissonPeths = eventsPeth(trials(trialIds),tsPoisson,tWindow);
+
+    sessionSeconds = header.fileSizeBytes/header.Fs/4; % seconds
+    sessionFR = 1 / mean(diff(ts));
+    binMs = 50; % ms
+    nBins = round((2*tWindow / .001) / binMs);
+    all_nBins = round((sessionSeconds / .001) / binMs);
     
-%     all_eventPetz{iNeuron} = eventPetz(trials(trialIds),ts,tWindow);
-    tsPeths = eventsPeth(trials(trialIds),ts,tWindow);
-    all_tsPeths{iNeuron} = tsPeths;
+    tsPeth = eventsPeth(trials(trialIds),ts,tWindow);
+    [allCounts,allCenters] = hist(ts,all_nBins);
+    for iEvent = 1:8
+        [counts,centers] = hist([tsPeth{:,iEvent}],nBins);
+        zCounts = ((counts / size(tsPeth,1)) - mean(allCounts)) / std(allCounts);
+        neuronPeth(iNeuron,iEvent,:) = zCounts;
+    end
+    
+%     all_tsPeths{iNeuron} = tsPeths;
+%     all_ts{iNeuron} = ts;
 
 % %     longRasterData = rasterData(allTimes > .4);
 % %     if ~isempty(longRasterData)
