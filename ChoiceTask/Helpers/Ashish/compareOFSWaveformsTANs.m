@@ -1,4 +1,4 @@
-function compareOFSWaveforms(csvWaveformFiles)
+function compareOFSWaveformsTANs(csvWaveformFiles)
 %csvWaveformFiles = {'/Volumes/RecordingsLeventhal2/ChoiceTask/R0088/R0088-processed/Waveforms/compiledWaveformTable.csv',
 %     '/Volumes/RecordingsLeventhal2/ChoiceTask/R0117/R0117-processed/Waveforms/compiledWaveformTable.csv'};
 paramIdxEnergy = 5;
