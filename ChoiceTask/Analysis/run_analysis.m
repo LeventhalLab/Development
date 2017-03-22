@@ -13,16 +13,14 @@ longRasterTimes = [];
 shortRasters = {};
 shortRasterTimes = [];
 allTrials = {};
-
-all_eventPetz = {};
+all_tsPeths = {};
 for iNeuron=1:size(analysisConf.neurons,1)
     fpass = [10 100];
     freqList = logFreqList(fpass,30);
     
     neuronName = analysisConf.neurons{iNeuron};
     disp(['Working on ',neuronName]);
-% %     [electrodeName,electrodeSite,electrodeChannels] =
-% getElectrodeInfo(neuronName) !!! fix function for 50um filenames
+    [electrodeName,electrodeSite,electrodeChannels] = getElectrodeInfo(neuronName);
     
     % only load different sessions
     if ~exist('sessionConf','var') || ~strcmp(sessionConf.sessions__name,analysisConf.sessionConfs{iNeuron})
@@ -61,25 +59,28 @@ for iNeuron=1:size(analysisConf.neurons,1)
 
     % load SEV file and filter it for LFP analyses
     needsLfp = false;
-    if needsLfp
-        % !!! needs fix to handle 50um and tetrodes
-        [a,b] = regexp(neuronName,'_ch[0-9]+');
-        electrodeSite = str2num(neuronName(a+3:b));
-        rows = sessionConf.session_electrodes.site == electrodeSite;
-        channels = sessionConf.session_electrodes.channel(rows);
-        lfpChannel = channels(1);
+    
+    
+    % this is really not perfect yet, needs LFP channel in DB I think
+    rows = sessionConf.session_electrodes.channel == electrodeChannels;
+    channels = sessionConf.session_electrodes.channel(any(rows')');
+    lfpChannel = channels(1);
 
-        if ~exist('sevFile','var') || ~strcmp(sevFile,sessionConf.sevFiles{lfpChannel})
+    if ~exist('sevFile','var') || ~strcmp(sevFile,sessionConf.sevFiles{lfpChannel})
 %             sevFile = sessionConf.sevFiles{lfpChannel};
-            sevFile = sessionConf.sevFiles{1}; % !!! CHANGE BACK
+        sevFile = sessionConf.sevFiles{lfpChannel};
+        if needsLfp
             [sev,header] = read_tdt_sev(sevFile);
             decimateFactor = 1;%round(header.Fs / (fpass(2) * 10)); % 10x max filter freq
 % %             sevFilt = decimate(double(sev),decimateFactor);
             sevFilt = double(sev);
 % %             Fs = header.Fs / decimateFactor;
             Fs = header.Fs;
+        else
+            header = getSEVHeader(sevFile);
         end
     end
+
     
     % ----- ANALYSIS START -----
     
@@ -95,7 +96,9 @@ for iNeuron=1:size(analysisConf.neurons,1)
 % %     tsLTSPeths = eventsPeth(trials(trialIds),tsLTS,tWindow);
 % %     tsPoissonPeths = eventsPeth(trials(trialIds),tsPoisson,tWindow);
     
-    all_eventPetz{iNeuron} = eventPetz(trials(trialIds),ts,tWindow);
+%     all_eventPetz{iNeuron} = eventPetz(trials(trialIds),ts,tWindow);
+    tsPeths = eventsPeth(trials(trialIds),ts,tWindow);
+    all_tsPeths{iNeuron} = tsPeths;
 
 % %     longRasterData = rasterData(allTimes > .4);
 % %     if ~isempty(longRasterData)
