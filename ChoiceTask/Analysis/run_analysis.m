@@ -95,7 +95,7 @@ for iNeuron=1:size(analysisConf.neurons,1)
 % %     tsLTSPeths = eventsPeth(trials(trialIds),tsLTS,tWindow);
 % %     tsPoissonPeths = eventsPeth(trials(trialIds),tsPoisson,tWindow);
     
-    all_eventPetz{iNeuron} = eventPetz(trials,ts,tWindow);
+    all_eventPetz{iNeuron} = eventPetz(trials(trialIds),ts,tWindow);
 
 % %     longRasterData = rasterData(allTimes > .4);
 % %     if ~isempty(longRasterData)
