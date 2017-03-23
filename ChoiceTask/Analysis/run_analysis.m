@@ -5,11 +5,12 @@
 % compileOFSWaveforms(waveformDir);
 % compares some of the unit properties in a scatter plot
 % compareOFSWaveforms(csvWaveformFiles);
-tWindow = 2; % for scalograms, xlim is set to -1/+1 in formatting
+tWindow = 1; % for scalograms, xlim is set to -1/+1 in formatting
 plotEventIds = [1 2 4 3 5 6 8]; % removed foodClick because it mirrors SideIn
 sevFile = '';
 
-allTrials = {};
+all_meanTiming = [];
+all_trials = {};
 neuronPeth = [];
 for iNeuron = 1:size(analysisConf.neurons,1)
     fpass = [10 100];
@@ -38,7 +39,7 @@ for iNeuron = 1:size(analysisConf.neurons,1)
     logFile = getLogPath(sessionConf.leventhalPaths.rawdata);
     logData = readLogData(logFile);
     trials = createTrialsStruct_simpleChoice(logData,nexStruct);
-    allTrials{iNeuron} = trials; % for debugging
+    all_trials{iNeuron} = trials; % for debugging
     timingField = 'RT';
     [trialIds,allTimes] = sortTrialsBy(trials,timingField); % forces to be 'correct'
     eventFieldnames = fieldnames(trials(trialIds(1)).timestamps);
@@ -57,11 +58,11 @@ for iNeuron = 1:size(analysisConf.neurons,1)
     % load SEV file and filter it for LFP analyses
     needsLfp = false;
     
-    
     % this is really not perfect yet, needs LFP channel in DB I think
     rows = sessionConf.session_electrodes.channel == electrodeChannels;
     channels = sessionConf.session_electrodes.channel(any(rows')');
-    lfpChannel = channels(1);
+%     lfpChannel = channels(1);
+lfpChannel = 65;
 
     if ~exist('sevFile','var') || ~strcmp(sevFile,sessionConf.sevFiles{lfpChannel})
 %             sevFile = sessionConf.sevFiles{lfpChannel};
@@ -100,6 +101,8 @@ for iNeuron = 1:size(analysisConf.neurons,1)
     all_nBins = round((sessionSeconds / .001) / binMs);
     
     tsPeth = eventsPeth(trials(trialIds),ts,tWindow);
+    all_meanTiming(iNeuron) = mean(allTimes);
+
     [allCounts,allCenters] = hist(ts,all_nBins);
     for iEvent = 1:8
         [counts,centers] = hist([tsPeth{:,iEvent}],nBins);

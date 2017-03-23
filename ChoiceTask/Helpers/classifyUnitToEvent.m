@@ -1,8 +1,15 @@
 % timingField = 'RT';
 % eventFieldnames = fieldnames(trials(2).timestamps);
 % tWindow = 2;
+smallFontSize = 8;
 
-close all;
+% close all;
+
+% % for iNeuron = 1:size(all_trials,2)
+% %     timingField = 'RT';
+% %     [trialIds,allTimes] = sortTrialsBy(all_trials{1,iNeuron},timingField);
+% %     all_meanTiming(iNeuron) = mean(allTimes(trialIds));
+% % end
 
 % max per peth of each event
 % use abs to capture neg z-scores
@@ -10,20 +17,66 @@ close all;
 % max peth within unit
 [v2,k2] = max(v,[],2);
 % unit order based on peak timing
-[v3,k3] = sort(k(k2));
-neuronPeth = neuronPeth(k3,:,:);
+[v3,k3] = sort(k2);
+% [v3,k3] = sort(all_meanTiming);
+neuronPethSortedByEvent = neuronPeth(k3,:,:);
 
-figure('position',[0 0 900 800]);
+figure('position',[100 100 1100 800]);
 iSubplot = 1;
 for iEvent = plotEventIds
-    subplot(1,numel(plotEventIds),iSubplot);
-    imagesc(squeeze(neuronPeth(:,iEvent,:)));
+    subplot(1,numel(plotEventIds)+2,iSubplot);
+    imagesc(squeeze(neuronPethSortedByEvent(:,iEvent,:)));
     colormap(jet);
     caxis([-1 1]);
+    xtickVals = linspace(0,size(neuronPeth,3),3);
+    xticks(xtickVals);
+    xticklabels([-tWindow 0 tWindow]);
+    xlim([xtickVals(1) xtickVals(end)]);
+    ytickVals = [1:size(neuronPeth,1)];
+    yticks(ytickVals);
+    yticklabels(repmat('',1,numel(ytickVals)));
+    
+    titleStr = [eventFieldnames{iEvent},' (',num2str(iEvent),')'];
+    if iEvent == 1
+        yticklabels(k2(k3));
+        ylabel('max z-event');
+        title({analysisConf.subjects__name,titleStr});
+    else
+        title(titleStr);
+    end
+    xlabel('time (s)');
+    set(gca,'fontSize',smallFontSize);
+    
     iSubplot = iSubplot + 1;
 end
-hcb = colorbar;
-title(hcb,'Z');
+subplot(1,numel(plotEventIds)+2,iSubplot);
+plot(all_meanTiming(k3),flip([1:size(neuronPeth,1)]),'r.','markerSize',25);
+ytickVals = [1:size(neuronPeth,1)];
+yticks(ytickVals);
+yticklabels(flip(ytickVals));
+ylim([0.5 size(neuronPeth,1)+0.5]);
+ylabel('unit #');
+xlabel(timingField);
+set(gca,'fontSize',smallFontSize);
+grid on;
+
+iSubplot = iSubplot + 1;
+
+subplot(1,numel(plotEventIds)+2,iSubplot);
+plot(k2(k3),flip([1:size(neuronPeth,1)]),'b.','markerSize',25);
+xtickVals = [1:8];
+xticks(xtickVals);
+xticklabels([1 2 4 3 5 6 7 8]);
+xlabel('event #');
+ytickVals = [1:size(neuronPeth,1)];
+yticks(ytickVals);
+yticklabels(flip(ytickVals));
+ylim([0.5 size(neuronPeth,1)+0.5]);
+set(gca,'fontSize',smallFontSize);
+grid on;
+
+% hcb = colorbar;
+% title(hcb,'Z');
 % % 
 % % maxNeuronZ = [];
 % % for iNeuron = 1:size(all_eventPetz,2)

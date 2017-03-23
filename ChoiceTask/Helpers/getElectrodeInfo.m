@@ -13,8 +13,8 @@ if ~isempty(a)
     electrodeChannels = s(startChs+1:endChs-1);
     electrodeChannels = str2num(electrodeChannels);
 else
-    electrodeName = s(a+1:end-1);
     electrodeSite = [];
-    [a,b] = regexp(a,'_ch[0-9]+');
-    electrodeChannels = s(a+3:b);
+    [a,b] = regexp(s,'_ch[0-9]+');
+    electrodeName = s(a+1:end-1);
+    electrodeChannels = str2num(s(a+3:b));
 end
