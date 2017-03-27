@@ -40,7 +40,7 @@ for iNeuron = 1:size(analysisConf.neurons,1)
     logData = readLogData(logFile);
     trials = createTrialsStruct_simpleChoice(logData,nexStruct);
     all_trials{iNeuron} = trials; % for debugging
-    timingField = 'RT';
+    timingField = 'MT';
     [trialIds,allTimes] = sortTrialsBy(trials,timingField); % forces to be 'correct'
     eventFieldnames = fieldnames(trials(trialIds(1)).timestamps);
     
@@ -62,7 +62,7 @@ for iNeuron = 1:size(analysisConf.neurons,1)
     rows = sessionConf.session_electrodes.channel == electrodeChannels;
     channels = sessionConf.session_electrodes.channel(any(rows')');
 %     lfpChannel = channels(1);
-lfpChannel = 65;
+lfpChannel = 1;
 
     if ~exist('sevFile','var') || ~strcmp(sevFile,sessionConf.sevFiles{lfpChannel})
 %             sevFile = sessionConf.sevFiles{lfpChannel};

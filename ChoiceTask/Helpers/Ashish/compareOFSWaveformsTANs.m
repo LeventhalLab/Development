@@ -4,7 +4,7 @@ function compareOFSWaveformsTANs(csvWaveformFiles)
 paramIdxEnergy = 5;
 paramIdxPeakValley = 6;
 paramIdxISIPrev = 8;
-paramIdxISIThresh = 9;
+paramIdxISIProp = 9;
 paramIdxAPeakToValleyTick = 10;
 
 h2 = figure('position',[0 0 800 800]);
@@ -23,8 +23,7 @@ for iCsv = 1:length(csvWaveformFiles)
         ylabel('uV');
         xlim([1 length(waveform)]);
         ylim([-400 400]);
-        parts = strsplit(T{ii,1}{1},'-');
-        unitTitles{ii} = strjoin(parts(1:3));
+        unitTitles{ii} = T{ii,1}{1};
         title(unitTitles{ii});
     end
 
@@ -33,32 +32,37 @@ for iCsv = 1:length(csvWaveformFiles)
     scatterCount = 1;
     for ii = 1:size(T,1)
         scatterData{1,scatterCount} = T{ii,paramIdxAPeakToValleyTick};
-        scatterData{2,scatterCount} = T{ii,paramIdxISIPrev};
-        scatterData{3,scatterCount} = T{ii,paramIdxISIThresh};
+        scatterData{2,scatterCount} = 1 / (.001 * T{ii,paramIdxISIPrev}); % FR
+        scatterData{3,scatterCount} = T{ii,paramIdxISIPrev} % ISI
+        scatterData{4,scatterCount} = T{ii,paramIdxISIProp} % PropISI
         scatterLabels{scatterCount} = unitTitles{ii};% num2str(scatterCount);
         scatterCount = scatterCount + 1;
     end
+    smallFontSize = 6;
+    
     figure(h2);
     subplot(311);
     hold on;
     plot(cell2mat(scatterData(1,:)),cell2mat(scatterData(2,:)),'.','MarkerSize',25);
-    labelpoints(cell2mat(scatterData(1,:)),cell2mat(scatterData(2,:)),scatterLabels);
+    labelpoints(cell2mat(scatterData(1,:)),cell2mat(scatterData(2,:)),scatterLabels,'FontSize',smallFontSize);
     xlabel('Peak to Valley Tick');
-    ylabel('Mean ISI');
+    ylabel('Mean FR');
 
     subplot(312);
     hold on;
-    plot(cell2mat(scatterData(1,:)),cell2mat(scatterData(3,:)),'.','MarkerSize',25);
-    labelpoints(cell2mat(scatterData(1,:)),cell2mat(scatterData(3,:)),scatterLabels);
-    xlabel('Peak to Valley Tick');
-    ylabel('ISI < 5ms');
+    plot(cell2mat(scatterData(4,:)),cell2mat(scatterData(2,:)),'.','MarkerSize',25);
+    labelpoints(cell2mat(scatterData(4,:)),cell2mat(scatterData(2,:)),scatterLabels, 'FontSize',smallFontSize);
+    xlabel('PROP ISI');
+    ylabel('Mean FR');
 
     subplot(313);
     hold on;
-    plot(cell2mat(scatterData(2,:)),cell2mat(scatterData(3,:)),'.','MarkerSize',25);
-    labelpoints(cell2mat(scatterData(2,:)),cell2mat(scatterData(3,:)),scatterLabels);
-    xlabel('Mean ISI');
-    ylabel('ISI < 5ms');
+    plot(cell2mat(scatterData(4,:)),cell2mat(scatterData(1,:)),'.','MarkerSize',25);
+    labelpoints(cell2mat(scatterData(4,:)),cell2mat(scatterData(1,:)),scatterLabels, 'FontSize',smallFontSize);
+    xlabel('PROP ISI');
+    ylabel('Peak to Valley Tick');
+    
+    
 end
 
 % legend(unitTitles,'Location','northoutside');

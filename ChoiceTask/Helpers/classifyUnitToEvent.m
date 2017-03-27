@@ -11,13 +11,18 @@ smallFontSize = 8;
 % %     all_meanTiming(iNeuron) = mean(allTimes(trialIds));
 % % end
 
-% max per peth of each event
-% use abs to capture neg z-scores
-[v,k] = max(abs(neuronPeth),[],3);
-% max peth within unit
-[v2,k2] = max(v,[],2);
-% unit order based on peak timing
-[v3,k3] = sort(k2);
+
+[maxHistValues,maxHistTimes] = max(abs(neuronPeth),[],3);
+% [maxHistValues,maxHistTimes] = max((neuronPeth),[],3);
+[~,eventIds] = max(maxHistValues,[],2);
+maxHistTimes_of_eventIds = diag(maxHistTimes(:,eventIds));
+[~,k] = sort(maxHistTimes_of_eventIds,'ascend');
+eventIds = eventIds(k);
+[v3,k3] = sort(eventIds);
+k3 = k(k3);
+
+
+
 % [v3,k3] = sort(all_meanTiming);
 neuronPethSortedByEvent = neuronPeth(k3,:,:);
 
@@ -26,8 +31,11 @@ iSubplot = 1;
 for iEvent = plotEventIds
     subplot(1,numel(plotEventIds)+2,iSubplot);
     imagesc(squeeze(neuronPethSortedByEvent(:,iEvent,:)));
+    hold on;
+    xZero = round(size(neuronPeth,3) / 2);
+    plot([xZero xZero],[1 size(neuronPeth,1)],'k');
     colormap(jet);
-    caxis([-1 1]);
+    caxis([-1.5 1.5]);
     xtickVals = linspace(0,size(neuronPeth,3),3);
     xticks(xtickVals);
     xticklabels([-tWindow 0 tWindow]);
@@ -38,7 +46,7 @@ for iEvent = plotEventIds
     
     titleStr = [eventFieldnames{iEvent},' (',num2str(iEvent),')'];
     if iEvent == 1
-        yticklabels(k2(k3));
+        yticklabels(v3);
         ylabel('max z-event');
         title({analysisConf.subjects__name,titleStr});
     else
@@ -63,7 +71,7 @@ grid on;
 iSubplot = iSubplot + 1;
 
 subplot(1,numel(plotEventIds)+2,iSubplot);
-plot(k2(k3),flip([1:size(neuronPeth,1)]),'b.','markerSize',25);
+plot(v3,flip([1:size(neuronPeth,1)]),'b.','markerSize',25);
 xtickVals = [1:8];
 xticks(xtickVals);
 xticklabels([1 2 4 3 5 6 7 8]);

@@ -13,10 +13,10 @@ for iFile = 1:length(waveformFiles)
         waveform = waveformFile(waveformFile(:,2) == units(iUnit),:);
         % convert ISI Next to percent ISI under 5ms, very rough measure of
         % firing rate of burstiness
-        waveform(:,8) = length(find(waveform(:,7) < 5)) / length(waveform);
-        parts = strsplit(waveformFiles(iFile).name,'_');
-        parts{1,3} = [parts{1,3} char(96 + units(iUnit))];
-        waveforms{rowCount,1} = strjoin(parts,'-');
+        waveform(:,8) = 100 * (length(find(waveform(:,7) > 500)) / length(waveform));
+        [~,name,~] = fileparts(waveformFiles(iFile).name);
+        parts = strsplit(name,'_');
+        waveforms{rowCount,1} = strjoin({parts{[4,6]}},'-');
         waveforms{rowCount,2} = mean(waveform);
         rowCount = rowCount + 1;
     end
