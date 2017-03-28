@@ -12,7 +12,7 @@ sevFile = '';
 all_meanTiming = [];
 all_trials = {};
 neuronPeth = [];
-for iNeuron = 1:size(analysisConf.neurons,1)
+for iNeuron = 1:1%size(analysisConf.neurons,1)
     fpass = [10 100];
     freqList = logFreqList(fpass,30);
     
@@ -40,7 +40,7 @@ for iNeuron = 1:size(analysisConf.neurons,1)
     logData = readLogData(logFile);
     trials = createTrialsStruct_simpleChoice(logData,nexStruct);
     all_trials{iNeuron} = trials; % for debugging
-    timingField = 'MT';
+    timingField = 'RT';
     [trialIds,allTimes] = sortTrialsBy(trials,timingField); % forces to be 'correct'
     eventFieldnames = fieldnames(trials(trialIds(1)).timestamps);
     
@@ -61,8 +61,7 @@ for iNeuron = 1:size(analysisConf.neurons,1)
     % this is really not perfect yet, needs LFP channel in DB I think
     rows = sessionConf.session_electrodes.channel == electrodeChannels;
     channels = sessionConf.session_electrodes.channel(any(rows')');
-%     lfpChannel = channels(1);
-lfpChannel = 1;
+    lfpChannel = channels(1);
 
     if ~exist('sevFile','var') || ~strcmp(sevFile,sessionConf.sevFiles{lfpChannel})
 %             sevFile = sessionConf.sevFiles{lfpChannel};
@@ -94,36 +93,64 @@ lfpChannel = 1;
 % %     tsLTSPeths = eventsPeth(trials(trialIds),tsLTS,tWindow);
 % %     tsPoissonPeths = eventsPeth(trials(trialIds),tsPoisson,tWindow);
 
+
+    % unit-to-event classifier analysis
     sessionSeconds = header.fileSizeBytes/header.Fs/4; % seconds
     sessionFR = 1 / mean(diff(ts));
     binMs = 50; % ms
     nBins = round((2*tWindow / .001) / binMs);
     all_nBins = round((sessionSeconds / .001) / binMs);
     
-    tsPeth = eventsPeth(trials(trialIds),ts,tWindow);
-    all_meanTiming(iNeuron) = mean(allTimes);
-
+% %     tsPeth = eventsPeth(trials(trialIds),ts,tWindow);
+% %     all_meanTiming(iNeuron) = mean(allTimes);
+% % 
+% %     [allCounts,allCenters] = hist(ts,all_nBins);
+% %     for iEvent = 1:8
+% %         [counts,centers] = hist([tsPeth{:,iEvent}],nBins);
+% %         zCounts = ((counts / size(tsPeth,1)) - mean(allCounts)) / std(allCounts);
+% %         neuronPeth(iNeuron,iEvent,:) = zCounts;
+% %     end
+    
+    % ipsi/contra analysis
+    ipsiIdx = 0;
+    contraIdx = 1;
+    trials_correct = trials(trialIds);
+    trials_ipsi = trials_correct([trials_correct(:).movementDirection] == ipsiIdx);
+    trials_contra = trials_correct([trials_correct(:).movementDirection] == contraIdx);
+    tsPeths_ipsi = eventsPeth(trials_ipsi,ts,tWindow);
+    tsPeths_contra = eventsPeth(trials_contra,ts,tWindow);
+    
     [allCounts,allCenters] = hist(ts,all_nBins);
-    for iEvent = 1:8
-        [counts,centers] = hist([tsPeth{:,iEvent}],nBins);
-        zCounts = ((counts / size(tsPeth,1)) - mean(allCounts)) / std(allCounts);
-        neuronPeth(iNeuron,iEvent,:) = zCounts;
+    zCounts_ipsi = [];
+    if ~isempty(tsPeths_ipsi)
+        for iEvent = 1:8
+            for iTrial = 1:size(tsPeths_ipsi,1)
+                [counts,centers] = hist(tsPeths_ipsi{iTrial,iEvent},nBins);
+                zCounts = (counts - mean(allCounts)) / std(allCounts);
+                zCounts_ipsi(iEvent,iTrial,:) = zCounts;
+            end
+        end
     end
-    
-%     all_tsPeths{iNeuron} = tsPeths;
-%     all_ts{iNeuron} = ts;
+    zCounts_contra = [];
+    if ~isempty(tsPeths_contra)
+        for iEvent = 1:8
+            for iTrial = 1:size(tsPeths_contra,1)
+                [counts,centers] = hist(tsPeths_contra{iTrial,iEvent},nBins);
+                zCounts = (counts - mean(allCounts)) / std(allCounts);
+                zCounts_contra(iEvent,iTrial,:) = zCounts;
+            end
+        end
+    end
+% %     zCounts_contra = [];
+% %     if ~isempty(tsPeths_contra)
+% %         for iEvent = 1:8
+% %             [counts,centers] = hist([tsPeths_contra{:,iEvent}],nBins);
+% %             zCounts = ((counts / size(tsPeths_contra,1)) - mean(allCounts)) / std(allCounts);
+% %             zCounts_contra(iEvent,:) = zCounts;
+% %         end
+% %     end
 
-% %     longRasterData = rasterData(allTimes > .4);
-% %     if ~isempty(longRasterData)
-% %         longRasters = [longRasters;longRasterData];
-% %         longRasterTimes = [longRasterTimes;allTimes(allTimes > .4)'];
-% %     end
-% %     shortRasterData = rasterData(allTimes < .2);
-% %     if ~isempty(shortRasterData)
-% %         shortRasters = [shortRasters;shortRasterData];
-% %         shortRasterTimes = [shortRasterTimes;allTimes(allTimes < .2)'];
-% %     end
-    
+
     % event-centered analysis
 % %     tsPeths = eventsPeth(trials(trialIds),ts,tWindow);
 % %     tsISIInvPeths = eventsPeth(trials(trialIds),tsISIInv,tWindow);
