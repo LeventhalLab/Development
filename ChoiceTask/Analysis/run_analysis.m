@@ -40,7 +40,7 @@ for iNeuron = 1:1%size(analysisConf.neurons,1)
     logData = readLogData(logFile);
     trials = createTrialsStruct_simpleChoice(logData,nexStruct);
     all_trials{iNeuron} = trials; % for debugging
-    timingField = 'RT';
+    timingField = 'movementDirection';
     [trialIds,allTimes] = sortTrialsBy(trials,timingField); % forces to be 'correct'
     eventFieldnames = fieldnames(trials(trialIds(1)).timestamps);
     
@@ -99,7 +99,10 @@ for iNeuron = 1:1%size(analysisConf.neurons,1)
     sessionFR = 1 / mean(diff(ts));
     binMs = 50; % ms
     nBins = round((2*tWindow / .001) / binMs);
-    all_nBins = round((sessionSeconds / .001) / binMs);
+    nBins_tWindow = linspace(-tWindow,tWindow,nBins);
+    nBins_all = round((sessionSeconds / .001) / binMs);
+    nBins_all_tWindow = linspace(0,sessionSeconds,nBins_all);
+    
     
 % %     tsPeth = eventsPeth(trials(trialIds),ts,tWindow);
 % %     all_meanTiming(iNeuron) = mean(allTimes);
@@ -115,40 +118,22 @@ for iNeuron = 1:1%size(analysisConf.neurons,1)
     ipsiIdx = 0;
     contraIdx = 1;
     trials_correct = trials(trialIds);
-    trials_ipsi = trials_correct([trials_correct(:).movementDirection] == ipsiIdx);
-    trials_contra = trials_correct([trials_correct(:).movementDirection] == contraIdx);
-    tsPeths_ipsi = eventsPeth(trials_ipsi,ts,tWindow);
-    tsPeths_contra = eventsPeth(trials_contra,ts,tWindow);
     
-    [allCounts,allCenters] = hist(ts,all_nBins);
-    zCounts_ipsi = [];
-    if ~isempty(tsPeths_ipsi)
-        for iEvent = 1:8
-            for iTrial = 1:size(tsPeths_ipsi,1)
-                [counts,centers] = hist(tsPeths_ipsi{iTrial,iEvent},nBins);
-                zCounts = (counts - mean(allCounts)) / std(allCounts);
-                zCounts_ipsi(iEvent,iTrial,:) = zCounts;
+    tsPeths = eventsPeth(trials_correct,ts,tWindow);
+    
+    [allCounts,allCenters] = hist(ts,nBins_all_tWindow);
+    zCounts = [];
+    if ~isempty(tsPeths)
+        for iEvent = 1:size(tsPeths,2)
+            for iTrial = 1:size(tsPeths,1)
+                if iTrial == 63
+                    disp('h');
+                end
+                [counts,centers] = hist(tsPeths{iTrial,iEvent},nBins_tWindow);
+                    zCounts(iEvent,iTrial,:) = (counts - mean(allCounts)) / std(allCounts);
             end
         end
     end
-    zCounts_contra = [];
-    if ~isempty(tsPeths_contra)
-        for iEvent = 1:8
-            for iTrial = 1:size(tsPeths_contra,1)
-                [counts,centers] = hist(tsPeths_contra{iTrial,iEvent},nBins);
-                zCounts = (counts - mean(allCounts)) / std(allCounts);
-                zCounts_contra(iEvent,iTrial,:) = zCounts;
-            end
-        end
-    end
-% %     zCounts_contra = [];
-% %     if ~isempty(tsPeths_contra)
-% %         for iEvent = 1:8
-% %             [counts,centers] = hist([tsPeths_contra{:,iEvent}],nBins);
-% %             zCounts = ((counts / size(tsPeths_contra,1)) - mean(allCounts)) / std(allCounts);
-% %             zCounts_contra(iEvent,:) = zCounts;
-% %         end
-% %     end
 
 
     % event-centered analysis
