@@ -12,7 +12,7 @@ sevFile = '';
 all_meanTiming = [];
 all_trials = {};
 neuronPeth = [];
-for iNeuron = 1:1%size(analysisConf.neurons,1)
+for iNeuron = 1:size(analysisConf.neurons,1)
     fpass = [10 100];
     freqList = logFreqList(fpass,30);
     
@@ -126,14 +126,13 @@ for iNeuron = 1:1%size(analysisConf.neurons,1)
     if ~isempty(tsPeths)
         for iEvent = 1:size(tsPeths,2)
             for iTrial = 1:size(tsPeths,1)
-                if iTrial == 63
-                    disp('h');
-                end
                 [counts,centers] = hist(tsPeths{iTrial,iEvent},nBins_tWindow);
-                    zCounts(iEvent,iTrial,:) = (counts - mean(allCounts)) / std(allCounts);
+                zCounts(iEvent,iTrial,:) = (counts - mean(allCounts)) / std(allCounts);
             end
         end
     end
+    
+    ipsiContraHists();
 
 
     % event-centered analysis
