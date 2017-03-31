@@ -41,19 +41,19 @@ for iEvent = plotEventIds
     hold on;
     grid on;
     % plot(x,smooth(mean(zCounts_co(:,:)),nSmooth),'k','linewidth',2);
-    tmp = mean(zCounts_co(tidx_contra_correct,:));
+    tmp = mean(zCounts_co(tidx_contra_correct,:),1);
     all_tidx_contra_correct(iNeuron,iEvent,:,:) = tmp;
     plot(x,smooth(tmp,nSmooth),'linewidth',2);
     
-    tmp = mean(zCounts_co(tidx_ipsi_correct,:));
+    tmp = mean(zCounts_co(tidx_ipsi_correct,:),1);
     all_tidx_ipsi_correct(iNeuron,iEvent,:,:) = tmp;
     plot(x,smooth(tmp,nSmooth),'linewidth',2);
     
-    tmp = mean(zCounts_co(tidx_contra_incorrect,:));
+    tmp = mean(zCounts_co(tidx_contra_incorrect,:),1);
     all_tidx_contra_incorrect(iNeuron,iEvent,:,:) = tmp;
     plot(x,smooth(tmp,nSmooth),'linewidth',2);
     
-    tmp = mean(zCounts_co(tidx_ipsi_incorrect,:));
+    tmp = mean(zCounts_co(tidx_ipsi_incorrect,:),1);
     all_tidx_ipsi_incorrect(iNeuron,iEvent,:,:) = tmp;
     plot(x,smooth(tmp,nSmooth),'linewidth',2);
 
