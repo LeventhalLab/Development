@@ -5,6 +5,11 @@ tidx_ipsi_correct = find([trials.movementDirection] == 2 & [trials.correct] == 1
 tidx_contra_incorrect = find([trials.movementDirection] == 1 & [trials.correct] == 0);
 tidx_ipsi_incorrect = find([trials.movementDirection] == 2 & [trials.correct] == 0);
 
+all_tidx_contra_correct = [];
+all_tidx_ipsi_correct = [];
+all_tidx_contra_incorrect = [];
+all_tidx_ipsi_incorrect = [];
+
 all_RT = [];
 all_MT = [];
 for iTrial = tidx_correct
@@ -36,10 +41,22 @@ for iEvent = plotEventIds
     hold on;
     grid on;
     % plot(x,smooth(mean(zCounts_co(:,:)),nSmooth),'k','linewidth',2);
-    plot(x,smooth(mean(zCounts_co(tidx_contra_correct,:)),nSmooth),'linewidth',2);
-    plot(x,smooth(mean(zCounts_co(tidx_ipsi_correct,:)),nSmooth),'linewidth',2);
-    plot(x,smooth(mean(zCounts_co(tidx_contra_incorrect,:)),nSmooth),'--','linewidth',1);
-    plot(x,smooth(mean(zCounts_co(tidx_ipsi_incorrect,:)),nSmooth),'--','linewidth',1);
+    tmp = mean(zCounts_co(tidx_contra_correct,:));
+    all_tidx_contra_correct(iNeuron,iEvent,:,:) = tmp;
+    plot(x,smooth(tmp,nSmooth),'linewidth',2);
+    
+    tmp = mean(zCounts_co(tidx_ipsi_correct,:));
+    all_tidx_ipsi_correct(iNeuron,iEvent,:,:) = tmp;
+    plot(x,smooth(tmp,nSmooth),'linewidth',2);
+    
+    tmp = mean(zCounts_co(tidx_contra_incorrect,:));
+    all_tidx_contra_incorrect(iNeuron,iEvent,:,:) = tmp;
+    plot(x,smooth(tmp,nSmooth),'linewidth',2);
+    
+    tmp = mean(zCounts_co(tidx_ipsi_incorrect,:));
+    all_tidx_ipsi_incorrect(iNeuron,iEvent,:,:) = tmp;
+    plot(x,smooth(tmp,nSmooth),'linewidth',2);
+
     ylimVals = [-1 2];
     plot([0 0],ylimVals,'r');
     ylim(ylimVals);
