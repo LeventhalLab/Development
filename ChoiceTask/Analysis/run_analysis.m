@@ -6,12 +6,18 @@
 % compares some of the unit properties in a scatter plot
 % compareOFSWaveforms(csvWaveformFiles);
 tWindow = 2; % for scalograms, xlim is set to -1/+1 in formatting
-plotEventIds = [1 2 4 3 5 6 8]; % removed foodClick because it mirrors SideIn
+% plotEventIds = [1 2 4 3 5 6 8]; % removed foodClick because it mirrors SideIn
+eventFieldnames = {'cueOn';'centerIn';'tone';'centerOut';'sideIn';'sideOut';'foodRetrieval'};
 sevFile = '';
 
 all_meanTiming = [];
 all_trials = {};
 neuronPeth = [];
+
+all_tidx_contra_correct = [];
+all_tidx_ipsi_correct = [];
+all_tidx_contra_incorrect = [];
+all_tidx_ipsi_incorrect = [];
 for iNeuron = 1:size(analysisConf.neurons,1)
     fpass = [10 100];
     freqList = logFreqList(fpass,30);
@@ -118,7 +124,7 @@ for iNeuron = 1:size(analysisConf.neurons,1)
     % ipsi/contra analysis
     trials_correct = trials;
 %     trials_correct = trials(trialIds);
-    tsPeths = eventsPeth(trials_correct,ts,tWindow);
+    tsPeths = eventsPeth(trials_correct,ts,tWindow,eventFieldnames);
     [allCounts,allCenters] = hist(ts,nBins_all_tWindow);
     zCounts = [];
     if ~isempty(tsPeths)

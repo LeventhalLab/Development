@@ -42,28 +42,28 @@ for iCsv = 1:length(csvWaveformFiles)
     
     figure(h2);
     subplot(311);
-    hold on;
+    hold off;
     plot(cell2mat(scatterData(1,:)),cell2mat(scatterData(2,:)),'.','MarkerSize',25);
     labelpoints(cell2mat(scatterData(1,:)),cell2mat(scatterData(2,:)),scatterLabels,'FontSize',smallFontSize);
     xlabel('Peak to Valley Tick');
     ylabel('Mean FR');
 
     subplot(312);
-    hold on;
+    hold off;
     plot(cell2mat(scatterData(4,:)),cell2mat(scatterData(2,:)),'.','MarkerSize',25);
     labelpoints(cell2mat(scatterData(4,:)),cell2mat(scatterData(2,:)),scatterLabels, 'FontSize',smallFontSize);
     xlabel('PROP ISI');
     ylabel('Mean FR');
 
     subplot(313);
-    hold on;
+    hold off;
     plot(cell2mat(scatterData(4,:)),cell2mat(scatterData(1,:)),'.','MarkerSize',25);
     labelpoints(cell2mat(scatterData(4,:)),cell2mat(scatterData(1,:)),scatterLabels, 'FontSize',smallFontSize);
     xlabel('PROP ISI');
     ylabel('Peak to Valley Tick');
     
-    plot3(scatterdata(1,:),scatterData(2,:),scatterData(4,:));
-    
+    plot3(cell2mat(scatterData(1,:)),cell2mat(scatterData(4,:)), cell2mat(scatterData(2,:)), '.', 'MarkerSize', 25);
+    hold on;
     
 end
 
