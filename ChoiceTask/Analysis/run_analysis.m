@@ -5,7 +5,7 @@
 % compileOFSWaveforms(waveformDir);
 % compares some of the unit properties in a scatter plot
 % compareOFSWaveforms(csvWaveformFiles);
-tWindow = 1; % for scalograms, xlim is set to -1/+1 in formatting
+tWindow = 2; % for scalograms, xlim is set to -1/+1 in formatting
 plotEventIds = [1 2 4 3 5 6 8]; % removed foodClick because it mirrors SideIn
 sevFile = '';
 
@@ -62,6 +62,7 @@ for iNeuron = 1:size(analysisConf.neurons,1)
     rows = sessionConf.session_electrodes.channel == electrodeChannels;
     channels = sessionConf.session_electrodes.channel(any(rows')');
     lfpChannel = channels(1);
+% lfpChannel = 65;
 
     if ~exist('sevFile','var') || ~strcmp(sevFile,sessionConf.sevFiles{lfpChannel})
 %             sevFile = sessionConf.sevFiles{lfpChannel};
@@ -99,11 +100,11 @@ for iNeuron = 1:size(analysisConf.neurons,1)
     sessionFR = 1 / mean(diff(ts));
     binMs = 50; % ms
     nBins = round((2*tWindow / .001) / binMs);
-    nBins_tWindow = linspace(-tWindow,tWindow,nBins);
+    nBinHalfWidth = ((tWindow*2) / nBins) / 2;
+    nBins_tWindow = linspace(-tWindow+nBinHalfWidth,tWindow-nBinHalfWidth,nBins);
     nBins_all = round((sessionSeconds / .001) / binMs);
     nBins_all_tWindow = linspace(0,sessionSeconds,nBins_all);
-    
-    
+
 % %     tsPeth = eventsPeth(trials(trialIds),ts,tWindow);
 % %     all_meanTiming(iNeuron) = mean(allTimes);
 % % 
@@ -115,12 +116,9 @@ for iNeuron = 1:size(analysisConf.neurons,1)
 % %     end
     
     % ipsi/contra analysis
-    ipsiIdx = 0;
-    contraIdx = 1;
-    trials_correct = trials(trialIds);
-    
+    trials_correct = trials;
+%     trials_correct = trials(trialIds);
     tsPeths = eventsPeth(trials_correct,ts,tWindow);
-    
     [allCounts,allCenters] = hist(ts,nBins_all_tWindow);
     zCounts = [];
     if ~isempty(tsPeths)
@@ -132,7 +130,8 @@ for iNeuron = 1:size(analysisConf.neurons,1)
         end
     end
     
-    ipsiContraHists();
+%     ipsiContraHists();
+    ipsiContraZTrialCompare();
 
 
     % event-centered analysis

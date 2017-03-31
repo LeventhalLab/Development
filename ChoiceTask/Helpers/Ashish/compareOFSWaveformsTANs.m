@@ -62,6 +62,8 @@ for iCsv = 1:length(csvWaveformFiles)
     xlabel('PROP ISI');
     ylabel('Peak to Valley Tick');
     
+    plot3(scatterdata(1,:),scatterData(2,:),scatterData(4,:));
+    
     
 end
 
