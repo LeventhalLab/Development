@@ -12,24 +12,26 @@ smallFontSize = 8;
 % % end
 
 
-[maxHistValues,maxHistTimes] = max(abs(neuronPeth(:,1:8,:)),[],3);
+[maxHistValues,maxHistTimes] = max(abs(neuronPeth(:,1:numel(eventFieldnames),:)),[],3);
 % [maxHistValues,maxHistTimes] = max((neuronPeth),[],3);
-[~,eventIds] = max(maxHistValues,[],2);
+[maxHistValues_max,eventIds] = max(maxHistValues,[],2);
+
+highZIds = find(maxHistValues_max > 1);
+eventIds_by_maxHistValues = eventIds; % used by other script
+
 maxHistTimes_of_eventIds = diag(maxHistTimes(:,eventIds));
 [~,sorted_maxHistTimes] = sort(maxHistTimes_of_eventIds,'ascend');
 eventIds = eventIds(sorted_maxHistTimes);
 [sorted_eventIds,sorted_eventKeys] = sort(eventIds);
 sorted_eventKeys = sorted_maxHistTimes(sorted_eventKeys);
 
-
-
 % [v3,k3] = sort(all_meanTiming);
 neuronPethSortedByEvent = neuronPeth(sorted_eventKeys,:,:);
 
 figure('position',[100 100 1100 800]);
 iSubplot = 1;
-for iEvent = plotEventIds
-    subplot(1,numel(plotEventIds),iSubplot);
+for iEvent = 1:numel(eventFieldnames)
+    subplot(1,numel(eventFieldnames),iSubplot);
     
     imagesc(squeeze(neuronPethSortedByEvent(:,iEvent,:)));
     hold on;

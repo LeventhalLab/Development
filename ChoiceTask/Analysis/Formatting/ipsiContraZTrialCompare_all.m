@@ -1,8 +1,9 @@
 figure('position',[0 0 1600 700]);
 iSubplot = 1;
 x = linspace(-tWindow,tWindow,size(zCounts,3));
-neurons = 1;%[1,3,9,5,18,19,10,16,22,25,26,38,30,39,41,51,58,63,65,70,71,80,87,74,75];
-% neurons = find(eventIds == 4);
+% neurons = [1,3,9,5,18,19,10,16,22,25,26,38,30,39,41,51,58,63,65,70,71,80,87,74,75];
+eventClassifier = 7;
+neurons = find(eventIds_by_maxHistValues == eventClassifier);
 onlyPlotEvents = [1:7];
 nSmooth = 3;
 rows = 5;
@@ -25,7 +26,11 @@ for iEvent = onlyPlotEvents
     plot(x,smooth(nanmean(cur_all_tidx_ipsi_incorrect,1),nSmooth),'linewidth',0.75);
     ylim([-0.5 1]);
     xlim([-1 1]);
-    title(eventFieldnames{iEvent});
+    if iEvent == eventClassifier
+        title(['***',eventFieldnames{iEvent},'***']);
+    else
+        title(eventFieldnames{iEvent});
+    end
     if iSubplot == 1
         lgd = legend(legendLabels,'location','south');
         lgd.FontSize = 10;

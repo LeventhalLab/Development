@@ -48,7 +48,6 @@ for iNeuron = 1:size(analysisConf.neurons,1)
     all_trials{iNeuron} = trials; % for debugging
     timingField = 'movementDirection';
     [trialIds,allTimes] = sortTrialsBy(trials,timingField); % forces to be 'correct'
-    eventFieldnames = fieldnames(trials(trialIds(1)).timestamps);
     
     % load timestamps for neuron
     for iNexNeurons=1:length(nexStruct.neurons)
@@ -111,15 +110,15 @@ for iNeuron = 1:size(analysisConf.neurons,1)
     nBins_all = round((sessionSeconds / .001) / binMs);
     nBins_all_tWindow = linspace(0,sessionSeconds,nBins_all);
 
-% %     tsPeth = eventsPeth(trials(trialIds),ts,tWindow);
-% %     all_meanTiming(iNeuron) = mean(allTimes);
-% % 
-% %     [allCounts,allCenters] = hist(ts,all_nBins);
-% %     for iEvent = 1:8
-% %         [counts,centers] = hist([tsPeth{:,iEvent}],nBins);
-% %         zCounts = ((counts / size(tsPeth,1)) - mean(allCounts)) / std(allCounts);
-% %         neuronPeth(iNeuron,iEvent,:) = zCounts;
-% %     end
+    tsPeth = eventsPeth(trials(trialIds),ts,tWindow,eventFieldnames);
+    all_meanTiming(iNeuron) = mean(allTimes);
+
+    [allCounts,allCenters] = hist(ts,all_nBins);
+    for iEvent = 1:numel(eventFieldnames)
+        [counts,centers] = hist([tsPeth{:,iEvent}],nBins);
+        zCounts = ((counts / size(tsPeth,1)) - mean(allCounts)) / std(allCounts);
+        neuronPeth(iNeuron,iEvent,:) = zCounts;
+    end
     
     % ipsi/contra analysis
     trials_correct = trials;
