@@ -5,7 +5,7 @@
 % compileOFSWaveforms(waveformDir);
 % compares some of the unit properties in a scatter plot
 % compareOFSWaveforms(csvWaveformFiles);
-tWindow = 2; % for scalograms, xlim is set to -1/+1 in formatting
+tWindow = 1; % for scalograms, xlim is set to -1/+1 in formatting
 % plotEventIds = [1 2 4 3 5 6 8]; % removed foodClick because it mirrors SideIn
 eventFieldnames = {'cueOn';'centerIn';'tone';'centerOut';'sideIn';'sideOut';'foodRetrieval'};
 sevFile = '';
@@ -67,7 +67,6 @@ for iNeuron = 1:size(analysisConf.neurons,1)
     rows = sessionConf.session_electrodes.channel == electrodeChannels;
     channels = sessionConf.session_electrodes.channel(any(rows')');
     lfpChannel = channels(1);
-% lfpChannel = 65;
 
     if ~exist('sevFile','var') || ~strcmp(sevFile,sessionConf.sevFiles{lfpChannel})
 %             sevFile = sessionConf.sevFiles{lfpChannel};
@@ -110,20 +109,21 @@ for iNeuron = 1:size(analysisConf.neurons,1)
     nBins_all = round((sessionSeconds / .001) / binMs);
     nBins_all_tWindow = linspace(0,sessionSeconds,nBins_all);
 
-    tsPeth = eventsPeth(trials(trialIds),ts,tWindow,eventFieldnames);
-    all_meanTiming(iNeuron) = mean(allTimes);
+    tsPeths = eventsPeth(trials(trialIds),ts,tWindow,eventFieldnames);
+%     all_meanTiming(iNeuron) = mean(allTimes);
 
-    [allCounts,allCenters] = hist(ts,all_nBins);
+    [allCounts,allCenters] = hist(ts,nBins_all);
     for iEvent = 1:numel(eventFieldnames)
-        [counts,centers] = hist([tsPeth{:,iEvent}],nBins);
-        zCounts = ((counts / size(tsPeth,1)) - mean(allCounts)) / std(allCounts);
+        [counts,centers] = hist([tsPeths{:,iEvent}],nBins);
+        zCounts = ((counts / size(tsPeths,1)) - mean(allCounts)) / std(allCounts);
         neuronPeth(iNeuron,iEvent,:) = zCounts;
     end
     
     % ipsi/contra analysis
-    trials_correct = trials;
+%     trials_correct = trials;
 %     trials_correct = trials(trialIds);
-    tsPeths = eventsPeth(trials_correct,ts,tWindow,eventFieldnames);
+%     tsPeths = eventsPeth(trials_correct,ts,tWindow,eventFieldnames);
+    tsPeths = eventsPeth(trials,ts,tWindow,eventFieldnames);
     [allCounts,allCenters] = hist(ts,nBins_all_tWindow);
     zCounts = [];
     if ~isempty(tsPeths)

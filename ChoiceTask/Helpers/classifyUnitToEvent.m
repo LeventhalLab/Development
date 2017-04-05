@@ -16,7 +16,6 @@ smallFontSize = 8;
 % [maxHistValues,maxHistTimes] = max((neuronPeth),[],3);
 [maxHistValues_max,eventIds] = max(maxHistValues,[],2);
 
-highZIds = find(maxHistValues_max > 1);
 eventIds_by_maxHistValues = eventIds; % used by other script
 
 maxHistTimes_of_eventIds = diag(maxHistTimes(:,eventIds));

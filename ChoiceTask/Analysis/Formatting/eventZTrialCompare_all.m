@@ -1,3 +1,4 @@
+% % highZIds = find(maxHistValues_max > 0.5);
 x = linspace(-tWindow,tWindow,size(zCounts,3));
 nSmooth = 3;
 colors = jet(numel(eventFieldnames));
@@ -5,13 +6,13 @@ colors = jet(numel(eventFieldnames));
 figure('position',[0 0 1600 700]);
 iSubplot = 1;
 rows = 2;
-cols = numel(onlyPlotEvents);
+cols = numel(eventFieldnames);
 for iMovement = 1:2
     for iPlotEvent = 1:numel(eventFieldnames)
         subplot(rows,cols,iSubplot);
         for iEvent = 1:numel(eventFieldnames) % classifier
             neurons = find(eventIds_by_maxHistValues == iEvent);
-            neurons = neurons(ismember(neurons,highZIds));
+% %             neurons = neurons(ismember(neurons,highZIds));
             if iMovement == 1
                 cur_all_tidx_correct = (squeeze(all_tidx_contra_correct(neurons,iPlotEvent,:,:)));
             else
@@ -22,7 +23,10 @@ for iMovement = 1:2
             plot(x,smooth(nanmean(cur_all_tidx_correct,1),nSmooth),'linewidth',2,'color',colors(iEvent,:));
             ylim([-0.5 1]);
             xlim([-1 1]);
-            title(eventFieldnames{iPlotEvent},'color',colors(iPlotEvent,:));
+            if iEvent == iPlotEvent
+                title([eventFieldnames{iPlotEvent},' (',num2str(size(cur_all_tidx_correct,1)),')'],...
+                    'color',colors(iPlotEvent,:));
+            end
             if iMovement == 1 && iPlotEvent == 1
                 ylabel('z-contra');
             elseif iMovement == 2 && iPlotEvent == 1
@@ -35,14 +39,14 @@ end
 
 figure('position',[0 0 1600 900]);
 iSubplot = 1;
-rows = numel(onlyPlotEvents);
-cols = numel(onlyPlotEvents);
+rows = numel(eventFieldnames);
+cols = numel(eventFieldnames);
 
 for iEvent = 1:numel(eventFieldnames) % classifier
     for iPlotEvent = 1:numel(eventFieldnames)
         subplot(rows,cols,iSubplot);
         neurons = find(eventIds_by_maxHistValues == iEvent);
-        neurons = neurons(ismember(neurons,highZIds));
+% %         neurons = neurons(ismember(neurons,highZIds));
         cur_all_tidx_contra_correct = (squeeze(all_tidx_contra_correct(neurons,iPlotEvent,:,:)));
         cur_all_tidx_ipsi_correct = (squeeze(all_tidx_ipsi_correct(neurons,iPlotEvent,:,:)));
         
@@ -60,7 +64,9 @@ for iEvent = 1:numel(eventFieldnames) % classifier
         title(eventFieldnames{iPlotEvent},'color',colors(iPlotEvent,:));
         if iPlotEvent == 1
             ylabel('z-score');
-            lgd = legend('contra','ipsi','location','northwest');
+            lgd = legend(['contra (',num2str(size(cur_all_tidx_contra_correct,1)),')'],...
+                ['ipsi (',num2str(size(cur_all_tidx_ipsi_correct,1)),')'],...
+                'location','northwest');
             lgd.FontSize = 6;
             legend('boxoff');
         end
