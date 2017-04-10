@@ -62,6 +62,7 @@ for iCsv = 1:length(csvWaveformFiles)
     xlabel('PROP ISI');
     ylabel('Peak to Valley Tick');
     
+    
     p = scatter3(cell2mat(scatterData(1,:)),cell2mat(scatterData(4,:)), cell2mat(scatterData(2,:)));
     p.MarkerFaceColor = [0 0.5 0.5];
     hold on;

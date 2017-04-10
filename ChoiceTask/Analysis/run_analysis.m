@@ -12,6 +12,7 @@ sevFile = '';
 
 all_meanTiming = [];
 all_trials = {};
+all_tsPeths = {};
 neuronPeth = [];
 
 all_tidx_contra_correct = [];
@@ -110,6 +111,7 @@ for iNeuron = 1:size(analysisConf.neurons,1)
     nBins_all_tWindow = linspace(0,sessionSeconds,nBins_all);
 
     tsPeths = eventsPeth(trials(trialIds),ts,tWindow,eventFieldnames);
+    all_tsPeths{iNeuron} = tsPeths;
 %     all_meanTiming(iNeuron) = mean(allTimes);
 
     [allCounts,allCenters] = hist(ts,nBins_all);
