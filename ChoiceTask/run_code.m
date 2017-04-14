@@ -1,78 +1,73 @@
-tidx_correct = find([trials.correct] == 1);
-tidx_incorrect = find([trials.correct] == 0);
-tidx_contra_correct = find([trials.movementDirection] == 1 & [trials.correct] == 1);
-tidx_ipsi_correct = find([trials.movementDirection] == 2 & [trials.correct] == 1);
-tidx_contra_incorrect = find([trials.movementDirection] == 1 & [trials.correct] == 0);
-tidx_ipsi_incorrect = find([trials.movementDirection] == 2 & [trials.correct] == 0);
+useEvents = 4;
+snipTs = 0.2; % *2 tail
+xsRT = [];
+xsMT = [];
+ys = [];
+doplot = true;
+eventNeuronIds = 1:size(all_tsPeths,2);
+eventNeuronIds = find(eventIds_by_maxHistValues == useEvents);
 
-all_RT = [];
-all_MT = [];
-for iTrial = tidx_correct
-    all_RT = [all_RT trials(iTrial).timing.RT];
-    all_MT = [all_MT trials(iTrial).timing.MT];
+for iNeuron = 1:numel(eventNeuronIds)
+    neuronTrials = all_trials{1,(iNeuron)};
+    correct_trials = neuronTrials([neuronTrials(:).correct] == 1);
+    cur_tsPeths = all_tsPeths{1,iNeuron};
+    sortArr = [];
+    ISIs = [];
+    for iTrial = 1:size(cur_tsPeths,1)
+        cur_tsPeth = cur_tsPeths{iTrial,useEvents};
+%         cur_tsPeth_snippet = cur_tsPeth(cur_tsPeth > -snipTs & cur_tsPeth < snipTs);
+%         sortArr(iTrial) = var(diff(cur_tsPeth_snippet));
+        ISI = diff(cur_tsPeth);
+        ISIs(iTrial) = median(ISI);
+    end
+    ISIsmean = median(ISIs);
+    ISIsstd = std(ISIs);
+    
+    allRTs = [];
+    allMTs = [];
+    if doplot
+        figure('position',[100 400 1200 400]);
+        subplot(131);
+        hold on;
+    end
+    for iTrial = 1:size(cur_tsPeths,1)
+        cur_tsPeth = cur_tsPeths{iTrial,useEvents};
+        cur_tsPeth_snippet = cur_tsPeth(cur_tsPeth > -snipTs & cur_tsPeth < snipTs*2);
+        ISI = diff(cur_tsPeth_snippet);
+        lowISI = numel(find(ISI <= (ISIsmean - ISIsstd))) / numel(ISI);
+        medISI = numel(find(ISI > (ISIsmean - ISIsstd) & ISI < (ISIsmean + ISIsstd))) / numel(ISI);
+        highISI = numel(find(ISI >= (ISIsmean + ISIsstd))) / numel(ISI);
+        if doplot
+            plot([1,2,3],[(lowISI),(medISI),(highISI)]);
+        end
+        CV = ((lowISI) + (highISI)) - (medISI);
+        sortArr(iTrial) = CV;
+        allRTs(iTrial) = correct_trials(iTrial).timing.RT;
+        allMTs(iTrial) = correct_trials(iTrial).timing.MT;
+        
+        if numel(ISI) > 10
+            xsRT = [xsRT correct_trials(iTrial).timing.RT];
+            xsMT = [xsMT correct_trials(iTrial).timing.MT];
+            ys = [ys CV];
+        end
+    end
+    
+    if doplot
+        [v,kRT] = sort(allRTs);
+        subplot(132);
+        plotSpikeRaster(cur_tsPeths(kRT,useEvents),'PlotType','scatter');
+        hold on;
+        allRTs = allRTs(kRT);
+        plot(allRTs-1,[1:numel(allRTs)],'r*');
+        title('RT')
+        [v,kMT] = sort(allMTs);
+        subplot(133);
+        plotSpikeRaster(cur_tsPeths(kMT,useEvents),'PlotType','scatter');
+        hold on;
+        allMTs = allMTs(kMT);
+        plot(allMTs-1,[1:numel(allMTs)],'b*');
+        title('MT')
+    end
 end
-tidx_lowRT = find(all_RT < (median(all_RT) - std(all_RT)));
-tidx_lowRT_contra = tidx_lowRT(ismember(tidx_lowRT,tidx_contra_correct));
-tidx_lowRT_ipsi = tidx_lowRT(ismember(tidx_lowRT,tidx_ipsi_correct));
-tidx_highRT = find(all_RT > (median(all_RT) + std(all_RT)));
-tidx_highRT_contra = tidx_highRT(ismember(tidx_highRT,tidx_contra_correct));
-tidx_highRT_ipsi = tidx_highRT(ismember(tidx_highRT,tidx_ipsi_correct));
 
-tidx_lowMT = find(all_MT < (median(all_MT) - std(all_MT)));
-tidx_lowMT_contra = tidx_lowMT(ismember(tidx_lowMT,tidx_contra_correct));
-tidx_lowMT_ipsi = tidx_lowMT(ismember(tidx_lowMT,tidx_ipsi_correct));
-tidx_highMT = find(all_MT > (median(all_MT) + std(all_MT)));
-tidx_highMT_contra = tidx_highMT(ismember(tidx_highMT,tidx_contra_correct));
-tidx_highMT_ipsi = tidx_highMT(ismember(tidx_highMT,tidx_ipsi_correct));
-
-close all
-figure('position',[0 0 1600 800]);
-nSmooth = 6;
-x = linspace(-tWindow,tWindow,size(zCounts,3));
-
-subplot(131);
-hold on;
-grid on;
-% plot(x,smooth(mean(zCounts_co(:,:)),nSmooth),'k','linewidth',2);
-plot(x,smooth(mean(zCounts_co(tidx_contra_correct,:)),nSmooth),'linewidth',2);
-plot(x,smooth(mean(zCounts_co(tidx_ipsi_correct,:)),nSmooth),'linewidth',2);
-plot(x,smooth(mean(zCounts_co(tidx_contra_incorrect,:)),nSmooth),'--','linewidth',1);
-plot(x,smooth(mean(zCounts_co(tidx_ipsi_incorrect,:)),nSmooth),'--','linewidth',1);
-ylimVals = [-1 2];
-plot([0 0],ylimVals,'r');
-ylim(ylimVals);
-legend('contra correct','ipsi correct','contra incorrect','ipsi incorrect',...
-    'location','northoutside');
-title('center out');
-
-subplot(132);
-hold on;
-grid on;
-plot(x,smooth(mean(zCounts_co(tidx_lowRT,:)),nSmooth),'linewidth',2);
-plot(x,smooth(mean(zCounts_co(tidx_lowRT_contra,:)),nSmooth),'linewidth',1);
-plot(x,smooth(mean(zCounts_co(tidx_lowRT_ipsi,:)),nSmooth),'linewidth',1);
-plot(x,smooth(mean(zCounts_co(tidx_highRT,:)),nSmooth),'linewidth',2);
-plot(x,smooth(mean(zCounts_co(tidx_highRT_contra,:)),nSmooth),'linewidth',1);
-plot(x,smooth(mean(zCounts_co(tidx_highRT_ipsi,:)),nSmooth),'linewidth',1);
-ylimVals = [-1 2];
-plot([0 0],ylimVals,'r');
-ylim(ylimVals);
-legend('Low RT','Low RT - contra','Low RT - ipsi','High RT','High RT - contra','High RT - ipsi',...
-    'location','northoutside');
-title('center out');
-
-subplot(133);
-hold on;
-grid on;
-plot(x,smooth(mean(zCounts_co(tidx_lowMT,:)),nSmooth),'linewidth',2);
-plot(x,smooth(mean(zCounts_co(tidx_lowMT_contra,:)),nSmooth),'linewidth',1);
-plot(x,smooth(mean(zCounts_co(tidx_lowMT_ipsi,:)),nSmooth),'linewidth',1);
-plot(x,smooth(mean(zCounts_co(tidx_highMT,:)),nSmooth),'linewidth',2);
-plot(x,smooth(mean(zCounts_co(tidx_highMT_contra,:)),nSmooth),'linewidth',1);
-plot(x,smooth(mean(zCounts_co(tidx_highMT_ipsi,:)),nSmooth),'linewidth',1);
-ylimVals = [-1 2];
-plot([0 0],ylimVals,'r');
-ylim(ylimVals);
-legend('Low MT','Low MT - contra','Low MT - ipsi','High MT','High MT - contra','High MT - ipsi',...
-    'location','northoutside');
-title('center out');
+close 
