@@ -51,7 +51,7 @@ for iNeuron = 1:size(analysisConf.neurons,1)
     [trialIds,allTimes] = sortTrialsBy(trials,timingField); % forces to be 'correct'
     
     % load timestamps for neuron
-    for iNexNeurons=1:length(nexStruct.neurons)
+    for iNexNeurons = 1:length(nexStruct.neurons)
         if strcmp(nexStruct.neurons{iNexNeurons}.name,analysisConf.neurons{iNeuron})
             disp(['Using timestamps from ',nexStruct.neurons{iNexNeurons}.name]);
             ts = nexStruct.neurons{iNexNeurons}.timestamps;
@@ -110,6 +110,7 @@ for iNeuron = 1:size(analysisConf.neurons,1)
     nBins_all = round((sessionSeconds / .001) / binMs);
     nBins_all_tWindow = linspace(0,sessionSeconds,nBins_all);
 
+    all_ts{iNeuron} = ts;
     tsPeths = eventsPeth(trials(trialIds),ts,tWindow,eventFieldnames);
     all_tsPeths{iNeuron} = tsPeths;
 %     all_meanTiming(iNeuron) = mean(allTimes);

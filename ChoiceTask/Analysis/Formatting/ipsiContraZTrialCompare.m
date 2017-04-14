@@ -1,4 +1,4 @@
-doplot = true;
+doplot = false;
 
 tidx_correct = find([trials.correct] == 1);
 tidx_incorrect = find([trials.correct] == 0);
