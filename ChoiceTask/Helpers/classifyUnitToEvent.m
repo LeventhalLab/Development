@@ -11,7 +11,7 @@ smallFontSize = 8;
 % %     all_meanTiming(iNeuron) = mean(allTimes(trialIds));
 % % end
 
-useEvents = [1:6];
+useEvents = [1:7];
 [maxHistValues,maxHistTimes] = max(abs(neuronPeth(:,useEvents,:)),[],3);
 % [maxHistValues,maxHistTimes] = max((neuronPeth),[],3);
 [maxHistValues_max,eventIds] = max(maxHistValues,[],2);
