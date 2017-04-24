@@ -5,7 +5,7 @@ for iNeuron = 1:size(analysisConf.neurons,1)
     sessionConf = analysisConf.sessionConfs{iNeuron};
     [electrodeName,electrodeSite,electrodeChannels] = getElectrodeInfo(neuronName);
     rows = sessionConf.session_electrodes.channel == electrodeChannels;
-    channelData = sessionConf.session_electrodes(rows,:);
+    channelData = sessionConf.session_electrodes(any(rows)',:);
     event_id = eventIds_by_maxHistValues(iNeuron);
     if isempty(channelData)
         continue;
@@ -55,4 +55,4 @@ for ii = 1:size(colors,1)
 end
 
 legend(ax,{'<1 s/s','<2 s/s','<5 s/s','<10 s/s','<20 s/s','<40 s/s','>40 s/s'});
-tightfig;
+% tightfig;

@@ -5,7 +5,7 @@
 % compileOFSWaveforms(waveformDir);
 % compares some of the unit properties in a scatter plot
 % compareOFSWaveforms(csvWaveformFiles);
-tWindow = 1; % for scalograms, xlim is set to -1/+1 in formatting
+tWindow = 2; % for scalograms, xlim is set to -1/+1 in formatting
 % plotEventIds = [1 2 4 3 5 6 8]; % removed foodClick because it mirrors SideIn
 eventFieldnames = {'cueOn';'centerIn';'tone';'centerOut';'sideIn';'sideOut';'foodRetrieval'};
 sevFile = '';
