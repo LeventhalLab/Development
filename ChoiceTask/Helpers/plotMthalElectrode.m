@@ -1,6 +1,7 @@
 function [atlas_ims,k] = plotMthalElectrode(atlas_ims,AP,ML,DV,nasPath,dotColor)
 mm_px = 269; % calibrated from atlas
 dotSize = round(mm_px / 25);
+% dotSize = round(mm_px / 3);
 atlas_mls = [1.4,1.9,2.4];
 % [ap ml x_px y_px]
 atlas_cal = [-3.2 -7.2 500.75 901;...

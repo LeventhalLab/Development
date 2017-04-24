@@ -10,7 +10,7 @@ cols = numel(eventFieldnames);
 for iMovement = 1:2
     for iPlotEvent = 1:numel(eventFieldnames)
         subplot(rows,cols,iSubplot);
-        for iEvent = 1:numel(eventFieldnames) % classifier
+        for iEvent = 3:4%1:numel(eventFieldnames) % classifier
             neurons = find(eventIds_by_maxHistValues == iEvent);
 % %             neurons = neurons(ismember(neurons,highZIds));
             if iMovement == 1
