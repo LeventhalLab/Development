@@ -43,6 +43,9 @@ for iNeuron = 1:size(analysisConf.neurons,1)
         isNewSession = false;
     end
     
+    check_nexData(nexStruct)
+    continue;
+    
     logFile = getLogPath(sessionConf.leventhalPaths.rawdata);
     logData = readLogData(logFile);
     trials = createTrialsStruct_simpleChoice(logData,nexStruct);
