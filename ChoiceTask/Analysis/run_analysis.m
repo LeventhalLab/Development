@@ -43,8 +43,7 @@ for iNeuron = 1:size(analysisConf.neurons,1)
         isNewSession = false;
     end
     
-    check_nexData(nexStruct)
-    continue;
+    
     
     logFile = getLogPath(sessionConf.leventhalPaths.rawdata);
     logData = readLogData(logFile);
@@ -63,6 +62,9 @@ for iNeuron = 1:size(analysisConf.neurons,1)
             tsISIInv = ts(~Lia);
         end
     end
+    
+    check_nexData(nexStruct)
+    continue;
 
     % load SEV file and filter it for LFP analyses
     needsLfp = false;
