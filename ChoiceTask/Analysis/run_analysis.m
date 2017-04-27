@@ -47,6 +47,8 @@ for iNeuron = 1:size(analysisConf.neurons,1)
     
     logFile = getLogPath(sessionConf.leventhalPaths.rawdata);
     logData = readLogData(logFile);
+    % *** TEST
+    nexStruct = fixMissingEvents(logData,nexStruct);
     trials = createTrialsStruct_simpleChoice(logData,nexStruct);
     all_trials{iNeuron} = trials; % for debugging
     timingField = 'movementDirection';
@@ -63,6 +65,7 @@ for iNeuron = 1:size(analysisConf.neurons,1)
         end
     end
     
+    % !!! REMOVE
     check_nexData(nexStruct)
     continue;
 
