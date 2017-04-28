@@ -14,7 +14,7 @@ for iNeuron = 1:size(analysisConf.neurons,1)
     end
     [electrodeName,electrodeSite,electrodeChannels] = getElectrodeInfo(neuronName);
     rows = sessionConf.session_electrodes.channel == electrodeChannels;
-    channelData = sessionConf.session_electrodes(rows,:);
+    channelData = sessionConf.session_electrodes(any(rows')',:);
     if ~isempty(channelData)
         AP = channelData{1,'ap'};
         ML = channelData{1,'ml'};

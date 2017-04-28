@@ -10,9 +10,19 @@ smallFontSize = 8;
 % %     [trialIds,allTimes] = sortTrialsBy(all_trials{1,iNeuron},timingField);
 % %     all_meanTiming(iNeuron) = mean(allTimes(trialIds));
 % % end
-
+colors = jet(7);
+colors_subject = jet(4);
 useEvents = [1:7];
-[maxHistValues,maxHistTimes] = max(abs(neuronPeth(:,useEvents,:)),[],3);
+range_R0088 = 1:40;
+range_R0117 = 41:62;
+range_R0142 = 63:300;
+range_R0154 = 301:343;
+useRange = 1:343;%range_R0142;
+neuronPeth_sub = neuronPeth(useRange,useEvents,:);
+all_tidx_contra_correct_sub = all_tidx_contra_correct(useRange,:,:,:);
+all_tidx_ipsi_correct_sub = all_tidx_ipsi_correct(useRange,:,:,:);
+
+[maxHistValues,maxHistTimes] = max(abs(neuronPeth_sub),[],3);
 % [maxHistValues,maxHistTimes] = max((neuronPeth),[],3);
 [maxHistValues_max,eventIds] = max(maxHistValues,[],2);
 
@@ -25,12 +35,12 @@ eventIds = eventIds(sorted_maxHistTimes);
 sorted_eventKeys = sorted_maxHistTimes(sorted_eventKeys);
 
 % [v3,k3] = sort(all_meanTiming);
-neuronPethSortedByEvent = neuronPeth(sorted_eventKeys,:,:);
+neuronPethSortedByEvent = neuronPeth_sub(sorted_eventKeys,:,:);
 
-figure('position',[100 100 1100 800]);
+figure('position',[0 0 1200 1000]);
 iSubplot = 1;
 for iEvent = 1:numel(eventFieldnames)
-    subplot(1,numel(eventFieldnames),iSubplot);
+    subplot(1,numel(eventFieldnames)+2,iSubplot);
     
     imagesc(squeeze(neuronPethSortedByEvent(:,iEvent,:)));
     hold on;
@@ -55,15 +65,60 @@ for iEvent = 1:numel(eventFieldnames)
     if iEvent == 1
         yticklabels(sorted_eventIds);
         ylabel('max z-event');
-        title({analysisConf.subjects__name,titleStr});
-    else
-        title(titleStr);
+%         title({analysisConf.subjects__name,titleStr});
     end
+    title(titleStr,'color',colors(iEvent,:));
     xlabel('time (s)');
     set(gca,'fontSize',smallFontSize);
     
     iSubplot = iSubplot + 1;
 end
+
+neuronNames_sub = analysisConf.neurons(useRange);
+sessionConfs_sub = analysisConf.sessionConfs(useRange);
+for iNeuron = 1:numel(sorted_eventKeys)
+    neuronName = neuronNames_sub{sorted_eventKeys(iNeuron)};
+    subjects__name = neuronName(1:5);
+    switch subjects__name
+        case 'R0088'
+            colorsIdx = 1;
+        case 'R0117'
+            colorsIdx = 2;
+        case 'R0142'
+            colorsIdx = 3;
+        case 'R0154'
+            colorsIdx = 4;
+    end
+    sessionConf = sessionConfs_sub{sorted_eventKeys(iNeuron)};
+    [electrodeName,electrodeSite,electrodeChannels] = getElectrodeInfo(neuronName);
+    rows = sessionConf.session_electrodes.channel == electrodeChannels;
+    channelData = sessionConf.session_electrodes(any(sum(rows,2)),:);
+    AP = channelData{1,'ap'};
+    ML = channelData{1,'ml'};
+    DV = channelData{1,'dv'};
+    
+    subplot(1,numel(eventFieldnames)+2,numel(eventFieldnames)+1);
+    plot(AP,iNeuron,'.','markerSize',10,'color',colors(sorted_eventIds(iNeuron),:));
+    hold on;grid on;
+    xlabel('AP');
+    set(gca,'ydir','reverse');
+    xlim([-3.5 -2.8]);
+    yticks(ytickVals);
+    yticklabels(sorted_eventIds);
+    set(gca,'fontSize',smallFontSize);
+    
+    subplot(1,numel(eventFieldnames)+2,numel(eventFieldnames)+2);
+    plot(DV,iNeuron,'.','markerSize',10,'color',colors_subject(colorsIdx,:));
+%     plot(DV,iNeuron,'.','markerSize',10,'color',colors(sorted_eventIds(iNeuron),:));
+    hold on;grid on;
+    xlabel('DV');
+    set(gca,'ydir','reverse');
+    xlim([5.8 7.8]);
+    yticks(ytickVals);
+    yticklabels(sorted_eventIds);
+    set(gca,'fontSize',smallFontSize);
+end
+
 % subplot(1,numel(plotEventIds)+2,iSubplot);
 % plot(all_meanTiming(k3),flip([1:size(neuronPeth,1)]),'r.','markerSize',25);
 % ytickVals = [1:size(neuronPeth,1)];

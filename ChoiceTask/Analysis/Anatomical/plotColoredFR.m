@@ -12,7 +12,7 @@ for iNeuron = 1:size(analysisConf.neurons,1)
     end
     wiggle = (rand(1) - 0.5) * 0.2;
     AP = channelData{1,'ap'} + wiggle;
-    ML = channelData{1,'ml'} + wiggle;
+    ML = channelData{1,'ml'};
     DV = channelData{1,'dv'} + wiggle;
     
     ts = all_ts{iNeuron};

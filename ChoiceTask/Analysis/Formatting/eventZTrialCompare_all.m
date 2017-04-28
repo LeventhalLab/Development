@@ -10,13 +10,13 @@ cols = numel(eventFieldnames);
 for iMovement = 1:2
     for iPlotEvent = 1:numel(eventFieldnames)
         subplot(rows,cols,iSubplot);
-        for iEvent = 3:4%1:numel(eventFieldnames) % classifier
+        for iEvent = 1:numel(eventFieldnames) % classifier
             neurons = find(eventIds_by_maxHistValues == iEvent);
 % %             neurons = neurons(ismember(neurons,highZIds));
             if iMovement == 1
-                cur_all_tidx_correct = (squeeze(all_tidx_contra_correct(neurons,iPlotEvent,:,:)));
+                cur_all_tidx_correct = (squeeze(all_tidx_contra_correct_sub(neurons,iPlotEvent,:,:)));
             else
-                cur_all_tidx_correct = (squeeze(all_tidx_ipsi_correct(neurons,iPlotEvent,:,:)));
+                cur_all_tidx_correct = (squeeze(all_tidx_ipsi_correct_sub(neurons,iPlotEvent,:,:)));
             end
             
             hold on; grid on;
@@ -24,7 +24,7 @@ for iMovement = 1:2
             ylim([-0.5 1]);
             xlim([-1 1]);
             if iEvent == iPlotEvent
-                title([eventFieldnames{iPlotEvent},' (',num2str(size(cur_all_tidx_correct,1)),')'],...
+                title([eventFieldnames{iPlotEvent},' (',num2str(numel(neurons)),')'],...
                     'color',colors(iPlotEvent,:));
             end
             if iMovement == 1 && iPlotEvent == 1
@@ -36,6 +36,9 @@ for iMovement = 1:2
         iSubplot = iSubplot + 1;
     end
 end
+
+% !!!
+return;
 
 figure('position',[0 0 1600 900]);
 iSubplot = 1;

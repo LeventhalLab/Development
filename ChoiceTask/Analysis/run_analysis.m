@@ -5,7 +5,7 @@
 % compileOFSWaveforms(waveformDir);
 % compares some of the unit properties in a scatter plot
 % compareOFSWaveforms(csvWaveformFiles);
-tWindow = 2; % for scalograms, xlim is set to -1/+1 in formatting
+tWindow = 1; % for scalograms, xlim is set to -1/+1 in formatting
 % plotEventIds = [1 2 4 3 5 6 8]; % removed foodClick because it mirrors SideIn
 eventFieldnames = {'cueOn';'centerIn';'tone';'centerOut';'sideIn';'sideOut';'foodRetrieval'};
 sevFile = '';
@@ -43,16 +43,17 @@ for iNeuron = 1:size(analysisConf.neurons,1)
         isNewSession = false;
     end
     
-    
-    
     logFile = getLogPath(sessionConf.leventhalPaths.rawdata);
     logData = readLogData(logFile);
-    % *** TEST
-    nexStruct = fixMissingEvents(logData,nexStruct);
+    if strcmp(neuronName(1:5),'R0154')
+        nexStruct = fixMissingEvents(logData,nexStruct);
+    end
     trials = createTrialsStruct_simpleChoice(logData,nexStruct);
     all_trials{iNeuron} = trials; % for debugging
     timingField = 'movementDirection';
     [trialIds,allTimes] = sortTrialsBy(trials,timingField); % forces to be 'correct'
+    
+%     continue;
     
     % load timestamps for neuron
     for iNexNeurons = 1:length(nexStruct.neurons)
@@ -64,10 +65,6 @@ for iNeuron = 1:size(analysisConf.neurons,1)
             tsISIInv = ts(~Lia);
         end
     end
-    
-    % !!! REMOVE
-    check_nexData(nexStruct)
-    continue;
 
     % load SEV file and filter it for LFP analyses
     needsLfp = false;
@@ -107,7 +104,7 @@ for iNeuron = 1:size(analysisConf.neurons,1)
 % %     tsLTSPeths = eventsPeth(trials(trialIds),tsLTS,tWindow);
 % %     tsPoissonPeths = eventsPeth(trials(trialIds),tsPoisson,tWindow);
 
-
+    % !!!review binning to make sure edges are handled
     % unit-to-event classifier analysis
     sessionSeconds = header.fileSizeBytes/header.Fs/4; % seconds
     sessionFR = 1 / mean(diff(ts));
@@ -151,6 +148,7 @@ for iNeuron = 1:size(analysisConf.neurons,1)
 
 
     % event-centered analysis
+    % !!! add eventFieldnames to eventsPeth
 % %     tsPeths = eventsPeth(trials(trialIds),ts,tWindow);
 % %     tsISIInvPeths = eventsPeth(trials(trialIds),tsISIInv,tWindow);
 % %     tsISIPeths = eventsPeth(trials(trialIds),tsISI,tWindow);

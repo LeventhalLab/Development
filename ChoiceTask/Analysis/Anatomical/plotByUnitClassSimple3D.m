@@ -2,6 +2,11 @@
 colors = jet(7);
 atlas_ims = [];
 useEvents = [1:7];
+figure('position',[0 0 800 800]);
+all_AP = [];
+all_ML = [];
+all_DV = [];
+all_colors = [];
 for iNeuron = 1:size(analysisConf.neurons,1)
     neuronName = analysisConf.neurons{iNeuron};
     sessionConf = analysisConf.sessionConfs{iNeuron};
@@ -18,27 +23,25 @@ for iNeuron = 1:size(analysisConf.neurons,1)
     wiggle = (rand(1) - 0.5) * 0.1;
     AP = channelData{1,'ap'} + wiggle;
     wiggle = (rand(1) - 0.5) * 0.1;
-    ML = channelData{1,'ml'};
+    ML = channelData{1,'ml'} + wiggle;
     wiggle = (rand(1) - 0.5) * 0.1;
     DV = channelData{1,'dv'} + wiggle;
-    [atlas_ims,k] = plotMthalElectrode(atlas_ims,AP,ML,DV,nasPath,colors(event_id,:));
+    all_AP = [all_AP;AP];
+    all_ML = [all_ML;ML];
+    all_DV = [all_DV;DV];
+    all_colors = [all_colors;colors(event_id,:)];
 end
-
-figure('position',[0 0 1400 600]);
-subplot(131);
-imshow(atlas_ims{1});
-title('Event Class');
-subplot(132);
-imshow(atlas_ims{2});
-subplot(133);
-imshow(atlas_ims{3});
-hold on;
-ax = [];
-xlims = xlim;
-ylims = ylim;
-for ii = 1:size(colors,1)
-    ax(ii) = plot(xlims(1),ylims(1),'.','markerSize',20,'color',colors(ii,:));
-    hold on;
-end
-
-legend(ax,eventFieldnames);
+% ax = bubbleplot3(all_ML,all_AP,all_DV,ones(1,numel(all_DV))*.04,all_colors,0.7);
+% camlight right; lighting phong;
+scatter3sph(all_ML,all_AP,all_DV,'size',.05,'color',all_colors,'transp',0.9);
+light('Position',[1 1 1],'Style','local','Color',[1 1 1]);
+lighting gouraud;
+view(102,17);
+grid on;
+% legend(ax,eventFieldnames);
+xlabel('ML');
+ylabel('AP');
+zlabel('DV');
+set(gca,'zdir','reverse');
+set(gca,'xdir','reverse');
+set(gca,'ydir','reverse');
