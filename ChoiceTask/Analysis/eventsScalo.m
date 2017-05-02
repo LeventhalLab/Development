@@ -1,11 +1,10 @@
-function [allScalograms,eventFieldnames,allLfpData] = eventsScalo(trials,sevFilt,tWindow,Fs,freqList)
+function [allScalograms,allLfpData] = eventsScalo(trials,sevFilt,tWindow,Fs,freqList,eventFieldnames)
 % need better lfp thresh algorithm
 lfpThresh = 2000; % diff of lfp in uV
 
 tWindowSamples = round(Fs * tWindow);
 
 allScalograms = [];
-eventFieldnames = fieldnames(trials(1).timestamps); % assumes fields are same for all
 allLfpData = [];
 for iField=1:numel(eventFieldnames)
     data = [];

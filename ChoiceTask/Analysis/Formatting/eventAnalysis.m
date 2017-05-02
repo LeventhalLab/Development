@@ -6,8 +6,8 @@ caxisScaleIdx = 3; % centerOut
 h = figure;
 
 adjSubplots = [];
-for iEvent=plotEventIds
-    ax = subplot(totalRows,length(plotEventIds),iSubplot);
+for iEvent = 1:numel(eventFieldnames)
+    ax = subplot(totalRows,numel(eventFieldnames),iSubplot);
     imagesc(t,freqList,log(squeeze(eventScalograms(iEvent,:,:))));
     if iEvent == 1
         ylabel('Freq (Hz)');
@@ -35,7 +35,7 @@ for iEvent=plotEventIds
 end
 % set caxis
 for ii=1:length(adjSubplots)
-    ax = subplot(totalRows,length(plotEventIds),adjSubplots(ii));
+    ax = subplot(totalRows,numel(eventFieldnames),adjSubplots(ii));
     caxis(yvals);
     if ii == length(adjSubplots)
         subplotPos = get(gca,'Position');
@@ -47,8 +47,8 @@ end
 
 % high pass filter butterfly overlay trace
 adjSubplots = [];
-for iEvent=plotEventIds
-    ax = subplot(totalRows,length(plotEventIds),iSubplot);
+for iEvent = 1:numel(eventFieldnames)
+    ax = subplot(totalRows,numel(eventFieldnames),iSubplot);
     for iTrial = 1:size(allLfpData,3)
         lfpData = squeeze(allLfpData(iEvent,:,iTrial));
         % inline baseline adjustment (weird DC offset in some data)
@@ -69,14 +69,14 @@ for iEvent=plotEventIds
 end
 % set y-axis
 for ii=1:length(adjSubplots)
-    ax = subplot(totalRows,length(plotEventIds),adjSubplots(ii));
+    ax = subplot(totalRows,numel(eventFieldnames),adjSubplots(ii));
     ylim([-yvals yvals]);   
 end
 
 % spike rasters
 adjSubplots = [];
-for iEvent=plotEventIds
-    ax = subplot(totalRows,length(plotEventIds),iSubplot);
+for iEvent = 1:numel(eventFieldnames)
+    ax = subplot(totalRows,numel(eventFieldnames),iSubplot);
     rasterData = tsPeths(:,iEvent);
     rasterData = rasterData(~cellfun('isempty',rasterData)); % remove empty rows (no spikes)
     rasterData = makeRasterReadable(rasterData,100); % limit to 100 data points
@@ -100,8 +100,8 @@ allPeths = {tsPeths,tsISIInvPeths,tsISIPeths,tsLTSPeths,tsPoissonPeths};
 rowLabels = {'tsAll','tsAll - tsISI','tsISI','tsLTS','tsPoisson'};
 for iRowData = 1:length(allPeths)
     allys = [];
-    for iEvent=plotEventIds
-        ax = subplot(totalRows,length(plotEventIds),iSubplot);
+    for iEvent = 1:numel(eventFieldnames)
+        ax = subplot(totalRows,numel(eventFieldnames),iSubplot);
         curData = allPeths{1,iRowData}(:,iEvent); % extract all trials for iEvent column
         curData = cat(2,curData{:}); % concatenate all values into one vector
         if ~isempty(curData)
@@ -119,7 +119,7 @@ for iRowData = 1:length(allPeths)
         iSubplot = iSubplot + 1;
     end
     for ii=1:length(adjSubplots)
-        ax = subplot(totalRows,length(plotEventIds),adjSubplots(ii));
+        ax = subplot(totalRows,numel(eventFieldnames),adjSubplots(ii));
         if ~isempty(allys)
             ylim([0 max(allys)]); % make FR start at 0
         end

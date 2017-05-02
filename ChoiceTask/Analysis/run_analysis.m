@@ -67,7 +67,7 @@ for iNeuron = 1:size(analysisConf.neurons,1)
     end
 
     % load SEV file and filter it for LFP analyses
-    needsLfp = false;
+    needsLfp = true;
     
     % this is really not perfect yet, needs LFP channel in DB I think
     rows = sessionConf.session_electrodes.channel == electrodeChannels;
@@ -104,59 +104,59 @@ for iNeuron = 1:size(analysisConf.neurons,1)
 % %     tsLTSPeths = eventsPeth(trials(trialIds),tsLTS,tWindow);
 % %     tsPoissonPeths = eventsPeth(trials(trialIds),tsPoisson,tWindow);
 
-    % !!!review binning to make sure edges are handled
-    % unit-to-event classifier analysis
-    sessionSeconds = header.fileSizeBytes/header.Fs/4; % seconds
-    sessionFR = 1 / mean(diff(ts));
-    binMs = 50; % ms
-    nBins = round((2*tWindow / .001) / binMs);
-    nBinHalfWidth = ((tWindow*2) / nBins) / 2;
-    nBins_tWindow = linspace(-tWindow+nBinHalfWidth,tWindow-nBinHalfWidth,nBins);
-    nBins_all = round((sessionSeconds / .001) / binMs);
-    nBins_all_tWindow = linspace(0,sessionSeconds,nBins_all);
-
-    all_ts{iNeuron} = ts;
-    tsPeths = eventsPeth(trials(trialIds),ts,tWindow,eventFieldnames);
-    all_tsPeths{iNeuron} = tsPeths;
-%     all_meanTiming(iNeuron) = mean(allTimes);
-
-    [allCounts,allCenters] = hist(ts,nBins_all);
-    for iEvent = 1:numel(eventFieldnames)
-        [counts,centers] = hist([tsPeths{:,iEvent}],nBins);
-        zCounts = ((counts / size(tsPeths,1)) - mean(allCounts)) / std(allCounts);
-        neuronPeth(iNeuron,iEvent,:) = zCounts;
-    end
-    
-    % ipsi/contra analysis
-%     trials_correct = trials;
-%     trials_correct = trials(trialIds);
-%     tsPeths = eventsPeth(trials_correct,ts,tWindow,eventFieldnames);
-    tsPeths = eventsPeth(trials,ts,tWindow,eventFieldnames);
-    [allCounts,allCenters] = hist(ts,nBins_all_tWindow);
-    zCounts = [];
-    if ~isempty(tsPeths)
-        for iEvent = 1:size(tsPeths,2)
-            for iTrial = 1:size(tsPeths,1)
-                [counts,centers] = hist(tsPeths{iTrial,iEvent},nBins_tWindow);
-                zCounts(iEvent,iTrial,:) = (counts - mean(allCounts)) / std(allCounts);
-            end
-        end
-    end
-    
-%     ipsiContraHists();
-    ipsiContraZTrialCompare();
+% %     % !!!review binning to make sure edges are handled
+% %     % unit-to-event classifier analysis
+% %     sessionSeconds = header.fileSizeBytes/header.Fs/4; % seconds
+% %     sessionFR = 1 / mean(diff(ts));
+% %     binMs = 50; % ms
+% %     nBins = round((2*tWindow / .001) / binMs);
+% %     nBinHalfWidth = ((tWindow*2) / nBins) / 2;
+% %     nBins_tWindow = linspace(-tWindow+nBinHalfWidth,tWindow-nBinHalfWidth,nBins);
+% %     nBins_all = round((sessionSeconds / .001) / binMs);
+% %     nBins_all_tWindow = linspace(0,sessionSeconds,nBins_all);
+% % 
+% %     all_ts{iNeuron} = ts;
+% %     tsPeths = eventsPeth(trials(trialIds),ts,tWindow,eventFieldnames);
+% %     all_tsPeths{iNeuron} = tsPeths;
+% % %     all_meanTiming(iNeuron) = mean(allTimes);
+% % 
+% %     [allCounts,allCenters] = hist(ts,nBins_all);
+% %     for iEvent = 1:numel(eventFieldnames)
+% %         [counts,centers] = hist([tsPeths{:,iEvent}],nBins);
+% %         zCounts = ((counts / size(tsPeths,1)) - mean(allCounts)) / std(allCounts);
+% %         neuronPeth(iNeuron,iEvent,:) = zCounts;
+% %     end
+% %     
+% %     % ipsi/contra analysis
+% % %     trials_correct = trials;
+% % %     trials_correct = trials(trialIds);
+% % %     tsPeths = eventsPeth(trials_correct,ts,tWindow,eventFieldnames);
+% %     tsPeths = eventsPeth(trials,ts,tWindow,eventFieldnames);
+% %     [allCounts,allCenters] = hist(ts,nBins_all_tWindow);
+% %     zCounts = [];
+% %     if ~isempty(tsPeths)
+% %         for iEvent = 1:size(tsPeths,2)
+% %             for iTrial = 1:size(tsPeths,1)
+% %                 [counts,centers] = hist(tsPeths{iTrial,iEvent},nBins_tWindow);
+% %                 zCounts(iEvent,iTrial,:) = (counts - mean(allCounts)) / std(allCounts);
+% %             end
+% %         end
+% %     end
+% %     
+% % %     ipsiContraHists();
+% %     ipsiContraZTrialCompare();
 
 
     % event-centered analysis
     % !!! add eventFieldnames to eventsPeth
-% %     tsPeths = eventsPeth(trials(trialIds),ts,tWindow);
-% %     tsISIInvPeths = eventsPeth(trials(trialIds),tsISIInv,tWindow);
-% %     tsISIPeths = eventsPeth(trials(trialIds),tsISI,tWindow);
-% %     tsLTSPeths = eventsPeth(trials(trialIds),tsLTS,tWindow);
-% %     tsPoissonPeths = eventsPeth(trials(trialIds),tsPoisson,tWindow);
-% %     [eventScalograms,eventFieldnames,allLfpData] = eventsScalo(trials(trialIds),sevFilt,tWindow,Fs,freqList);
-% %     t = linspace(-tWindow,tWindow,size(eventScalograms,3));
-% %     eventAnalysis(); % format
+    tsPeths = eventsPeth(trials(trialIds),ts,tWindow,eventFieldnames);
+    tsISIInvPeths = eventsPeth(trials(trialIds),tsISIInv,tWindow,eventFieldnames);
+    tsISIPeths = eventsPeth(trials(trialIds),tsISI,tWindow,eventFieldnames);
+    tsLTSPeths = eventsPeth(trials(trialIds),tsLTS,tWindow,eventFieldnames);
+    tsPoissonPeths = eventsPeth(trials(trialIds),tsPoisson,tWindow,eventFieldnames);
+    [eventScalograms,allLfpData] = eventsScalo(trials(trialIds),sevFilt,tWindow,Fs,freqList,eventFieldnames);
+    t = linspace(-tWindow,tWindow,size(eventScalograms,3));
+    eventAnalysis(); % format
     
     % scalograms based on different ts bursts separated by low-med-high
     % spike density
