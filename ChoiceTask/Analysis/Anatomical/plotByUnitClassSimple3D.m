@@ -38,7 +38,7 @@ for iNeuron = 1:size(analysisConf.neurons,1)
 end
 % ax = bubbleplot3(all_ML,all_AP,all_DV,ones(1,numel(all_DV))*.04,all_colors,0.7);
 % camlight right; lighting phong;
-scatter3sph(all_ML,all_AP,all_DV,'size',.05,'color',all_colors,'transp',0.9);
+scatter3sph(all_ML,all_AP,all_DV,'size',.1,'color',all_colors,'transp',0.5);
 set(gcf,'color','w');
 light('Position',[1 1 1],'Style','local','Color',[1 1 1]);
 lighting gouraud;

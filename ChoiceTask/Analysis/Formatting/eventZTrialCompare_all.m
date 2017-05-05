@@ -3,18 +3,22 @@ x = linspace(-tWindow,tWindow,size(zCounts,3));
 nSmooth = 3;
 colors = jet(numel(eventFieldnames));
 
-figure('position',[0 0 1600 700]);
+figure('position',[0 0 1600 400]);
 iSubplot = 1;
-rows = 2;
+useMovements = [1];
+rows = numel(useMovements);
 cols = numel(eventFieldnames);
-for iMovement = 1:2
+eventFieldnamesLegend = {'Light On','Nose In','Cue/Go','Nose Out','Side In','Side Out','Food Cup'};
+for iMovement = useMovements
     for iPlotEvent = 1:numel(eventFieldnames)
         subplot(rows,cols,iSubplot);
-        for iEvent = 1:numel(eventFieldnames) % classifier
+        for iEvent = 4%1:numel(eventFieldnames) % classifier
             neurons = find(eventIds_by_maxHistValues == iEvent);
 % %             neurons = neurons(ismember(neurons,highZIds));
             if iMovement == 1
                 cur_all_tidx_correct = (squeeze(all_tidx_contra_correct_sub(neurons,iPlotEvent,:,:)));
+                cur_all_tidx_correct = [(squeeze(all_tidx_contra_correct_sub(neurons,iPlotEvent,:,:)));...
+                    (squeeze(all_tidx_ipsi_correct_sub(neurons,iPlotEvent,:,:)))];
             else
                 cur_all_tidx_correct = (squeeze(all_tidx_ipsi_correct_sub(neurons,iPlotEvent,:,:)));
             end
@@ -24,11 +28,13 @@ for iMovement = 1:2
             ylim([-0.5 1]);
             xlim([-1 1]);
             if iEvent == iPlotEvent
-                title([eventFieldnames{iPlotEvent},' (',num2str(numel(neurons)),')'],...
-                    'color',colors(iPlotEvent,:));
+%                 title([eventFieldnames{iPlotEvent},' (',num2str(size(cur_all_tidx_correct,1)),')'],...
+%                     'color',colors(iPlotEvent,:));
+%                 title(eventFieldnamesLegend{iPlotEvent},...
+%                     'color',colors(iPlotEvent,:));
             end
             if iMovement == 1 && iPlotEvent == 1
-                ylabel('z-contra');
+%                 ylabel('z-contra');
             elseif iMovement == 2 && iPlotEvent == 1
                 ylabel('z-ipsi');
             end
