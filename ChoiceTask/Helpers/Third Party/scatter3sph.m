@@ -97,7 +97,7 @@ for j= 1:length(X)
 end
 
 daspect([ratios(1), ratios(2), ratios(3)]);
-light('Position',[1 1 1],'Style','infinit','Color',[1 1 1]);
-lighting gouraud;
-view(30,30)
+% light('Position',[1 1 1],'Style','infinit','Color',[1 1 1]);
+% lighting gouraud;
+% view(30,30)
 
