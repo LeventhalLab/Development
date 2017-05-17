@@ -15,20 +15,20 @@ selectedIds = [6,8,9,12,14,16,17,19,21,26,27,28,29,31,36,37,44,46,48,49,51,56,57
 % curatedIds = neuronIds(allPossibleIds)';
 
 
-for iStart = 1:16:numel(neuronIds)
-    figure('position',[0 0 900 900]);
-    iSubplot = 1;
-    for iNeuron = iStart:min([iStart+15 numel(neuronIds)])
-        curPeths = all_tsPeths{neuronIds(iNeuron)};
-        subplot(4,4,iSubplot);
-        plotSpikeRaster(curPeths(:,eventId));
-%         title(analysisConf.neurons(neuronIds(iNeuron)),'interpreter','none');
-        title(num2str(iNeuron));
-%         xlim([-1 1]);
-        iSubplot = iSubplot + 1;
-    end
-    disp('hold');
-end
+% for iStart = 1:16:numel(neuronIds)
+%     figure('position',[0 0 900 900]);
+%     iSubplot = 1;
+%     for iNeuron = iStart:min([iStart+15 numel(neuronIds)])
+%         curPeths = all_tsPeths{neuronIds(iNeuron)};
+%         subplot(4,4,iSubplot);
+%         plotSpikeRaster(curPeths(:,eventId));
+% %         title(analysisConf.neurons(neuronIds(iNeuron)),'interpreter','none');
+%         title(num2str(iNeuron));
+% %         xlim([-1 1]);
+%         iSubplot = iSubplot + 1;
+%     end
+%     disp('hold');
+% end
 
 all_ISIs = [];
 all_rasters = [];

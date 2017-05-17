@@ -1,7 +1,7 @@
 % eventFieldnames = {'cueOn';'centerIn';'tone';'centerOut';'sideIn';'sideOut';'foodRetrieval'};
 colors = jet(7);
 atlas_ims = [];
-useEvents = [3,4];
+useEvents = [1:7];
 figure('position',[0 0 800 800]);
 all_AP = [];
 all_ML = [];

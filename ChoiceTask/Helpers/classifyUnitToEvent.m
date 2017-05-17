@@ -40,7 +40,7 @@ neuronPethSortedByEvent = neuronPeth_sub(sorted_eventKeys,:,:);
 figure('position',[0 0 1400 800]);
 set(gcf,'color','w');
 iSubplot = 1;
-extraPlots = 0;
+extraPlots = 2;
 for iEvent = 1:numel(eventFieldnames)
     subplot(1,numel(eventFieldnames)+extraPlots,iSubplot);
     
@@ -71,57 +71,57 @@ for iEvent = 1:numel(eventFieldnames)
 %         ylabel('max z-event');
 %         title({analysisConf.subjects__name,titleStr});
     end
-%     title(titleStr,'color',colors(iEvent,:));
+    title(titleStr,'color',colors(iEvent,:));
     xlabel('time (s)');
     set(gca,'fontSize',smallFontSize);
     
     iSubplot = iSubplot + 1;
 end
 
-% % neuronNames_sub = analysisConf.neurons(useRange);
-% % sessionConfs_sub = analysisConf.sessionConfs(useRange);
-% % for iNeuron = 1:numel(sorted_eventKeys)
-% %     neuronName = neuronNames_sub{sorted_eventKeys(iNeuron)};
-% %     subjects__name = neuronName(1:5);
-% %     switch subjects__name
-% %         case 'R0088'
-% %             colorsIdx = 1;
-% %         case 'R0117'
-% %             colorsIdx = 2;
-% %         case 'R0142'
-% %             colorsIdx = 3;
-% %         case 'R0154'
-% %             colorsIdx = 4;
-% %     end
-% %     sessionConf = sessionConfs_sub{sorted_eventKeys(iNeuron)};
-% %     [electrodeName,electrodeSite,electrodeChannels] = getElectrodeInfo(neuronName);
-% %     rows = sessionConf.session_electrodes.channel == electrodeChannels;
-% %     channelData = sessionConf.session_electrodes(any(sum(rows,2)),:);
-% %     AP = channelData{1,'ap'};
-% %     ML = channelData{1,'ml'};
-% %     DV = channelData{1,'dv'};
-% %     
-% %     subplot(1,numel(eventFieldnames)+extraPlots,numel(eventFieldnames)+1);
-% %     plot(AP,iNeuron,'.','markerSize',10,'color',colors(sorted_eventIds(iNeuron),:));
-% %     hold on;grid on;
-% %     xlabel('AP');
-% %     set(gca,'ydir','reverse');
-% %     xlim([-3.5 -2.8]);
-% %     yticks(ytickVals);
-% %     yticklabels(sorted_eventIds);
-% %     set(gca,'fontSize',smallFontSize);
-% %     
-% %     subplot(1,numel(eventFieldnames)+extraPlots,numel(eventFieldnames)+2);
-% %     plot(DV,iNeuron,'.','markerSize',10,'color',colors_subject(colorsIdx,:));
-% % %     plot(DV,iNeuron,'.','markerSize',10,'color',colors(sorted_eventIds(iNeuron),:));
-% %     hold on;grid on;
-% %     xlabel('DV');
-% %     set(gca,'ydir','reverse');
-% %     xlim([5.8 7.8]);
-% %     yticks(ytickVals);
-% %     yticklabels(sorted_eventIds);
-% %     set(gca,'fontSize',smallFontSize);
-% % end
+neuronNames_sub = analysisConf.neurons(useRange);
+sessionConfs_sub = analysisConf.sessionConfs(useRange);
+for iNeuron = 1:numel(sorted_eventKeys)
+    neuronName = neuronNames_sub{sorted_eventKeys(iNeuron)};
+    subjects__name = neuronName(1:5);
+    switch subjects__name
+        case 'R0088'
+            colorsIdx = 1;
+        case 'R0117'
+            colorsIdx = 2;
+        case 'R0142'
+            colorsIdx = 3;
+        case 'R0154'
+            colorsIdx = 4;
+    end
+    sessionConf = sessionConfs_sub{sorted_eventKeys(iNeuron)};
+    [electrodeName,electrodeSite,electrodeChannels] = getElectrodeInfo(neuronName);
+    rows = sessionConf.session_electrodes.channel == electrodeChannels;
+    channelData = sessionConf.session_electrodes(any(sum(rows,2)),:);
+    AP = channelData{1,'ap'};
+    ML = channelData{1,'ml'};
+    DV = channelData{1,'dv'};
+    
+    subplot(1,numel(eventFieldnames)+extraPlots,numel(eventFieldnames)+1);
+    plot(AP,iNeuron,'.','markerSize',10,'color',colors(sorted_eventIds(iNeuron),:));
+    hold on;grid on;
+    xlabel('AP');
+    set(gca,'ydir','reverse');
+    xlim([-3.5 -2.8]);
+    yticks(ytickVals);
+    yticklabels(sorted_eventIds);
+    set(gca,'fontSize',smallFontSize);
+    
+    subplot(1,numel(eventFieldnames)+extraPlots,numel(eventFieldnames)+2);
+    plot(DV,iNeuron,'.','markerSize',10,'color',colors_subject(colorsIdx,:));
+%     plot(DV,iNeuron,'.','markerSize',10,'color',colors(sorted_eventIds(iNeuron),:));
+    hold on;grid on;
+    xlabel('DV');
+    set(gca,'ydir','reverse');
+    xlim([5.8 7.8]);
+    yticks(ytickVals);
+    yticklabels(sorted_eventIds);
+    set(gca,'fontSize',smallFontSize);
+end
 
 % subplot(1,numel(plotEventIds)+2,iSubplot);
 % plot(all_meanTiming(k3),flip([1:size(neuronPeth,1)]),'r.','markerSize',25);
