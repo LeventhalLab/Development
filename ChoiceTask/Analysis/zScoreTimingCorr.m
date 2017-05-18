@@ -1,6 +1,6 @@
-timingField = 'MT';
+timingField = 'RT';
 eventFieldnames = {'cueOn';'centerIn';'tone';'centerOut';'sideIn';'sideOut';'foodRetrieval'};
-eventId = 4;
+useEvent = 4;
 if true
     zScoreTimingCorr_z = [];
     zScoreTimingCorr_rt = [];
@@ -8,7 +8,7 @@ if true
     nCorr = 1;
 
     for iNeuron = 1:size(all_tsPeths,2)
-        if eventIds_by_maxHistValues(iNeuron) ~= eventId
+        if eventIds_by_maxHistValues(iNeuron) ~= useEvent
             continue;
         end
         trials = all_trials{iNeuron};
@@ -19,17 +19,18 @@ if true
             if allTimesRT(iTrial) <= 0
                 continue;
             end
+            % get values from first event to normalize
             z_tsPeth = tsPeths{iTrial,1};
             [z_counts,z_centers] = hist(z_tsPeth,nBins_tWindow);
-            z_idxs = find(nBins_tWindow <= 0);
+            z_idxs = find(nBins_tWindow <= 0); % only values before event
             z_counts = z_counts(z_idxs);
             z_centers = z_centers(z_idxs);
 
-            if mean(z_counts) < 0.5
+            if mean(z_counts) < 0.25 % not enough spikes
                 continue;
             end
 
-            tsPeth = tsPeths{iTrial,eventId};
+            tsPeth = tsPeths{iTrial,useEvent};
             [counts,centers] = hist(tsPeth,nBins_tWindow);
             zscore = (counts - mean(z_counts)) / std(z_counts);
 
@@ -37,7 +38,7 @@ if true
     %             disp('stop');
     %         end
 
-            zScoreTimingCorr_z(nCorr) = trapz(abs(zscore(21:end)));
+            zScoreTimingCorr_z(nCorr) = trapz(abs(zscore));
             zScoreTimingCorr_rt(nCorr) = allTimesRT(iTrial);
 
             nCorr = nCorr + 1;
@@ -49,7 +50,7 @@ figure('position',[0 0 600 900]);
 subplot(211);
 lsidx(1) = plot(zScoreTimingCorr_rt,zScoreTimingCorr_z,'k.');
 xlabel(timingField);
-ylabel('Z-score');
+ylabel('Area Under Z-score');
 
 corrInterval = 0.05;
 startInterval = 0.0;
@@ -58,7 +59,7 @@ if strcmp(timingField,'MT')
     startInterval = 0.15;
     endInterval = 0.8;
 end
-nUpperMean = 20;
+k_rand = 20;
 all_zs = [];
 all_zstd = [];
 all_ints = [];
@@ -66,9 +67,9 @@ for ii = startInterval-corrInterval:corrInterval:endInterval
     idx = find(zScoreTimingCorr_rt >= ii & zScoreTimingCorr_rt < ii + corrInterval);
     if ~isempty(idx)
         cur_zs = flip(sort(zScoreTimingCorr_z(idx)));
-        upperIdxs = min([numel(cur_zs),nUpperMean]);
-        all_zs = [all_zs mean(cur_zs(1:upperIdxs))];
-        all_zstd = [all_zstd std(cur_zs(1:upperIdxs))];
+        rand_zs = randsample(cur_zs,k_rand,true);
+        all_zs = [all_zs mean(rand_zs)];
+        all_zstd = [all_zstd std(rand_zs)];
     else
         all_zs = [all_zs NaN];
         all_zstd = [all_zstd NaN];
@@ -80,8 +81,7 @@ all_ints = all_ints + corrInterval/2;
 
 nSmooth = 10;
 hold on;
-plot(interp(all_ints,nSmooth),interp(inpaint_nans(all_zs),nSmooth));
-lsidxx = shadedErrorBar(interp(all_ints,nSmooth),interp(inpaint_nans(all_zs),nSmooth),interp(inpaint_nans(all_zstd),nSmooth),{'g'},1);
+lsidxx = shadedErrorBar(interp(all_ints,nSmooth),interp(inpaint_nans(all_zs),nSmooth),interp(inpaint_nans(all_zstd),nSmooth),{'k'},1);
 lsidx(2) = lsidxx.mainLine;
 % plot((all_ints),(inpaint_nans(all_zs)));
 xlim([startInterval endInterval]);
@@ -89,8 +89,8 @@ cur_ylim = ylim;
 lsidx(3) = plot([mean(zScoreTimingCorr_rt) mean(zScoreTimingCorr_rt)],cur_ylim,'r');
 lsidx(4) = plot([median(zScoreTimingCorr_rt) median(zScoreTimingCorr_rt)],cur_ylim,'b');
 
-legend(lsidx,{'Trials',['Abs(Z) Area (',num2str(nUpperMean),')'],'Mean','Median'});
-title([eventFieldnames{eventId},' - Trial Timing Distribution']);
+legend(lsidx,{'Trials',['Abs(Z) Area (',num2str(k_rand),')'],'Mean','Median'});
+title([eventFieldnames{useEvent},' - Trial Timing Distribution']);
 
 subplot(212);
 title('Timing Histogram');
