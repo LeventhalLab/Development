@@ -1,7 +1,7 @@
-function [atlas_ims,k] = plotMthalElectrode(atlas_ims,AP,ML,DV,nasPath,dotColor)
+function [atlas_ims,k] = plotMthalElectrodeLabels(atlas_ims,AP,ML,DV,nasPath,labelText)
 mm_px = 269; % calibrated from atlas
 % dotSize = round(mm_px / 25);
-dotSize = round(mm_px / 35);
+dotSize = round(mm_px / 15);
 atlas_mls = [1.4,1.9,2.4];
 % [ap ml x_px y_px]
 atlas_cal = [-3.2 -7.2 500.75 901;...
@@ -11,12 +11,6 @@ atlas_cal = [-3.2 -7.2 500.75 901;...
 % force DV to negative
 if DV > 0
     DV = DV * -1;
-end
-if isempty(dotColor)
-    dotColor = 'red';
-end
-if ~ischar(dotColor)
-    dotColor = dotColor * 255;
 end
 
 atlas_im_paths = {fullfile(nasPath,'atlas','mthal_naku_lat1-4mm.jpg'),...
@@ -40,5 +34,5 @@ rel_dv_mm = DV - cal(2);
 rel_ap_px = rel_ap_mm * mm_px;
 rel_dv_px = rel_dv_mm * mm_px;
 
-im_dot = insertShape(im,'FilledCircle',[cal(3) - rel_ap_px,cal(4) - rel_dv_px,dotSize],'Color',dotColor,'Opacity',1);
+im_dot = insertText(im,[cal(3) - rel_ap_px,cal(4) - rel_dv_px],labelText);
 atlas_ims{k} = im_dot;

@@ -48,47 +48,75 @@ if false
 
     end
 end
+selectIds = find(modFiringArea ~= 0);
+modFiringArea_select = modFiringArea(selectIds);
+all_AP_select = all_AP(selectIds);
+all_ML_select = all_ML(selectIds);
+all_DV_select = all_DV(selectIds);
 
 figure('position',[0 0 900 400]);
 markerSize = 30;
 atlas_ims = [];
-for iNeuron = 1:size(all_tsPeths,2)
-    if modFiringArea(iNeuron) == 0
-        continue;
-    end
+select_mthalIds = [3:5 7 9 11:16 71:86 88 89 91:94 97 99:108];
+allIds = [1:numel(modFiringArea_select)];
+select_nonmthalIds = allIds(~ismember(allIds,select_mthalIds));
+
+all_mthalPeths = [];
+all_nonmthalPeths = [];
+
+for iNeuron = 1:numel(modFiringArea_select)
+    wiggle = (rand(1) - 0.5) * 0.2;
+    this_AP = all_AP_select(iNeuron) + wiggle;
+    wiggle = (rand(1) - 0.5) * 0.2;
+    this_ML = all_ML_select(iNeuron) + wiggle;
+    wiggle = (rand(1) - 0.5) * 0.2;
+    this_DV = all_DV_select(iNeuron) + wiggle;
+    this_modFiringArea = modFiringArea_select(iNeuron);
+    
     subplot(131);
     hold on;
-    wiggle = (rand(1) - 0.5) * 0.1;
-    plot(all_AP(iNeuron)+wiggle,modFiringArea(iNeuron),'k.','markerSize',markerSize);
+    
+    plot(this_AP,this_modFiringArea,'.','markerSize',markerSize,'color',colors(round(this_modFiringArea),:));
     title('AP');
     xlabel('mm');
-    ylabel('z width');
+    ylabel('z width ticks (20/s)');
     grid on;
     
     subplot(132);
     hold on;
-    wiggle = (rand(1) - 0.5) * 0.1;
-    plot(all_ML(iNeuron)+wiggle,modFiringArea(iNeuron),'k.','markerSize',markerSize);
+    plot(this_DV,this_modFiringArea,'.','markerSize',markerSize,'color',colors(round(this_modFiringArea),:));
     title('ML');
     xlabel('mm');
-    ylabel('z width');
+    ylabel('z width ticks (20/s)');
     grid on;
     
     subplot(133);
     hold on;
-    wiggle = (rand(1) - 0.5) * 0.1;
-    plot(all_DV(iNeuron)+wiggle,modFiringArea(iNeuron),'k.','markerSize',markerSize);
+    plot(this_DV,this_modFiringArea,'.','markerSize',markerSize,'color',colors(round(this_modFiringArea),:));
     title('DV');
     xlabel('mm');
-    ylabel('z width');
+    ylabel('z width ticks (20/s)');
     grid on;
     
-    colors = jet(round(max(modFiringArea)));
-    wiggle1 = (rand(1) - 0.5) * 0.2;
-    wiggle2 = (rand(1) - 0.5) * 0.2;
-    wiggle3 = (rand(1) - 0.5) * 0.2;
-    [atlas_ims,k] = plotMthalElectrode(atlas_ims,all_AP(iNeuron)+wiggle1,all_ML(iNeuron)+wiggle2,all_DV(iNeuron)+wiggle3,nasPath,...
-        colors(round(modFiringArea(iNeuron)),:));
+    colors = jet(round(max(modFiringArea_select)));
+%     [atlas_ims,k] = plotMthalElectrode(atlas_ims,this_AP,this_ML,this_DV,nasPath,...
+%         colors(round(this_modFiringArea),:));
+    
+    if ismember(iNeuron,select_mthalIds)
+        useColor = [1 0 0];
+        all_mthalPeths = [all_mthalPeths squeeze(neuronPeth(selectIds(iNeuron),4,:))];
+    else
+        useColor = [0 0 1];
+        all_nonmthalPeths = [all_nonmthalPeths squeeze(neuronPeth(selectIds(iNeuron),4,:))];
+    end
+    
+    if this_modFiringArea < (.2 * 20)
+        useColor = [1 0 0];
+    else
+        useColor = [0 0 1];
+    end
+    [atlas_ims,k] = plotMthalElectrode(atlas_ims,this_AP,this_ML,this_DV,nasPath,useColor);
+%     [atlas_ims,k] = plotMthalElectrodeLabels(atlas_ims,this_AP,this_ML,this_DV,nasPath,num2str(iNeuron));
 end
 
 figure('position',[0 0 1200 500]);
@@ -107,11 +135,64 @@ title(hcb,'t_m_o_d (s)');
 
 modFiringBins = [0:2:20];
 figure;
-[counts,centers] = hist(modFiringArea(find(modFiringArea ~= 0)),modFiringBins);
+[counts,centers] = hist(modFiringArea_select,modFiringBins);
 bar(centers,counts,'k');
-ylabel('units');
+ylabel('unit count');
 xlim([min(modFiringBins) - 2 max(modFiringBins)] + 1);
 xtickVals = modFiringBins / 20;
 xticks(modFiringBins);
-xticklabels(num2str(modFiringBins(:)));
+xticklabels(num2str(modFiringBins(:)/20));
 xlabel('t_m_o_d (s)');
+
+figure;
+[counts_mthal,centers_mthal] = hist(modFiringArea_select(select_mthalIds),modFiringBins);
+[counts_nonmthal,centers_nonmthal] = hist(modFiringArea_select(select_nonmthalIds),modFiringBins);
+ylim_max = max([counts_mthal counts_nonmthal]);
+subplot(211);
+bar(centers_mthal,counts_mthal,'k');
+ylabel('unit count');
+ylim([0 ylim_max+2]);
+xlim([min(modFiringBins) - 2 max(modFiringBins)] + 1);
+xtickVals = modFiringBins / 20;
+xticks(modFiringBins);
+xticklabels(num2str(modFiringBins(:)/20));
+xlabel('t_m_o_d (s)');
+title('VM Units');
+grid on;
+
+subplot(212);
+bar(centers_nonmthal,counts_nonmthal,'k');
+ylabel('unit count');
+ylim([0 ylim_max+2]);
+xlim([min(modFiringBins) - 2 max(modFiringBins)] + 1);
+xtickVals = modFiringBins / 20;
+xticks(modFiringBins);
+xticklabels(num2str(modFiringBins(:)/20));
+xlabel('t_m_o_d (s)');
+title('Not VM Units');
+grid on;
+
+figure('position',[0 0 400 900]);
+subplot(211);
+nSmooth = 3;
+grayColor = [.7 .7 .7 .7];
+for ii = 1:size(all_mthalPeths,2)
+    plot(smooth(all_mthalPeths(:,ii),nSmooth),'color',grayColor);
+    hold on;
+end
+plot(smooth(mean(all_mthalPeths,2),nSmooth),'color','red','lineWidth',1.5);
+xlim([1 40]);
+ylim([-1 2]);
+title('VM Units');
+grid on;
+
+subplot(212);
+for ii = 1:size(all_mthalPeths,2)
+    plot(smooth(all_mthalPeths(:,ii),nSmooth),'color',grayColor);
+    hold on;
+end
+plot(smooth(mean(all_nonmthalPeths,2),nSmooth),'color','red','lineWidth',1.5);
+xlim([1 40]);
+ylim([-1 2]);
+title('Not VM Units');
+grid on;
