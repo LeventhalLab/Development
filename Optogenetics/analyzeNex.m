@@ -1,7 +1,8 @@
-dosteps = [1,2];
+dosteps = [2];
 
 if ismember(1,dosteps)
-    sev_laserFile = '/Volumes/RecordingsLeventhal2/ChoiceTask/R0181/R0181-acute/R0181_20170524_cylinder/R0181_20170524_cylinder-5/R0181_20170524_cylinder_R0181_20170524_cylinder-5_data_ch65.sev';
+    sev_laserFile = '/Volumes/RecordingsLeventhal2/ChoiceTask/R0181/R0181-acute/R0181_20170525_cylinder/R0181_20170525c_cylinder-2/R0181_20170525c_cylinder_R0181_20170525c_cylinder-2_data_ch65.sev';
+    sev_laserFile = '/Volumes/RecordingsLeventhal2/ChoiceTask/R0181/R0181-acute/R0181_20170525_cylinder/R0181_20170525c_cylinder-1/R0181_20170525c_cylinder_R0181_20170525c_cylinder-1_data_ch65.sev';
     [sev_laser,header] = read_tdt_sev(sev_laserFile);
     
     h1 = figure('position',[0 0 1100 500]);
@@ -14,7 +15,7 @@ if ismember(1,dosteps)
     sev_laser(1:round(startStop(1))) = 0;
     sev_laser(round(startStop(2)):end) = 0;
 
-    minResetTime = 1; % seconds
+    minResetTime = 0; % seconds
     [pulse_binary,pulse_ts] = extractLaserProtocol(sev_laser,header,minResetTime);
 
     figure('position',[0 0 1100 500]);
@@ -27,15 +28,18 @@ if ismember(2,dosteps)
     % start NEX analysis
     dodebug = true;
     if dodebug
-        sevFile_data = '/Volumes/RecordingsLeventhal2/ChoiceTask/R0181/R0181-acute/R0181_20170524_cylinder/R0181_20170524_cylinder-5/R0181_20170524_cylinder_R0181_20170524_cylinder-5_data_ch3.sev';
+        sevFile_data = '/Volumes/RecordingsLeventhal2/ChoiceTask/R0181/R0181-acute/R0181_20170525_cylinder/R0181_20170525c_cylinder-2/R0181_20170525c_cylinder_R0181_20170525c_cylinder-2_data_ch49.sev';
+        sevFile_data = '/Volumes/RecordingsLeventhal2/ChoiceTask/R0181/R0181-acute/R0181_20170525_cylinder/R0181_20170525c_cylinder-1/R0181_20170525c_cylinder_R0181_20170525c_cylinder-1_data_ch49.sev';
         [sev_data,header] = read_tdt_sev(sevFile_data);
     end
-    nexFile = '/Volumes/RecordingsLeventhal2/ChoiceTask/R0181/R0181-acute/R0181_20170524_cylinder/R0181_20170524_cylinder-5/R0181_20170524_cylinder_R0181_20170524_cylinder-5_data_ch3[revised].nex';
+    nexFile = '/Volumes/RecordingsLeventhal2/ChoiceTask/R0181/R0181-acute/R0181_20170525_cylinder/R0181_20170525c_cylinder_R0181_20170525c_cylinder-2_data_ch49-quick.nex';
+    nexFile = '/Volumes/RecordingsLeventhal2/ChoiceTask/R0181/R0181-acute/R0181_20170525_cylinder/R0181_20170525c_cylinder_R0181_20170525c_cylinder-1_data_ch49.nex';
+    
 %     nexFile = '/Volumes/RecordingsLeventhal2/ChoiceTask/R0181/R0181-acute/R0181_20170524_cylinder/R0181_20170524_cylinder-5/R0181_20170524_cylinder_R0181_20170524_cylinder-5_data_ch3.nex';
     [nvar, names, types, freq] = nex_info(nexFile);
 
-    pethWindow = 1; % seconds
-    pethBinWidth = 50; % ms
+    pethWindow = .05; % seconds
+    pethBinWidth = 2; % ms
     pethBins = -pethWindow:pethBinWidth/1000:pethWindow;
     binEdge = mean(diff(pethBins)) / 2;
     for iUnit = 1:size(names)
