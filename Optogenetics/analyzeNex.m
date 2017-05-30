@@ -1,14 +1,14 @@
 % close all;
 
-dosteps = [1,2];
-pethWindow = .05; % seconds
-pethBinWidth = 2; % ms
+dosteps = [2];
+pethWindow = .02; % seconds
+pethBinWidth = 1; % ms
 minResetTime = 0; % seconds
-useUnits = [2];
+useUnits = [1,2];
 pulseBreaks = 251:251:2510;
 
 if ismember(1,dosteps)
-    sev_laserFile = '/Volumes/RecordingsLeventhal2/ChoiceTask/R0181/R0181-opto/R0181_20170525_cylinder/R0181_20170525c_cylinder-2/R0181_20170525c_cylinder_R0181_20170525c_cylinder-2_data_ch65.sev';
+%     sev_laserFile = '/Volumes/RecordingsLeventhal2/ChoiceTask/R0181/R0181-opto/R0181_20170525_cylinder/R0181_20170525c_cylinder-2/R0181_20170525c_cylinder_R0181_20170525c_cylinder-2_data_ch65.sev';
     sev_laserFile = '/Volumes/RecordingsLeventhal2/ChoiceTask/R0181/R0181-opto/R0181_20170525_cylinder/R0181_20170525c_cylinder-1/R0181_20170525c_cylinder_R0181_20170525c_cylinder-1_data_ch65.sev';
     [sev_laser,header] = read_tdt_sev(sev_laserFile);
     
@@ -29,14 +29,13 @@ if ismember(2,dosteps)
     % start NEX analysis
     dodebug = true;
     if dodebug
-        sevFile_data = '/Volumes/RecordingsLeventhal2/ChoiceTask/R0181/R0181-opto/R0181_20170525_cylinder/R0181_20170525c_cylinder-2/R0181_20170525c_cylinder_R0181_20170525c_cylinder-2_data_ch49.sev';
+%         sevFile_data = '/Volumes/RecordingsLeventhal2/ChoiceTask/R0181/R0181-opto/R0181_20170525_cylinder/R0181_20170525c_cylinder-2/R0181_20170525c_cylinder_R0181_20170525c_cylinder-2_data_ch49.sev';
         sevFile_data = '/Volumes/RecordingsLeventhal2/ChoiceTask/R0181/R0181-opto/R0181_20170525_cylinder/R0181_20170525c_cylinder-1/R0181_20170525c_cylinder_R0181_20170525c_cylinder-1_data_ch49.sev';
         [sev_data,header] = read_tdt_sev(sevFile_data);
     end
-    nexFile = '/Volumes/RecordingsLeventhal2/ChoiceTask/R0181/R0181-opto/R0181_20170525_cylinder/R0181_20170525c_cylinder_R0181_20170525c_cylinder-2_data_ch49-quick.nex';
-    nexFile = '/Volumes/RecordingsLeventhal2/ChoiceTask/R0181/R0181-opto/R0181_20170525_cylinder/R0181_20170525c_cylinder-1/R0181_20170525c_cylinder_R0181_20170525c_cylinder-1_data_ch49[updated].nex';
+%     nexFile = '/Volumes/RecordingsLeventhal2/ChoiceTask/R0181/R0181-opto/R0181_20170525_cylinder/R0181_20170525c_cylinder-2/R0181_20170525c_cylinder_R0181_20170525c_cylinder-2_data_ch49.nex';
+    nexFile = '/Volumes/RecordingsLeventhal2/ChoiceTask/R0181/R0181-opto/R0181_20170525_cylinder/R0181_20170525c_cylinder-1/R0181_20170525c_cylinder_R0181_20170525c_cylinder-1_data_ch49-01-mg.nex';
     
-%     nexFile = '/Volumes/RecordingsLeventhal2/ChoiceTask/R0181/R0181-opto/R0181_20170524_cylinder/R0181_20170524_cylinder-5/R0181_20170524_cylinder_R0181_20170524_cylinder-5_data_ch3.nex';
     [nvar, names, types, freq] = nex_info(nexFile);
 
     pethBins = -pethWindow:pethBinWidth/1000:pethWindow;
@@ -59,9 +58,9 @@ if ismember(2,dosteps)
             title({unitName,[num2str(numel(pulse_ts)),' pulses']});
             
             figure;
-            [counts,centers] = hist(ts,[0:1:max(ts)]);
+            [counts,centers] = hist(ts,[0:1:round(numel(sev_data)/header.Fs)]);
             bar(centers,counts);
-            title('Session FR');
+            title([unitName,' Session FR']);
             xlabel('time (s)');
             ylabel('spikes/sec');
             xlim([0 max(ts)]);
@@ -71,11 +70,12 @@ if ismember(2,dosteps)
         sortArr = [];
         for iPulse = 1:numel(pulse_ts)
             ts_shift = ts - pulse_ts(iPulse);
+%             ts_window = ts(ts > pulse_ts(iPulse) - pethWindow - binEdge & ts < pulse_ts(iPulse) + pethWindow + binEdge) - pulse_ts(iPulse);
             ts_window = ts_shift(ts_shift >= -pethWindow - binEdge & ts_shift < pethWindow + binEdge);
             all_tsPeth{iPulse} = ts_window;
             sortArr(iPulse) = std(diff(ts_window));
         end
-        [v,k] = sort(sortArr);
+% %         [v,k] = sort(sortArr);
         figure;
         plotSpikeRaster(all_tsPeth,'PlotType','scatter');
         xlimVals = xlim;
