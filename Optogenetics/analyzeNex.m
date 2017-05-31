@@ -1,10 +1,21 @@
 % close all;
 
 dosteps = [2];
-pethWindow = .02; % seconds
-pethBinWidth = 1; % ms
-minResetTime = 0; % seconds
-useUnits = [1,2];
+protocol = 1; % 1 = long, 2 = short, 3 = custom
+useUnits = [2];
+
+if protocol == 1
+    pethWindow = 5; % seconds
+    pethBinWidth = 250; % ms
+    minResetTime = 1; % seconds
+elseif protocol == 2
+    pethWindow = .01; % seconds
+    pethBinWidth = .5; % ms
+    minResetTime = 0; % seconds
+else
+    % custom
+end
+
 pulseBreaks = 251:251:2510;
 
 if ismember(1,dosteps)
@@ -34,15 +45,25 @@ if ismember(2,dosteps)
         [sev_data,header] = read_tdt_sev(sevFile_data);
     end
 %     nexFile = '/Volumes/RecordingsLeventhal2/ChoiceTask/R0181/R0181-opto/R0181_20170525_cylinder/R0181_20170525c_cylinder-2/R0181_20170525c_cylinder_R0181_20170525c_cylinder-2_data_ch49.nex';
-    nexFile = '/Volumes/RecordingsLeventhal2/ChoiceTask/R0181/R0181-opto/R0181_20170525_cylinder/R0181_20170525c_cylinder-1/R0181_20170525c_cylinder_R0181_20170525c_cylinder-1_data_ch49-01-mg.nex';
+    nexFile = '/Volumes/RecordingsLeventhal2/ChoiceTask/R0181/R0181-opto/R0181_20170525_cylinder/R0181_20170525c_cylinder-1/R0181_20170525c_cylinder_R0181_20170525c_cylinder-1_data_ch49.nex';
     
     [nvar, names, types, freq] = nex_info(nexFile);
 
     pethBins = -pethWindow:pethBinWidth/1000:pethWindow;
     binEdge = mean(diff(pethBins)) / 2;
-    for iUnit = useUnits
+    for iUnit = 1:size(names,1)
+        if ~isempty(useUnits)
+            if ~ismember(iUnit,useUnits)
+                continue;
+            end
+        end
         unitName = deblank(names(iUnit,:));
         [n, ts] = nex_ts(nexFile, unitName);
+        sur_ts = [];
+        for ii = 1:numel(ts)
+            sur_ts(ii) = ts(ii) + rand(1)*10;
+        end
+
         % remove all ts out of range
 %         ts = ts(ts >= startStop(1)*header.Fs & ts < startStop(2)*header.Fs);
         if dodebug
@@ -69,7 +90,7 @@ if ismember(2,dosteps)
         all_tsPeth = {};
         sortArr = [];
         for iPulse = 1:numel(pulse_ts)
-            ts_shift = ts - pulse_ts(iPulse);
+            ts_shift = sur_ts - pulse_ts(iPulse);
 %             ts_window = ts(ts > pulse_ts(iPulse) - pethWindow - binEdge & ts < pulse_ts(iPulse) + pethWindow + binEdge) - pulse_ts(iPulse);
             ts_window = ts_shift(ts_shift >= -pethWindow - binEdge & ts_shift < pethWindow + binEdge);
             all_tsPeth{iPulse} = ts_window;
@@ -78,13 +99,13 @@ if ismember(2,dosteps)
 % %         [v,k] = sort(sortArr);
         figure;
         plotSpikeRaster(all_tsPeth,'PlotType','scatter');
-        xlimVals = xlim;
+        xlim([-pethWindow pethWindow]);
         xlabel('time (s)');
         ylabel('pulse');
         title({unitName,[num2str(numel(pulse_ts)),' pulses']});
         hold on;
         for ii = 1:numel(pulseBreaks)
-            plot(xlimVals,[pulseBreaks(ii) pulseBreaks(ii)],'--r');
+            plot([-pethWindow pethWindow],[pulseBreaks(ii) pulseBreaks(ii)],'--r');
         end
         
         figure('position',[0 0 600 600]);

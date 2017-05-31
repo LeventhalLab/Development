@@ -1,9 +1,9 @@
 % save('session_20170526_videoParams','video_20msALLs_pulse_binary','video_20msALLs_pulse_ts','video_20msSTARTs_pulse_binary','video_20msSTARTs_pulse_ts','all_tsPeth');
 
-% % videoFile = '/Users/mattgaidica/Desktop/R0181_052517_480p.mov';
-% % video = VideoReader(videoFile);
+videoFile = '/Users/mattgaidica/Desktop/R0181_052517_480p.mov';
+video = VideoReader(videoFile);
 
-saveFile = '/Users/mattgaidica/Desktop/R0181_20170525_cylinder1-laserRasters5sOnOff50Hz.avi';
+saveFile = '/Users/mattgaidica/Desktop/R0181_20170525_cylinder1-laserRasters5sOnOff50Hz_ch49.avi';
 doVideo = true;
 
 if doVideo
@@ -16,8 +16,8 @@ end
 protocolStartFrames = 16526:300:19226;
 % protocolStartFrames = 432+1500:300:3132+1500;
 % pulseStartIdxs = 1:251:2512-251;
-pulseInt = 500;
-pulseStartIdxs = 1:pulseInt:5000;
+pulseInt = 251;
+pulseStartIdxs = 1:pulseInt:numel(all_tsPeth);
 
 h1 = figure('position',[0 0 1300 800]);
 set(gcf,'color','w');
@@ -30,10 +30,11 @@ for iPulse = 1:10
         hold on;
     end
     plotSpikeRaster(all_tsPeth(pulseStartIdxs(iPulse):pulseStartIdxs(iPulse)+pulseInt));
+    xlim([-pethWindow pethWindow]);
     title(['Pulse ',num2str(iPulse)]);
 end
 
-pulseInc = 250/150;
+pulseInc = pulseInt/300;
 histMarker = 1;
 for iFrame = 1:300 % 300 frames / 30 frames per second = 10 seconds
     for iPulse = 1:10
@@ -44,7 +45,7 @@ for iFrame = 1:300 % 300 frames / 30 frames per second = 10 seconds
         laserTitle = 'laser off';
         markerColor = [.7 .7 .7];
         histMarker = pulseInc * iFrame;
-        if iFrame <= 150
+        if histMarker < 150
             laserTitle = 'laser on';
             markerColor = [0 0 1];
         end
@@ -55,7 +56,7 @@ for iFrame = 1:300 % 300 frames / 30 frames per second = 10 seconds
             subplot(4,5,iPulse+10);
         end
         hold on;
-        plot(-.02,histMarker,'.','markerSize',20,'color',markerColor);
+        plot(-pethWindow,histMarker,'.','markerSize',20,'color',markerColor);
         
         if iPulse <= 5
             subplot(4,5,iPulse);
