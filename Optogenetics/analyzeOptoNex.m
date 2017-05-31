@@ -47,6 +47,10 @@ if ismember(2,dosteps)
         unitName = deblank(names(iUnit,:));
         [~,fileName,~] = fileparts(nexFile);
         [n, ts] = nex_ts(nexFile, unitName);
+        if numel(ts) < 10
+            disp(['Only ',num2str(numel(ts)),' units; skipping...']);
+            continue;
+        end
 
         figure('position',[100 100 1100 500]);
         ephysData_norm = normalize(ephysData);
