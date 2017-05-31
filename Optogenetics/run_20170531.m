@@ -89,7 +89,7 @@ if true
             
             if true % Analysis 2
                 pethWindow = .05; % seconds
-                pethBinWidth = 1; % ms
+                pethBinWidth = 2; % ms
                 pethBins = -pethWindow:pethBinWidth/1000:pethWindow;
                 binEdge = mean(diff(pethBins)) / 2;
                 all_tsPeth = {};
@@ -138,6 +138,40 @@ if true
                     saveas(h1,fullfile(saveDir,[fileName,unitName,'_50HzPeriLaserON-2msBins50msWin.png']));
                     close(h1);
                 end
+                
+                fontSize = 16;
+                figure('position',[0 0 700 500]);
+                useData = all_tsPeth;
+                [counts,centers] = hist([useData{:}],pethBins);
+                fr = ((1/(pethBinWidth/1000)) * counts) / numel(pulse_ts);
+                maxy = max(fr) + 4;
+                hold on;
+                for ii = [-pethWindow - .01:.02:pethWindow + .01]
+                    x = [ii ii+.01 ii+.01 ii];
+                    y = [0 0 maxy maxy];
+                    patch(x,y,[82/255 148/255 247/255],'EdgeColor','none','FaceAlpha',1);
+                end
+                for ii = [-pethWindow - .01:.02:pethWindow + .01]
+                    x = [ii ii+.01 ii+.01 ii];
+                    y = [0 0 maxy-1 maxy-1];
+                    patch(x,y,[170/255 203/255 251/255],'EdgeColor','none','FaceAlpha',1);
+                end
+                bar(centers,fr,'k');
+                xlim([-pethWindow pethWindow]);
+                xlabel('Time (s)');
+                ylabel('Spikes/Sec');
+                xlim([-pethWindow pethWindow]);
+                ylim([0 maxy]);
+                xticks([-pethWindow:.05:pethWindow]);
+                yticks([0 10 20 30]);
+                set(gcf,'color','w');
+                set(gca,'fontSize',16);
+                title(fileName(end-13:end),'interpreter','none');
+                axes('Position',[.78 .78 .12 .15]);
+                plot(smooth(spike_1357,3),'LineWidth',2,'Color','red');
+                xlim([0 numel(spike_1357)]);
+                axis off;
+                box off;
             end
         end
     end
