@@ -1,9 +1,9 @@
-function [pulse_binary,pulse_ts] = extractLaserProtocol(sev_laser,Fs,minResetTime)
+function [pulse_binary,pulse_ts] = extractLaserProtocol(laserData,Fs,minResetTime)
 
 % % figure; plot(sev_laser_laser);
 % % [~,laserThresh] = ginput(1);
 % % laserThresh = 4e5; % found empirically
-laserThresh = max(sev_laser) * 0.2; % 20% of max should work for many types of data
+laserThresh = max(laserData) * 0.2; % 20% of max should work for many types of data
 
 % minResetTime = 0; % seconds, make 0 for fast pulses
 resetSamples = 1;
@@ -11,8 +11,8 @@ pulse_binary = [];
 pulse_ts = [];
 nts = 1;
 laserState = false;
-for iSample = 1:numel(sev_laser)
-    if sev_laser(iSample) > laserThresh && ~laserState % rising edge
+for iSample = 1:numel(laserData)
+    if laserData(iSample) > laserThresh && ~laserState % rising edge
         laserState = true;
         if resetSamples / Fs > minResetTime
             pulse_ts(nts) = iSample / Fs;
@@ -25,7 +25,7 @@ for iSample = 1:numel(sev_laser)
         resetSamples = resetSamples + 1;
     end
     
-    if sev_laser(iSample) < laserThresh && laserState     
+    if laserData(iSample) < laserThresh && laserState     
         laserState = false;
     end
 end

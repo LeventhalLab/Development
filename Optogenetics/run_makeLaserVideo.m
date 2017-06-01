@@ -1,9 +1,9 @@
 % save('session_20170526_videoParams','video_20msALLs_pulse_binary','video_20msALLs_pulse_ts','video_20msSTARTs_pulse_binary','video_20msSTARTs_pulse_ts','all_tsPeth');
 
-videoFile = '/Users/mattgaidica/Desktop/R0181_052517_480p.mov';
-video = VideoReader(videoFile);
+% videoFile = '/Users/mattgaidica/Desktop/R0181_052517_480p.mov';
+% video = VideoReader(videoFile);
 
-saveFile = '/Users/mattgaidica/Desktop/R0181_20170525_cylinder1-laserRasters5sOnOff50Hz_ch49.avi';
+saveFile = '/Users/mattgaidica/Desktop/R0181_20170525_cylinder1-laserRasters5sOnOff50Hz_ch1357.avi';
 doVideo = true;
 
 if doVideo
@@ -45,7 +45,7 @@ for iFrame = 1:300 % 300 frames / 30 frames per second = 10 seconds
         laserTitle = 'laser off';
         markerColor = [.7 .7 .7];
         histMarker = pulseInc * iFrame;
-        if histMarker < 150
+        if histMarker < 125
             laserTitle = 'laser on';
             markerColor = [0 0 1];
         end
