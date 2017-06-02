@@ -90,10 +90,12 @@ for iEvent = 1:size(neuronPeth_sub,2)
     end
     subplot(1,size(onlyPlotEvents,2)+extraPlots,iSubplot);
     ylim([min(all_markerIds) max(all_markerIds)]);
+    plot(1,101,'r>','markersize',25,'MarkerFaceColor','r');
+    set(gca,'fontSize',10);
+    set(gca,'fontName','Arial');
     iSubplot = iSubplot + 1;
 end
 
-plot(1,101,'r>','markersize',35,'MarkerFaceColor','r');
 
 % % neuronNames_sub = analysisConf.neurons(useRange);
 % % sessionConfs_sub = analysisConf.sessionConfs(useRange);
