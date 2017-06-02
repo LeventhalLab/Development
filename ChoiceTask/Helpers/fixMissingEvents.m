@@ -35,6 +35,9 @@ for iTrial = 1:numel(logData.outcome)
     centerCueEvent = (centerCuePort * 2) - 1;
     centerCueTimes = nexStruct.events{centerCueEvent,1}.timestamps;
     centerCueTimes = centerCueTimes(centerCueTimes > curTime + roundErr);
+    if isempty(centerCueTimes)
+        continue;
+    end
     curTime = centerCueTimes(1);
     
     gotrialOn(iTrial) = curTime - .01;
@@ -44,6 +47,9 @@ for iTrial = 1:numel(logData.outcome)
         centerInEvent = centerCueEvent + 16;
         centerInTimes = nexStruct.events{centerInEvent,1}.timestamps;
         centerInTimes = centerInTimes(centerInTimes > curTime + roundErr);
+        if isempty(centerInTimes)
+            continue;
+        end
         toneTime = centerInTimes(1) + logData.pretone(iTrial);
         curTime = toneTime;
         if logData.Tone(iTrial) == 1000
@@ -59,6 +65,9 @@ for iTrial = 1:numel(logData.outcome)
             targetInEvent = (targetInPort * 2) - 1 + 16;
             targetInTimes = nexStruct.events{targetInEvent,1}.timestamps;
             targetInTimes = targetInTimes(targetInTimes >= curTime);
+            if isempty(targetInTimes)
+                continue;
+            end
             curTime = targetInTimes(1);
         elseif ismember(outcome,[5]) % wrong side, invert targetPort
                 curTime = curTime + 5;

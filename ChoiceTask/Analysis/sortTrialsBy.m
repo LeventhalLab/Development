@@ -10,7 +10,13 @@ for iTrial = 1:length(trials)
             if strcmp(timingField,'movementDirection')
                 allTimes(trialCount) = trials(iTrial).movementDirection;
             else
-                allTimes(trialCount) = getfield(trials(iTrial).timing,timingField);
+                t = getfield(trials(iTrial).timing,timingField);
+                % not sure why there are some negative times, set to 0?
+                if t < 0
+                    allTimes(trialCount) = 0;
+                else
+                    allTimes(trialCount) = t;
+                end
             end
         end
         trialIds(trialCount) = iTrial;

@@ -3,13 +3,15 @@
 % useUnits = {[2],[1]};
 
 nexFileDir = '/Volumes/RecordingsLeventhal2/ChoiceTask/R0181/R0181-opto/R0181_20170525_cylinder/R0181_20170525c_cylinder-1';
-% % nexFiles = dir(fullfile(nexFileDir,'*[1  3  5  7].nex'));
-% % useUnits = [2];
-nexFiles = dir(fullfile(nexFileDir,'*.nex'));
-useUnits = [];
+% nexFiles = dir(fullfile(nexFileDir,'*[1  3  5  7].nex'));
+nexFiles = dir(fullfile(nexFileDir,'*49.nex'));
+useUnits = [2];
 
-saveDir = '/Volumes/RecordingsLeventhal2/ChoiceTask/R0181/R0181-opto/R0181_20170525_cylinder/R0181_20170525c_cylinder-1/Analysis2';
-dosave = true;
+% nexFiles = dir(fullfile(nexFileDir,'*.nex'));
+% useUnits = [];
+
+saveDir = '/Volumes/RecordingsLeventhal2/ChoiceTask/R0181/R0181-opto/R0181_20170525_cylinder/R0181_20170525c_cylinder-1/Analysis3';
+dosave = false;
 
 % setup
 if false
@@ -24,7 +26,7 @@ if false
     % remove data outside startStop
     laserData(1:round(startStop(1))) = 0;
     laserData(round(startStop(2)):end) = 0;
-    [pulse_binary,pulse_ts] = extractLaserProtocol(laserData,header.Fs,1);
+    [pulse_binary,pulse_ts] = extractLaserProtocol(laserData,header.Fs,0);
 end
 
 if true
@@ -90,9 +92,9 @@ if true
             end
             
             if true % Analysis 2
-                pethWindow = 5; % seconds
-                pethBinWidth = 100; % ms
-                pethBins = -pethWindow:pethBinWidth/1000:pethWindow;
+                pethWindow = .05; % seconds
+                pethBinWidth = 2; % ms
+                pethBins = [-pethWindow-(pethBinWidth/1000):pethBinWidth/1000:pethWindow+(pethBinWidth/1000)] + (pethBinWidth/1000)/2;
                 binEdge = mean(diff(pethBins)) / 2;
                 all_tsPeth = {};
                 all_tsPethSurr = {};
@@ -137,11 +139,11 @@ if true
 % %                     xticks([-pethWindow:.01:pethWindow]);
                 end
                 if dosave
-                    saveas(h1,fullfile(saveDir,[fileName,unitName,'_5sLongPeriLaserOn-5sWin100MsBin.png']));
+                    saveas(h1,fullfile(saveDir,[fileName,unitName,'_50msWin2msBin.png']));
                     close(h1);
                 end
                 
-                if false % grant figure
+                if true % grant figure
                     fontSize = 16;
                     figure('position',[0 0 700 500]);
                     useData = all_tsPeth;
@@ -170,11 +172,13 @@ if true
                     set(gcf,'color','w');
                     set(gca,'fontSize',16);
                     title(fileName(end-13:end),'interpreter','none');
-                    axes('Position',[.78 .78 .12 .15]);
-                    plot(smooth(spike_1357,3),'LineWidth',2,'Color','red');
-                    xlim([0 numel(spike_1357)]);
-                    axis off;
-                    box off;
+                    if true
+                        axes('Position',[.78 .78 .12 .15]);
+                        plot(smooth(spikeWaveform,3),'LineWidth',2,'Color','red');
+                        xlim([0 numel(spikeWaveform)]);
+                        axis off;
+                        box off;
+                    end
                 end
             end
         end
