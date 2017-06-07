@@ -1,4 +1,13 @@
-function [tsISI,tsLTS,tsPoisson,tsPoissonLTS, ISI_n, LTS_n, poisson_n, poissonLTS_n] = tsBurstFilters(ts)
+function [tsISI,tsLTS,tsPoisson,tsPoissonLTS,ISI_n,LTS_n,poisson_n,poissonLTS_n] = tsBurstFilters(ts)
+% tsISI,tsLTS,tsPoisson,tsPoissonLTS contain timestamps (in seconds) that
+% represent the time of the first spike in that classification type.
+% ISI_n,LTS_n,poisson_n,poissonLTS_n correspond to the first four outputs
+% and contain a number (n) representing how many spikes are contained
+% within that class of burst (including the first spike); therefore, n >= 2.
+
+% Tip: you can use the *_n arrays to discard bursts containing less than
+% some amount of spikes.
+
 maxBurstISI = 0.007; % seconds
 
 tsISI = [];

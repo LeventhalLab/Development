@@ -101,10 +101,17 @@ if ismember(2,dosteps)
         figure('position',[0 0 600 600]);
         [counts,centers] = hist([all_tsPeth{:}],pethBins);
         fr = ((1/(pethBinWidth/1000)) * counts) / numel(pulse_ts);
+        maxy = max(fr)+3;
+        x = [0 pethWindow pethWindow 0];
+        y = [0 0 maxy maxy];
+        patch(x,y,[82/255 148/255 247/255],'EdgeColor','none','FaceAlpha',1);
+        y = [0 0 maxy-1 maxy-1];
+        patch(x,y,[170/255 203/255 251/255],'EdgeColor','none','FaceAlpha',1);
+        hold on;
         bar(centers,fr,'k');
         xlim([-pethWindow pethWindow]);
-        xlabel('time (s), pulse = 0');
-        ylabel('spikes/sec');
+        xlabel('Time (s)');
+        ylabel('Spikes/Sec');
         title({fileName,unitName,[num2str(numel(pulse_ts)),' pulses']},'interpreter','none');
     end
 end

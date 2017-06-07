@@ -2,6 +2,9 @@
 %     '/Volumes/RecordingsLeventhal2/ChoiceTask/R0181/R0181-opto/R0181_20170525_cylinder/R0181_20170525c_cylinder-1/R0181_20170525c_cylinder_R0181_20170525c_cylinder-1_data_ch53.nex'};
 % useUnits = {[2],[1]};
 
+% ch49 from Offline Sorter
+spikeWaveform = [0.853487191	1.605702596	1.800573878	1.87625502	1.988851402	2.118986199	2.262357536	2.474828513	2.602205698	2.733480308	4.185479712	8.699838416	15.04354822	16.95659591	7.157254506	-14.47587224	-37.27705009	-46.8586014	-37.39916943	-16.56147294	1.862944944	9.56555715	8.319214357	4.904456694	3.497375733	3.642597735	3.628454247	3.17353398	2.817618129	2.637049663	2.410778367	2.180989583];
+
 nexFileDir = '/Volumes/RecordingsLeventhal2/ChoiceTask/R0181/R0181-opto/R0181_20170525_cylinder/R0181_20170525c_cylinder-1';
 % nexFiles = dir(fullfile(nexFileDir,'*[1  3  5  7].nex'));
 nexFiles = dir(fullfile(nexFileDir,'*49.nex'));
@@ -93,7 +96,7 @@ if true
             
             if true % Analysis 2
                 pethWindow = .05; % seconds
-                pethBinWidth = 2; % ms
+                pethBinWidth = 5; % ms
                 pethBins = [-pethWindow-(pethBinWidth/1000):pethBinWidth/1000:pethWindow+(pethBinWidth/1000)] + (pethBinWidth/1000)/2;
                 binEdge = mean(diff(pethBins)) / 2;
                 all_tsPeth = {};
@@ -144,12 +147,13 @@ if true
                 end
                 
                 if true % grant figure
-                    fontSize = 16;
+                    fontSize = 10;
+                    fontName = 'Arial';
                     figure('position',[0 0 700 500]);
                     useData = all_tsPeth;
                     [counts,centers] = hist([useData{:}],pethBins);
                     fr = ((1/(pethBinWidth/1000)) * counts) / numel(pulse_ts);
-                    maxy = max(fr) + 4;
+                    maxy = max(fr) + 2;
                     hold on;
                     for ii = [-pethWindow - .01:.02:pethWindow + .01]
                         x = [ii ii+.01 ii+.01 ii];
@@ -166,11 +170,12 @@ if true
                     xlabel('Time (s)');
                     ylabel('Spikes/Sec');
                     xlim([-pethWindow pethWindow]);
-                    ylim([0 maxy]);
+                    ylim([25 maxy]);
                     xticks([-pethWindow:.05:pethWindow]);
-                    yticks([0 10 20 30]);
+                    yticks([0:1:33]);
                     set(gcf,'color','w');
-                    set(gca,'fontSize',16);
+                    set(gca,'fontSize',fontSize);
+                    set(gca,'fontName',fontName);
                     title(fileName(end-13:end),'interpreter','none');
                     if true
                         axes('Position',[.78 .78 .12 .15]);

@@ -6,5 +6,7 @@ for ii = 1:numel(hd)
 end
 [pathstr, name, ext] = fileparts(h.FileName);
 
+% try setting page size here to maintain font?
+
 fp = fillPage(h,'margins',[0 0 0 0],'papersize',[5 4]); % [w,h]
 print(h,'-painters','-dpdf','-r200',fullfile(pathstr,[name,'.pdf']));
