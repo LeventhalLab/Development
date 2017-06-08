@@ -1,5 +1,5 @@
 % function rtMtDist(analysisConf)
-if false
+if true
     all_rt = [];
     all_mt = [];
     lastSession = '';
@@ -46,3 +46,13 @@ xlabel('Movement time (s)');
 xlim(xlimVals);
 ylabel('trials');
 title(['MT Distribution, ',num2str(numel(all_mt)),' trials, ',num2str(histInt*1000),' ms bins']);
+
+% RT-MT correlation
+figure;
+plot(all_rt,all_mt,'k.','MarkerSize',10)
+xlim([.1 .7]);
+ylim([.15 .5]);
+grid on;
+xlabel('RT (s)');
+ylabel('MT (s)');
+
