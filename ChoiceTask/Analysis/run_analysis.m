@@ -67,7 +67,7 @@ for iNeuron = 1:size(analysisConf.neurons,1)
     end
 
     % load SEV file and filter it for LFP analyses
-    needsLfp = false;
+    needsLfp = true;
     
     % this is really not perfect yet, needs LFP channel in DB I think
     rows = sessionConf.session_electrodes.channel == electrodeChannels;
@@ -79,11 +79,10 @@ for iNeuron = 1:size(analysisConf.neurons,1)
         sevFile = sessionConf.sevFiles{lfpChannel};
         if needsLfp
             [sev,header] = read_tdt_sev(sevFile);
-            decimateFactor = 1;%round(header.Fs / (fpass(2) * 10)); % 10x max filter freq
-% %             sevFilt = decimate(double(sev),decimateFactor);
+            decimateFactor = 10;%round(header.Fs / (fpass(2) * 10)); % 10x max filter freq
+            sevFilt = decimate(double(sev),decimateFactor);
             sevFilt = double(sev);
-% %             Fs = header.Fs / decimateFactor;
-            Fs = header.Fs;
+            Fs = header.Fs / decimateFactor;
         else
             header = getSEVHeader(sevFile);
         end
@@ -94,7 +93,7 @@ for iNeuron = 1:size(analysisConf.neurons,1)
     
     % produces waveform and ISI xcorr analyses
     if isNewSession
-% %         makeUnitSummaries();
+        makeUnitSummaries();
     end
     
     % !! Not used but need eventFieldnames
@@ -152,15 +151,14 @@ for iNeuron = 1:size(analysisConf.neurons,1)
 
     if true
         % event-centered analysis
-        % !!! add eventFieldnames to eventsPeth
         tsPeths = eventsPeth(trials(trialIds),ts,tWindow,eventFieldnames);
         tsISIInvPeths = eventsPeth(trials(trialIds),tsISIInv,tWindow,eventFieldnames);
         tsISIPeths = eventsPeth(trials(trialIds),tsISI,tWindow,eventFieldnames);
         tsLTSPeths = eventsPeth(trials(trialIds),tsLTS,tWindow,eventFieldnames);
         tsPoissonPeths = eventsPeth(trials(trialIds),tsPoisson,tWindow,eventFieldnames);
-%         [eventScalograms,allLfpData] = eventsScalo(trials(trialIds),sevFilt,tWindow,Fs,freqList,eventFieldnames);
+        [eventScalograms,allLfpData] = eventsScalo(trials(trialIds),sevFilt,tWindow,Fs,freqList,eventFieldnames);
         t = linspace(-tWindow,tWindow,size(tsPeths,1));
-%         eventAnalysis(); % format
+        eventAnalysis(); % format
     end
     
     % scalograms based on different ts bursts separated by low-med-high
@@ -184,4 +182,4 @@ for iNeuron = 1:size(analysisConf.neurons,1)
 % % run_RTraster()
 end
 
-% % addUnitHeader(analysisConf,{'eventAnalysis'});
+addUnitHeader(analysisConf,{'eventAnalysis'});
