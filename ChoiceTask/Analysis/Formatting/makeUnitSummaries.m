@@ -10,7 +10,9 @@ fontSize = 7;
 
 waveformFile = fullfile(sessionConf.leventhalPaths.processed,[neuronName(1:end-1),'.txt']);
 if ~exist(waveformFile,'file')
-    warning(['No waveform file for ',neuronName]);
+    disp(['No waveform file for ',neuronName]);
+    disp('Pausing! Place file and press any key to continue...');
+    pause();
 end
 waveforms = csvread(waveformFile,2);
 units = sort(unique(waveforms(:,2)));
