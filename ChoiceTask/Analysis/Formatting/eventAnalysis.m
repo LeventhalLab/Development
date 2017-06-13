@@ -1,4 +1,5 @@
-totalRows = 8; % LFP, tsAll, tsBurst, tsLTS, tsPoisson, raster, high pass data
+rows = 8; % LFP, tsAll, tsBurst, tsLTS, tsPoisson, raster, high pass data
+cols = numel(eventFieldnames);
 fontSize = 7;
 histBins = 40;
 iSubplot = 1;
@@ -7,7 +8,7 @@ h = figure;
 
 adjSubplots = [];
 for iEvent = 1:numel(eventFieldnames)
-    ax = subplot(totalRows,numel(eventFieldnames),iSubplot);
+    ax = subplot(rows,cols,iSubplot);
     imagesc(t,freqList,log(squeeze(eventScalograms(iEvent,:,:))));
     if iEvent == 1
         ylabel('Freq (Hz)');
@@ -35,11 +36,11 @@ for iEvent = 1:numel(eventFieldnames)
 end
 % set caxis
 for ii=1:length(adjSubplots)
-    ax = subplot(totalRows,numel(eventFieldnames),adjSubplots(ii));
+    ax = subplot(rows,numel(eventFieldnames),adjSubplots(ii));
     caxis(yvals);
     if ii == length(adjSubplots)
         subplotPos = get(gca,'Position');
-        colorbar('eastoutside');
+%         colorbar('eastoutside'); % need to fix formatting before using
         set(ax,'Position',subplotPos);
     end
     set(ax,'FontSize',fontSize);
@@ -48,7 +49,7 @@ end
 % high pass filter butterfly overlay trace
 adjSubplots = [];
 for iEvent = 1:numel(eventFieldnames)
-    ax = subplot(totalRows,numel(eventFieldnames),iSubplot);
+    ax = subplot(rows,cols,iSubplot);
     for iTrial = 1:size(allLfpData,3)
         lfpData = squeeze(allLfpData(iEvent,:,iTrial));
         % inline baseline adjustment (weird DC offset in some data)
@@ -69,14 +70,15 @@ for iEvent = 1:numel(eventFieldnames)
 end
 % set y-axis
 for ii=1:length(adjSubplots)
-    ax = subplot(totalRows,numel(eventFieldnames),adjSubplots(ii));
-    ylim([-yvals yvals]);   
+    ax = subplot(rows,numel(eventFieldnames),adjSubplots(ii));
+% %     ylim([-yvals yvals]);
+    ylim([-500 500]);
 end
 
 % spike rasters
 adjSubplots = [];
 for iEvent = 1:numel(eventFieldnames)
-    ax = subplot(totalRows,numel(eventFieldnames),iSubplot);
+    ax = subplot(rows,cols,iSubplot);
     rasterData = tsPeths(:,iEvent);
     rasterData = rasterData(~cellfun('isempty',rasterData)); % remove empty rows (no spikes)
     rasterData = makeRasterReadable(rasterData,100); % limit to 100 data points
@@ -86,7 +88,7 @@ for iEvent = 1:numel(eventFieldnames)
     else
         set(ax,'yTickLabel',[]);
     end
-    title(['sorted asc by ',timingField]);
+%     title(['sorted asc by ',timingField]); % sort by?
     xlim([-1 1]);
     set(ax,'FontSize',fontSize);
     hold on;
@@ -101,7 +103,7 @@ rowLabels = {'tsAll','tsAll - tsISI','tsISI','tsLTS','tsPoisson'};
 for iRowData = 1:length(allPeths)
     allys = [];
     for iEvent = 1:numel(eventFieldnames)
-        ax = subplot(totalRows,numel(eventFieldnames),iSubplot);
+        ax = subplot(rows,cols,iSubplot);
         curData = allPeths{1,iRowData}(:,iEvent); % extract all trials for iEvent column
         curData = cat(2,curData{:}); % concatenate all values into one vector
         if ~isempty(curData)
@@ -119,7 +121,7 @@ for iRowData = 1:length(allPeths)
         iSubplot = iSubplot + 1;
     end
     for ii=1:length(adjSubplots)
-        ax = subplot(totalRows,numel(eventFieldnames),adjSubplots(ii));
+        ax = subplot(rows,numel(eventFieldnames),adjSubplots(ii));
         if ~isempty(allys)
             ylim([0 max(allys)]); % make FR start at 0
         end

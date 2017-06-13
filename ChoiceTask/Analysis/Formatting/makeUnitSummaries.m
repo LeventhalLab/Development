@@ -29,7 +29,7 @@ for iUnit = 1:numel(units) % units are all exported to one file
     startSubplot = 3*(iUnit-1)+1;
 
     % waveform plot
-    ax = subplot(numel(units),3,startSubplot);
+    ax = subplot_tight(numel(units),3,startSubplot);
     t = linspace(0,(size(waveformTrace,2)/header.Fs)*1000,size(waveformTrace,2));
     errorbar(t,mean(waveformTrace),std(waveformTrace),'k');
     unitNames{iUnit} = [neuronName(1:end-1),char(96+iUnit)];
@@ -42,7 +42,7 @@ for iUnit = 1:numel(units) % units are all exported to one file
     ay.YTick = waveformScale;
 
     % firing rate
-    subplot(numel(units),3,startSubplot+1);
+    subplot_tight(numel(units),3,startSubplot+1);
     waveformTs = waveformInfo(:,3);
     allTimestamps{iUnit} = waveformTs;
     histBins = 200;
@@ -58,7 +58,7 @@ for iUnit = 1:numel(units) % units are all exported to one file
     ylim([0 max(firingRate) + std(firingRate)]);
 
     % ISI histogram
-    ax = subplot(numel(units),3,startSubplot+2);
+    ax = subplot_tight(numel(units),3,startSubplot+2);
     ISI = waveformInfo(:,7); % ISI column
     ISI = ISI(ISI~=0); % fix weird issue in one data set where ISI=0
     bins = exp(linspace(log(min(ISI)),log(max(ISI)),100));
@@ -79,7 +79,7 @@ savePDF(h,sessionConf.leventhalPaths,subFolder,docName,true);
 h = figure;
 for iUnit=1:numel(units)
     for jj=iUnit:numel(units)
-        subplot(numel(units),numel(units),((iUnit-1) * numel(units)) + jj);
+        subplot_tight(numel(units),numel(units),((iUnit-1) * numel(units)) + jj);
         [tsOffsets, ts1idx, ts2idx] = crosscorrelogram(allTimestamps{iUnit},allTimestamps{jj},axcorrRange);
         [counts,centers] = hist(tsOffsets(tsOffsets ~= 0),100); % remove reference spike
         bar(centers,counts,'k','EdgeColor','k');
@@ -98,18 +98,18 @@ subFolder = 'axcorrs';
 docName = [subFolder,'_',neuronName(1:end-1)];
 savePDF(h,sessionConf.leventhalPaths,subFolder,docName,true);
 
-rows = 8;
-cols = 8;
+rows = 9;
+cols = 6;
 for iUnit = 1:numel(units) % units are all exported to one file
     h = figure('position',[0 0 900 1100]);
     % mean waveform
     waveformInfo = waveforms(waveforms(:,2) == units(iUnit),:);
     waveformTrace = waveformInfo(:,11:end);
     waveformTrace = waveformTrace(:,~isnan(waveformTrace(1,:)));
-    ax = subplot(rows,cols,1);
+    ax = subplot_tight(rows,cols,1);
     t = linspace(0,(size(waveformTrace,2)/header.Fs)*1000,size(waveformTrace,2));
     plot(t,mean(waveformTrace));
-    title({unitNames{iUnit},'waveform'},'interpreter','none');
+    title({unitNames{iUnit},'waveform'},'interpreter','none','HorizontalAlignment','left');
     xlabel('ms');
     ylabel('uV');
     xlim([0 (size(waveformTrace,2)/header.Fs)*1000]);
@@ -119,7 +119,7 @@ for iUnit = 1:numel(units) % units are all exported to one file
     set(ax,'FontSize',fontSize);
     
     % firing rate
-    ax = subplot(rows,cols,2);
+    ax = subplot_tight(rows,cols,2);
     waveformTs = waveformInfo(:,3);
     allTimestamps{iUnit} = waveformTs;
     histBins = 100;
@@ -137,7 +137,7 @@ for iUnit = 1:numel(units) % units are all exported to one file
     set(ax,'FontSize',fontSize);
     
     % ISI histogram
-    ax = subplot(rows,cols,3);
+    ax = subplot_tight(rows,cols,3);
     ISI = waveformInfo(:,7);
     ISI = ISI(ISI~=0); % fix weird issue in one data set where ISI=0
     bins = exp(linspace(log(min(ISI)),log(max(ISI)),100));
@@ -150,11 +150,12 @@ for iUnit = 1:numel(units) % units are all exported to one file
     xlim([0 10^2]);
     set(ax,'FontSize',fontSize);
     
+
     % axcorr, arrange loop to first do acorr then xcorr
     unitRange = 1:numel(units);
     unitOrder = [iUnit unitRange(unitRange ~= iUnit)];
     for jj=1:numel(units)
-        ax = subplot(rows,cols,3+jj);
+        ax = subplot_tight(rows,cols,cols+jj);
         [tsOffsets, ts1idx, ts2idx] = crosscorrelogram(allTimestamps{iUnit},allTimestamps{unitOrder(jj)},axcorrRange);
         [counts,centers] = hist(tsOffsets(tsOffsets ~= 0),50); % remove reference spike
         bar(centers,counts,'k','EdgeColor','k');
@@ -166,6 +167,16 @@ for iUnit = 1:numel(units) % units are all exported to one file
         end
         set(ax,'FontSize',fontSize);
     end
+    
+    channelData = get_channelData(sessionConf,electrodeChannels);
+    atlas_ims = [];
+    [atlas_ims,k] = plotMthalElectrode(atlas_ims,channelData.ap(1),channelData.ml(1),channelData.dv(1),nasPath,[1 0 0],0.1);
+    ax = subplot_tight(rows,cols,cols+5);
+    imshow(atlas_ims{1,k});
+    p = get(ax,'position');
+    p(3) = p(3)*2;
+    p(4) = p(4)*2;
+    set(ax,'position',p);
     
     % savePDF
     subFolder = 'unitHeader';
