@@ -99,7 +99,7 @@ docName = [subFolder,'_',neuronName(1:end-1)];
 savePDF(h,sessionConf.leventhalPaths,subFolder,docName,true);
 
 rows = 9;
-cols = 6;
+cols = 7;
 for iUnit = 1:numel(units) % units are all exported to one file
     h = figure('position',[0 0 900 1100]);
     % mean waveform
@@ -171,7 +171,7 @@ for iUnit = 1:numel(units) % units are all exported to one file
     channelData = get_channelData(sessionConf,electrodeChannels);
     atlas_ims = [];
     [atlas_ims,k] = plotMthalElectrode(atlas_ims,channelData.ap(1),channelData.ml(1),channelData.dv(1),nasPath,[1 0 0],0.1);
-    ax = subplot_tight(rows,cols,cols+5);
+    ax = subplot_tight(rows,cols,cols+6);
     imshow(atlas_ims{1,k});
     p = get(ax,'position');
     p(3) = p(3)*2;

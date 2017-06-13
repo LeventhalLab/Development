@@ -20,7 +20,7 @@ all_tidx_ipsi_correct = [];
 all_tidx_contra_incorrect = [];
 all_tidx_ipsi_incorrect = [];
 for iNeuron = 1:size(analysisConf.neurons,1)
-    fpass = [10 100];
+    fpass = [1 100];
     freqList = logFreqList(fpass,30);
     
     neuronName = analysisConf.neurons{iNeuron};

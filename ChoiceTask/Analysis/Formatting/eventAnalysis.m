@@ -9,7 +9,7 @@ h = figure;
 adjSubplots = [];
 for iEvent = 1:numel(eventFieldnames)
     ax = subplot(rows,cols,iSubplot);
-    imagesc(t,freqList,log(squeeze(eventScalograms(iEvent,:,:))));
+    imagesc(t,freqList,squeeze(eventScalograms(iEvent,:,:)));
     if iEvent == 1
         ylabel('Freq (Hz)');
     else
