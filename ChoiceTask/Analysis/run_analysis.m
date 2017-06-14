@@ -5,7 +5,7 @@
 % compileOFSWaveforms(waveformDir);
 % compares some of the unit properties in a scatter plot
 % compareOFSWaveforms(csvWaveformFiles);
-tWindow = 2; % for scalograms, xlim is set to -1/+1 in formatting
+tWindow = 3; % for scalograms, xlim is set to -1/+1 in formatting
 % plotEventIds = [1 2 4 3 5 6 8]; % removed foodClick because it mirrors SideIn
 eventFieldnames = {'cueOn';'centerIn';'tone';'centerOut';'sideIn';'sideOut';'foodRetrieval'};
 sevFile = '';
@@ -21,7 +21,7 @@ all_tidx_contra_incorrect = [];
 all_tidx_ipsi_incorrect = [];
 for iNeuron = 1:size(analysisConf.neurons,1)
     fpass = [1 100];
-    freqList = logFreqList(fpass,30);
+    freqList = [fpass(1):5:fpass(2)];%logFreqList(fpass,30);
     
     neuronName = analysisConf.neurons{iNeuron};
     disp(['Working on ',neuronName]);

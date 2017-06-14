@@ -6,10 +6,14 @@ iSubplot = 1;
 caxisScaleIdx = 3; % centerOut
 h = figure;
 
+yvals = [];
 adjSubplots = [];
 for iEvent = 1:numel(eventFieldnames)
     ax = subplot(rows,cols,iSubplot);
-    imagesc(t,freqList,squeeze(eventScalograms(iEvent,:,:)));
+    scaloData = squeeze(eventScalograms(iEvent,:,:));
+% %     tIdxs = find(t >= -1 & t <= 1);
+% %     tIdxs = [min(tIdxs)-1 tIdxs max(tIdxs)+1];
+    imagesc(t,freqList,scaloData);
     if iEvent == 1
         ylabel('Freq (Hz)');
     else
@@ -22,22 +26,26 @@ for iEvent = 1:numel(eventFieldnames)
     else
         title({'',eventFieldnames{iEvent}});
     end
-    set(ax,'YScale','log');
-    set(ax,'Ytick',round(logFreqList(fpass,5)));
+%     set(ax,'YScale','log');
+%     set(ax,'Ytick',round(logFreqList(fpass,5)));
+
     set(ax,'TickDir','out');
     set(ax,'FontSize',fontSize);
     colormap(jet);
 %     set(ax,'XTickLabel',[]);
-    if iEvent == caxisScaleIdx
-        yvals = caxis;
-    end
+% %     if iEvent == caxisScaleIdx
+% %         yvals = caxis;
+        % use a middling window, 50% of +/-1s
+        scaloMidRange = [round(size(scaloData,1) / 2) - round(size(scaloData,1) / 4):round(size(scaloData,1) / 2) + round(size(scaloData,1) / 4)];
+        yvals(iEvent,:) = [mean(min(scaloData(scaloMidRange,:))) mean(max(scaloData(scaloMidRange,:)))];
+% %     end
     adjSubplots = [adjSubplots iSubplot];
     iSubplot = iSubplot + 1;
 end
 % set caxis
 for ii=1:length(adjSubplots)
     ax = subplot(rows,numel(eventFieldnames),adjSubplots(ii));
-    caxis(yvals);
+    caxis([min(min(yvals)) max(max(yvals))]);
     if ii == length(adjSubplots)
         subplotPos = get(gca,'Position');
 %         colorbar('eastoutside'); % need to fix formatting before using
