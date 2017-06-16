@@ -1,10 +1,15 @@
+doprint = false;
+fontSize = 10;
 rows = 3;
 cols = numel(eventFieldnames);
 
 tWindow = 1;
 curRow = 1;
+neuronCount = 1;
 eventFieldnames = {'cueOn';'centerIn';'tone';'centerOut';'sideIn';'sideOut';'foodRetrieval'};
-for iNeuron = 1:size(analysisConf.neurons,1)
+for iNeuron = useNeurons
+% for iNeuron = 1:size(analysisConf.neurons,1)
+    disp(iNeuron)
     neuronName = analysisConf.neurons{iNeuron};
     disp(['Working on ',neuronName]);
     [electrodeName,electrodeSite,electrodeChannels] = getElectrodeInfo(neuronName);
@@ -37,12 +42,12 @@ for iNeuron = 1:size(analysisConf.neurons,1)
 % %             [tsISI,tsLTS,tsPoisson] = tsBurstFilters(ts);
 % %             Lia = ismember(ts,tsISI);
 % %             tsISIInv = ts(~Lia);
-        end
+        end 
     end
     
     tsPeths = eventsPeth(trials(trialIds),ts,tWindow,eventFieldnames);
     
-    if iNeuron == 1
+    if neuronCount == 1
         h1 = figure('position',[0 0 1200 800]);
         iSubplot = 1;
     end
@@ -69,19 +74,22 @@ for iNeuron = 1:size(analysisConf.neurons,1)
     %     set(ax,'XTickLabel',[]);
         iSubplot = iSubplot + 1;
     end
-    
+    drawnow;
     % print, reset figure
-    if curRow == rows || iNeuron == size(analysisConf.neurons,1)
+    if curRow == rows || neuronCount == numel(useNeurons)
         curRow = 1;
         iSubplot = 1;
         % print
-        set(h1,'PaperPositionMode','auto'); 
-        set(h1,'PaperOrientation','landscape');
-        print('-bestfit','-r150')
+        if doprint
+            set(h1,'PaperPositionMode','auto'); 
+            set(h1,'PaperOrientation','landscape');
+            print('-bestfit','-r150')
+        end
         
-        close(h1);
+%         close(h1);
         h1 = figure('position',[0 0 1200 800]);
     else
         curRow = curRow + 1;
     end
+    neuronCount = neuronCount + 1;
 end

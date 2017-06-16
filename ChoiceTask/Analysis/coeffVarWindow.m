@@ -1,5 +1,5 @@
 eventFieldnames = {'cueOn';'centerIn';'tone';'centerOut';'sideIn';'sideOut';'foodRetrieval'};
-tWindow = 2;
+tWindow = 1;
 
 if false
     trialCount = 1;
@@ -65,7 +65,7 @@ if false
 
         % this is basically tsPeths
         for iTrial = trialIds
-            iField = 2;
+            iField = 3;
             centerTs = getfield(trials(iTrial).timestamps,eventFieldnames{iField});
     %         windowIdxs = find(t_cv >= centerTs - tWindow & t_cv < centerTs + tWindow);
             tsWindow_before = ts(ts < centerTs & ts >= centerTs - tWindow);
@@ -88,49 +88,56 @@ if false
     end
 end
 
+useNeurons = sorted_eventKeys(find(ismember(sorted_eventIds,[3,4])))';
+
 % classify based on CV threshold
 neuronCvClass = [];
 neuronCvMean = [];
 highThresh = 1.3;
 lowThresh = 0.7;
+
 for iNeuron = 1:size(analysisConf.neurons,1)
     entryIdxs = find(all_iNeuron == iNeuron);
     mean_all_neuron_cvs = nanmean(all_cvs(entryIdxs,:));
     neuronCvMean(iNeuron,:) = mean_all_neuron_cvs;
-    if mean_all_neuron_cvs(1) >= highThresh || mean_all_neuron_cvs(2) >= highThresh
-        neuronCvClass(iNeuron) = 1;
-    elseif mean_all_neuron_cvs(1) < lowThresh || mean_all_neuron_cvs(2) < lowThresh
-        neuronCvClass(iNeuron) = 2;
-    else
-        neuronCvClass(iNeuron) = 3;
+    if ismember(iNeuron,useNeurons)
+        if mean_all_neuron_cvs(1) >= highThresh || mean_all_neuron_cvs(2) >= highThresh
+            neuronCvClass(iNeuron) = 1;
+        elseif mean_all_neuron_cvs(1) < lowThresh || mean_all_neuron_cvs(2) < lowThresh
+            neuronCvClass(iNeuron) = 2;
+        else
+            neuronCvClass(iNeuron) = 3;
+        end
+    else % do not use
+        neuronCvClass(iNeuron) = 0;
     end
 end
-
+use_neuronCvMean = neuronCvMean(useNeurons,:);
 figuree(900,600);
 subplot(311);
-plot(neuronCvMean);
+plot(use_neuronCvMean);
 xlabel('neuron');
-xlim([1 size(neuronCvMean,1)]);
+xlim([1 size(use_neuronCvMean,1)]);
 ylabel('CV');
 legend({'before','after','random'});
 grid on;
 
 subplot(312);
-[v,k] = sort(neuronCvMean(:,3));
+[v,k] = sort(use_neuronCvMean(:,3));
 % plot(neuronCvMean(repmat(k,[1 3]),:));
-plot(neuronCvMean(k,:));
+plot(use_neuronCvMean(k,:));
 xlabel('neuron');
-xlim([1 size(neuronCvMean,1)]);
+xlim([1 size(use_neuronCvMean,1)]);
 ylabel('CV');
 legend({'before','after','random'});
 grid on;
 
-nSmooth = 10;
+nSmooth = 1;
 shiftBy = .02;
 subplot(313);
 % % bar(centers-shiftBy,counts,.3);
 for ii=1:3
-    [counts,centers] = hist(neuronCvMean(:,ii),[0:.1:3]);
+    [counts,centers] = hist(use_neuronCvMean(:,ii),[0:.1:3]);
 plot(interp(centers,nSmooth),interp(counts,nSmooth),'LineWidth',3);
 hold on;
 end
@@ -181,7 +188,7 @@ for ii=1:3
 end
 
 
-if true
+if false
     % rt/mt corr with individual trials
     figuree(800, 800);
     subplot(221);

@@ -1,7 +1,7 @@
 % timingField = 'RT';
 % eventFieldnames = fieldnames(trials(2).timestamps);
 % tWindow = 2;
-smallFontSize = 14;
+smallFontSize = 10;
 
 % close all;
 
@@ -13,7 +13,7 @@ smallFontSize = 14;
 colors = jet(7);
 colors_subject = jet(4);
 useEvents = [1:7];
-onlyPlotEvents = [3,4];
+onlyPlotEvents = [1:7];
 range_R0088 = 1:40;
 range_R0117 = 41:62;
 range_R0142 = 63:300;
@@ -92,8 +92,6 @@ for iEvent = 1:size(neuronPeth_sub,2)
     ylim([min(all_markerIds) max(all_markerIds)]);
     iSubplot = iSubplot + 1;
 end
-
-plot(1,101,'r>','markersize',35,'MarkerFaceColor','r');
 
 % % neuronNames_sub = analysisConf.neurons(useRange);
 % % sessionConfs_sub = analysisConf.sessionConfs(useRange);

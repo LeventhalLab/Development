@@ -169,15 +169,17 @@ for iUnit = 1:numel(units) % units are all exported to one file
     end
     
     channelData = get_channelData(sessionConf,electrodeChannels);
-    atlas_ims = [];
-    [atlas_ims,k] = plotMthalElectrode(atlas_ims,channelData.ap(1),channelData.ml(1),channelData.dv(1),nasPath,[1 0 0],0.1);
     ax = subplot_tight(rows,cols,cols+6);
-    imshow(atlas_ims{1,k});
-    p = get(ax,'position');
-    p(3) = p(3)*2;
-    p(4) = p(4)*2;
-    set(ax,'position',p);
-    
+    if ismember(channelData.region_id(1),[36 37]) % bg/cb thalamus
+        atlas_ims = [];
+        [atlas_ims,k] = plotMthalElectrode(atlas_ims,channelData.ap(1),channelData.ml(1),channelData.dv(1),nasPath,[1 0 0],0.1);
+        imshow(atlas_ims{1,k});
+        p = get(ax,'position');
+        p(3) = p(3)*2;
+        p(4) = p(4)*2;
+        set(ax,'position',p);
+    end
+    title(channelData.abbreviation{1});
     % savePDF
     subFolder = 'unitHeader';
     docName = [subFolder,'_',unitNames{iUnit}];
