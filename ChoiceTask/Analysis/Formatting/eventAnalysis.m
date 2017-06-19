@@ -10,15 +10,10 @@ yvals = [];
 adjSubplots = [];
 for iEvent = 1:numel(eventFieldnames)
     ax = subplot(rows,cols,iSubplot);
-    scaloData = squeeze(eventScalograms(iEvent,:,:));
+    scaloData = log(squeeze(eventScalograms(iEvent,:,:)));
     imagesc(t,freqList,scaloData);
     if iEvent == 1
         ylabel('Freq (Hz)');
-        nTicks = 5;
-        ytickVals = round(linspace(freqList(1),freqList(end),nTicks));
-        ytickLabelVals = round(logFreqList(fpass,nTicks));
-        yticks(ytickVals);
-        yticklabels(ytickLabelVals);
     else
         set(ax,'yTickLabel',[]);
     end
@@ -37,6 +32,12 @@ for iEvent = 1:numel(eventFieldnames)
     if iEvent == caxisScaleIdx
         yvals = caxis;
     end
+    nTicks = 5;
+    ytickVals = round(linspace(freqList(1),freqList(end),nTicks));
+    ytickLabelVals = round(logFreqList(fpass,nTicks));
+    yticks(ytickVals);
+    yticklabels(ytickLabelVals);
+        
     adjSubplots = [adjSubplots iSubplot];
     iSubplot = iSubplot + 1;
 end
