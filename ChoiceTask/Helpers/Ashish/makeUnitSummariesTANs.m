@@ -79,13 +79,13 @@ for iUnit = 1:numel(units) % units are all exported to one file
     FSIs = find(FR > 5.2 & FR < 27.8 & PVD > 142.2 & PVD < 260.8);
     UINs = find(FR > 0.3 & FR < 1.9 & PVD > 149.8 & PVD < 280.2);
     
-    if FR > 2.8 & FR < 6.0 
+    if FR > 2.8 & FR < 6.0 & PVD > 455.6 & PVD < 541.2
         p.MarkerFaceColor = 'g';
-    elseif FR > 0.2 & FR < 1.8
+    elseif FR > 0.2 & FR < 1.8 & PVD > 459.5 & PVD < 534.5
         p.MarkerFaceColor = 'r';
-    elseif FR > 5.2 & FR < 27.8
+    elseif FR > 5.2 & FR < 27.8 & PVD > 142.2 & PVD < 260.8
         p.MarkerFaceColor = 'b';
-    elseif FR > 0.3 & FR < 1.9
+    elseif FR > 0.3 & FR < 1.9 & PVD > 149.8 & PVD < 280.2
         p.MarkerFaceColor = 'k';
     end
    
