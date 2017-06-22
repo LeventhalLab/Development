@@ -4,5 +4,5 @@ textFiles = dir(fullfile(startDir,'*.txt'));
 
 for iFile = 1:size(textFiles,1)
     fileName = fullfile(startDir,textFiles(iFile).name);
-    makeUnitSummaries_updated(fileName);
+    makeUnitSummariesTANs(fileName);
 end
