@@ -18,8 +18,7 @@ for iNeuron = 1:size(analysisConf.neurons,1)
     neuronName = analysisConf.neurons{iNeuron};
     sessionConf = analysisConf.sessionConfs{iNeuron};
     [electrodeName,electrodeSite,electrodeChannels] = getElectrodeInfo(neuronName);
-    rows = sessionConf.session_electrodes.channel == electrodeChannels;
-    channelData = sessionConf.session_electrodes(any(rows)',:);
+    channelData = get_channelData(sessionConf,electrodeChannels);
     event_id = eventIds_by_maxHistValues(iNeuron);
     if ~ismember(event_id,useEvents)
         continue;

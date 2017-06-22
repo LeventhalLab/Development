@@ -11,8 +11,7 @@ for iNeuron = 1:size(analysisConf.neurons,1)
     neuronName = analysisConf.neurons{iNeuron};
     sessionConf = analysisConf.sessionConfs{iNeuron};
     [electrodeName,electrodeSite,electrodeChannels] = getElectrodeInfo(neuronName);
-    rows = sessionConf.session_electrodes.channel == electrodeChannels;
-    channelData = sessionConf.session_electrodes(any(rows)',:);
+    channelData = get_channelData(sessionConf,electrodeChannels);
     event_id = eventIds_by_maxHistValues(iNeuron);
     if ~ismember(event_id,useEvents)
         continue;
@@ -20,11 +19,11 @@ for iNeuron = 1:size(analysisConf.neurons,1)
     if isempty(channelData)
         continue;
     end
-    wiggle = (rand(1) - 0.5) * 0.1;
+    wiggle = (rand(1) - 0.5) * 0.2;
     AP = channelData{1,'ap'} + wiggle;
-    wiggle = (rand(1) - 0.5) * 0.1;
+    wiggle = (rand(1) - 0.5) * 0.2;
     ML = channelData{1,'ml'} + wiggle;
-    wiggle = (rand(1) - 0.5) * 0.1;
+    wiggle = (rand(1) - 0.5) * 0.2;
     DV = channelData{1,'dv'} + wiggle;
     all_AP = [all_AP;AP];
     all_ML = [all_ML;ML];
@@ -38,7 +37,7 @@ for iNeuron = 1:size(analysisConf.neurons,1)
 end
 % ax = bubbleplot3(all_ML,all_AP,all_DV,ones(1,numel(all_DV))*.04,all_colors,0.7);
 % camlight right; lighting phong;
-scatter3sph(all_ML,all_AP,all_DV,'size',.1,'color',all_colors,'transp',0.5);
+scatter3sph(all_ML,all_AP,all_DV,'size',.08,'color',all_colors,'transp',0.7);
 set(gcf,'color','w');
 light('Position',[1 1 1],'Style','local','Color',[1 1 1]);
 lighting gouraud;
@@ -51,10 +50,15 @@ zlabel('DV');
 set(gca,'zdir','reverse');
 set(gca,'xdir','reverse');
 set(gca,'ydir','reverse');
-
-hold on;
 xlims = xlim;
 ylims = ylim;
+zlims = zlim;
+xticks(xlims);
+yticks(ylims);
+zticks(zlims);
+
+% this is just for the legend
+hold on;
 ax = [];
 for ii = 1:numel(useEvents)
     ax(ii) = plot(xlims(1),ylims(1),'.','markerSize',30,'color',colors(useEvents(ii),:));
