@@ -63,7 +63,8 @@ for iUnit = 1:numel(units) % units are all exported to one file
     %3D scatterplot
     subplot(numel(units),3,startSubplot+2);
     Prop_ISI = 100 * (length(find(waveformInfo(:,7) > 500)) / length(waveformInfo)); % Proportion of ISI over 5 ms
-    PVD = (1/24414.0625) * abs(mean(waveformInfo(:,9))) * 10^7;
+    PVD = (1/24414.0625) * abs(waveformInfo(:,9)) * 10^6;
+    PVD = mean(PVD)
     FR = .001 * waveformInfo(:,7);
     FR = mean(FR);
     FR = 1/FR;
