@@ -2,9 +2,9 @@ saveFile = '/Users/mattgaidica/Desktop/plotByUnitClass3DPETHVideo2.avi';
 legendPath = '/Users/mattgaidica/Dropbox/Presentations/2017 NGP Symposium/assets/Choice Task';
 legendName = 'CT-sequence-frames_';
 legendExt = '.jpg';
-legendCoords = [846 2004];
+legendCoords = [722 2208];
 
-doVideo = false;
+doVideo = true;
 
 colors = jet(7);
 useEvents = [1:7];
@@ -31,7 +31,7 @@ for iNeuron = 1:size(analysisConf.neurons,1)
     wiggle = (rand(1) - 0.5) * 0.1;
     ML = channelData{1,'ml'} + wiggle;
     wiggle = (rand(1) - 0.5) * 0.1;
-    DV = channelData{1,'dv'} + wiggle;
+    DV = channelData{1,'dv'} * -1 + wiggle;
     all_AP = [all_AP;AP];
     all_ML = [all_ML;ML];
     all_DV = [all_DV;DV];
@@ -50,7 +50,7 @@ end
 
 ninterp = 5;
 firstLoop = true;
-az = 70;
+az = 140;
 el = 10;
 colormapArr = ones(size(neuronPeth,3) * ninterp,3);
 tickWidth = ceil(size(neuronPeth,3) * ninterp * 0.02);
@@ -68,16 +68,31 @@ for iEvent = 1:size(neuronPeth,2) % use all events right now
 % %             neuronBaseColorHsv(1,2) = min([neuronZFrameVal*1.5,1]); % base SAT, w/ max = 1
             neuronFinalColor = hsv2rgb(neuronBaseColorHsv);
             all_colors = [all_colors;neuronFinalColor];
-            all_sizes = [all_sizes;0.03 + neuronZFrameVal*0.05];
+            all_sizes = [all_sizes;0.03 + neuronZFrameVal*0.07];
         end
-        h = figure('position',[0 0 1200 800],'Visible','On');
+        h1 = figure('position',[0 0 1334 750],'Visible','On');
         ax = [];
         hold on;
         for ii = 1:numel(eventFieldnames)
             ax(ii) = plot(rand(1,2),rand(1,2),'.','markerSize',50,'color',colors(ii,:));
         end
+        
+        shapeColors = {'r','g','b','y'};
+        for iShape = 1:numel(shapes)
+            h = plot(shapes{iShape});
+%             h.FaceLighting = 'gouraud';
+            h.AmbientStrength = 0.3;
+            h.DiffuseStrength = 0.8;
+%             h.SpecularStrength = 0.9;
+%             h.SpecularExponent = 25;
+        %     h.BackFaceLighting = 'unlit';
+            h.EdgeColor = 'none';
+            h.FaceColor = shapeColors{iShape};
+            h.FaceAlpha = 0.15;
+            hold on;
+        end
 
-        scatter3sph(all_ML,all_AP,all_DV,'size',all_sizes,'color',all_colors,'transp',0.85);
+        scatter3sph(all_AP,all_ML,all_DV,'size',all_sizes,'color',all_colors,'transp',0.75);
         eventFieldnamesLegend = {'Light On','Nose In','Cue/Go','Nose Out','Side In','Side Out','Food Cup'};
         lgd = legend(ax,eventFieldnamesLegend,'location','northeastoutside','FontSize',20);
         legend('boxoff');
@@ -86,20 +101,20 @@ for iEvent = 1:size(neuronPeth,2) % use all events right now
 
         if firstLoop
             set(gcf,'color','w');
-            light('Position',[1 1 1],'Style','local','Color',[1 1 1]);
-            lighting gouraud;
+%             light('Position',[1 1 1],'Style','local','Color',[1 1 1]);
+%             lighting gouraud;
             grid on;
             
 %             xlabel('ML'); 
-            lims_ml = [1 2]; xticks(lims_ml); xticklabels({'medial','lateral'}); xlim(lims_ml);
+            lims_ml = [.5 2.5]; yticks(lims_ml); yticklabels({'lateral','medial'}); ylim(lims_ml);
 %             ylabel('AP');
-            lims_ap = [-3.8 -2.8]; yticks(lims_ap); yticklabels({'posterior','anterior'}); ylim(lims_ap);
+            lims_ap = [-4 -1.5]; xticks(lims_ap); xticklabels({'posterior','anterior'}); xlim(lims_ap);
 %             zlabel('DV');
-            lims_dv = [5 8.5]; zticks(lims_dv); zticklabels({'dorsal','ventral'}); zlim(lims_dv);
+            lims_dv = [-8 -5.5]; zticks(lims_dv); zticklabels({'dorsal','ventral'}); zlim(lims_dv);
             
-            set(gca,'zdir','reverse');
+%             set(gca,'zdir','reverse');
             set(gca,'xdir','reverse');
-            set(gca,'ydir','reverse');
+%             set(gca,'ydir','reverse');
             set(gca,'fontSize',14);
             
             c = colorbar('southoutside');
@@ -114,7 +129,7 @@ for iEvent = 1:size(neuronPeth,2) % use all events right now
 %             firstLoop = false;
         end
         view(az,el);
-        az = az + (0.3 / ninterp);
+        az = az - (0.3 / ninterp);
         el = el + (0.1 / ninterp);
 %         title(eventFieldnames{iEvent},'FontSize',18);
 %         drawnow;
@@ -126,7 +141,7 @@ for iEvent = 1:size(neuronPeth,2) % use all events right now
         if doVideo
             writeVideo(newVideo,im);
         end
-        close(h);
+        close(h1);
     end
 end
 
