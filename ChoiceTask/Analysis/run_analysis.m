@@ -23,7 +23,7 @@ all_tidx_contra_correct = [];
 all_tidx_ipsi_correct = [];
 all_tidx_contra_incorrect = [];
 all_tidx_ipsi_incorrect = [];
-for iNeuron = 61:size(analysisConf.neurons,1)
+for iNeuron = 1:size(analysisConf.neurons,1)
     fpass = [1 100];
     freqList = logFreqList(fpass,30);
     
@@ -71,7 +71,7 @@ for iNeuron = 61:size(analysisConf.neurons,1)
     end
 
     % load SEV file and filter it for LFP analyses
-    needsLfp = true;
+    needsLfp = false;
     
     % this is really not perfect yet, needs LFP channel in DB I think
     rows = sessionConf.session_electrodes.channel == electrodeChannels;
@@ -97,7 +97,7 @@ for iNeuron = 61:size(analysisConf.neurons,1)
     
     % produces waveform and ISI xcorr analyses
     if isNewSession
-        makeUnitSummaries();
+%         makeUnitSummaries();
     end
     
     % !! Not used but need eventFieldnames
@@ -108,7 +108,7 @@ for iNeuron = 61:size(analysisConf.neurons,1)
 % %     tsLTSPeths = eventsPeth(trials(trialIds),tsLTS,tWindow);
 % %     tsPoissonPeths = eventsPeth(trials(trialIds),tsPoisson,tWindow);
 
-    if false
+    if true
         % !!!review binning to make sure edges are handled
         % unit-to-event classifier analysis
         sessionSeconds = header.fileSizeBytes/header.Fs/4; % seconds
@@ -153,7 +153,7 @@ for iNeuron = 61:size(analysisConf.neurons,1)
     end
 
 
-    if true
+    if false
         % event-centered analysis
         tsPeths = eventsPeth(trials(trialIds),ts,tWindow,eventFieldnames);
         tsISIInvPeths = eventsPeth(trials(trialIds),tsISIInv,tWindow,eventFieldnames);
@@ -186,4 +186,4 @@ for iNeuron = 61:size(analysisConf.neurons,1)
 % % run_RTraster()
 end
 
-addUnitHeader(analysisConf,{'eventAnalysis'});
+% addUnitHeader(analysisConf,{'eventAnalysis'});
