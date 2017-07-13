@@ -26,47 +26,53 @@ for iCsv = 1:length(csvWaveformFiles)
         unitTitles{ii} = T{ii,1}{1};
         title(unitTitles{ii});
     end
-
+    
+    % 3D scatterplot
     scatterData = {};
     scatterLabels = {};
     scatterCount = 1;
     for ii = 1:size(T,1)
-        scatterData{1,scatterCount} = T{ii,paramIdxAPeakToValleyTick};
+        scatterData{1,scatterCount} = (1/24414.0625) * T{ii,paramIdxAPeakToValleyTick};
         scatterData{2,scatterCount} = 1 / (.001 * T{ii,paramIdxISIPrev}); % FR
-        scatterData{3,scatterCount} = T{ii,paramIdxISIPrev} % ISI
-        scatterData{4,scatterCount} = T{ii,paramIdxISIProp} % PropISI
+        scatterData{3,scatterCount} = T{ii,paramIdxISIPrev}; % ISI
+        scatterData{4,scatterCount} = T{ii,paramIdxISIProp}; % PropISI
         scatterLabels{scatterCount} = unitTitles{ii};% num2str(scatterCount);
         scatterCount = scatterCount + 1;
     end
     smallFontSize = 6;
     
     figure(h2);
-    subplot(311);
-    hold off;
-    plot(cell2mat(scatterData(1,:)),cell2mat(scatterData(2,:)),'.','MarkerSize',25);
-    labelpoints(cell2mat(scatterData(1,:)),cell2mat(scatterData(2,:)),scatterLabels,'FontSize',smallFontSize);
-    xlabel('Peak to Valley Tick');
-    ylabel('Mean FR');
-
-    subplot(312);
-    hold off;
-    plot(cell2mat(scatterData(4,:)),cell2mat(scatterData(2,:)),'.','MarkerSize',25);
-    labelpoints(cell2mat(scatterData(4,:)),cell2mat(scatterData(2,:)),scatterLabels, 'FontSize',smallFontSize);
-    xlabel('PROP ISI');
-    ylabel('Mean FR');
-
-    subplot(313);
-    hold off;
-    plot(cell2mat(scatterData(4,:)),cell2mat(scatterData(1,:)),'.','MarkerSize',25);
-    labelpoints(cell2mat(scatterData(4,:)),cell2mat(scatterData(1,:)),scatterLabels, 'FontSize',smallFontSize);
-    xlabel('PROP ISI');
-    ylabel('Peak to Valley Tick');
     
+    colors = jet(4);
+    scatterColors = zeros(size(scatterData,2),3);
+ 
+    % Parameters according to Cohen paper
+    ISI = cell2mat(scatterData(4,:));
+    FR = cell2mat(scatterData(2,:));
+    PVD = cell2mat(scatterData(1,:));
     
-    p = scatter3(cell2mat(scatterData(1,:)),cell2mat(scatterData(4,:)), cell2mat(scatterData(2,:)));
-    p.MarkerFaceColor = [0 0.5 0.5];
+    TANs = find(FR > 2.8 & FR < 6.0 & PVD > 255.6 & PVD < 541.2);
+    scatterColors(TANs,:) = repmat(colors(2,:),[numel(TANs) 1]);
+    
+    MSNs = find(FR > 0.2 & FR < 1.8 & PVD > 459.5 & PVD < 534.5);
+    scatterColors(MSNs,:) = repmat(colors(3,:),[numel(MSNs) 1]);
+    
+    FSIs = find(FR > 5.2 & FR < 27.8 & PVD > 142.2 & PVD < 260.8);
+    scatterColors(FSIs,:) = repmat(colors(4,:),[numel(FSIs) 1]);
+    
+    UINs = find(FR > 0.3 & FR < 1.9 & PVD > 149.8 & PVD < 280.2);
+    scatterColors(UINs,:) = repmat(colors(1,:),[numel(UINs) 1]);
+    
+    p = scatter3(cell2mat(scatterData(1,:)),cell2mat(scatterData(4,:)),cell2mat(scatterData(2,:)),24,scatterColors);
+    p.MarkerFaceColor = 'white';
+    ylabel('PROP_I_S_I (%)');
+    zlabel('Firing Rate (spikes/s)');
+    zlim([0 40]);
+    xlabel('Valley Peak Duration');
+  
     hold on;
     
+    
+    
+    
 end
-
-% legend(unitTitles,'Location','northoutside');
