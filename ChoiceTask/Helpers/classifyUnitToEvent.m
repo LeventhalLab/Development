@@ -3,7 +3,7 @@
 smallFontSize = 10;
 
 useRange = [];
-useShapes = [3];
+
 for iNeuron = 1:size(analysisConf.neurons,1)
     neuronName = analysisConf.neurons{iNeuron};
     sessionConf = analysisConf.sessionConfs{iNeuron};
@@ -13,10 +13,7 @@ for iNeuron = 1:size(analysisConf.neurons,1)
     AP = channelData{1,'ap'};
     ML = channelData{1,'ml'};
     DV = channelData{1,'dv'};
-    shapeId = testAnatomyShapes(shapes,ML,AP,DV);
-    if ismember(shapeId,useShapes)
-        useRange = [useRange iNeuron];
-    end
+%     shapeId = testAnatomyShapes(shapes,ML,AP,DV);
 end
 
 % close all;
