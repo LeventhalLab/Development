@@ -15,7 +15,11 @@ function addUnitHeader(analysisConf,analyses)
             end
             allAnalysisFiles = dir(fullfile(analysisPath,[analyses{iAnalysis},'*.pdf'])); % not headers
             parts = strsplit(analysisPath,filesep);
-            parentPath = strjoin(parts(1:end-1),filesep);
+            % had to use a loop to work in Windows (strjoin ignores empty cells)
+            parentPath = '';
+            for iParts = 1:numel(parts)-1
+                parentPath = [parentPath filesep parts{iParts}];
+            end
             allUnitHeaderFiles = dir(fullfile(parentPath,unitHeaderFolder,'*.pdf'));
             for iAnalysisFiles=1:length(allAnalysisFiles)
                 % will continue to work long as filename: analysisType_unitName.pdf

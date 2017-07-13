@@ -14,10 +14,11 @@ for iField=1:numel(eventFieldnames)
         centerRangeSamples = (centerSample - tWindowSamples):(centerSample + tWindowSamples - 1);
         if centerRangeSamples(1) > 0 && centerRangeSamples(end) < length(sevFilt)
             lfp = sevFilt(centerRangeSamples);
-            if max(abs(diff(lfp))) > lfpThresh
-                disp(['skipping trial ',num2str(iTrial),' (lfp thresh)']);
-                continue;
-            end
+            % disabled for now, throwing error on R0117_20160508a_T23_ch[0 0 0 104]a
+% %             if max(abs(diff(lfp))) > lfpThresh
+% %                 disp(['skipping trial ',num2str(iTrial),' (lfp thresh)']);
+% %                 continue;
+% %             end
             data(:,iTrial) = lfp;
         end
     end
