@@ -1,4 +1,4 @@
-% function classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow)
+function [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,nBins_tWindow,trialTypes)
 % just like classifyUnitToEvent but done in a loop with sub classes
 % [ ] classify correct and failed?
 
@@ -13,18 +13,23 @@ for iNeuron = 1:numel(analysisConf.neurons)
 % %     [allCounts,allCenters] = hist(all_ts{iNeuron},nBins_all_tWindow);
     
     unitEvents{iNeuron} = {};
+    useTrials = [];
+    for iTrialTypes = 1:numel(trialTypes)
+        useTrials = [useTrials getfield(trialIdInfo,trialTypes{iTrialTypes})];
+    end
+    tsPeths = eventsPeth(curTrials(useTrials),all_ts{iNeuron},tWindow,eventFieldnames);
+    unitEvents{iNeuron}.class = [];
+    unitEvents{iNeuron}.maxz = [];
+    unitEvents{iNeuron}.maxbin = [];
     
-    tsPeths = eventsPeth(curTrials([trialIdInfo.correctContra trialIdInfo.correctIpsi]),all_ts{iNeuron},tWindow,eventFieldnames);
-    unitEvents{iNeuron}.correct = {};
-    unitEvents{iNeuron}.correct.class = [];
-    unitEvents{iNeuron}.correct.maxz = [];
-    unitEvents{iNeuron}.correct.maxbin = [];
-    
+    % skip if empty (incorrect)
     if ~any(size(tsPeths))
         continue;
     end
     ts_event1 = [tsPeths{:,1}];
     [counts_events1,centers_event1] = hist(ts_event1,nBins_tWindow);
+    
+    % skip if no counts, can't determine mean/std
     if counts_events1 == 0
         continue;
     else
@@ -41,15 +46,8 @@ for iNeuron = 1:numel(analysisConf.neurons)
     all_zscores(iNeuron,:,:) = zscore;
     [max_z,max_bins] = max(zscore');
     % leave these values in event order (1-7)
-    unitEvents{iNeuron}.correct.maxz = max_z;
-    unitEvents{iNeuron}.correct.maxbin = max_bins;
+    unitEvents{iNeuron}.maxz = max_z;
+    unitEvents{iNeuron}.maxbin = max_bins;
     % this is where the event class is actually ranked/ordered using key
-    [~,unitEvents{iNeuron}.correct.class] = sort(max_z,'descend');
-% %     figuree(1200,400);
-% %     for iEvent = 1:numel(eventFieldnames)
-% %         subplot(1,numel(eventFieldnames),iEvent);
-% %         plot(centers_eventX,smooth(zscore(iEvent,:),3),'LineWidth',2);
-% %         ylim([-2 8]);
-% %     end
-%     disp('hold on');
+    [~,unitEvents{iNeuron}.class] = sort(max_z,'descend');
 end

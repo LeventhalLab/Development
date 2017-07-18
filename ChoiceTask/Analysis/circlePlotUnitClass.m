@@ -1,3 +1,6 @@
+trialTypes = {'correctContra','correctIpsi'};
+[unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,nBins_tWindow,trialTypes);
+
 figuree(1200,500);
 rows = 2;
 xmm = zeros(numel(eventFieldnames));
@@ -5,12 +8,12 @@ for iEvent = 1:numel(eventFieldnames)
     xm = zeros(numel(eventFieldnames));
     classCount = 0;
     for iNeuron = 1:numel(analysisConf.neurons)
-        if isempty(unitEvents{iNeuron}.correct.class)
+        if isempty(unitEvents{iNeuron}.class)
             continue;
         end
-        if unitEvents{iNeuron}.correct.class(1) == iEvent
-            xm(iEvent,unitEvents{iNeuron}.correct.class(2)) = xm(iEvent,unitEvents{iNeuron}.correct.class(2)) + 1; % increment
-            xmm(iEvent,unitEvents{iNeuron}.correct.class(2)) = xm(iEvent,unitEvents{iNeuron}.correct.class(2)) + 1; % increment
+        if unitEvents{iNeuron}.class(1) == iEvent
+            xm(iEvent,unitEvents{iNeuron}.class(2)) = xm(iEvent,unitEvents{iNeuron}.class(2)) + 1; % increment
+            xmm(iEvent,unitEvents{iNeuron}.class(2)) = xm(iEvent,unitEvents{iNeuron}.class(2)) + 1; % increment
             classCount = classCount + 1;
         end
     end

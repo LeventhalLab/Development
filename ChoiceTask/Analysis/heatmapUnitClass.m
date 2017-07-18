@@ -7,10 +7,10 @@ neuronClasses = {};
 for iEvent = 1:numel(eventFieldnames)
     neuronClasses{iEvent} = [];
     for iNeuron = 1:numel(analysisConf.neurons)
-        if isempty(unitEvents{iNeuron}.correct.class)
+        if isempty(unitEvents{iNeuron}.class)
             continue;
         end
-        if unitEvents{iNeuron}.correct.class(1) == iEvent
+        if unitEvents{iNeuron}.class(1) == iEvent
             neuronClasses{iEvent} = [neuronClasses{iEvent} iNeuron];
         end
     end
@@ -23,7 +23,7 @@ for iEvent = 1:numel(eventFieldnames)
     cur_neuronClasses = neuronClasses{iEvent};
     for iNeuron = 1:numel(cur_neuronClasses)
         neuronId = cur_neuronClasses(iNeuron);
-        curEvent_maxbins(iNeuron) = unitEvents{neuronId}.correct.maxbin(iEvent);
+        curEvent_maxbins(iNeuron) = unitEvents{neuronId}.maxbin(iEvent);
     end
     [v,k] = sort(curEvent_maxbins);
     sorted_neuronClasses{iEvent} = cur_neuronClasses(k);
@@ -54,17 +54,4 @@ for iEvent = 1:numel(eventFieldnames)
     plot(ones(numel(markerRange),1),markerRange,'k.','MarkerSize',20);
 %     markerRange = markerLocs(iEvent)+1:markerLocs(iEvent+1);
 %     plot(ones(numel(markerRange),1),markerRange,'r.','MarkerSize',10);
-end
-
-figuree(1200,400);
-for iEvent = 1:numel(eventFieldnames)
-    subplot(1,numel(eventFieldnames),iEvent);
-    plot(nanmean(squeeze(all_zscores(sorted_neuronIds,iEvent,:)))); % insert corr_
-    xlim([1 40]);
-    xticks([1 20 40]);
-    xticklabels({'-1','0','1'});
-    ylim([-2 5]);
-    colormap jet;
-    title(eventFieldnames{iEvent});
-    hold on;
 end
