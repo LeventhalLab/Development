@@ -4,13 +4,14 @@ decimateFactor = 1;
 params.fpass = fpass;
 params.pad = 0;
 params.tapers = [3 5];
+params.Fs = header.Fs;
 
 % % [W, freqList] = calculateComplexScalograms_EnMasse(r154NNC_sev_before_decimated','Fs',Fs,'freqList',freqList,'doplot',true);
 % % [W, freqList] = calculateComplexScalograms_EnMasse(r154NNC_sev_afterEarly_decimated','Fs',Fs,'freqList',freqList,'doplot',true);
 figure;
 ch = '59';
 
-r154NNC_before_filename = ['/Users/mattgaidica/Documents/Data/ChoiceTask/R0154_20170225a_beforeNNC-1/R0154_20170225a_beforeNNC_R0154_20170225a_beforeNNC-1_data_ch',ch,'.sev'];
+r154NNC_before_filename = ['/Users/mattgaidica/Documents/Data/ChoiceTask/R0154/R0154_20170225a_beforeNNC-1/R0154_20170225a_beforeNNC_R0154_20170225a_beforeNNC-1_data_ch',ch,'.sev'];
 [r154NNC_before_sev,header] = read_tdt_sev(r154NNC_before_filename);
 r154NNC_sev_before_decimated = decimate(double(r154NNC_before_sev),decimateFactor);
 Fs = header.Fs / decimateFactor;
@@ -21,7 +22,7 @@ dataSnip = size(r154NNC_sev_before_decimated,2);
 
 hold on;
 
-r154NNC_after_filename = ['/Users/mattgaidica/Documents/Data/ChoiceTask/R0154_20170225a_afterNNC-1/R0154_20170225a_afterNNC_R0154_20170225a_afterNNC-1_data_ch',ch,'.sev'];
+r154NNC_after_filename = ['/Users/mattgaidica/Documents/Data/ChoiceTask/R0154/R0154_20170225a_afterNNC-1/R0154_20170225a_afterNNC_R0154_20170225a_afterNNC-1_data_ch',ch,'.sev'];
 [r154NNC_after_sev,header] = read_tdt_sev(r154NNC_after_filename);
 r154NNC_sev_after_decimated = decimate(double(r154NNC_after_sev),decimateFactor);
 

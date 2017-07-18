@@ -1,3 +1,4 @@
+useNeurons = 1:343;
 doprint = false;
 fontSize = 10;
 rows = 3;
