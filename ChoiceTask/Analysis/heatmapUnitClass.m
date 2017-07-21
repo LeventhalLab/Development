@@ -1,4 +1,5 @@
-% compile all z-scores
+% % unitEvents = corr_unitEvents;
+% % all_zscores = corr_all_zscores;
 
 imsc = [];
 
@@ -40,18 +41,60 @@ end
 figuree(1200,800);
 for iEvent = 1:numel(eventFieldnames)
     subplot(1,numel(eventFieldnames),iEvent);
-    imagesc(squeeze(all_zscores(corr_sorted_neuronIds,iEvent,:)));
+    imagesc(squeeze(all_zscores(sorted_neuronIds,iEvent,:)));
     caxis([-3 8]);
     xlim([1 40]);
     xticks([1 20 40]);
     xticklabels({'-1','0','1'});
     yticks([1 numel(analysisConf.neurons)]);
     colormap jet;
-    title(eventFieldnames{iEvent});
+    title(['corr_',eventFieldnames{iEvent}],'interpreter','none');
     hold on;
     plot([20 20],[1 numel(analysisConf.neurons)],'k--');
-    markerRange = corr_markerLocs(iEvent)+1:corr_markerLocs(iEvent+1);
+    markerRange = markerLocs(iEvent)+1:markerLocs(iEvent+1);
     plot(ones(numel(markerRange),1),markerRange,'k.','MarkerSize',20);
 %     markerRange = markerLocs(iEvent)+1:markerLocs(iEvent+1);
 %     plot(ones(numel(markerRange),1),markerRange,'r.','MarkerSize',10);
+end
+
+if false
+    % incorrect 
+    figuree(1200,800);
+    for iEvent = 1:numel(eventFieldnames)
+        subplot(1,numel(eventFieldnames),iEvent);
+        imagesc(squeeze(incorr_all_zscores(sorted_neuronIds,iEvent,:)));
+        caxis([-3 8]);
+        xlim([1 40]);
+        xticks([1 20 40]);
+        xticklabels({'-1','0','1'});
+        yticks([1 numel(analysisConf.neurons)]);
+        colormap jet;
+        title(['incorr_',eventFieldnames{iEvent}],'interpreter','none');
+        hold on;
+        plot([20 20],[1 numel(analysisConf.neurons)],'k--');
+        markerRange = markerLocs(iEvent)+1:markerLocs(iEvent+1);
+        plot(ones(numel(markerRange),1),markerRange,'k.','MarkerSize',20);
+    %     markerRange = markerLocs(iEvent)+1:markerLocs(iEvent+1);
+    %     plot(ones(numel(markerRange),1),markerRange,'r.','MarkerSize',10);
+    end
+
+    % correct - incorrect 
+    figuree(1200,800);
+    for iEvent = 1:numel(eventFieldnames)
+        subplot(1,numel(eventFieldnames),iEvent);
+        imagesc(squeeze(all_zscores(sorted_neuronIds,iEvent,:)) - squeeze(incorr_all_zscores(sorted_neuronIds,iEvent,:)));
+        caxis([-3 8]);
+        xlim([1 40]);
+        xticks([1 20 40]);
+        xticklabels({'-1','0','1'});
+        yticks([1 numel(analysisConf.neurons)]);
+        colormap jet;
+        title(['diff_',eventFieldnames{iEvent}],'interpreter','none');
+        hold on;
+        plot([20 20],[1 numel(analysisConf.neurons)],'k--');
+        markerRange = markerLocs(iEvent)+1:markerLocs(iEvent+1);
+        plot(ones(numel(markerRange),1),markerRange,'k.','MarkerSize',20);
+    %     markerRange = markerLocs(iEvent)+1:markerLocs(iEvent+1);
+    %     plot(ones(numel(markerRange),1),markerRange,'r.','MarkerSize',10);
+    end
 end
