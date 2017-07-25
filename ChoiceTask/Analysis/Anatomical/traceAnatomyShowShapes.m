@@ -1,4 +1,4 @@
-shapes = {thal_vm,thal_va,thal_vl,thal_rt};
+% shapes = {thal_vm,thal_va,thal_vl,thal_rt};
 all_colors = {'r','g','b','y'};
 
 figuree(800,800);

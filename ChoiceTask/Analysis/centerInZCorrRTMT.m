@@ -1,9 +1,6 @@
 all_trialTypes = {'correctContra','correctIpsi','incorrectContra','incorrectIpsi'};
-colors = lines(4);
-lns = [];
-h1=figure;
-h2=figure;
-for ii = 1:4
+figure;
+for ii=1:4
 trialTypes = {all_trialTypes{ii}};
 [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,nBins_tWindow,trialTypes);
 
@@ -18,11 +15,9 @@ for iNeuron = 1:numel(analysisConf.neurons)
     neuronName = analysisConf.neurons{iNeuron};
     curTrials = all_trials{iNeuron};
     trialIdInfo = organizeTrialsById(curTrials);
-%     trialIds = [trialIdInfo.correctContra trialIdInfo.correctIpsi trialIdInfo.incorrectContra trialIdInfo.incorrectIpsi];
 
 % %     [allCounts,allCenters] = hist(all_ts{iNeuron},nBins_all_tWindow);
     
-%     unitEvents{iNeuron} = {};
     useTrials = [];
     for iTrialTypes = 1:numel(trialTypes)
         useTrials = [useTrials getfield(trialIdInfo,trialTypes{iTrialTypes})];
@@ -44,7 +39,6 @@ for iNeuron = 1:numel(analysisConf.neurons)
     
     zscores = [];
     testEvent = 2;
-    all_trial_zscore = [];
     for iTrial = 1:numel(useTrials)
         ts_eventX = tsPeths{iTrial,testEvent};
         if isempty(ts_eventX)
@@ -60,53 +54,46 @@ for iNeuron = 1:numel(analysisConf.neurons)
             all_RT(iUnitTrials) = curTrials(useTrials(iTrial)).timing.reactionTime;
         end
         all_pretone(iUnitTrials) = curTrials(useTrials(iTrial)).timing.pretone;
-        all_noseInMinZ(iUnitTrials) = min(zscore(20:30));
+        all_noseInMinZ(iUnitTrials) = mean(zscore(20:30));
         if all_noseInMinZ(iUnitTrials) == 0 || all_MT(iUnitTrials) == 0 || all_RT(iUnitTrials) == 0
             continue;
         end
         iUnitTrials = iUnitTrials + 1;
-        all_trial_zscore(iTrial,:) = zscore;
     end
-    all_mean_zscores(iNeuron,:) = mean(all_trial_zscore);
 %     plot(interp(all_mean_zscores(iNeuron,:),10),'color',[.2 .2 .2 .2]);
 %     hold on;
 end
-figure(h1);
-subplot(4,1,ii);
-hist(all_MT,linspace(0,2,100));
-xlim([0 2]);
-title(['MT ',all_trialTypes{ii}]);
-
-figure(h2);
-subplot(4,1,ii);
-hist(all_RT,linspace(0,2,100));
-xlim([0 2]);
-title(['RT ',all_trialTypes{ii}]);
+e = errorbar(ii,mean(all_noseInMinZ),std(all_noseInMinZ),'Marker','*','LineWidth',3);
+hold on;
+end
+xticks([1:4]);
+xticklabels(all_trialTypes);
+xtickangle(60);
+xlim([0 5]);
 
 % plot(interp(nanmean(all_mean_zscores),10),'r','LineWidth',3);
-end
 % ylim([0 1]);
 if false
     markerSize = 5;
-    figuree(1200,400);
+%     figuree(1200,400);
     subplot(131);
-    plot(all_MT,all_noseInMinZ,'k.','MarkerSize',markerSize);
+    plot(all_MT,all_noseInMinZ,'r.','MarkerSize',markerSize);hold on;
     xlabel('MT');
     ylabel('Z');
     xlim([0 1]);
-    ylim([-20 0]);
+    ylim([-15 15]);
 
     subplot(132);
-    plot(all_RT,all_noseInMinZ,'k.','MarkerSize',markerSize);
+    plot(all_RT,all_noseInMinZ,'r.','MarkerSize',markerSize);hold on;
     xlabel('RT');
     ylabel('Z');
     xlim([0 1]);
-    ylim([-20 0]);
+    ylim([-15 15]);
 
     subplot(133);
-    plot(all_pretone,all_noseInMinZ,'k.','MarkerSize',markerSize);
+    plot(all_pretone,all_noseInMinZ,'r.','MarkerSize',markerSize);hold on;
     xlabel('pretone');
     ylabel('Z');
     xlim([.5 1]);
-    ylim([-20 0]);
+    ylim([-15 15]);
 end
