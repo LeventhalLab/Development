@@ -1,6 +1,7 @@
 % % unitEvents = corr_unitEvents;
 % % all_zscores = corr_all_zscores;
-
+trialTypes = {'incorrectContra','incorrectIpsi'};
+[unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,nBins_tWindow,trialTypes);
 imsc = [];
 
 % compile event classes

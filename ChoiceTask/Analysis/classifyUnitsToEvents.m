@@ -8,19 +8,16 @@ for iNeuron = 1:numel(analysisConf.neurons)
     neuronName = analysisConf.neurons{iNeuron};
     curTrials = all_trials{iNeuron};
     trialIdInfo = organizeTrialsById(curTrials);
-%     trialIds = [trialIdInfo.correctContra trialIdInfo.correctIpsi trialIdInfo.incorrectContra trialIdInfo.incorrectIpsi];
 
 % %     [allCounts,allCenters] = hist(all_ts{iNeuron},nBins_all_tWindow);
-    
     unitEvents{iNeuron} = {};
-    useTrials = [];
-    for iTrialTypes = 1:numel(trialTypes)
-        useTrials = [useTrials getfield(trialIdInfo,trialTypes{iTrialTypes})];
-    end
-    tsPeths = eventsPeth(curTrials(useTrials),all_ts{iNeuron},tWindow,eventFieldnames);
     unitEvents{iNeuron}.class = [];
     unitEvents{iNeuron}.maxz = [];
     unitEvents{iNeuron}.maxbin = [];
+    
+    % get tsPeths for all trials to generate zMean and zStd
+    useTrials = [trialIdInfo.correctContra trialIdInfo.correctIpsi trialIdInfo.incorrectContra trialIdInfo.incorrectIpsi];
+    tsPeths = eventsPeth(curTrials(useTrials),all_ts{iNeuron},tWindow,eventFieldnames);
     
     % skip if empty (incorrect)
     if ~any(size(tsPeths))
@@ -35,6 +32,16 @@ for iNeuron = 1:numel(analysisConf.neurons)
     else
         zMean = mean(counts_events1 / size(tsPeths,1));
         zStd = std(counts_events1 / size(tsPeths,1));
+    end
+    
+    % now get tsPeths for only trialTypes
+    useTrials = [];
+    for iTrialTypes = 1:numel(trialTypes)
+        useTrials = [useTrials getfield(trialIdInfo,trialTypes{iTrialTypes})];
+    end
+    tsPeths = eventsPeth(curTrials(useTrials),all_ts{iNeuron},tWindow,eventFieldnames);
+    if isempty(tsPeths)
+        continue;
     end
     zscores = [];
     for iEvent = 1:numel(eventFieldnames)

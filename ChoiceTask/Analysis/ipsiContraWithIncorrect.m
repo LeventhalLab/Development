@@ -15,10 +15,10 @@ for iTrialType = 1:4
             end
         end
         subplot(4,numel(eventFieldnames),iEvent+(numel(eventFieldnames)*(iTrialType-1)));
-% %         lns(iTrialType) = plot(smooth(nanmean(squeeze(all_zscores(sorted_neuronIds,iEvent,:))),3),'LineWidth',3,'Color',myColorMap(iTrialType,:));
-        shadedErrorBar([],smooth(nanmean(squeeze(all_zscores(sorted_neuronIds,iEvent,:))),3),...
-            smooth(nanstd(squeeze(all_zscores(sorted_neuronIds,iEvent,:))),3),...
-            {'LineWidth',3,'Color',myColorMap(iTrialType,:)});
+        lns(iTrialType) = plot(smooth(nanmean(squeeze(all_zscores(sorted_neuronIds,iEvent,:))),3),'LineWidth',3,'Color',myColorMap(iTrialType,:));
+% %         shadedErrorBar([],smooth(nanmean(squeeze(all_zscores(sorted_neuronIds,iEvent,:))),3),...
+% %             smooth(nanstd(squeeze(all_zscores(sorted_neuronIds,iEvent,:))),3),...
+% %             {'LineWidth',3,'Color',myColorMap(iTrialType,:)});
         xlim([1 40]);
         xticks([1 20 40]);
         xticklabels({'-1','0','1'});
