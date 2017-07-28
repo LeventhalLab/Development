@@ -1,15 +1,16 @@
 % % unitEvents = corr_unitEvents;
 % % all_zscores = corr_all_zscores;
-trialTypes = {'incorrectContra','incorrectIpsi'};
+trialTypes = {'correctContra','correctIpsi'};
 [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,nBins_tWindow,trialTypes);
 imsc = [];
-
+useSubject = 154;
 % compile event classes
 neuronClasses = {};
 for iEvent = 1:numel(eventFieldnames)
     neuronClasses{iEvent} = [];
     for iNeuron = 1:numel(analysisConf.neurons)
-        if isempty(unitEvents{iNeuron}.class)
+        sessionConf = analysisConf.sessionConfs{iNeuron};
+        if isempty(unitEvents{iNeuron}.class) || sessionConf.subjects__id ~= useSubject
             continue;
         end
         if unitEvents{iNeuron}.class(1) == iEvent
