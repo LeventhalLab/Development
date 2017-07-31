@@ -1,5 +1,6 @@
 % This analysis shows the Fraction of (classified) units that exceeds a
-% z-score associated with p-value
+% z-score associated with p-value (see link).
+% https://people.wku.edu/david.neal/109/Unit4/ConfInt.pdf
 
 % prob z
 % 0.90 1.645

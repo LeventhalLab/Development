@@ -1,16 +1,16 @@
 % % unitEvents = corr_unitEvents;
 % % all_zscores = corr_all_zscores;
 trialTypes = {'correctContra','correctIpsi'};
-[unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,nBins_tWindow,trialTypes);
+% % [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,nBins_tWindow,trialTypes);
 imsc = [];
-useSubject = 154;
+useSubject = [88,117,142,154];
 % compile event classes
 neuronClasses = {};
 for iEvent = 1:numel(eventFieldnames)
     neuronClasses{iEvent} = [];
     for iNeuron = 1:numel(analysisConf.neurons)
         sessionConf = analysisConf.sessionConfs{iNeuron};
-        if isempty(unitEvents{iNeuron}.class) || sessionConf.subjects__id ~= useSubject
+        if isempty(unitEvents{iNeuron}.class) || ~ismember(sessionConf.subjects__id,useSubjects)
             continue;
         end
         if unitEvents{iNeuron}.class(1) == iEvent
@@ -59,7 +59,7 @@ for iEvent = 1:numel(eventFieldnames)
 %     plot(ones(numel(markerRange),1),markerRange,'r.','MarkerSize',10);
 end
 
-if false
+if true
     % incorrect 
     figuree(1200,800);
     for iEvent = 1:numel(eventFieldnames)
