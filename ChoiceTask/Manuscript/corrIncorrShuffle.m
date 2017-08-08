@@ -7,13 +7,13 @@ for iNeuron = 1:numel(analysisConf.neurons)
     curTrials = all_trials{iNeuron};
     trialIdInfo = organizeTrialsById(curTrials);
     
-    if numel(trialIdInfo.correctContra) < requireTrials || numel(trialIdInfo.correctIpsi) < requireTrials
+    if numel(trialIdInfo.correctContra) + numel(trialIdInfo.correctIpsi) < requireTrials || numel(trialIdInfo.incorrectContra) + numel(trialIdInfo.incorrectIpsi) < requireTrials
         continue;
     end
     
-    useTrials = [trialIdInfo.correctContra trialIdInfo.correctIpsi];
+    useTrials = [trialIdInfo.correctContra trialIdInfo.correctIpsi trialIdInfo.incorrectContra trialIdInfo.incorrectIpsi];
     trialClass = zeros(numel(useTrials),1);
-    trialClass(1:numel(trialIdInfo.correctContra)) = ones(numel(trialIdInfo.correctContra),1);
+    trialClass(1:numel(trialIdInfo.correctContra) + numel(trialIdInfo.correctIpsi)) = ones(numel(trialIdInfo.correctContra) + numel(trialIdInfo.correctIpsi),1);
     % should be ordered according to useTrials
     tsPeths = eventsPeth(curTrials(useTrials),all_ts{iNeuron},tWindow,eventFieldnames);
     
@@ -25,15 +25,15 @@ for iNeuron = 1:numel(analysisConf.neurons)
             [counts,centers] = hist(curPeths{iTrial},nBins_tWindow);
             eventMatrix(iTrial,:) = counts;
         end
-        contraMean = mean(eventMatrix(trialClass == 1,:));
-        ipsiMean = mean(eventMatrix(trialClass == 0,:));
-        matrixDiff = abs(contraMean - ipsiMean);
+        corrMean = mean(eventMatrix(trialClass == 1,:));
+        incorrMean = mean(eventMatrix(trialClass == 0,:));
+        matrixDiff = abs(corrMean - incorrMean);
         matrixDiffShuffle = [];
         for iShuffle = 1:nShuffle
             shuffledTrialTypes = trialClass(randperm(numel(trialClass)));
-            contraMeanShuffled = mean(eventMatrix(shuffledTrialTypes == 1,:));
-            ipsiMeanShuffled = mean(eventMatrix(shuffledTrialTypes == 0,:));
-            matrixDiffShuffle(iShuffle,:) = abs(contraMeanShuffled - ipsiMeanShuffled);
+            corrMeanShuffled = mean(eventMatrix(shuffledTrialTypes == 1,:));
+            incorrMeanShuffled = mean(eventMatrix(shuffledTrialTypes == 0,:));
+            matrixDiffShuffle(iShuffle,:) = abs(corrMeanShuffled - incorrMeanShuffled);
         end
         % how often is matrixDiff greater than matrixDiffShuffle?
         for iBin = 1:numel(matrixDiff)

@@ -85,7 +85,6 @@ for iNeuron = 1:size(analysisConf.neurons,1)
             [sev,header] = read_tdt_sev(sevFile);
             decimateFactor = 1;%round(header.Fs / (fpass(2) * 10)); % 10x max filter freq
             sevFilt = decimate(double(sev),decimateFactor);
-            sevFilt = double(sev);
             Fs = header.Fs / decimateFactor;
         else
             header = getSEVHeader(sevFile);

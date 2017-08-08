@@ -1,4 +1,4 @@
-function [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,nBins_tWindow,trialTypes)
+function [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,nBins_tWindow,trialTypes,useEvents)
 % just like classifyUnitToEvent but done in a loop with sub classes
 % [ ] classify correct and failed?
 
@@ -43,16 +43,23 @@ for iNeuron = 1:numel(analysisConf.neurons)
     if isempty(tsPeths)
         continue;
     end
-    zscores = [];
+    zscore = [];
+    zscore_filt = [];
     for iEvent = 1:numel(eventFieldnames)
         ts_eventX = [tsPeths{:,iEvent}];
         [counts_eventsX,centers_eventX] = hist(ts_eventX,nBins_tWindow);
 %         zscore(iEvent,:) = ((counts_eventsX / size(tsPeths,1)) - mean(allCounts)) / std(allCounts); % old method
+        % just set z=0 if not using events; works for now
         zscore(iEvent,:) = ((counts_eventsX / size(tsPeths,1)) - zMean) / zStd;
+        if ismember(iEvent,useEvents)
+            zscore_filt(iEvent,:) = zscore(iEvent,:);
+        else
+            zscore_filt(iEvent,:) = zeros(size(counts_eventsX));
+        end
     end
     all_zscores(iNeuron,:,:) = zscore;
-    [max_z,max_bins] = max(zscore');
-    % leave these values in event order (1-7)
+    [max_z,max_bins] = max(zscore_filt');
+    % leave these values in event order (e.g. 1-7)
     unitEvents{iNeuron}.maxz = max_z;
     unitEvents{iNeuron}.maxbin = max_bins;
     % this is where the event class is actually ranked/ordered using key

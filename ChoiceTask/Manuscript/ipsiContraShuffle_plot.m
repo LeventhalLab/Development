@@ -8,10 +8,12 @@ for iEvent = 1:numel(useEvents)
         eventBins = eventBins + (curBins > pVal);
     end
     bar(1:size(pNeuronDiff,3),eventBins/size(pNeuronDiff,1),'FaceColor','k','EdgeColor','none');
-    ylim([0 1]);
+    ylim([0 0.4]);
+    yticks([0:0.2:0.4]);
     xlim([1 40]);
     xticks([1 20 40]);
     xticklabels({'-1','0','1'});
+    grid on;
     xlabel(eventFieldnames{iEvent});
     if iEvent == 1
         ylabel('Fraction of units < 0.05');
