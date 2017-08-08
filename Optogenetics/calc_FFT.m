@@ -2,7 +2,7 @@ function [] = calc_FFT(amp_data, laser_data, sample_rate, ps)
 points = zeros(3,2);
 figure;
 
-for i=1:3
+for i=1:5
     
     plot(laser_data);
     xlim([0 length(laser_data)]);
@@ -11,11 +11,16 @@ for i=1:3
         title('Click No Stimulation Window');
     
     elseif i==2
-        title('Click Continuous Pulses Window');
+        title('Click Continuous (0Hz) Pulses Window');
     
     elseif i==3
+        title('Click 20Hz Pulses Window');
+        
+    elseif i==4
         title('Click 50Hz Pulses Window');
-    
+
+    elseif i==5
+        title('Click 100Hz Pulses Window');
     end
     [points(i,:),~] = ginput(2);
 
@@ -31,14 +36,18 @@ end
 for j=1:k
     figure;
     
-    for i=1:3
+    for i=1:5
         
         if i==1
             name = 'No Stim';
         elseif i==2
-            name = '5s on/off';   
+            name = '0 Hz';   
         elseif i==3
-            name = '50 Hz';   
+            name = '20 Hz';   
+        elseif i==4
+            name = '50 Hz';
+        elseif i==5
+            name = '100 Hz';
         end
         
         win = (amp_data(round(points(i,1)):round(points(i,2))));
@@ -61,7 +70,7 @@ for j=1:k
         if j==2
             win = amp_data(round(points(i,1)):round(points(i,2)));
 
-            [pxx, fxx] = pwelch(win, [], [], 1:100, sample_rate);
+            [pxx, fxx] = pwelch(win, [], [], 1:0.5:100, sample_rate);
             plot(fxx, smooth(10*log10(pxx),5), 'DisplayName', name);
             title('Power Spectrum');
             xlabel('Frequency (Hz)');
@@ -78,3 +87,4 @@ end
 
 
 end
+
