@@ -23,6 +23,8 @@ if true
         end
         trials = createTrialsStruct_simpleChoice(logData,nexStruct);
 
+        % of course plotting these looks interesting, RT/MT sorted
+        % independently!
         timingField = 'RT';
         [trialIds,rt] = sortTrialsBy(trials,timingField); % forces to be 'correct'
         all_rt = [all_rt rt];

@@ -1,6 +1,8 @@
-function [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,nBins_tWindow,trialTypes,useEvents)
+function [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents)
 % just like classifyUnitToEvent but done in a loop with sub classes
 % [ ] classify correct and failed?
+binS = binMs / 1000;
+nBins_tWindow = [-tWindow:binS:tWindow];
 
 unitEvents = {};
 all_zscores = [];
@@ -17,21 +19,23 @@ for iNeuron = 1:numel(analysisConf.neurons)
     
     % get tsPeths for all trials to generate zMean and zStd
     useTrials = [trialIdInfo.correctContra trialIdInfo.correctIpsi trialIdInfo.incorrectContra trialIdInfo.incorrectIpsi];
-    tsPeths = eventsPeth(curTrials(useTrials),all_ts{iNeuron},tWindow,eventFieldnames);
+    tWindow_zbaseline = 2;
+    tsPeths = eventsPeth(curTrials(useTrials),all_ts{iNeuron},tWindow_zbaseline,eventFieldnames);
     
     % skip if empty (incorrect)
     if ~any(size(tsPeths))
         continue;
     end
     ts_event1 = [tsPeths{:,1}];
-    [counts_events1,centers_event1] = hist(ts_event1,nBins_tWindow);
+    nBins_tWindow_zbaseline = [-tWindow_zbaseline:binS:0];
+    h = histogram(ts_event1,nBins_tWindow_zbaseline);
     
     % skip if no counts, can't determine mean/std
-    if counts_events1 == 0
+    if sum(h.Values) == 0
         continue;
     else
-        zMean = mean(counts_events1 / size(tsPeths,1));
-        zStd = std(counts_events1 / size(tsPeths,1));
+        zMean = mean(h.Values / size(tsPeths,1));
+        zStd = std(h.Values / size(tsPeths,1));
     end
     
     % now get tsPeths for only trialTypes
@@ -47,14 +51,14 @@ for iNeuron = 1:numel(analysisConf.neurons)
     zscore_filt = [];
     for iEvent = 1:numel(eventFieldnames)
         ts_eventX = [tsPeths{:,iEvent}];
-        [counts_eventsX,centers_eventX] = hist(ts_eventX,nBins_tWindow);
+        h = histogram(ts_eventX,nBins_tWindow);
 %         zscore(iEvent,:) = ((counts_eventsX / size(tsPeths,1)) - mean(allCounts)) / std(allCounts); % old method
         % just set z=0 if not using events; works for now
-        zscore(iEvent,:) = ((counts_eventsX / size(tsPeths,1)) - zMean) / zStd;
+        zscore(iEvent,:) = ((h.Values / size(tsPeths,1)) - zMean) / zStd;
         if ismember(iEvent,useEvents)
             zscore_filt(iEvent,:) = zscore(iEvent,:);
         else
-            zscore_filt(iEvent,:) = zeros(size(counts_eventsX));
+            zscore_filt(iEvent,:) = zeros(size(h.Values));
         end
     end
     all_zscores(iNeuron,:,:) = zscore;

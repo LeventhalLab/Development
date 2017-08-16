@@ -1,5 +1,5 @@
 trialTypes = {'correctContra','correctIpsi'};
-[unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,nBins_tWindow,trialTypes);
+[unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes);
 
 % shapes: vm, va, vl, ret
 shapesLabels = {'vm','va','vl','ret'};

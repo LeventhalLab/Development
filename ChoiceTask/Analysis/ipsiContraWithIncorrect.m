@@ -1,11 +1,11 @@
 trialTypes = {'correctContra','correctIpsi','incorrectContra','incorrectIpsi'};
 myColorMap = lines(4);
 lns = [];
-
+useEvents = 1:7;
 if false % 4 rows
     figuree(1200,800);
     for iTrialType = 1:4
-        [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,nBins_tWindow,{trialTypes{iTrialType}});
+        [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,{trialTypes{iTrialType}},useEvents);
         for iEvent = 1:numel(eventFieldnames)
             sorted_neuronIds = [];
             for iNeuron = 1:numel(unitEvents)
@@ -36,7 +36,7 @@ end
 if false % 1 row
     figuree(1200,400);
     for iTrialType = 1:4
-        [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,nBins_tWindow,{trialTypes{iTrialType}});
+        [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,{trialTypes{iTrialType}},useEvents);
         for iEvent = 1:numel(eventFieldnames)
             subplot(1,7,iEvent);
             lns(iTrialType) = plot(smooth(nanmean(squeeze(all_zscores(:,iEvent,:))),3),'LineWidth',3,'Color',myColorMap(iTrialType,:));
@@ -57,7 +57,7 @@ if true % 1 row
     figuree(1200,800);
     for iSubject = 1:numel(useSubjects)
         for iTrialType = 1:4
-            [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,nBins_tWindow,{trialTypes{iTrialType}});
+            [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,{trialTypes{iTrialType}},useEvents);
             for iEvent = 1:numel(eventFieldnames)
                 useNeurons = [];
                 for iNeuron = 1:numel(unitEvents)
