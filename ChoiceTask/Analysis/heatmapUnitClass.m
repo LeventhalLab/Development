@@ -3,9 +3,10 @@
 trialTypes = {'correctContra','correctIpsi'};
 useEvents = 1:7;
 tWindow = 1;
-[unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,nBins_tWindow,trialTypes,useEvents);
+[unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,t_a,eventFieldnames,tWindow,50,trialTypes,useEvents);
 imsc = [];
-useSubjects = [88,117,142,154];
+% useSubjects = [88,117,142,154,182];
+useSubjects = [182];
 
 % compile event classes
 neuronClasses = {};
@@ -46,8 +47,8 @@ end
 figuree(1200,800);
 for iEvent = 1:numel(eventFieldnames)
     subplot(1,numel(eventFieldnames),iEvent);
-%     imagesc(squeeze(all_zscores(sorted_neuronIds,iEvent,:)));
-    imagesc(squeeze(all_zscores(:,iEvent,:))); % in session order
+    imagesc(squeeze(all_zscores(sorted_neuronIds,iEvent,:)));
+%     imagesc(squeeze(all_zscores(:,iEvent,:))); % in session order
     caxis([-3 8]);
     xlim([1 40]);
     xticks([1 20 40]);

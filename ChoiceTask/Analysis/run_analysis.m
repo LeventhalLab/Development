@@ -17,6 +17,7 @@ sevFile = '';
 all_meanTiming = [];
 all_trials = {};
 all_tsPeths = {};
+all_ts = {};
 neuronPeth = [];
 
 all_tidx_contra_correct = [];
@@ -148,7 +149,7 @@ for iNeuron = 1:size(analysisConf.neurons,1)
         end
 
     %     ipsiContraHists();
-        ipsiContraZTrialCompare();
+%         ipsiContraZTrialCompare();
     end
 
 
