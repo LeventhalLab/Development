@@ -3,7 +3,7 @@
 trialTypes = {'correctContra','correctIpsi'};
 useEvents = 1:7;
 tWindow = 1;
-[unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,t_a,eventFieldnames,tWindow,50,trialTypes,useEvents);
+[unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,ts_all,eventFieldnames,tWindow,binMs,trialTypes,useEvents);
 imsc = [];
 % useSubjects = [88,117,142,154,182];
 useSubjects = [182];

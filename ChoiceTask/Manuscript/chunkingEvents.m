@@ -18,7 +18,7 @@ all_classSequenceCount = [];
 maxz_mean = [];
 nSequences = 1;
 for iNeuron = 1:size(analysisConf.neurons,1)
-    if isempty(unitEvents{iNeuron}.class) || ~ismember(sessionConf.subjects__id,useSubjects(ii))
+    if isempty(unitEvents{iNeuron}.class) || ~ismember(sessionConf.subjects__id,useSubjects)
         continue;
     end
     maxz_ordered = unitEvents{iNeuron}.maxz(unitEvents{iNeuron}.class);

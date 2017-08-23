@@ -9,13 +9,17 @@
 % 0.99 2.576
 
 trialTypes = {'correctContra','correctIpsi'};
-trialLabels = {'Conta','Ipsi'};
+trialLabels = {'Contra','Ipsi'};
 ps = [0.05 0.01];
 psZ = [1.96 2.576];
 barMult = [1 -1];
 barAlpha = [0.2 1];
 colors = lines(numel(trialTypes));
 useEvents = 1:7;
+binMs = 50;
+
+psZ = [1.96];
+barAlpha = [0.8 1];
 
 figuree(1300,400);
 barCount = 1;
@@ -29,11 +33,12 @@ for iTrialType = 1:numel(trialTypes)
         pMatrix = zeros(numel(useEvents),size(all_zscores,3));
         for iNeuron = 1:size(all_zscores,1)
             for iEvent = useEvents
-                if ~isempty(unitEvents{iNeuron}.class) && iEvent == unitEvents{iNeuron}.class(1)
+                if ~isempty(unitEvents{iNeuron}.class)% && iEvent == unitEvents{iNeuron}.class(1)
                     if iProbs == 1 % only count neurons once for each trial type
                         neuronCount(iTrialType,iEvent) = neuronCount(iTrialType,iEvent) + 1;
                     end
                     curZ = squeeze(all_zscores(iNeuron,iEvent,:));
+                    % uses abs() on z-score, so it includes negative dips
                     pMatrix(iEvent,abs(curZ) > psZ(iProbs)) = pMatrix(iEvent,abs(curZ) > psZ(iProbs)) + 1;
                 end
             end
@@ -51,7 +56,7 @@ for iTrialType = 1:numel(trialTypes)
             xticklabels({'-1','0','1'});
             xlim([1 40]);
             xlabel('time (s)');
-            maxy = 0.2;
+            maxy = 0.8;
             ylim([-maxy maxy]);
             yticks([-maxy:0.2:maxy]);
             title([eventFieldnames{iEvent}]);

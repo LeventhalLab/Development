@@ -21,6 +21,9 @@ if true
         if strcmp(neuronName(1:5),'R0154')
             nexStruct = fixMissingEvents(logData,nexStruct);
         end
+        % let's first make sure logData RT == tril
+        corrIdx = find(logData.outcome == 0);
+        corrIdx_trials = find([trials(:).correct] == 1);
         trials = createTrialsStruct_simpleChoice(logData,nexStruct);
 
         % of course plotting these looks interesting, RT/MT sorted
@@ -29,14 +32,16 @@ if true
         [trialIds,rt] = sortTrialsBy(trials,timingField); % forces to be 'correct'
         all_rt = [all_rt rt];
         all_rt_c{iCount} = rt;
-        
-        timingField = 'MT';
-        [trialIds,mt] = sortTrialsBy(trials,timingField); % forces to be 'correct'
+        mt = [];
+        for iTrial = 1:numel(trialIds)
+            curTrial = trialIds(iTrial);
+            mt(iTrial) = getfield(trials(curTrial).timing,'MT');
+        end
         all_mt = [all_mt mt];
         all_mt_c{iCount} = mt;
         
         all_subjects__id = [all_subjects__id sessionConf.subjects__id];
-        iCount = iCount + 1;
+        iCount = iCount + 1
     end
 end
 figure('position',[0 0 900 700]);

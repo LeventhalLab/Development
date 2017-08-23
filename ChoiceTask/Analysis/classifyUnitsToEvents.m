@@ -34,8 +34,8 @@ for iNeuron = 1:numel(analysisConf.neurons)
     if sum(h.Values) == 0
         continue;
     else
-        zMean = mean(h.Values / size(tsPeths,1));
-        zStd = std(h.Values / size(tsPeths,1));
+        zMean = mean(h.Values / size(tsPeths,1)); % per bin
+        zStd = std(h.Values / size(tsPeths,1)); % per bin
     end
     
     % now get tsPeths for only trialTypes
