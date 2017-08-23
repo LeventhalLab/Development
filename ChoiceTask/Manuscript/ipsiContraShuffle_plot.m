@@ -1,5 +1,5 @@
 % see ipsiContraShuffle.m
-
+useEvents = [1:5];
 toneNeurons = [];
 centerOutNeurons = [];
 for iNeuron = 1:numel(unitEvents)
@@ -51,7 +51,7 @@ for iEvent = 1:numel(useEvents)
 
 % %     bar(1:size(pNeuronDiff,3),-eventBins/size(pNeuronDiff,1),'FaceColor','k','EdgeColor','none'); % NEGATIVE
     bar(1:size(pNeuronDiff,3),-eventBins/numel(centerOutNeurons),'FaceColor','k','EdgeColor','none'); % NEGATIVE
-    ylim([-.8 .8]);
+    ylim([-1 1]);
 %     yticks([0:0.2:0.4]);
     xlim([1 40]);
     xticks([1 20 40]);

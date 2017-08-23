@@ -4,7 +4,7 @@ lns = [];
 useEvents = 1:7;
 if false % 4 rows
     figuree(1200,800);
-    for iTrialType = 1:4
+    for iTrialType = 1:2
         [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,{trialTypes{iTrialType}},useEvents);
         for iEvent = 1:numel(eventFieldnames)
             sorted_neuronIds = [];

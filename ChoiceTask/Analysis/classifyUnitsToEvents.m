@@ -1,3 +1,4 @@
+% function [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents,RTmin,RTmax)
 function [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents)
 % just like classifyUnitToEvent but done in a loop with sub classes
 % [ ] classify correct and failed?
@@ -9,6 +10,7 @@ all_zscores = [];
 for iNeuron = 1:numel(analysisConf.neurons)
     neuronName = analysisConf.neurons{iNeuron};
     curTrials = all_trials{iNeuron};
+%     trialIdInfo = organizeTrialsById_RT(curTrials,RTmin,RTmax);
     trialIdInfo = organizeTrialsById(curTrials);
 
 % %     [allCounts,allCenters] = hist(all_ts{iNeuron},nBins_all_tWindow);
@@ -26,16 +28,20 @@ for iNeuron = 1:numel(analysisConf.neurons)
     if ~any(size(tsPeths))
         continue;
     end
-    ts_event1 = [tsPeths{:,1}];
+%     ts_event1 = [tsPeths{:,1}];
+    all_hValues = [];
     nBins_tWindow_zbaseline = [-tWindow_zbaseline:binS:0];
-    h = histogram(ts_event1,nBins_tWindow_zbaseline);
+    for iTrial = 1:size(tsPeths,1)
+        ts_event1 = tsPeths{iTrial,1};
+        h = histogram(ts_event1,nBins_tWindow_zbaseline);
+        all_hValues(iTrial,:) = h.Values;
+    end
+    zStd = mean(std(all_hValues));
+    zMean = mean(mean(all_hValues));
     
     % skip if no counts, can't determine mean/std
-    if sum(h.Values) == 0
+    if zStd == 0 || zMean == 0
         continue;
-    else
-        zMean = mean(h.Values / size(tsPeths,1)); % per bin
-        zStd = std(h.Values / size(tsPeths,1)); % per bin
     end
     
     % now get tsPeths for only trialTypes
