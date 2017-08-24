@@ -1,3 +1,6 @@
+% [unitEventsRT,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents);
+
+
 % [unitEventsRT,all_zscoresRT_000100] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents,0,.100);
 % [unitEventsRT,all_zscoresRT_100200] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents,.100,.200);
 % [unitEventsRT,all_zscoresRT_200300] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents,.200,.300);
@@ -6,18 +9,46 @@
 % [unitEventsRT,all_zscoresRT_500] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents,0.5,1);
 
 n = 0;
-for iNeuron = 1:numel(analysisConf.neurons)
-    neuronName = analysisConf.neurons{iNeuron};
-    curTrials = all_trials{iNeuron};
-    trialIdInfo = organizeTrialsById_RT(curTrials,.5,2);
-    useTrials = [trialIdInfo.correctContra trialIdInfo.correctIpsi];
-    n = n + numel(useTrials);
+activeNeuronsIdx = {};
+for ii = 1:7
+    activeNeuronsIdx{ii} = [];
 end
-n
+for iNeuron = 1:numel(analysisConf.neurons)
+%     neuronName = analysisConf.neurons{iNeuron};
+%     curTrials = all_trials{iNeuron};
+%     trialIdInfo = organizeTrialsById_RT(curTrials,.5,2);
+%     useTrials = [trialIdInfo.correctContra trialIdInfo.correctIpsi];
+%     n = n + numel(useTrials);
+    if ~isempty(unitEventsRT{iNeuron}.class) && max(unitEventsRT{iNeuron}.maxz) > 1.5
+        activeNeuronsIdx{unitEventsRT{iNeuron}.class(1)} = [activeNeuronsIdx{unitEventsRT{iNeuron}.class(1)} iNeuron];
+    end  
+end
 
 myColorMap = lines(10);
 figuree(1200,400);
 curColor = 1;
+
+curColor = 1;
+lns = [];
+for iEvent = 1:numel(eventFieldnames)
+    subplot(1,7,iEvent);
+    for iEvent2 = 1:numel(eventFieldnames)
+%         plot(squeeze(all_zscores(activeNeuronsIdx{iEvent},iEvent,:))','LineWidth',.2,'Color',myColorMap(curColor,:));
+%         hold on;
+        lns(iEvent2) = plot(smooth(nanmean(squeeze(all_zscores(activeNeuronsIdx{iEvent2},iEvent,:))),3),'LineWidth',3,'Color',myColorMap(iEvent2,:));
+        hold on;
+        text(5,.2,num2str(numel(activeNeuronsIdx{iEvent})));
+        xlim([1 100]);
+        xticks([1 50 100]);
+        xticklabels({'-1','0','1'});
+        ylim([-1 2]);
+        grid on;
+        title([eventFieldnames{iEvent}]);
+        hold on;
+    end
+end
+legend(lns,eventFieldnames);
+
 for iEvent = 1:numel(eventFieldnames)
     subplot(1,7,iEvent);
     plot(smooth(nanmean(squeeze(all_zscoresRT_000100(:,iEvent,:))),3),'LineWidth',2,'Color',myColorMap(curColor,:));

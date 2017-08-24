@@ -34,7 +34,7 @@ for iNeuron = 1:numel(analysisConf.neurons)
     for iTrial = 1:size(tsPeths,1)
         ts_event1 = tsPeths{iTrial,1};
         h = histogram(ts_event1,nBins_tWindow_zbaseline);
-        all_hValues(iTrial,:) = h.Values;
+        all_hValues(iTrial,:) = smooth(h.Values,3);
     end
     zStd = mean(std(all_hValues));
     zMean = mean(mean(all_hValues));

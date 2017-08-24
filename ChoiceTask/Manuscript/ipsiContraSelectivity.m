@@ -27,11 +27,13 @@ lns = [];
 legendLabels = {};
 neuronCount = zeros(numel(trialTypes),numel(useEvents));
 for iTrialType = 1:numel(trialTypes)
-    [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,{trialTypes{iTrialType}},useEvents);
+    disp(['--- iTrialType ',num2str(iTrialType)]);
+%     [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,{trialTypes{iTrialType}},useEvents);
     for iProbs = 1:numel(psZ)
         legendLabels{barCount} = [trialLabels{iTrialType},' > ',num2str(ps(iProbs))];
         pMatrix = zeros(numel(useEvents),size(all_zscores,3));
         for iNeuron = 1:size(all_zscores,1)
+            disp(['iNeuron ',num2str(iNeuron)]);
             for iEvent = useEvents
                 if ~isempty(unitEvents{iNeuron}.class)% && iEvent == unitEvents{iNeuron}.class(1)
                     if iProbs == 1 % only count neurons once for each trial type
