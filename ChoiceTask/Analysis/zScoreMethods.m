@@ -51,7 +51,7 @@ for iNeuron = 1:numel(analysisConf.neurons)
     % random samples
     figure;
     
-    sampleTests = [10 100 200 500 1000];
+    sampleTests = [10 100 200 500 1000 10000];
     cur_binMs = 50;
     binS = cur_binMs / 1000;
     a = 0;
@@ -80,11 +80,11 @@ for iNeuron = 1:numel(analysisConf.neurons)
     plot(all_mean);
     title({neuronName,'50ms bins','mean'});
     xticks(1:numel(sampleTests));
-    xticklabels({'10','100','200','500','1000'});
+    xticklabels({'10','100','200','500','1000','10000'});
     subplot(212);
     plot(all_std);
     title('std');
     xticks(1:numel(sampleTests));
-    xticklabels({'10','100','200','500','1000'});
+    xticklabels({'10','100','200','500','1000','10000'});
     hold on;
 end

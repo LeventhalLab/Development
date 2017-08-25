@@ -1,5 +1,5 @@
-function [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents,RTmin,RTmax)
-% function [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents)
+% function [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents,RTmin,RTmax)
+function [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents)
 % just like classifyUnitToEvent but done in a loop with sub classes
 % [ ] classify correct and failed?
 binS = binMs / 1000;
@@ -11,33 +11,30 @@ for iNeuron = 1:numel(analysisConf.neurons)
     neuronName = analysisConf.neurons{iNeuron};
     disp(['classifyUnitsToEvents: ',neuronName]);
     curTrials = all_trials{iNeuron};
-    trialIdInfo = organizeTrialsById_RT(curTrials,RTmin,RTmax);
-%     trialIdInfo = organizeTrialsById(curTrials);
+%     trialIdInfo = organizeTrialsById_RT(curTrials,RTmin,RTmax);
+    trialIdInfo = organizeTrialsById(curTrials);
 
-% %     [allCounts,allCenters] = hist(all_ts{iNeuron},nBins_all_tWindow);
     unitEvents{iNeuron} = {};
     unitEvents{iNeuron}.class = [];
     unitEvents{iNeuron}.maxz = [];
     unitEvents{iNeuron}.maxbin = [];
-    
-    % get tsPeths for all trials to generate zMean and zStd
-    useTrials = [trialIdInfo.correctContra trialIdInfo.correctIpsi trialIdInfo.incorrectContra trialIdInfo.incorrectIpsi];
-    tWindow_zbaseline = 2;
-    tsPeths = eventsPeth(curTrials(useTrials),all_ts{iNeuron},tWindow_zbaseline,eventFieldnames);
-    
-    % skip if empty (incorrect)
-    if ~any(size(tsPeths))
-        continue;
+
+    % --- find MEAN & STD from random trials
+    tsPeths = {};
+    a = tWindow;
+    b = max(all_ts{iNeuron}) - tWindow;
+    nSamples = 1000; % converges pretty well (1800x 2s bins in 3600s session, more is oversampling)
+    r = (b-a).*rand(nSamples,1) + a;
+    for iir = 1:numel(r)
+        tsPeths{iir,1} = tsPeth(all_ts{iNeuron},r(iir),tWindow);
     end
-%     ts_event1 = [tsPeths{:,1}];
     all_hValues = [];
-    nBins_tWindow_zbaseline = [-tWindow_zbaseline:binS:0];
     for iTrial = 1:size(tsPeths,1)
         ts_event1 = tsPeths{iTrial,1};
-        h = histogram(ts_event1,nBins_tWindow_zbaseline);
-        all_hValues(iTrial,:) = h.Values;
+        hCounts = histcounts(ts_event1,nBins_tWindow);
+        all_hValues(iTrial,:) = hCounts;
     end
-    zStd = mean(std(all_hValues));
+    zStd = std(mean(all_hValues));
     zMean = mean(mean(all_hValues));
     
     % skip if no counts, can't determine mean/std
@@ -58,13 +55,13 @@ for iNeuron = 1:numel(analysisConf.neurons)
     zscore_filt = [];
     for iEvent = 1:numel(eventFieldnames)
         ts_eventX = [tsPeths{:,iEvent}];
-        h = histogram(ts_eventX,nBins_tWindow);
+        hCounts = histcounts(ts_eventX,nBins_tWindow);
         % just set z=0 if not using events; works for now
-        zscore(iEvent,:) = ((h.Values / size(tsPeths,1)) - zMean) / zStd;
+        zscore(iEvent,:) = ((hCounts / size(tsPeths,1)) - zMean) / zStd;
         if ismember(iEvent,useEvents)
             zscore_filt(iEvent,:) = zscore(iEvent,:);
         else
-            zscore_filt(iEvent,:) = zeros(size(h.Values));
+            zscore_filt(iEvent,:) = zeros(size(hCounts));
         end
     end
     all_zscores(iNeuron,:,:) = zscore;
