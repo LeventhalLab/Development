@@ -1,9 +1,9 @@
 % the fraction of units whose activity is significantly different between
 % ipsi/contra trials
 
-useEvents = 1:5;
+useEvents = 1:7;
 trialTypes = {'correctContra','correctIpsi'};
-[unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,{trialTypes{iTrialType}},useEvents);
+% [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents);
 
 requireTrials = 5;
 nShuffle = 1000;

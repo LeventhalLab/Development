@@ -1,5 +1,5 @@
-% function [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents,RTmin,RTmax)
-function [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents)
+function [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents,RTmin,RTmax)
+% function [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents)
 % just like classifyUnitToEvent but done in a loop with sub classes
 % [ ] classify correct and failed?
 binS = binMs / 1000;
@@ -9,9 +9,10 @@ unitEvents = {};
 all_zscores = [];
 for iNeuron = 1:numel(analysisConf.neurons)
     neuronName = analysisConf.neurons{iNeuron};
+    disp(['classifyUnitsToEvents: ',neuronName]);
     curTrials = all_trials{iNeuron};
-%     trialIdInfo = organizeTrialsById_RT(curTrials,RTmin,RTmax);
-    trialIdInfo = organizeTrialsById(curTrials);
+    trialIdInfo = organizeTrialsById_RT(curTrials,RTmin,RTmax);
+%     trialIdInfo = organizeTrialsById(curTrials);
 
 % %     [allCounts,allCenters] = hist(all_ts{iNeuron},nBins_all_tWindow);
     unitEvents{iNeuron} = {};
@@ -34,7 +35,7 @@ for iNeuron = 1:numel(analysisConf.neurons)
     for iTrial = 1:size(tsPeths,1)
         ts_event1 = tsPeths{iTrial,1};
         h = histogram(ts_event1,nBins_tWindow_zbaseline);
-        all_hValues(iTrial,:) = smooth(h.Values,3);
+        all_hValues(iTrial,:) = h.Values;
     end
     zStd = mean(std(all_hValues));
     zMean = mean(mean(all_hValues));
@@ -58,7 +59,6 @@ for iNeuron = 1:numel(analysisConf.neurons)
     for iEvent = 1:numel(eventFieldnames)
         ts_eventX = [tsPeths{:,iEvent}];
         h = histogram(ts_eventX,nBins_tWindow);
-%         zscore(iEvent,:) = ((counts_eventsX / size(tsPeths,1)) - mean(allCounts)) / std(allCounts); % old method
         % just set z=0 if not using events; works for now
         zscore(iEvent,:) = ((h.Values / size(tsPeths,1)) - zMean) / zStd;
         if ismember(iEvent,useEvents)

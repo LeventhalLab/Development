@@ -1,5 +1,5 @@
 % see ipsiContraShuffle.m
-useEvents = [1:5];
+useEvents = [1:7];
 toneNeurons = [];
 centerOutNeurons = [];
 for iNeuron = 1:numel(unitEvents)

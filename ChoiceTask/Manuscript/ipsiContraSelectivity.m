@@ -28,14 +28,14 @@ legendLabels = {};
 neuronCount = zeros(numel(trialTypes),numel(useEvents));
 for iTrialType = 1:numel(trialTypes)
     disp(['--- iTrialType ',num2str(iTrialType)]);
-%     [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,{trialTypes{iTrialType}},useEvents);
+    [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,{trialTypes{iTrialType}},useEvents);
     for iProbs = 1:numel(psZ)
         legendLabels{barCount} = [trialLabels{iTrialType},' > ',num2str(ps(iProbs))];
         pMatrix = zeros(numel(useEvents),size(all_zscores,3));
         for iNeuron = 1:size(all_zscores,1)
             disp(['iNeuron ',num2str(iNeuron)]);
             for iEvent = useEvents
-                if ~isempty(unitEvents{iNeuron}.class)% && iEvent == unitEvents{iNeuron}.class(1)
+                if ~isempty(unitEvents{iNeuron}.class) && iEvent == unitEvents{iNeuron}.class(1)
                     if iProbs == 1 % only count neurons once for each trial type
                         neuronCount(iTrialType,iEvent) = neuronCount(iTrialType,iEvent) + 1;
                     end
@@ -49,16 +49,17 @@ for iTrialType = 1:numel(trialTypes)
         eventCount = 1;
         for iEvent = useEvents
             subplot(1,numel(useEvents),iEvent);
-            bar((pMatrix(iEvent,:)./size(all_zscores,1))*barMult(iTrialType),'FaceColor',colors(iTrialType,:),'EdgeColor','none','FaceAlpha',barAlpha(iProbs));
+%             bar((pMatrix(iEvent,:)./size(all_zscores,1))*barMult(iTrialType),'FaceColor',colors(iTrialType,:),'EdgeColor','none','FaceAlpha',barAlpha(iProbs));
+            bar((pMatrix(iEvent,:)./neuronCount(iTrialType,iEvent))*barMult(iTrialType),'FaceColor',colors(iTrialType,:),'EdgeColor','none','FaceAlpha',barAlpha(iProbs));
             if eventCount == 1
                 barCount = barCount + 1;
             end
             hold on;
-            xticks([1 20 40]);
+            xticks([1 round(size(all_zscores,3)/2) size(all_zscores,3) ]);
             xticklabels({'-1','0','1'});
-            xlim([1 40]);
+            xlim([1 size(all_zscores,3)]);
             xlabel('time (s)');
-            maxy = 0.8;
+            maxy = 0.5;
             ylim([-maxy maxy]);
             yticks([-maxy:0.2:maxy]);
             title([eventFieldnames{iEvent}]);
