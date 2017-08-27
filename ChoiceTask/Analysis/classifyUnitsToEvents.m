@@ -1,5 +1,6 @@
-% function [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents,RTmin,RTmax)
-function [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents,MTmin,MTmax)
+function [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents,RTmin,RTmax)
+% function [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents,MTmin,MTmax)
+% function [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents,pretonemin,pretonemax)
 % function [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents)
 % just like classifyUnitToEvent but done in a loop with sub classes
 % [ ] classify correct and failed?
@@ -12,8 +13,9 @@ for iNeuron = 1:numel(analysisConf.neurons)
     neuronName = analysisConf.neurons{iNeuron};
     disp(['classifyUnitsToEvents: ',neuronName]);
     curTrials = all_trials{iNeuron};
-    trialIdInfo = organizeTrialsById_MT(curTrials,MTmin,MTmax);
-%     trialIdInfo = organizeTrialsById_RT(curTrials,RTmin,RTmax);
+%     trialIdInfo = organizeTrialsById_pretone(curTrials,pretonemin,pretonemax);
+%     trialIdInfo = organizeTrialsById_MT(curTrials,MTmin,MTmax);
+    trialIdInfo = organizeTrialsById_RT(curTrials,RTmin,RTmax);
 %     trialIdInfo = organizeTrialsById(curTrials);
 
     unitEvents{iNeuron} = {};
@@ -25,7 +27,7 @@ for iNeuron = 1:numel(analysisConf.neurons)
     tsPeths = {};
     a = tWindow;
     b = max(all_ts{iNeuron}) - tWindow;
-    nSamples = 1000; % converges pretty well (1800x 2s bins in 3600s session, more is oversampling)
+    nSamples = 500; % converges pretty well (1800x 2s bins in 3600s session, more is oversampling)
     r = (b-a).*rand(nSamples,1) + a;
     for iir = 1:numel(r)
         tsPeths{iir,1} = tsPeth(all_ts{iNeuron},r(iir),tWindow);
