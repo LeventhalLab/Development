@@ -50,7 +50,7 @@ figuree(1200,300);
 lns = [];
 colors = lines(3);
 for iEvent = 1:numel(useEvents)
-%     subplot(1,7,iEvent);
+    subplot(1,7,iEvent);
     yyaxis left;
     lns(1) = plot(smooth(class1Z(iEvent,:),3),'-','LineWidth',2,'color',colors(1,:));
     hold on;

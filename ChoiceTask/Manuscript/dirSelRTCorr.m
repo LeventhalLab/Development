@@ -11,13 +11,12 @@ if false
         trialIdInfo = organizeTrialsById(curTrials);
     %     useTrials = [trialIdInfo.correctContra trialIdInfo.correctIpsi];
         timingField = 'RT';
-        [useTrials,allTimes] = sortTrialsBy(trials,timingField);
+        [useTrials,allTimes] = sortTrialsBy(curTrials,timingField);
 
         tsPeths = eventsPeth(curTrials(useTrials),all_ts{iNeuron},tWindow,eventFieldnames);
         if isempty(tsPeths)
             continue;
         end
-
 
         tmp = figure;
         eventRTCorr = [];
@@ -41,16 +40,62 @@ if false
     end
 end
 
+if true
+    nShuffle = 1000;
+    pVal = 0.95;
+    neuronCount = 1;
+
+    class1 = squeeze(nanmean(squeeze(neuronRTCorr(logical(dirSelNeurons),:,:)))); % directionally selective
+    class2 = squeeze(nanmean(squeeze(neuronRTCorr(~logical(dirSelNeurons),:,:)))); % NOT directionally selective
+    
+    matrixDiffShuffle = [];
+    for iShuffle = 1:nShuffle
+        ix = randperm(numel(dirSelNeurons));
+        dirSelNeurons_shuff = dirSelNeurons(ix);
+        class1shuffled = squeeze(nanmean(squeeze(neuronRTCorr(logical(dirSelNeurons_shuff),:,:))));
+        class2shuffled = squeeze(nanmean(squeeze(neuronRTCorr(~logical(dirSelNeurons_shuff),:,:))));
+        for iEvent = 1:numel(useEvents)
+            matrixDiffShuffle(iShuffle,iEvent,:) = abs(class1shuffled(iEvent,:) - class2shuffled(iEvent,:));
+        end
+    end
+    
+    pMatrix = [];
+    for iEvent = 1:numel(useEvents)
+        matrixDiff = abs(class1(iEvent,:) - class2(iEvent,:));
+        for iBin = 1:size(class1,2)
+            pMatrix(iEvent,iBin) = numel(find(matrixDiff(iBin) > matrixDiffShuffle(:,iEvent,iBin))) / nShuffle;
+        end
+    end
+end
+
 figuree(1300,400);
-colors = lines(2);
+colors = lines(3);
+lns = [];
 for iEvent = 1:7
     subplot(1,7,iEvent);
-    plot(mean(squeeze(neuronRTCorr(dirSelNeurons,iEvent,:))),'color',colors(1,:),'lineWidth',2);
+    
+    yyaxis left;
+    lns(1) = plot(smooth(nanmean(squeeze(neuronRTCorr(logical(dirSelNeurons),iEvent,:))),3),'-','color',colors(1,:),'lineWidth',2);
     hold on;
-    plot(mean(squeeze(neuronRTCorr(~dirSelNeurons,iEvent,:))),'color',colors(2,:),'lineWidth',2);
-    ylim([-1 1]);
+    lns(2) = plot(smooth(nanmean(squeeze(neuronRTCorr(~logical(dirSelNeurons),iEvent,:))),3),'-','color',colors(3,:),'lineWidth',2);
+    ylim([-.1 .1]);
+    
+    yyaxis right;
+    cur_pMatrix = smooth(1 - pMatrix(iEvent,:),3);
+    plot(cur_pMatrix,'-','color',[colors(2,:) .3]);
+    pMatrix_nans = cur_pMatrix;
+    pMatrix_nans(find(cur_pMatrix > 1-pVal)) = NaN;
+    plot(pMatrix_nans,'*','color',colors(2,:));
+    ylim([0 1]);
+    ylabel('p value');
+    
     xlim([1 40]);
     xticks([1 20 40]);
     xticklabels({'-1','0','1'});
+    title(eventFieldnames{iEvent});
     grid on;
+    if iEvent == 1
+        title({'corr(z,RT)',eventFieldnames{iEvent}});
+    end
 end
+legend(lns,['Dir Sel n=',num2str(sum(dirSelNeurons))],['NOT Dir Sel n=',num2str(sum(~dirSelNeurons))]);
