@@ -1,7 +1,8 @@
 % the fraction of units whose activity is significantly different between
 % ipsi/contra trials
+pVal = 0.95;
 
-if false
+if true
     useEvents = 1:7;
     trialTypes = {'correctContra','correctIpsi'};
 
@@ -9,6 +10,8 @@ if false
     nShuffle = 1000;
     pNeuronDiff = [];
     pNeuronAll = [];
+    
+    dirSelNeurons = zeros(numel(analysisConf.neurons),1);
     for iNeuron = 1:numel(analysisConf.neurons)
         neuronName = analysisConf.neurons{iNeuron};
         curTrials = all_trials{iNeuron};
@@ -52,6 +55,9 @@ if false
                 curMDS = matrixDiffShuffle(:,iBin);
                 pEventDiff(iEvent,iBin) = numel(find(matrixDiff(iBin) > curMDS)) / nShuffle;
             end
+            if iEvent == 4 && sum(pEventDiff(iEvent,:) > pVal) > 5
+                dirSelNeurons(iNeuron) = 1;
+            end
         end
         pNeuronDiff(iNeuron,:,:) = pEventDiff;
         pNeuronAll(iNeuron,:,:) = pEventAll;
@@ -59,8 +65,6 @@ if false
 end
 % see ipsiContraShuffle.m
 useEvents = [1:7];
-
-pVal = 0.95;
 figuree(1200,400);
 for iEvent = 1:numel(useEvents)
     subplot(1,numel(useEvents),iEvent)
@@ -75,8 +79,8 @@ for iEvent = 1:numel(useEvents)
 %     bar(1:size(pNeuronDiff,3),eventBins/numel(toneNeurons),'FaceColor','k','EdgeColor','none'); % POSITIVE
     bar(1:size(pNeuronDiff,3),eventBins/size(pNeuronDiff,1),'FaceColor','k','EdgeColor','none'); % POSITIVE
     hold on;
-% %     ylim([0 0.4]);
-% %     yticks([0:0.2:0.4]);
+    ylim([0 0.4]);
+    yticks([0:0.2:0.4]);
     xlim([1 40]);
     xticks([1 20 40]);
     xticklabels({'-1','0','1'});
