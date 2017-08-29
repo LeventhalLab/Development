@@ -1,4 +1,14 @@
-if false
+if true
+    unitClassFlag = [];
+    for iNeuron = 1:numel(analysisConf.neurons)
+        if ~isempty(unitEvents{iNeuron}.class) && ismember(unitEvents{iNeuron}.class(1),[3,4])
+            unitClassFlag(iNeuron,1) = 1;
+        else
+            unitClassFlag(iNeuron,1) = 0;
+        end
+    end
+    unitClassFlag = logical(unitClassFlag);
+    
     tWindow = 1;
     nBins = round((2*tWindow / .001) / binMs);
     nBinHalfWidth = ((tWindow*2) / nBins) / 2;
@@ -9,7 +19,6 @@ if false
         disp(['classifyUnitsToEvents: ',neuronName]);
         curTrials = all_trials{iNeuron};
         trialIdInfo = organizeTrialsById(curTrials);
-    %     useTrials = [trialIdInfo.correctContra trialIdInfo.correctIpsi];
         timingField = 'RT';
         [useTrials,allTimes] = sortTrialsBy(curTrials,timingField);
 
@@ -45,15 +54,17 @@ if true
     pVal = 0.95;
     neuronCount = 1;
 
-    class1 = squeeze(nanmean(squeeze(neuronRTCorr(logical(dirSelNeurons),:,:)))); % directionally selective
-    class2 = squeeze(nanmean(squeeze(neuronRTCorr(~logical(dirSelNeurons),:,:)))); % NOT directionally selective
+    class1 = squeeze(nanmean(squeeze(neuronRTCorr(dirSelNeurons & unitClassFlag,:,:)))); % directionally selective
+    class2 = squeeze(nanmean(squeeze(neuronRTCorr(~dirSelNeurons & unitClassFlag,:,:)))); % NOT directionally selective
     
     matrixDiffShuffle = [];
     for iShuffle = 1:nShuffle
         ix = randperm(numel(dirSelNeurons));
         dirSelNeurons_shuff = dirSelNeurons(ix);
-        class1shuffled = squeeze(nanmean(squeeze(neuronRTCorr(logical(dirSelNeurons_shuff),:,:))));
-        class2shuffled = squeeze(nanmean(squeeze(neuronRTCorr(~logical(dirSelNeurons_shuff),:,:))));
+        unitClassFlag_shuff = unitClassFlag(ix);
+        
+        class1shuffled = squeeze(nanmean(squeeze(neuronRTCorr(dirSelNeurons_shuff & unitClassFlag_shuff,:,:))));
+        class2shuffled = squeeze(nanmean(squeeze(neuronRTCorr(~dirSelNeurons_shuff & unitClassFlag_shuff,:,:))));
         for iEvent = 1:numel(useEvents)
             matrixDiffShuffle(iShuffle,iEvent,:) = abs(class1shuffled(iEvent,:) - class2shuffled(iEvent,:));
         end
@@ -75,9 +86,9 @@ for iEvent = 1:7
     subplot(1,7,iEvent);
     
     yyaxis left;
-    lns(1) = plot(smooth(nanmean(squeeze(neuronRTCorr(logical(dirSelNeurons),iEvent,:))),3),'-','color',colors(1,:),'lineWidth',2);
+    lns(1) = plot(smooth(nanmean(squeeze(neuronRTCorr(dirSelNeurons & unitClassFlag,iEvent,:))),3),'-','color',colors(1,:),'lineWidth',2);
     hold on;
-    lns(2) = plot(smooth(nanmean(squeeze(neuronRTCorr(~logical(dirSelNeurons),iEvent,:))),3),'-','color',colors(3,:),'lineWidth',2);
+    lns(2) = plot(smooth(nanmean(squeeze(neuronRTCorr(~dirSelNeurons & unitClassFlag,iEvent,:))),3),'-','color',colors(3,:),'lineWidth',2);
     ylim([-.1 .1]);
     
     yyaxis right;

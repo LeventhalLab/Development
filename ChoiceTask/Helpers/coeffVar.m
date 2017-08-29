@@ -1,2 +1,2 @@
-function coeffVar = coeffVar(ts)
-coeffVar = std(diff(ts)) / mean(diff(ts));
+function CV = coeffVar(ts)
+CV = std(diff(ts)) / mean(diff(ts));

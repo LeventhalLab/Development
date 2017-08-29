@@ -63,6 +63,8 @@ if true
         pNeuronAll(iNeuron,:,:) = pEventAll;
     end
 end
+dirSelNeurons = logical(dirSelNeurons);
+
 % see ipsiContraShuffle.m
 useEvents = [1:7];
 figuree(1200,400);
