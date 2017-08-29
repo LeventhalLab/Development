@@ -109,4 +109,4 @@ for iEvent = 1:7
         title({'corr(z,RT)',eventFieldnames{iEvent}});
     end
 end
-legend(lns,['Dir Sel n=',num2str(sum(dirSelNeurons))],['NOT Dir Sel n=',num2str(sum(~dirSelNeurons))]);
+legend(lns,['Dir Sel n=',num2str(sum(dirSelNeurons & unitClassFlag))],['NOT Dir Sel n=',num2str(sum(~dirSelNeurons & unitClassFlag))]);
