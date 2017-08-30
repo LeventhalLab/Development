@@ -1,15 +1,18 @@
-if true
-    unitClassFlag = [];
-    for iNeuron = 1:numel(analysisConf.neurons)
-        if ~isempty(unitEvents{iNeuron}.class) && ismember(unitEvents{iNeuron}.class(1),[3,4])
-            unitClassFlag(iNeuron,1) = 1;
-        else
-            unitClassFlag(iNeuron,1) = 0;
-        end
+unitClassFlag = [];
+for iNeuron = 1:numel(analysisConf.neurons)
+    if ~isempty(unitEvents{iNeuron}.class) && ismember(unitEvents{iNeuron}.class(1),[3,4])
+        unitClassFlag(iNeuron,1) = 1;
+    else
+        unitClassFlag(iNeuron,1) = 0;
     end
-    unitClassFlag = logical(unitClassFlag);
-    
+end
+unitClassFlag = logical(unitClassFlag);
+% override
+unitClassFlag = true(size(unitClassFlag));
+
+if false
     tWindow = 1;
+    binMs = 50;
     nBins = round((2*tWindow / .001) / binMs);
     nBinHalfWidth = ((tWindow*2) / nBins) / 2;
     binEdges = linspace(-tWindow+nBinHalfWidth,tWindow-nBinHalfWidth,nBins+1);
@@ -19,7 +22,7 @@ if true
         disp(['classifyUnitsToEvents: ',neuronName]);
         curTrials = all_trials{iNeuron};
         trialIdInfo = organizeTrialsById(curTrials);
-        timingField = 'RT';
+        timingField = 'MT';
         [useTrials,allTimes] = sortTrialsBy(curTrials,timingField);
 
         tsPeths = eventsPeth(curTrials(useTrials),all_ts{iNeuron},tWindow,eventFieldnames);
@@ -110,3 +113,45 @@ for iEvent = 1:7
     end
 end
 legend(lns,['Dir Sel n=',num2str(sum(dirSelNeurons & unitClassFlag))],['NOT Dir Sel n=',num2str(sum(~dirSelNeurons & unitClassFlag))]);
+
+% individual traces
+% % figuree(1300,400);
+% % colors = lines(3);
+% % lns = [];
+% % for iEvent = 3
+% % %     subplot(1,7,iEvent);
+% %     
+% %     yyaxis left;
+% %     plot((squeeze(neuronRTCorr(dirSelNeurons & unitClassFlag,iEvent,:))),'-','color',[colors(1,:) .15],'lineWidth',0.5);
+% %     hold on;
+% %     plot((squeeze(neuronRTCorr(~dirSelNeurons & unitClassFlag,iEvent,:))),'-','color',[colors(3,:) .15],'lineWidth',0.5);
+% %     
+% %     lns(1) = plot(smooth(nanmean(squeeze(neuronRTCorr(dirSelNeurons & unitClassFlag,iEvent,:))),3),'-','color',colors(1,:),'lineWidth',2);
+% %     lns(2) = plot(smooth(nanmean(squeeze(neuronRTCorr(~dirSelNeurons & unitClassFlag,iEvent,:))),3),'-','color',colors(3,:),'lineWidth',2);
+% %     ylim([-0.5 .5]);
+% %     
+% %     xlim([1 20]);
+% %     xticks([1 10 20]);
+% %     xticklabels({'-1','0','1'});
+% %     title(eventFieldnames{iEvent});
+% %     grid on;
+% %     if iEvent == 1
+% %         title({'corr(z,RT)',eventFieldnames{iEvent}});
+% %     end
+% % end
+% % legend(lns,['Dir Sel n=',num2str(sum(dirSelNeurons & unitClassFlag))],['NOT Dir Sel n=',num2str(sum(~dirSelNeurons & unitClassFlag))]);
+
+dirClasses = [];
+allClasses = [];
+for iNeuron = 1:numel(dirSelNeurons)
+    if ~isempty(unitEvents{iNeuron}.class)
+        allClasses = [allClasses unitEvents{iNeuron}.class(1)];
+        if dirSelNeurons(iNeuron) == 1
+            dirClasses = [dirClasses unitEvents{iNeuron}.class(1)];
+        end
+    end
+end
+figure;
+h = histogram(allClasses,0.5:1:7.5);
+hold on;
+h = histogram(dirClasses,0.5:1:7.5);

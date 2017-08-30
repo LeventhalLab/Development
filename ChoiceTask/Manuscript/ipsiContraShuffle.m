@@ -13,7 +13,7 @@ if true
     
     dirSelNeurons = zeros(numel(analysisConf.neurons),1);
     for iNeuron = 1:numel(analysisConf.neurons)
-        neuronName = analysisConf.neurons{iNeuron};
+        neuronName = analysisConf.neurons{iNeuron}
         curTrials = all_trials{iNeuron};
 
         trialIdInfo = organizeTrialsById(curTrials);
@@ -55,7 +55,7 @@ if true
                 curMDS = matrixDiffShuffle(:,iBin);
                 pEventDiff(iEvent,iBin) = numel(find(matrixDiff(iBin) > curMDS)) / nShuffle;
             end
-            if iEvent == 4 && sum(pEventDiff(iEvent,:) > pVal) > 5
+            if iEvent == 3 && sum(pEventDiff(iEvent,:) > pVal) > 8
                 dirSelNeurons(iNeuron) = 1;
             end
         end

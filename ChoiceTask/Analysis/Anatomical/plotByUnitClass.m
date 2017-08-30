@@ -1,33 +1,37 @@
 % eventFieldnames = {'cueOn';'centerIn';'tone';'centerOut';'sideIn';'sideOut';'foodRetrieval'};
 colors = jet(7);
+dotSize_mm = .03;
 atlas_ims = [];
-useEvents = [3,4];
+useEvents = [1:7];
+nasPath = '/Users/mattgaidica/Documents/Data/ChoiceTask';
+
 for iNeuron = 1:size(analysisConf.neurons,1)
     neuronName = analysisConf.neurons{iNeuron};
     sessionConf = analysisConf.sessionConfs{iNeuron};
     [electrodeName,electrodeSite,electrodeChannels] = getElectrodeInfo(neuronName);
     rows = sessionConf.session_electrodes.channel == electrodeChannels;
     channelData = sessionConf.session_electrodes(any(rows)',:);
-    event_id = eventIds_by_maxHistValues(iNeuron);
-    if ~ismember(event_id,useEvents)
-        continue;
-    end
-    if isempty(channelData)
-        continue;
-    end
-    wiggle = (rand(1) - 0.5) * 0.1;
+    
+    wiggle = (rand(1) - 0.5) * 0.2;
     AP = channelData{1,'ap'} + wiggle;
-    wiggle = (rand(1) - 0.5) * 0.1;
-    ML = channelData{1,'ml'};
-    wiggle = (rand(1) - 0.5) * 0.1;
+    wiggle = (rand(1) - 0.5) * 0.2;
+    ML = channelData{1,'ml'}; % no wiggle, this controls the image/slice
+    wiggle = (rand(1) - 0.5) * 0.2;
     DV = channelData{1,'dv'} + wiggle;
     
-    if ismember(iNeuron,neuronIds(curatedIds))
-        useColor = colors(7,:);
+    if ~isempty(unitEvents{iNeuron}.class)
+        neuronClass = unitEvents{iNeuron}.class(1);
+        dotColor = colors(neuronClass,:);
     else
-       useColor = colors(event_id,:);
+        continue;
     end
-    [atlas_ims,k] = plotMthalElectrode(atlas_ims,AP,ML,DV,nasPath,useColor);
+
+    if isempty(channelData) || ~ismember(neuronClass,useEvents) || sum(isnan([AP ML DV]))
+        iNeuron
+        continue;
+    end
+    
+    [atlas_ims,k] = plotMthalElectrode(atlas_ims,AP,ML,DV,nasPath,dotColor,dotSize_mm);
 end
 
 figure('position',[0 0 1400 600]);
