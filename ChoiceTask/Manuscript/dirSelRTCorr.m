@@ -1,4 +1,5 @@
 unitClassFlag = [];
+useEvents = 1:7;
 for iNeuron = 1:numel(analysisConf.neurons)
     if ~isempty(unitEvents{iNeuron}.class) && ismember(unitEvents{iNeuron}.class(1),[3,4])
         unitClassFlag(iNeuron,1) = 1;
@@ -10,7 +11,7 @@ unitClassFlag = logical(unitClassFlag);
 % override
 unitClassFlag = true(size(unitClassFlag));
 
-if false
+if true
     tWindow = 1;
     binMs = 50;
     nBins = round((2*tWindow / .001) / binMs);
@@ -18,13 +19,17 @@ if false
     binEdges = linspace(-tWindow+nBinHalfWidth,tWindow-nBinHalfWidth,nBins+1);
     neuronRTCorr = [];
     for iNeuron = 1:numel(analysisConf.neurons)
-        neuronName = analysisConf.neurons{iNeuron};
-        disp(['classifyUnitsToEvents: ',neuronName]);
+        neuronName = analysisConf.neurons{iNeuron}
         curTrials = all_trials{iNeuron};
         trialIdInfo = organizeTrialsById(curTrials);
-        timingField = 'MT';
+        
+        timingField = 'RT';
         [useTrials,allTimes] = sortTrialsBy(curTrials,timingField);
-
+        
+        % override for ipsi/contra trials only
+        allTimes = allTimes(ismember(trialIdInfo.correctIpsi,useTrials));
+        useTrials = useTrials(ismember(trialIdInfo.correctIpsi,useTrials));
+        
         tsPeths = eventsPeth(curTrials(useTrials),all_ts{iNeuron},tWindow,eventFieldnames);
         if isempty(tsPeths)
             continue;
@@ -141,17 +146,19 @@ legend(lns,['Dir Sel n=',num2str(sum(dirSelNeurons & unitClassFlag))],['NOT Dir 
 % % end
 % % legend(lns,['Dir Sel n=',num2str(sum(dirSelNeurons & unitClassFlag))],['NOT Dir Sel n=',num2str(sum(~dirSelNeurons & unitClassFlag))]);
 
-dirClasses = [];
-allClasses = [];
-for iNeuron = 1:numel(dirSelNeurons)
-    if ~isempty(unitEvents{iNeuron}.class)
-        allClasses = [allClasses unitEvents{iNeuron}.class(1)];
-        if dirSelNeurons(iNeuron) == 1
-            dirClasses = [dirClasses unitEvents{iNeuron}.class(1)];
+if false
+    dirClasses = [];
+    allClasses = [];
+    for iNeuron = 1:numel(dirSelNeurons)
+        if ~isempty(unitEvents{iNeuron}.class)
+            allClasses = [allClasses unitEvents{iNeuron}.class(1)];
+            if dirSelNeurons(iNeuron) == 1
+                dirClasses = [dirClasses unitEvents{iNeuron}.class(1)];
+            end
         end
     end
+    figure;
+    h = histogram(allClasses,0.5:1:7.5);
+    hold on;
+    h = histogram(dirClasses,0.5:1:7.5);
 end
-figure;
-h = histogram(allClasses,0.5:1:7.5);
-hold on;
-h = histogram(dirClasses,0.5:1:7.5);

@@ -1,8 +1,8 @@
 % eventFieldnames = {'cueOn';'centerIn';'tone';'centerOut';'sideIn';'sideOut';'foodRetrieval'};
-colors = jet(7);
+colors = lines(7);
 dotSize_mm = .03;
 atlas_ims = [];
-useEvents = [1:7];
+useEvents = [3:4];
 nasPath = '/Users/mattgaidica/Documents/Data/ChoiceTask';
 
 for iNeuron = 1:size(analysisConf.neurons,1)
@@ -25,6 +25,9 @@ for iNeuron = 1:size(analysisConf.neurons,1)
     else
         continue;
     end
+    
+    % override
+    dotColor = colors(dirSelNeurons(iNeuron) + 1,:);
 
     if isempty(channelData) || ~ismember(neuronClass,useEvents) || sum(isnan([AP ML DV]))
         iNeuron
