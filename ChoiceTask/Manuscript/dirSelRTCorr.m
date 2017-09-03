@@ -27,8 +27,8 @@ if true
         [useTrials,allTimes] = sortTrialsBy(curTrials,timingField);
         
         % override for ipsi/contra trials only
-        allTimes = allTimes(ismember(trialIdInfo.correctIpsi,useTrials));
-        useTrials = useTrials(ismember(trialIdInfo.correctIpsi,useTrials));
+% %         allTimes = allTimes(ismember(trialIdInfo.correctIpsi,useTrials));
+% %         useTrials = useTrials(ismember(trialIdInfo.correctIpsi,useTrials));
         
         tsPeths = eventsPeth(curTrials(useTrials),all_ts{iNeuron},tWindow,eventFieldnames);
         if isempty(tsPeths)

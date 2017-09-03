@@ -58,11 +58,12 @@ for iNeuron = 1:numel(analysisConf.neurons)
     zscore = [];
     zscore_filt = [];
     for iEvent = 1:numel(eventFieldnames)
+        curEvent = useEvents(iEvent);
         ts_eventX = [tsPeths{:,iEvent}];
         hCounts = histcounts(ts_eventX,nBins_tWindow);
         % just set z=0 if not using events; works for now
         zscore(iEvent,:) = ((hCounts / size(tsPeths,1)) - zMean) / zStd;
-        if ismember(iEvent,useEvents)
+        if ismember(curEvent,useEvents)
             zscore_filt(iEvent,:) = zscore(iEvent,:);
         else
             zscore_filt(iEvent,:) = zeros(size(hCounts));

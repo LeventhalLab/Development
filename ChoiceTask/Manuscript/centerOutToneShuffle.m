@@ -52,9 +52,9 @@ colors = lines(3);
 for iEvent = 1:numel(useEvents)
     subplot(1,7,iEvent);
     yyaxis left;
-    lns(1) = plot(smooth(class1Z(iEvent,:),3),'-','LineWidth',2,'color',colors(1,:));
+    lns(1) = plot(smooth(class1Z(iEvent,:),3),'-','LineWidth',2,'color',colors(3,:));
     hold on;
-    lns(2) = plot(smooth(class2Z(iEvent,:),3),'-','LineWidth',2,'color',colors(3,:));
+    lns(2) = plot(smooth(class2Z(iEvent,:),3),'-','LineWidth',2,'color',colors(1,:));
     ylim([-4 20]);
     title(eventFieldnames{iEvent});
     ylabel('z score');

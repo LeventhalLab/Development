@@ -12,8 +12,8 @@ if true
     pVal = 0.95;
     neuronCount = 1;
 
-    class1Z = squeeze(mean(all_zscores(logical(dirSelNeurons),:,:))); % directionally selective
-    class2Z = squeeze(mean(all_zscores(~logical(dirSelNeurons),:,:))); % NOT directionally selective
+    class1Z = squeeze(mean(all_zscores(dirSelNeurons,:,:))); % directionally selective
+    class2Z = squeeze(mean(all_zscores(~dirSelNeurons,:,:))); % NOT directionally selective
     
     matrixDiffShuffle = [];
     for iShuffle = 1:nShuffle

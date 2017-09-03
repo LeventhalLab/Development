@@ -1,7 +1,7 @@
 % are sensory signals accompanied by the drops in firing?
 % can we determine tone vs. centerOut just by dips in z?
 
-useSubjects = [88,117,142,154];
+useSubjects = [88,117,142,154,182];
 trialTypes = {'correctContra','correctIpsi'};
 useEvents = 1:7;
 tWindow = 1;
