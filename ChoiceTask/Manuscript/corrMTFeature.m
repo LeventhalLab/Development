@@ -10,8 +10,10 @@ if true
     yR2 = [];
     yc = 1;
     groups = {};
-    all_earlyRatio = [];
     all_useTimes = [];
+    all_earlySpikes_z = [];
+    all_allSpikes_z = [];
+
     for iNeuron = 1:numel(analysisConf.neurons)
         if ~dirSelNeurons(iNeuron) % only use
             continue;
@@ -20,7 +22,7 @@ if true
         curTrials = all_trials{iNeuron};
         trialIdInfo = organizeTrialsById(curTrials);
         
-        timingField = 'MT';
+        timingField = 'RT';
         [useTrials,allTimes] = sortTrialsBy(curTrials,timingField);
         tsPeths = {};
     
@@ -31,9 +33,7 @@ if true
         end
 
         earlySpikes = [];
-        lateSpikes = [];
         allSpikes = [];
-        earlyRatio = [];
         useTimes = [];
         corrCount = 1;
         for iTrial = 1:numel(useTrials)
@@ -45,14 +45,10 @@ if true
 %             end
 
             curMT = allTimes(iTrial);
-            MTbins = round(numel(counts)/2) - 3: min(ceil(curMT*1000 / binMs),numel(counts)) + round(numel(counts)/2); % either duration of MT or tWindow
-            MTbins_early = MTbins(1:floor(numel(MTbins)/2));
-            MTbins_late = MTbins(end-numel(MTbins_early)+1:end);
-            
-            allSpikes(corrCount) = sum(counts(MTbins));
-            earlySpikes(corrCount) = sum(counts(MTbins_early));
-            lateSpikes(corrCount) = sum(counts(MTbins_late));
-            earlyRatio(corrCount) = earlySpikes(corrCount) / allSpikes(corrCount);
+            MTbins = round(20:min(ceil(curMT*1000 / binMs),numel(counts)) + round(numel(counts)/2)); % either duration of MT or tWindow
+           
+            earlySpikes(corrCount) = sum(counts);
+            allSpikes(corrCount) = sum(counts(15:25));
             useTimes(corrCount) = allTimes(iTrial);
             corrCount = corrCount + 1;
         end
@@ -60,30 +56,32 @@ if true
 %         if numel(useTimes) < 4
 %             continue;
 %         end
-        
-        all_earlyRatio = [all_earlyRatio earlyRatio];
-        all_useTimes = [all_useTimes useTimes];
 
-        [~,gof] = fit(useTimes',earlySpikes','poly1');
-        y(yc) = corr(useTimes',earlySpikes');
-        yR2(yc) = gof.rsquare;
-        groups{yc} = 'early';
-        yc = yc + 1;
-        
-        [~,gof] = fit(useTimes',lateSpikes','poly1');
-        y(yc) = corr(useTimes',lateSpikes');
-        yR2(yc) = gof.rsquare;
-        groups{yc} = 'late';
-        yc = yc + 1;
-        
-%         figure;
-%         scatter(allTimes,earlySpikes)
-%         hold on
-%         scatter(allTimes,lateSpikes)
+        all_useTimes = [all_useTimes useTimes];
+        earlySpikes_z = (earlySpikes - mean(earlySpikes)) / std(earlySpikes); % for all trials
+        allSpikes_z = (allSpikes - mean(allSpikes)) / std(allSpikes); % for all trials
+        all_earlySpikes_z = [all_earlySpikes_z earlySpikes_z];
+        all_allSpikes_z = [all_allSpikes_z allSpikes_z];
+
+
+%         [~,gof] = fit(useTimes',sumSpikesZ','poly1');
+%         y(yc) = corr(useTimes',);
+%         yR2(yc) = gof.rsquare;
+%         groups{yc} = '';
+%         yc = yc + 1;
         
         neuronCount = neuronCount + 1;
     end
 end
-figure;scatter(all_useTimes,all_earlyRatio);
-anova1(y,groups)
+
+[v,k] = sort(all_useTimes);
+figure;
+plot(all_useTimes(k),all_earlySpikes_z(k),'color',[1 0 0 0.05]);
+hold on;
+plot(all_useTimes(k),smooth(all_earlySpikes_z(k),100),'color',[1 0 0]);
+plot(all_useTimes(k),all_allSpikes_z(k),'color',[0 0 1 0.05]);
+plot(all_useTimes(k),smooth(all_allSpikes_z(k),100),'color',[0 0 1]);
+grid on;
+
+% anova1(y,groups)
 % anova1(yR2,groups)
