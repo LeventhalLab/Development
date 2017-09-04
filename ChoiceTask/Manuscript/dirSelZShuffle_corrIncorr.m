@@ -9,7 +9,7 @@ end
 
 if true
 %     trialTypes = {'incorrectContra','incorrectIpsi'};
-    trialTypes = {'movementTooLong'};
+    trialTypes = {'falseStart'};
     useEvents = 1:7;
     binMs = 50;
     tWindow = 1;
@@ -106,8 +106,8 @@ if true
     for iShuffle = 1:nShuffle
         ix = randperm(numel(dirSelNeurons));
         dirSelNeurons_shuff = dirSelNeurons(ix);
-        class1Zshuffled = squeeze(mean(all_zscores(logical(dirSelNeurons_shuff),:,:)));
-        class2Zshuffled = squeeze(mean(all_zscores_incorr(logical(dirSelNeurons_shuff),:,:)));
+        class1Zshuffled = squeeze(mean(all_zscores(dirSelNeurons_shuff,:,:)));
+        class2Zshuffled = squeeze(mean(all_zscores_incorr(dirSelNeurons_shuff,:,:)));
         for iEvent = 1:numel(useEvents)
             matrixDiffShuffle(iShuffle,iEvent,:) = abs(class1Zshuffled(iEvent,:) - class2Zshuffled(iEvent,:));
         end
