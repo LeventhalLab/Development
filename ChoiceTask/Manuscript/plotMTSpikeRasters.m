@@ -1,4 +1,6 @@
-for iNeuron = 1:numel(analysisConf.neurons)
+use_dirSel = true;
+
+for iNeuron = 81%1:numel(analysisConf.neurons)
     if ~dirSelNeurons(iNeuron) % only use
         continue;
     end
@@ -16,6 +18,32 @@ for iNeuron = 1:numel(analysisConf.neurons)
             useTrials = useTrials(k);
             allTimes = allTimes(k);
         end
+        
+        if use_dirSel
+            trialIdInfo = organizeTrialsById(curTrials);
+            
+            t_useTrials = [];
+            t_allTimes = [];
+            trialCount = 1;
+            for iTrial = 1:numel(useTrials)
+                if ismember(useTrials(iTrial),trialIdInfo.correctContra)
+                    t_useTrials(trialCount) = useTrials(iTrial);
+                    t_allTimes(trialCount) = allTimes(iTrial);
+                    trialCount = trialCount + 1;
+                end
+            end
+            markContraTrials = trialCount - 1;
+            for iTrial = 1:numel(useTrials)
+                if ismember(useTrials(iTrial),trialIdInfo.correctIpsi)
+                    t_useTrials(trialCount) = useTrials(iTrial);
+                    t_allTimes(trialCount) = allTimes(iTrial);
+                    trialCount = trialCount + 1;
+                end
+            end
+            useTrials = t_useTrials;
+            allTimes = t_allTimes;
+        end
+        
         tsPeths = {};
 
         tsPeths = eventsPeth(curTrials(useTrials),all_ts{iNeuron},tWindow,eventFieldnames);
@@ -28,23 +56,27 @@ for iNeuron = 1:numel(analysisConf.neurons)
             rasterData = tsPeths(:,iEvent);
             rasterData = rasterData(~cellfun('isempty',rasterData)); % remove empty rows (no spikes)
             rasterData = makeRasterReadable(rasterData,75); % limit to 100 data points
-            plotSpikeRaster(rasterData,'PlotType','scatter','AutoLabel',false);
-            if iEvent == 1
-                ylabel({'tsAll','Trials'});
-            else
-                set(ax,'yTickLabel',[]);
-            end
+            plotSpikeRaster(rasterData,'PlotType','scatter','AutoLabel',false); hold on;
+            plot([0 0],[0 size(rasterData,1)],':','color','red'); % center line
+            ln = plot([-1 1],[markContraTrials markContraTrials],'g--');
+            
             xlim([-1 1]);
             set(ax,'FontSize',fontSize);
-            hold on;
-            plot([0 0],[0 size(rasterData,1)],':','color','red'); % center line
+            
             if iEvent == iRow
                 titleColor = 'r';
             else
                 titleColor = 'k';
             end
+            
+             if iEvent == 1
+                ylabel({'tsAll','Trials'});
+            else
+                set(ax,'yTickLabel',[]);
+            end
             if iEvent == 1 && iRow == 1
                 title({neuronName,eventFieldnames{iEvent}},'HorizontalAlignment','center','color',titleColor,'interpreter','none');
+                legend(ln,'contra/ipsi');
             else
                  title({'',eventFieldnames{iEvent}},'HorizontalAlignment','center','color',titleColor,'interpreter','none');
             end
@@ -58,6 +90,6 @@ for iNeuron = 1:numel(analysisConf.neurons)
         title(timingFields{iRow});
         xlim([0 1]);
     end
-    saveas(h1,fullfile('/Users/mattgaidica/Documents/Data/ChoiceTask/plotSpikeRastersSORTED',[neuronName,'.jpg']));
+    saveas(h1,fullfile('/Users/mattgaidica/Documents/Data/ChoiceTask/plotSpikeRastersSORTED',[neuronName,'_dirSel.jpg']));
     close(h1);
 end
