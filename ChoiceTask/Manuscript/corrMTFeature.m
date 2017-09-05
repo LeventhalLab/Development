@@ -15,14 +15,14 @@ if true
     all_allSpikes_z = [];
 
     for iNeuron = 1:numel(analysisConf.neurons)
-        if ~dirSelNeurons(iNeuron) % only use
-            continue;
-        end
+%         if ~dirSelNeurons(iNeuron) % only use
+%             continue;
+%         end
         neuronName = analysisConf.neurons{iNeuron}
         curTrials = all_trials{iNeuron};
         trialIdInfo = organizeTrialsById(curTrials);
         
-        timingField = 'RT';
+        timingField = 'MT';
         [useTrials,allTimes] = sortTrialsBy(curTrials,timingField);
         tsPeths = {};
     
@@ -40,22 +40,22 @@ if true
             ts_eventX = tsPeths{iTrial,4}; % centerOut
             counts = histcounts(ts_eventX,binEdges);
             
-%             if mean(counts) < 2
-%                 continue;
-%             end
+            if mean(counts) < 2
+                continue;
+            end
 
             curMT = allTimes(iTrial);
             MTbins = round(20:min(ceil(curMT*1000 / binMs),numel(counts)) + round(numel(counts)/2)); % either duration of MT or tWindow
            
             earlySpikes(corrCount) = sum(counts);
-            allSpikes(corrCount) = sum(counts(15:25));
+            allSpikes(corrCount) = max(counts(15:25));
             useTimes(corrCount) = allTimes(iTrial);
             corrCount = corrCount + 1;
         end
         
-%         if numel(useTimes) < 4
-%             continue;
-%         end
+        if numel(useTimes) < 4
+            continue;
+        end
 
         all_useTimes = [all_useTimes useTimes];
         earlySpikes_z = (earlySpikes - mean(earlySpikes)) / std(earlySpikes); % for all trials
@@ -73,6 +73,18 @@ if true
         neuronCount = neuronCount + 1;
     end
 end
+
+stepBin = .1;
+timingSteps = 0:stepBin:0.9;
+binZMean = [];
+binZStd = [];
+for ii=1:10
+    idxs = find(all_useTimes >= timingSteps(ii) & all_useTimes(ii) < timingSteps(ii) + stepBin);
+    binZMean(ii) = mean(all_allSpikes_z(idxs));
+    binZStd(ii) = std(all_allSpikes_z(idxs));
+end
+figure;
+errorbar(binZMean,binZStd);
 
 [v,k] = sort(all_useTimes);
 figure;
