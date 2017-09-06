@@ -1,103 +1,106 @@
-rows = 3;
-timingField = 'RT';
+timingField = 'MT';
 useEventPeth = 4;
+plotBySubject = false;
+
+if plotBySubject
+    nSubjects = numel(analysisConf.subjects);
+else
+    nSubjects = 1;
+end
 
 if true
-    % % figuree(500,800);
-    all_ttfs = [];
-    all_curUseTime = [];
-    neuronCount = 1;
-    trialCount = 1;
+    tWindow = 1;
+    binMs = 50;
+    binS = binMs / 1000;
+    nBins_tWindow = [-tWindow:binS:tWindow];
+    all_curUseTime_sorted = [];
+    allSubject_trialCount = 1;
+    k = [];
     allRasters = {};
-    for iNeuron = 1:numel(analysisConf.neurons)
-        neuronName = analysisConf.neurons{iNeuron};
-% %         if ~dirSelNeurons(iNeuron) %|| ~strcmp(analysisConf.sessionNames{81},analysisConf.sessionNames{iNeuron})
-% %             continue;
-% %         end
+    all_z = [];
+    for iSubject = 1:nSubjects
+        all_curUseTime = [];
+        trialCount = 1;
+        useSubject = analysisConf.subjects{iSubject};
+        for iNeuron = 1:numel(analysisConf.neurons)
+            if plotBySubject && ~strcmp(analysisConf.sessionConfs{iNeuron}.subjects__name,useSubject)
+                continue;
+            end
 
-        if isempty(unitEvents{iNeuron}.class) || unitEvents{iNeuron}.class(1) ~= 4
-            continue;
-        end
-%         disp(['Using neuron ',num2str(iNeuron),' - ',neuronName]);
+            neuronName = analysisConf.neurons{iNeuron};
+    % %         if ~dirSelNeurons(iNeuron) %|| ~strcmp(analysisConf.sessionNames{81},analysisConf.sessionNames{iNeuron})
+    % %             continue;
+    % %         end
 
-        curTrials = all_trials{iNeuron};
-        [useTrials,allTimes] = sortTrialsBy(curTrials,timingField);
-        trialIdInfo = organizeTrialsById(curTrials);
+            if isempty(unitEvents{iNeuron}.class) || unitEvents{iNeuron}.class(1) ~= 4
+                continue;
+            end
+            disp(['Using neuron ',num2str(iNeuron),' - ',neuronName]);
 
-        t_useTrials = [];
-        t_allTimes = [];
-        tc = 1;
-        for iTrial = 1:numel(useTrials)
-            if ismember(useTrials(iTrial),trialIdInfo.correctContra)
-                t_useTrials(tc) = useTrials(iTrial);
-                t_allTimes(tc) = allTimes(iTrial);
-                tc = tc + 1;
+            curTrials = all_trials{iNeuron};
+            [useTrials,allTimes] = sortTrialsBy(curTrials,timingField);
+            trialIdInfo = organizeTrialsById(curTrials);
+
+            t_useTrials = [];
+            t_allTimes = [];
+            tc = 1;
+            for iTrial = 1:numel(useTrials)
+                if ismember(useTrials(iTrial),trialIdInfo.correctContra)
+                    t_useTrials(tc) = useTrials(iTrial);
+                    t_allTimes(tc) = allTimes(iTrial);
+                    tc = tc + 1;
+                end
+            end
+            markContraTrials = tc - 1;
+            for iTrial = 1:numel(useTrials)
+                if ismember(useTrials(iTrial),trialIdInfo.correctIpsi)
+                    t_useTrials(tc) = useTrials(iTrial);
+                    t_allTimes(tc) = allTimes(iTrial);
+                    tc = tc + 1;
+                end
+            end
+            useTrials = t_useTrials;
+            allTimes = t_allTimes;
+
+            tsPeths = {};
+            ts = all_ts{iNeuron};
+            [zMean,zStd] = zParams(ts,binMs);
+            tsPeths = eventsPeth(curTrials(useTrials),ts,tWindow,eventFieldnames);
+            usePeths = tsPeths;
+            useTimes = allTimes;
+    %         usePeths = tsPeths(1:markContraTrials,:);
+    %         useTimes = allTimes(1:markContraTrials);
+
+            meanISI = [];
+            curZ = [];
+            for iTrial = 1:numel(useTimes)
+                curTs = usePeths{iTrial,useEventPeth};
+                curRefTs = usePeths{iTrial,1};
+                if numel(curTs) < 5 || numel(curRefTs) < 5; continue; end;
+                
+                counts = histcounts(curTs,nBins_tWindow);
+                curZ = smooth((counts - zMean) / zStd,3);
+                all_z(allSubject_trialCount,:) = curZ;
+                
+                curUseTime = useTimes(iTrial);
+
+                curAllTimeTs = curTs(curTs >= 0 & curTs < curUseTime);
+                if numel(curAllTimeTs) < 4; continue; end;
+
+                ttfs(iTrial) = mean(curTs(find(curTs >= 0,1)));
+                all_curUseTime(trialCount) = curUseTime;
+                allRasters{allSubject_trialCount} = curTs;
+                trialCount = trialCount + 1;
+                allSubject_trialCount = allSubject_trialCount + 1;
             end
         end
-        markContraTrials = tc - 1;
-        for iTrial = 1:numel(useTrials)
-            if ismember(useTrials(iTrial),trialIdInfo.correctIpsi)
-                t_useTrials(tc) = useTrials(iTrial);
-                t_allTimes(tc) = allTimes(iTrial);
-                tc = tc + 1;
-            end
-        end
-        useTrials = t_useTrials;
-        allTimes = t_allTimes;
-
-        tsPeths = {};
-        tsPeths = eventsPeth(curTrials(useTrials),all_ts{iNeuron},tWindow,eventFieldnames);
-        usePeths = tsPeths;
-        useTimes = allTimes;
-%         usePeths = tsPeths(1:markContraTrials,:);
-%         useTimes = allTimes(1:markContraTrials);
-
-        % % figure;
-        % % plotSpikeRaster(contraPeths(:,4),'PlotType','scatter','AutoLabel',false);
-        ttfs = [];
-        meanISI = [];
-        curZ = [];
-        for iTrial = 1:numel(useTimes)
-            curTs = usePeths{iTrial,useEventPeth};
-            curRefTs = usePeths{iTrial,1};
-            if numel(curTs) < 5 || numel(curRefTs) < 5; continue; end;
-            
-            curRefMeanISI = mean(diff(curRefTs));
-            curRefStdISI = std(diff(curRefTs));
-            curUseTime = useTimes(iTrial);
-            
-            curAllTimeTs = curTs(curTs >= 0 & curTs < curUseTime);
-            if numel(curAllTimeTs) < 4; continue; end;
-
-            ttfs(iTrial) = mean(curTs(find(curTs >= 0,1)));
-            all_curUseTime(trialCount) = curUseTime;
-            all_ttfs(trialCount) = ttfs(iTrial);
-            allRasters{trialCount} = curTs;
-            trialCount = trialCount + 1;
-        end
-
-    % %     subplot(rows,1,1);
-    % %     plot(ttfs); hold on;
-    % %     xlim([1 numel(contraMTs)]);
-    % %     title('time to first spike');
-    % %     xlabel('trial');
-    % % 
-    % %     subplot(rows,1,2);
-    % %     plot(meanISI); hold on;
-    % %     xlim([1 numel(contraMTs)]);
-    % %     title('mean ISI within MT');
-    % %     xlabel('trial');
-    % %     
-    % %     subplot(rows,1,3);
-    % %     plot(curMTz); hold on;
-    % %     xlim([1 numel(contraMTs)]);
-    % %     title('curMTz');
-    % %     xlabel('trial');
-
-        neuronCount = neuronCount + 1;
+        % compile from per-subject
+        [vs,ks] = sort(all_curUseTime);
+        all_curUseTime_sorted = [all_curUseTime_sorted vs];
+        k = [k ks];
     end
 end
-[all_curUseTime_sorted,k] = sort(all_curUseTime);
+% [all_curUseTime_sorted,k] = sort(all_curUseTime);
 
 
 
@@ -137,8 +140,8 @@ end
 % plot(time_bins,time_ttfs);
 % title([timingField,' ttfs']);
 
-[RHO,PVAL] = corr(time_bins',time_ttfs')
-[f,gof] = fit(time_bins',time_ttfs','poly1')
+% % [RHO,PVAL] = corr(time_bins',time_ttfs')
+% % [f,gof] = fit(time_bins',time_ttfs','poly1')
 
 
 h = figuree(800,500);
@@ -153,21 +156,44 @@ ylabel('trials');
 subplot(132);
 allRasters_sorted = allRasters(k);
 plotSpikeRaster(allRasters_sorted,'PlotType','scatter','AutoLabel',false); hold on;
-plot([0 0],[1 numel(all_ttfs_sorted_desc)],'r');
-xlim([-.5 .5]);
+plot([0 0],[1 numel(allRasters_sorted)],'r:');
+xlimVals = [-1 1];
+xlim(xlimVals);
 xlabel('time (s)');
 title([timingField,' spikes']);
 
-subplot(133);
-barh(all_ttfs_sorted_desc,'FaceColor','k','EdgeColor','none');
-hold on;
-plot(time_ttfs,bin_curTime,'r','LineWidth',3);
-ylim([1 numel(all_curUseTime_sorted_desc)]);
-xlim([0 0.1]);
-xlabel('time (s)');
-title([timingField,' ttfs']);
+nMeanBins = 31;
+meanColors = jet(nMeanBins);
+meanBins = floor(linspace(1,numel(allRasters_sorted),nMeanBins));
+all_z_sorted = all_z(k,:);
+mean_z = [];
+tMean = linspace(-1,1,size(all_z_sorted,2));
+for iBin = 1:numel(meanBins)-1
+    mean_z(iBin,:) = smooth(mean(all_z_sorted(meanBins(iBin):meanBins(iBin+1),:)),3);
+    makey = (meanBins(iBin) + round(mean(diff(meanBins)))) + 250 * mean_z(iBin,:) * -0.8; % -1 for orientation
+    plot(tMean,makey,'linewidth',2,'color',[meanColors(iBin,:),0.5]);
+end
 
-addNote(h,{'ttfs 100 bins','---',['corr = ',num2str(RHO)],['p = ',num2str(PVAL)],['R2 = ',num2str(gof.rsquare)]});
+subplot(133);
+imagesc(all_z_sorted);
+colormap(jet);
+xticks([1 10 20 30 40]);
+xticklabels({'-1','-0.5','0','0.5','1'});
+caxis([-1 3]);
+
+
+figure;
+plot(all_z_sorted,all_curUseTime_sorted,'k.');
+
+% % barh(all_ttfs_sorted_desc,'FaceColor','k','EdgeColor','none');
+% % hold on;
+% % plot(time_ttfs,bin_curTime,'r','LineWidth',3);
+% % ylim([1 numel(all_curUseTime_sorted_desc)]);
+% % xlim([0 0.1]);
+% % xlabel('time (s)');
+% % title([timingField,' ttfs']);
+
+% addNote(h,{'ttfs 100 bins','---',['corr = ',num2str(RHO)],['p = ',num2str(PVAL)],['R2 = ',num2str(gof.rsquare)]});
 
 % % binSteps = 0.3;
 % % maxBin = 1;

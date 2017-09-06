@@ -29,23 +29,8 @@ for iNeuron = 1:numel(analysisConf.neurons)
     unitEvents{iNeuron}.maxz = [];
     unitEvents{iNeuron}.maxbin = [];
 
-    % --- find MEAN & STD from random trials
-    tsPeths = {};
-    a = tWindow;
-    b = max(all_ts{iNeuron}) - tWindow;
-    nSamples = 500; % converges pretty well (1800x 2s bins in 3600s session, more is oversampling)
-    r = (b-a).*rand(nSamples,1) + a;
-    for iir = 1:numel(r)
-        tsPeths{iir,1} = tsPeth(all_ts{iNeuron},r(iir),tWindow);
-    end
-    all_hValues = [];
-    for iTrial = 1:size(tsPeths,1)
-        ts_event1 = tsPeths{iTrial,1};
-        hCounts = histcounts(ts_event1,nBins_tWindow);
-        all_hValues(iTrial,:) = hCounts;
-    end
-    zStd = std(mean(all_hValues));
-    zMean = mean(mean(all_hValues));
+    ts = all_ts{iNeuron};
+    [zMean,zStd] = zParams(ts,binMs);
     
     % skip if no counts, can't determine mean/std
     if zStd == 0 || zMean == 0
