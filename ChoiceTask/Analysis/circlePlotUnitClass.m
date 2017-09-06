@@ -1,5 +1,15 @@
 trialTypes = {'correctContra','correctIpsi'};
-[unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,nBins_tWindow,trialTypes);
+binMs = 50;
+tWindow = 1;
+useEvents = 1:7;
+[unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,0.5,binMs,trialTypes,useEvents);
+compiledEvents = zeros(numel(eventFieldnames),1);
+for iNeuron = 1:numel(unitEvents)
+    if isempty(unitEvents{iNeuron}.class)
+        continue;
+    end
+    compiledEvents(unitEvents{iNeuron}.class(1),1) = compiledEvents(unitEvents{iNeuron}.class(1)) + 1;
+end
 
 figuree(1200,500);
 rows = 2;
@@ -22,10 +32,11 @@ for iEvent = 1:numel(eventFieldnames)
     CG = circularGraph(xm,'Colormap',myColorMap,'Label',eventFieldnames);
     
     subplot(rows,numel(eventFieldnames),iEvent+numel(eventFieldnames));
+    bar(1:numel(eventFieldnames),compiledEvents,'FaceColor',[.75 .75 .75],'EdgeColor','none'); hold on;
     bar(1:numel(eventFieldnames),xm(iEvent,:),'FaceColor',myColorMap(iEvent,:),'EdgeColor','none');
     xticklabels(eventFieldnames);
     xtickangle(90);
-    ylim([0 45]);
+    ylim([0 120]);
     xlim([0 8]);
     title([eventFieldnames{iEvent},' (',num2str(classCount),')']);
 end

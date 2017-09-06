@@ -1,7 +1,7 @@
-function [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents,RTmin,RTmax)
+% function [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents,RTmin,RTmax)
 % function [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents,MTmin,MTmax)
 % function [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents,pretonemin,pretonemax)
-% function [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents)
+function [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents)
 % just like classifyUnitToEvent but done in a loop with sub classes
 % [ ] classify correct and failed?
 binS = binMs / 1000;
@@ -15,8 +15,8 @@ for iNeuron = 1:numel(analysisConf.neurons)
     curTrials = all_trials{iNeuron};
 %     trialIdInfo = organizeTrialsById_pretone(curTrials,pretonemin,pretonemax);
 %     trialIdInfo = organizeTrialsById_MT(curTrials,MTmin,MTmax);
-    trialIdInfo = organizeTrialsById_RT(curTrials,RTmin,RTmax);
-%     trialIdInfo = organizeTrialsById(curTrials);
+%     trialIdInfo = organizeTrialsById_RT(curTrials,RTmin,RTmax);
+    trialIdInfo = organizeTrialsById(curTrials);
 
     unitEvents{iNeuron} = {};
     unitEvents{iNeuron}.class = [];
@@ -75,5 +75,11 @@ for iNeuron = 1:numel(analysisConf.neurons)
     unitEvents{iNeuron}.maxz = max_z;
     unitEvents{iNeuron}.maxbin = max_bins;
     % this is where the event class is actually ranked/ordered using key
-    [~,unitEvents{iNeuron}.class] = sort(max_z,'descend');
+    [~,neuronClasses] = sort(max_z,'descend');
+    while ismember(-1,diff(neuronClasses))
+        [~,k] = ismember(-1,diff(neuronClasses));
+        neuronClasses(k+1) = [];
+    end
+        
+    unitEvents{iNeuron}.class = neuronClasses;
 end
