@@ -76,9 +76,9 @@ for iNeuron = 1:numel(analysisConf.neurons)
     unitEvents{iNeuron}.maxbin = max_bins;
     % this is where the event class is actually ranked/ordered using key
     [~,neuronClasses] = sort(max_z,'descend');
-    while ismember(-1,diff(neuronClasses))
-        [~,k] = ismember(-1,diff(neuronClasses));
-        neuronClasses(k+1) = [];
+    while any(ismember([-1 1],diff(neuronClasses)))
+        [v,k] = ismember([-1 1],diff(neuronClasses));
+        neuronClasses(min(k(v))+1) = [];
     end
         
     unitEvents{iNeuron}.class = neuronClasses;
