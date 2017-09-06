@@ -1,22 +1,28 @@
-% function [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents,RTmin,RTmax)
-% function [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents,MTmin,MTmax)
-% function [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents,pretonemin,pretonemax)
-function [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents)
-% just like classifyUnitToEvent but done in a loop with sub classes
-% [ ] classify correct and failed?
+function [unitEvents,all_zscores,unitClasses] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents,useTiming)
 binS = binMs / 1000;
 nBins_tWindow = [-tWindow:binS:tWindow];
 
 unitEvents = {};
 all_zscores = [];
+unitClasses = [];
 for iNeuron = 1:numel(analysisConf.neurons)
     neuronName = analysisConf.neurons{iNeuron};
     disp(['classifyUnitsToEvents: ',neuronName]);
     curTrials = all_trials{iNeuron};
-%     trialIdInfo = organizeTrialsById_pretone(curTrials,pretonemin,pretonemax);
-%     trialIdInfo = organizeTrialsById_MT(curTrials,MTmin,MTmax);
-%     trialIdInfo = organizeTrialsById_RT(curTrials,RTmin,RTmax);
-    trialIdInfo = organizeTrialsById(curTrials);
+    if isempty(useTiming)
+        trialIdInfo = organizeTrialsById(curTrials);
+    else
+        t_minmax = useTiming{2};
+        switch useTiming{1}
+            case 'RT'
+                trialIdInfo = organizeTrialsById_RT(curTrials,t_minmax(1),t_minmax(2));
+            case 'MT'
+                trialIdInfo = organizeTrialsById_MT(curTrials,t_minmax(1),t_minmax(2));
+            case 'pretone'
+                trialIdInfo = organizeTrialsById_pretone(curTrials,t_minmax(1),t_minmax(2));
+        end
+                
+    end 
 
     unitEvents{iNeuron} = {};
     unitEvents{iNeuron}.class = [];
@@ -82,4 +88,5 @@ for iNeuron = 1:numel(analysisConf.neurons)
     end
         
     unitEvents{iNeuron}.class = neuronClasses;
+    unitClasses(iNeuron) = neuronClasses(1);
 end

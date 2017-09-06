@@ -1,7 +1,10 @@
 use_dirSel = true;
 
-for iNeuron = 81%1:numel(analysisConf.neurons)
-    if ~dirSelNeurons(iNeuron) % only use
+for iNeuron = 1:numel(analysisConf.neurons)
+%     if ~dirSelNeurons(iNeuron) % only use
+%         continue;
+%     end
+    if isempty(unitEvents{iNeuron}.class) || unitEvents{iNeuron}.class(1) ~= 4
         continue;
     end
 
@@ -55,12 +58,12 @@ for iNeuron = 81%1:numel(analysisConf.neurons)
             ax = subplot(4,8,iEvent+(iRow*8-8));
             rasterData = tsPeths(:,iEvent);
             rasterData = rasterData(~cellfun('isempty',rasterData)); % remove empty rows (no spikes)
-            rasterData = makeRasterReadable(rasterData,75); % limit to 100 data points
+%             rasterData = makeRasterReadable(rasterData,75); % limit to 100 data points
             plotSpikeRaster(rasterData,'PlotType','scatter','AutoLabel',false); hold on;
             plot([0 0],[0 size(rasterData,1)],':','color','red'); % center line
             ln = plot([-1 1],[markContraTrials markContraTrials],'g--');
             
-            xlim([-1 1]);
+            xlim([-.05 .05]);
             set(ax,'FontSize',fontSize);
             
             if iEvent == iRow
@@ -90,6 +93,6 @@ for iNeuron = 81%1:numel(analysisConf.neurons)
         title(timingFields{iRow});
         xlim([0 1]);
     end
-    saveas(h1,fullfile('/Users/mattgaidica/Documents/Data/ChoiceTask/plotSpikeRastersSORTED',[neuronName,'_dirSel.jpg']));
+    saveas(h1,fullfile('/Users/mattgaidica/Documents/Data/ChoiceTask/plotSpikeRastersSORTED',[neuronName,'_centerOut50ms.jpg']));
     close(h1);
 end

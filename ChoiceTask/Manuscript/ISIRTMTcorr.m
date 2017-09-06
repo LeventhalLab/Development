@@ -1,22 +1,21 @@
 rows = 3;
-timingField = 'MT';
+timingField = 'RT';
 useEventPeth = 4;
 
 if true
     % % figuree(500,800);
     all_ttfs = [];
-    all_curMTz = [];
-    all_curMT = [];
-    all_cvcv = [];
+    all_curUseTime = [];
     neuronCount = 1;
     trialCount = 1;
+    allRasters = {};
     for iNeuron = 1:numel(analysisConf.neurons)
         neuronName = analysisConf.neurons{iNeuron};
 % %         if ~dirSelNeurons(iNeuron) %|| ~strcmp(analysisConf.sessionNames{81},analysisConf.sessionNames{iNeuron})
 % %             continue;
 % %         end
 
-        if isempty(unitEvents{iNeuron}.class) || unitEvents{iNeuron}.class(1) ~= 4%|| ~strcmp(analysisConf.sessionNames{81},analysisConf.sessionNames{iNeuron})
+        if isempty(unitEvents{iNeuron}.class) || unitEvents{iNeuron}.class(1) ~= 4
             continue;
         end
 %         disp(['Using neuron ',num2str(iNeuron),' - ',neuronName]);
@@ -57,7 +56,7 @@ if true
         % % plotSpikeRaster(contraPeths(:,4),'PlotType','scatter','AutoLabel',false);
         ttfs = [];
         meanISI = [];
-        curMTz = [];
+        curZ = [];
         for iTrial = 1:numel(useTimes)
             curTs = usePeths{iTrial,useEventPeth};
             curRefTs = usePeths{iTrial,1};
@@ -65,20 +64,15 @@ if true
             
             curRefMeanISI = mean(diff(curRefTs));
             curRefStdISI = std(diff(curRefTs));
-
-            curMT = useTimes(iTrial);
-            curMTTs = curTs(curTs >= 0 & curTs < .300);
-            if numel(curMTTs) < 5; continue; end;
+            curUseTime = useTimes(iTrial);
+            
+            curAllTimeTs = curTs(curTs >= 0 & curTs < curUseTime);
+            if numel(curAllTimeTs) < 4; continue; end;
 
             ttfs(iTrial) = mean(curTs(find(curTs >= 0,1)));
-            meanISI(iTrial) = mean(diff(curMTTs));
-            curMTz(iTrial) = mean(((1./diff(curMTTs)) -  (1/curRefMeanISI)) / (1/curRefStdISI)); % z FR
-            
-            all_cvcv(trialCount) = (mean((1./diff(curMTTs))) / std((1./diff(curMTTs)))) / (mean((1./diff(curRefTs))) / std((1./diff(curRefTs))));
-            all_curMTz(trialCount) = curMTz(iTrial);
-            all_curMT(trialCount) = curMT;
+            all_curUseTime(trialCount) = curUseTime;
             all_ttfs(trialCount) = ttfs(iTrial);
-            
+            allRasters{trialCount} = curTs;
             trialCount = trialCount + 1;
         end
 
@@ -103,19 +97,77 @@ if true
         neuronCount = neuronCount + 1;
     end
 end
-[all_curMT_sorted,k] = sort(all_curMT);
-% figure;
-% plot(all_curMTz(k))
-figure; 
-plot(all_curMT_sorted,smooth(all_cvcv(k),100));
-ylim([0 2]);
-title([timingField,'z']);
+[all_curUseTime_sorted,k] = sort(all_curUseTime);
+
+
+
 
 % figure;
-% plot(all_curMT_sorted,smooth(all_ttfs(k),50));
+% plot(all_curUseTime_sorted,smooth(all_ttfs(k),10));
 % xlim([0 1]);
 % title([timingField,' ttfs']);
+% 
+% [RHO,PVAL] = corr(all_curUseTime',all_ttfs')
+% [f,gof] = fit(all_curUseTime',all_ttfs','poly1')
 
+
+all_curUseTime_sorted_desc = fliplr(all_curUseTime_sorted);
+all_ttfs_sorted_desc = fliplr(all_ttfs(k));
+loopCount = 0;
+binCount = 1;
+time_bins = [];
+bin_curTime = [];
+time_ttfs = [];
+tally_ttfsVals = [];
+groupEvery = 100;
+for iCurTime = 1:numel(all_curUseTime_sorted_desc)
+    if loopCount == 100
+        time_bins(binCount) = all_curUseTime_sorted_desc(iCurTime);
+        time_ttfs(binCount) = mean(tally_ttfsVals);
+        bin_curTime(binCount) = iCurTime;
+        tally_ttfsVals = [];
+        binCount = binCount + 1;
+        loopCount = 0;
+    end
+    tally_ttfsVals = [tally_ttfsVals all_ttfs_sorted_desc(iCurTime)];
+    loopCount = loopCount + 1;
+end
+
+% figure;
+% plot(time_bins,time_ttfs);
+% title([timingField,' ttfs']);
+
+[RHO,PVAL] = corr(time_bins',time_ttfs')
+[f,gof] = fit(time_bins',time_ttfs','poly1')
+
+
+h = figuree(800,500);
+subplot(131);
+barh(all_curUseTime_sorted_desc,'FaceColor','k','EdgeColor','none');
+ylim([1 numel(all_curUseTime_sorted_desc)]);
+xlim([0 1]);
+xlabel('time (s)');
+title([timingField]);
+ylabel('trials');
+
+subplot(132);
+allRasters_sorted = allRasters(k);
+plotSpikeRaster(allRasters_sorted,'PlotType','scatter','AutoLabel',false); hold on;
+plot([0 0],[1 numel(all_ttfs_sorted_desc)],'r');
+xlim([-.5 .5]);
+xlabel('time (s)');
+title([timingField,' spikes']);
+
+subplot(133);
+barh(all_ttfs_sorted_desc,'FaceColor','k','EdgeColor','none');
+hold on;
+plot(time_ttfs,bin_curTime,'r','LineWidth',3);
+ylim([1 numel(all_curUseTime_sorted_desc)]);
+xlim([0 0.1]);
+xlabel('time (s)');
+title([timingField,' ttfs']);
+
+addNote(h,{'ttfs 100 bins','---',['corr = ',num2str(RHO)],['p = ',num2str(PVAL)],['R2 = ',num2str(gof.rsquare)]});
 
 % % binSteps = 0.3;
 % % maxBin = 1;
