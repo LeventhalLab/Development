@@ -1,4 +1,4 @@
-function [zMean,zStd] = zParams(ts,binMs)
+function [zMean,zStd] = zParams(ts,binMs,curTrials)
 % --- find MEAN & STD from random trials
 
 tWindow = 1;
