@@ -4,7 +4,7 @@ pVal = 0.95;
 
 if true
     useEvents = 1:7;
-    trialTypes = {'correctContra','correctIpsi'};
+    trialTypes = {'correct'};
 
     requireTrials = 5;
     nShuffle = 1000;
@@ -55,7 +55,7 @@ if true
                 curMDS = matrixDiffShuffle(:,iBin);
                 pEventDiff(iEvent,iBin) = numel(find(matrixDiff(iBin) > curMDS)) / nShuffle;
             end
-            if iEvent == 3 && sum(pEventDiff(iEvent,:) > pVal) > 8
+            if iEvent == 3 && sum(pEventDiff(iEvent,:) > pVal) > 4
                 dirSelNeurons(iNeuron) = 1;
             end
         end

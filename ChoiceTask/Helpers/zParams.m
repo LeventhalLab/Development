@@ -1,30 +1,48 @@
-function z = zParams(ts,binMs,trials,eventFieldnames)
+function z = zParams(ts,trials,eventFieldnames)
 % --- find MEAN & STD from random trials
-trialIdInfo = organizeTrialsById(trials);
+% trialIdInfo = organizeTrialsById(trials);
+
+dodebug = false;
+
+binMs = 20;
 tWindow = 1;
+nSmooth = 5;
 tsPeths = eventsPeth(trials,ts,tWindow,eventFieldnames);
 
-tWindow = 1;
 binS = binMs / 1000;
 histEdges = [-tWindow:binS:tWindow];
 
-histogramBins = [];
-for iTrial = 1:size(tsPeths,1)
-    curTs = tsPeths{iTrial,1};
-    histogramBins(iTrial,:) = histcounts(curTs,histEdges);
+if dodebug
+    figuree(300,800);
 end
 
-z = struct;
-z.FRsession = numel(ts) / (max(ts) - min(ts));
-z.binMeanWindow = mean(histogramBins);
-z.binStdWindow = std(histogramBins);
-z.FRMeanWindow = z.binMeanWindow / binS;
-z.FRStdWindow = z.binStdWindow / binS;
-z.binMean = mean(z.binMeanWindow);
-z.binStd = mean(z.binStdWindow);
-z.FRmean = z.binMean / binS;
-z.FRstd = z.binStd / binS;
+for iEvent = 1:7
 
+    histogramBins = [];
+    for iTrial = 1:size(tsPeths,1)
+        curTs = tsPeths{iTrial,iEvent};
+        histogramBins(iTrial,:) = smooth(histcounts(curTs,histEdges),nSmooth);
+    end
+
+    z = struct;
+    z.FRsession = numel(ts) / (max(ts) - min(ts));
+    z.binMeanWindow = mean(histogramBins);
+    z.binStdWindow = std(histogramBins);
+    z.FRMeanWindow = z.binMeanWindow / binS;
+    z.FRStdWindow = z.binStdWindow / binS;
+    z.binMean = mean(z.binMeanWindow);
+    z.binStd = mean(z.binStdWindow);
+    z.FRmean = z.binMean / binS;
+    z.FRstd = z.binStd / binS;
+    z.CV = z.FRmean / z.FRstd;
+
+    if dodebug
+        z
+        subplot(7,1,iEvent);
+        errorbar(z.FRMeanWindow,z.FRStdWindow);
+        ylim([0 70]);
+    end
+end
 % randon sample method
 % % nSamples = 500;
 % % tsPeths = {};

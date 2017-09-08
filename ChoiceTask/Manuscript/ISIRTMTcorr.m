@@ -9,8 +9,8 @@ areaUnderS = .200; % or within MT window?
 tWindow = 1;
 nSmooth = 3;
 
-useEventPeth = 2;
-useNeuronClasses = [2];
+useEventPeth = 4;
+useNeuronClasses = [4];
 plotBySubject = false;
 
 if plotBySubject
@@ -109,12 +109,11 @@ if doSetup
                     useTimes = allTimes;
             end
 
-            meanISI = [];
             curZ = [];
             for iTrial = 1:numel(useTimes)
                 curTs = usePeths{iTrial,useEventPeth};
                 curRefTs = usePeths{iTrial,1};
-                if numel(curTs) < 5 || numel(curRefTs) < 5; continue; end;
+                if numel(curTs) < 3; continue; end;
                 
                 counts = histcounts(curTs,nBins_tWindow);
                 curZ = smooth((counts - z.binMean) / z.binStd,3);
@@ -122,8 +121,6 @@ if doSetup
                 
                 curUseTime = useTimes(iTrial);
 
-                curAllTimeTs = curTs(curTs >= 0 & curTs < curUseTime);
-                if numel(curAllTimeTs) < 4; continue; end;
 
                 all_curUseTime(trialCount) = curUseTime;
                 allRasters{allSubject_trialCount} = curTs;
@@ -153,11 +150,8 @@ if doSetup
     end
 end
 
-figure;
-plot(all_subjectCount(k),all_curUseTime_sorted,'.');
-
-% % [RHO,PVAL] = corr(time_bins',time_ttfs')
-% % [f,gof] = fit(time_bins',time_ttfs','poly1')
+% figure;
+% plot(all_subjectCount(k),all_curUseTime_sorted,'.');
 
 %  RT
 h = figuree(1200,800);
@@ -170,7 +164,7 @@ set(gca,'YDir','reverse');
 ylim([1 numel(all_curUseTime_sorted)]);
 xlim([0 1]);
 xlabel('time (s)');
-title({[timingField,' ',eventFieldnames{useEventPeth}],['useNeuronClasses: ',num2str(useNeuronClasses)],[num2str(binMs),'ms bins, ',num2str(nMeanBins),' brackets'],['trial filter: ',limitToSide],['only dirSel? ',dirSelNote]});
+title({[timingField,' where t0 ~> ',eventFieldnames{useEventPeth}],['units from: ',strjoin(eventFieldnames(useNeuronClasses),',')],[num2str(binMs),'ms bins, ',num2str(nMeanBins),' brackets'],['trial filter: ',limitToSide],['only dirSel? ',dirSelNote]});
 ylabel('trials');
 grid on;
 
