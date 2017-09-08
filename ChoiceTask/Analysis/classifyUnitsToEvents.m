@@ -30,10 +30,10 @@ for iNeuron = 1:numel(analysisConf.neurons)
     unitEvents{iNeuron}.maxbin = [];
 
     ts = all_ts{iNeuron};
-    [zMean,zStd] = zParams(ts,binMs);
+    z = zParams(ts,binMs,curTrials,eventFieldnames);
     
     % skip if no counts, can't determine mean/std
-    if zStd == 0 || zMean == 0
+    if z.binStd == 0 || z.binMean == 0
         continue;
     end
     
@@ -53,7 +53,7 @@ for iNeuron = 1:numel(analysisConf.neurons)
         ts_eventX = [tsPeths{:,iEvent}];
         hCounts = histcounts(ts_eventX,nBins_tWindow);
         % just set z=0 if not using events; works for now
-        zscore(iEvent,:) = ((hCounts / size(tsPeths,1)) - zMean) / zStd;
+        zscore(iEvent,:) = ((hCounts / size(tsPeths,1)) - z.binMean) / z.binStd;
         if ismember(curEvent,useEvents)
             zscore_filt(iEvent,:) = zscore(iEvent,:);
         else

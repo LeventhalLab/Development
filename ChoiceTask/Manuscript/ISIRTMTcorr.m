@@ -2,12 +2,15 @@ doSetup = true;
 timingField = 'RT';
 limitToSide = 'N/A';
 useDirSel = false;
-useCenterOut = true;
-nMeanBins = 20;
-binMs = 50;
+nMeanBins = 10;
+binMs = 20;
+requireZ = 0.75;
 areaUnderS = .200; % or within MT window?
+tWindow = 1;
+nSmooth = 3;
 
-useEventPeth = 3;
+useEventPeth = 2;
+useNeuronClasses = [2];
 plotBySubject = false;
 
 if plotBySubject
@@ -17,7 +20,6 @@ else
 end
 
 if doSetup
-    tWindow = 1;
     binS = binMs / 1000;
     nBins_tWindow = [-tWindow:binS:tWindow];
     all_curUseTime_sorted = [];
@@ -25,6 +27,16 @@ if doSetup
     k = [];
     allRasters = {};
     all_z = [];
+    
+    sessionNames = {};
+    sessionCount = 0;
+    lastSession = '';
+    all_sessionCount = [];
+    
+    subjectNames = {};
+    subjectCount = 0;
+    lastSubject = '';
+    all_subjectCount = [];
     for iSubject = 1:nSubjects
         all_curUseTime = [];
         trialCount = 1;
@@ -35,17 +47,24 @@ if doSetup
             end
 
             neuronName = analysisConf.neurons{iNeuron};
+            sessionName = analysisConf.sessionConfs{iNeuron}.sessions__name;
+            subjectName = analysisConf.sessionConfs{iNeuron}.subjects__name;
             dirSelNote = 'NO';
-            if useDirSel && ~dirSelNeurons(iNeuron) %|| ~strcmp(analysisConf.sessionNames{81},analysisConf.sessionNames{iNeuron})
+            if useDirSel && ~dirSelNeurons(iNeuron)
                 dirSelNote = 'YES';
                 continue;
             end
             
-            centerOutNote = 'NO';
-            if useCenterOut && unitClasses(iNeuron) ~= useEventPeth
-                centerOutNote = 'YES';
+            if ~ismember(unitClasses(iNeuron),useNeuronClasses)
                 continue;
             end
+            
+            if unitEvents{iNeuron}.maxz(unitClasses(iNeuron)) <= requireZ
+                continue;
+            end
+            
+            unitEvents{iNeuron}.maxz(unitClasses(iNeuron))
+            unitClasses(iNeuron)
             disp(['Using neuron ',num2str(iNeuron),' - ',neuronName]);
 
             curTrials = all_trials{iNeuron};
@@ -75,7 +94,7 @@ if doSetup
 
             tsPeths = {};
             ts = all_ts{iNeuron};
-            [zMean,zStd] = zParams(ts,binMs);
+            z = zParams(ts,binMs,curTrials,eventFieldnames);
             tsPeths = eventsPeth(curTrials(useTrials),ts,tWindow,eventFieldnames);
             
             switch limitToSide
@@ -98,7 +117,7 @@ if doSetup
                 if numel(curTs) < 5 || numel(curRefTs) < 5; continue; end;
                 
                 counts = histcounts(curTs,nBins_tWindow);
-                curZ = smooth((counts - zMean) / zStd,3);
+                curZ = smooth((counts - z.binMean) / z.binStd,3);
                 all_z(allSubject_trialCount,:) = curZ;
                 
                 curUseTime = useTimes(iTrial);
@@ -108,6 +127,21 @@ if doSetup
 
                 all_curUseTime(trialCount) = curUseTime;
                 allRasters{allSubject_trialCount} = curTs;
+                
+                if ~strcmp(lastSession,sessionName)
+                    sessionCount = sessionCount + 1;
+                    lastSession = sessionName;
+                end
+                sessionNames{allSubject_trialCount} = sessionName;
+                all_sessionCount(allSubject_trialCount) = sessionCount;
+                
+                if ~strcmp(lastSubject,subjectName)
+                    subjectCount = subjectCount + 1;
+                    lastSubject = subjectName;
+                end
+                subjectNames{allSubject_trialCount} = subjectName;
+                all_subjectCount(allSubject_trialCount) = subjectCount;
+                
                 trialCount = trialCount + 1;
                 allSubject_trialCount = allSubject_trialCount + 1;
             end
@@ -118,6 +152,9 @@ if doSetup
         k = [k ks];
     end
 end
+
+figure;
+plot(all_subjectCount(k),all_curUseTime_sorted,'.');
 
 % % [RHO,PVAL] = corr(time_bins',time_ttfs')
 % % [f,gof] = fit(time_bins',time_ttfs','poly1')
@@ -133,7 +170,7 @@ set(gca,'YDir','reverse');
 ylim([1 numel(all_curUseTime_sorted)]);
 xlim([0 1]);
 xlabel('time (s)');
-title({[[timingField],' ',analysisName],[num2str(binMs),'ms bins, ',num2str(nMeanBins),' brackets'],['trial filter: ',limitToSide],['only dirSel? ',dirSelNote],['only centerOut? ',centerOutNote]});
+title({[timingField,' ',eventFieldnames{useEventPeth}],['useNeuronClasses: ',num2str(useNeuronClasses)],[num2str(binMs),'ms bins, ',num2str(nMeanBins),' brackets'],['trial filter: ',limitToSide],['only dirSel? ',dirSelNote]});
 ylabel('trials');
 grid on;
 
@@ -142,14 +179,14 @@ subplot(rows,cols,2);
 allRasters_sorted = allRasters(k);
 plotSpikeRaster(allRasters_sorted,'PlotType','scatter','AutoLabel',false); hold on;
 plot([0 0],[1 numel(allRasters_sorted)],'r:');
-xlimVals = [-1 1];
+xlimVals = [-tWindow tWindow];
 xlim(xlimVals);
 xlabel('time (s)');
 title([timingField,' spikes']);
 
 % make mean z-score bins
 meanBins = floor(linspace(1,numel(allRasters_sorted),nMeanBins+1));
-makeyStart = floor(linspace(500,numel(allRasters_sorted)-300,nMeanBins));
+makeyStart = floor(linspace((numel(allRasters_sorted)*.1),numel(allRasters_sorted)-(numel(allRasters_sorted)*.05),nMeanBins));
 meanColors = cool(numel(meanBins)-1);
 all_z_sorted = all_z(k,:);
 mean_z = [];
@@ -167,7 +204,7 @@ for iBin = 1:numel(meanBins)-1
     areaIdxs = floor(numel(tMean)/2):find(tMean <= areaUnderS,1,'last');
     area_z(iBin) = trapz(mean_z(iBin,areaIdxs));
     % plot
-    makey = (makeyStart(iBin) + mean_z(iBin,:) * -15); % -1 for orientation
+    makey = (makeyStart(iBin) + mean_z(iBin,:) * -(numel(allRasters_sorted)*.1)); % -1 for orientation
     plot(tMean,makey,'linewidth',1.5,'color',[meanColors(iBin,:),0.9]);
 end
 
@@ -176,8 +213,8 @@ subplot(rows,cols,3);
 imagesc(all_z_sorted);
 colormap(jet);
 xticks([1 floor(size(all_z_sorted,2)/2) size(all_z_sorted,2)]);
-xticklabels({'-1','0','1'});
-caxis([-10 60]);
+xticklabels({num2str(-tWindow),'0',num2str(tWindow)});
+caxis([-1 5]);
 title([timingField,' z-score']);
 xlabel('time (s)');
 colorbar;
@@ -186,7 +223,7 @@ maxIdxs = floor(size(all_z_sorted,2)/2):floor(size(all_z_sorted,2)/2)+floor(size
 minIdxs = floor(size(all_z_sorted,2)/8):floor(size(all_z_sorted,2)/2);
 
 % scatter all max z-scores
-markerSize = 7;
+markerSize = 3;
 subplot(rows,cols,4);
 % yyaxis left;
 lns = [];
@@ -195,15 +232,17 @@ lns = [];
 lns(1) = plot(all_curUseTime_sorted,maxv,'g.','MarkerSize',markerSize);
 hold on;
 lns(2) = plot(all_curUseTime_sorted,minv,'r.','MarkerSize',markerSize);
-xlim([0 1]);
-ylim([-40 120]);
+% ylim([-40 120]);
 ylabel('trial z-score');
 xlabel('time (s)');
 legend(lns,{'max z ~t0','min z < t0'});
 grid on;
 
 yyaxis right;
-lns(3) = plot(all_curUseTime_sorted,trapz(all_z_sorted(:,areaIdxs)'),'b.','MarkerSize',markerSize);
+lns(3) = plot(all_curUseTime_sorted+1,trapz(all_z_sorted(:,areaIdxs)'),'b.','MarkerSize',markerSize);
+xlim([0 2]);
+xticks([0 1 2]);
+xticklabels({'0','1/0','1'});
 
 [RHO_zxt,PVAL_zxt] = corr(all_curUseTime_sorted',maxv');
 [RHO_axt,PVAL_axt] = corr(all_curUseTime_sorted',trapz(all_z_sorted(:,areaIdxs)')');
@@ -239,7 +278,7 @@ lns(2) = plot(all_curUseTime_sorted(meanCentersIdx),minv,'r.','MarkerSize',marke
 
 ylabel('min max z');
 xlim([0 1]);
-ylim([-10 50]);
+% ylim([-10 50]);
 xlabel('time (s)');
 grid on;
 
@@ -270,17 +309,19 @@ legend(lns,{'max z ~t0','min z < t0',['z area <= ',num2str(areaUnderS)]});
 subplot(rows,cols,6);
 legendText = {};
 lns = [];
+
 for ii = 1:size(mean_z,1)
-    lns(ii) = plot(mean_z(ii,:),'color',meanColors(ii,:));
+    lns(ii) = plot(smooth(mean_z(ii,:),nSmooth),'color',meanColors(ii,:));
     hold on;
     legendText{ii} = [num2str(all_curUseTime_sorted(meanCentersIdx(ii))),' ms'];
 end
 legend(lns,legendText,'Location','eastoutside');
 xlim([1 size(all_z_sorted,2)]);
 xticks([1 floor(size(all_z_sorted,2)/2) size(all_z_sorted,2)]);
-xticklabels({'-1','0','1'});
+xticklabels({num2str(-tWindow),'0',num2str(tWindow)});
 xlabel('time (s)');
 grid on;
+ylim([-1 2])
 
 
 % % figuree(800,800);
