@@ -25,14 +25,8 @@ end
 
 z = struct;
 z.FRsession = numel(ts) / (max(ts) - min(ts));
-z.binMeanWindow = mean(histogramBins);
-z.binStdWindow = std(histogramBins);
-z.FRMeanWindow = z.binMeanWindow / binS;
-z.FRStdWindow = z.binStdWindow / binS;
-z.binMean = mean(z.binMeanWindow);
-z.binStd = mean(z.binStdWindow);
-z.FRmean = z.binMean / binS;
-z.FRstd = z.binStd / binS;
+z.FRmean = mean(mean(histogramBins)) / binS;
+z.FRstd = mean(std(histogramBins)) / binS;
 z.CV = z.FRmean / z.FRstd;
 
 if dodebug

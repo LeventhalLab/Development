@@ -1,12 +1,12 @@
 % % unitEvents = corr_unitEvents;
 % % all_zscores = corr_all_zscores;
-trialTypes = {'correctContra','correctIpsi'};
-useEvents = 1:7;
-tWindow = 1;
-[unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,ts_all,eventFieldnames,tWindow,binMs,trialTypes,useEvents);
+% trialTypes = {'correctContra','correctIpsi'};
+% useEvents = 1:7;
+% tWindow = 1;
+% [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,ts_all,eventFieldnames,tWindow,binMs,trialTypes,useEvents);
 imsc = [];
-% useSubjects = [88,117,142,154,182];
-useSubjects = [182];
+useSubjects = [88,117,142,154,182];
+% useSubjects = [182];
 
 % compile event classes
 neuronClasses = {};
@@ -49,15 +49,15 @@ for iEvent = 1:numel(eventFieldnames)
     subplot(1,numel(eventFieldnames),iEvent);
     imagesc(squeeze(all_zscores(sorted_neuronIds,iEvent,:)));
 %     imagesc(squeeze(all_zscores(:,iEvent,:))); % in session order
-    caxis([-3 8]);
-    xlim([1 40]);
-    xticks([1 20 40]);
+    caxis([-1 3]);
+    xlim([1 size(all_zscores,3)]);
+    xticks([1 round(size(all_zscores,3)/2) size(all_zscores,3)]);
     xticklabels({'-1','0','1'});
     yticks([1 numel(analysisConf.neurons)]);
     colormap jet;
     title(['corr_',eventFieldnames{iEvent}],'interpreter','none');
     hold on;
-    plot([20 20],[1 numel(analysisConf.neurons)],'k--');
+    plot([round(size(all_zscores,3)/2) round(size(all_zscores,3)/2)],[1 numel(analysisConf.neurons)],'k--');
     markerRange = markerLocs(iEvent)+1:markerLocs(iEvent+1);
     plot(ones(numel(markerRange),1),markerRange,'k.','MarkerSize',20);
 %     markerRange = markerLocs(iEvent)+1:markerLocs(iEvent+1);

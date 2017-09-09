@@ -4,10 +4,10 @@ limitToSide = 'N/A';
 useDirSel = false;
 nMeanBins = 10;
 binMs = 20;
-requireZ = 0.75;
+requireZ = 0.0;
 areaUnderS = .200; % or within MT window?
 tWindow = 1;
-nSmooth = 3;
+nSmoothz = 1;
 
 useEventPeth = 4;
 useNeuronClasses = [4];
@@ -63,9 +63,7 @@ if doSetup
                 continue;
             end
             
-            unitEvents{iNeuron}.maxz(unitClasses(iNeuron))
-            unitClasses(iNeuron)
-            disp(['Using neuron ',num2str(iNeuron),' - ',neuronName]);
+            disp(['Using neuron ',num2str(iNeuron),' (class=',num2str(unitClasses(iNeuron)),', maxz=',num2str(unitEvents{iNeuron}.maxz(unitClasses(iNeuron))),') ',neuronName]);
 
             curTrials = all_trials{iNeuron};
             [useTrials,allTimes] = sortTrialsBy(curTrials,timingField);
@@ -94,7 +92,9 @@ if doSetup
 
             tsPeths = {};
             ts = all_ts{iNeuron};
-            z = zParams(ts,binMs,curTrials,eventFieldnames);
+            z = zParams(ts,curTrials);
+            zBinMean = z.FRmean * (binMs/1000);
+            zBinStd = z.FRstd * (binMs/1000);
             tsPeths = eventsPeth(curTrials(useTrials),ts,tWindow,eventFieldnames);
             
             switch limitToSide
@@ -116,11 +116,10 @@ if doSetup
                 if numel(curTs) < 3; continue; end;
                 
                 counts = histcounts(curTs,nBins_tWindow);
-                curZ = smooth((counts - z.binMean) / z.binStd,3);
+                curZ = smooth((counts - zBinMean) / zBinStd,3);
                 all_z(allSubject_trialCount,:) = curZ;
                 
                 curUseTime = useTimes(iTrial);
-
 
                 all_curUseTime(trialCount) = curUseTime;
                 allRasters{allSubject_trialCount} = curTs;
@@ -162,15 +161,34 @@ subplot(rows,cols,1);
 plot(all_curUseTime_sorted,1:numel(all_curUseTime_sorted),'k');
 set(gca,'YDir','reverse');
 ylim([1 numel(all_curUseTime_sorted)]);
-xlim([0 1]);
+xlim([0 1.5]);
+xticks([0 0.25 0.5 0.75 1.05 1.35]);
+xticklabels({'0','0.25','0.5','0.75','Subjects','Sessions'});
 xlabel('time (s)');
 title({[timingField,' where t0 ~> ',eventFieldnames{useEventPeth}],['units from: ',strjoin(eventFieldnames(useNeuronClasses),',')],[num2str(binMs),'ms bins, ',num2str(nMeanBins),' brackets'],['trial filter: ',limitToSide],['only dirSel? ',dirSelNote]});
 ylabel('trials');
 grid on;
+hold on;
+
+all_sessionCount_sorted = all_sessionCount(k);
+all_subjectCount_sorted = all_subjectCount(k);
+uniqueSessions = numel(unique(all_sessionCount));
+uniqueSubjects = numel(unique(all_subjectCount));
+sessionSpan = linspace(1.2,1.5,uniqueSessions);
+subjectSpan = linspace(1,1.1,uniqueSubjects);
+sessionColors = jet(uniqueSessions);
+subjectColors = lines(uniqueSubjects);
+for iTrial = 1:numel(all_curUseTime_sorted)
+    curTime = all_curUseTime_sorted(iTrial);
+    plot(sessionSpan(all_sessionCount_sorted(iTrial)),iTrial,'.','markerSize',1,'color',sessionColors(all_sessionCount_sorted(iTrial),:));
+    plot(subjectSpan(all_subjectCount_sorted(iTrial)),iTrial,'.','markerSize',1,'color',subjectColors(all_subjectCount_sorted(iTrial),:));
+end
+
 
 % spike raster
 subplot(rows,cols,2);
 allRasters_sorted = allRasters(k);
+allRasters_sorted = makeRasterReadable(allRasters_sorted',30);
 plotSpikeRaster(allRasters_sorted,'PlotType','scatter','AutoLabel',false); hold on;
 plot([0 0],[1 numel(allRasters_sorted)],'r:');
 xlimVals = [-tWindow tWindow];
@@ -305,7 +323,7 @@ legendText = {};
 lns = [];
 
 for ii = 1:size(mean_z,1)
-    lns(ii) = plot(smooth(mean_z(ii,:),nSmooth),'color',meanColors(ii,:));
+    lns(ii) = plot(smooth(mean_z(ii,:),nSmoothz),'color',meanColors(ii,:));
     hold on;
     legendText{ii} = [num2str(all_curUseTime_sorted(meanCentersIdx(ii))),' ms'];
 end
@@ -316,7 +334,6 @@ xticklabels({num2str(-tWindow),'0',num2str(tWindow)});
 xlabel('time (s)');
 grid on;
 ylim([-1 2])
-
 
 % % figuree(800,800);
 % % colors = jet(size(all_z_sorted,1));
