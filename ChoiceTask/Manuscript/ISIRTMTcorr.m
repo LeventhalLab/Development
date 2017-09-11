@@ -39,6 +39,8 @@ if doSetup
     all_subjectCount = [];
     for iSubject = 1:nSubjects
         all_curUseTime = [];
+        all_burstsLTS = {};
+        all_burstsPoisson = {};
         trialCount = 1;
         useSubject = analysisConf.subjects{iSubject};
         for iNeuron = 1:numel(analysisConf.neurons)
@@ -92,10 +94,13 @@ if doSetup
 
             tsPeths = {};
             ts = all_ts{iNeuron};
+            [tsISI,tsLTS,tsPoisson] = tsBurstFilters(ts);
             z = zParams(ts,curTrials);
             zBinMean = z.FRmean * (binMs/1000);
             zBinStd = z.FRstd * (binMs/1000);
             tsPeths = eventsPeth(curTrials(useTrials),ts,tWindow,eventFieldnames);
+            tsPeths_LTS = eventsPeth(curTrials(useTrials),tsLTS,tWindow,eventFieldnames);
+            tsPeths_Poisson = eventsPeth(curTrials(useTrials),tsPoisson,tWindow,eventFieldnames);
             
             switch limitToSide
                 case 'contra'
@@ -137,6 +142,10 @@ if doSetup
                 end
                 subjectNames{allSubject_trialCount} = subjectName;
                 all_subjectCount(allSubject_trialCount) = subjectCount;
+                
+                % !! if peth isempty() fill with NaN for raster?
+                all_burstsLTS{allSubject_trialCount} = tsPeths_LTS{iTrial,useEventPeth};
+                all_burstsPoisson{allSubject_trialCount} = tsPeths_Poisson{iTrial,useEventPeth};
                 
                 trialCount = trialCount + 1;
                 allSubject_trialCount = allSubject_trialCount + 1;
@@ -333,34 +342,80 @@ xticks([1 floor(size(all_z_sorted,2)/2) size(all_z_sorted,2)]);
 xticklabels({num2str(-tWindow),'0',num2str(tWindow)});
 xlabel('time (s)');
 grid on;
-ylim([-1 2])
+ylim([-1 2]);
 
-% % figuree(800,800);
-% % colors = jet(size(all_z_sorted,1));
-% % tallminv = [];
-% % tallmaxv = [];
-% % for ii = 1:size(all_z_sorted,1)
-% %     [tminv,tmink] = min(all_z_sorted(ii,minIdxs));
-% %     [tmaxv,tmaxk] = max(all_z_sorted(ii,maxIdxs));
-% % 
-% %     tallminv = [tallminv tminv];
-% %     tallmaxv = [tallmaxv tmaxv];
-% %     plot(all_z_sorted(ii,:),'color',[colors(ii,:) .07]);
-% %     hold on;
-% %     plot([tmink+minIdxs(1)-1,tmaxk+maxIdxs(1)-1],[all_z_sorted(ii,tmink+minIdxs(1)-1),all_z_sorted(ii,tmaxk+maxIdxs(1)-1)],'color',[.5 .5 .5 .1]);
-% %     plot(tmink+minIdxs(1)-1,all_z_sorted(ii,tmink+minIdxs(1)-1),'.','color','r');
-% %     plot(tmaxk+maxIdxs(1)-1,all_z_sorted(ii,tmaxk+maxIdxs(1)-1),'.','color','g');
-% % %     drawnow;
-% % 
-% % end
-% % xlim([1 size(all_z_sorted,2)]);
-% % grid on;
-% % title({'all times sorted+colored',['trial filter: ',limitToSide],['only dirSel? ',dirSelNote],['only centerOut? ',centerOutNote],[timingField]});
+% experimental
+t = all_burstsPoisson(k);
+for iTrial = 1:size(all_burstsPoisson,2)
+    spikevect = t{iTrial};
+    if isempty(spikevect)
+        t{iTrial} = NaN;
+    end
+end
+
+% all ts and burst rasters
+figuree(300,600);
+subplot(211);
+plotSpikeRaster(t,'PlotType','scatter','AutoLabel',false);
+hold on;
+plot(all_curUseTime_sorted,1:numel(all_curUseTime_sorted),'r','linewidth',1);
+plot([0 0],[1 numel(all_curUseTime_sorted)],'r:','linewidth',1);
+title({'centerOut event/units','Poisson Timestamps RT'});
+
+subplot(212)
+allRasters_sorted = allRasters(k);
+allRasters_sorted = makeRasterReadable(allRasters_sorted',2);
+plotSpikeRaster(allRasters_sorted,'PlotType','scatter','AutoLabel',false); hold on;
+hold on;
+plot(all_curUseTime_sorted,1:numel(all_curUseTime_sorted),'r','linewidth',1);
+plot([0 0],[1 numel(all_curUseTime_sorted)],'r:','linewidth',1);
+xlimVals = [-tWindow tWindow];
+xlim(xlimVals);
+xlabel('time (s)');
+title({'centerOut event/units','All Timestamps RT (reduced density)'});
+
+burstCount = [];
+for iTrial = 1:size(t,2)
+    spikevect = t{iTrial};
+    burstCount(iTrial) = numel(find(spikevect > -0.05 & spikevect <= all_curUseTime_sorted(iTrial)));
+end
+
+% all brackets as colored lines
+figure;
+mean_burstHist = [];
+binEdges = linspace(-1,1,41);
+nSmooth = 3;
+for iBin = 1:numel(meanBins)-1
+    curTsBurst = [t{meanBins(iBin):meanBins(iBin+1)}];
+    mean_burstHist(iBin,:) = histcounts(curTsBurst,binEdges);
+    plot(binEdges(2:end),smooth(mean_burstHist(iBin,:),nSmooth),'color',meanColors(iBin,:),'lineWidth',1); hold on;
+    mean_burst(iBin) = mean(burstCount(meanBins(iBin):meanBins(iBin+1)));
+end
 
 
-% h = figure;
-% [f,gof] = fit(minv',maxv','poly1');
-% [RHO,PVAL] = corr(minv',maxv');
-% plot(f,minv',maxv');
-% addNote(h,{['r2: ',num2str(gof.rsquare)],['corr: ',num2str(RHO)],['p: ',num2str(PVAL)]});
-% title({'max z vs. min z',['trial filter: ',limitToSide],['only dirSel? ',dirSelNote],['only centerOut? ',centerOutNote],[timingField]});
+% burst occurence with z-score lines low/high RT
+nSmooth = 1;
+lns = [];
+figuree(500,400);
+
+yyaxis left;
+lns(1) = bar(binEdges(2:end),smooth(mean(mean_burstHist(1:7,:)),nSmooth),'facecolor','r','edgecolor','none','facealpha',.3);
+hold on;
+lns(2) = bar(binEdges(2:end),smooth(mean(mean_burstHist(8:10,:)),nSmooth),'facecolor','k','edgecolor','none','facealpha',.3);
+xlim([-1 1]);
+xlabel('time (s)');
+ylabel('Poisson bursts');
+title('Poisson bursts vs. Low/High RT');
+grid on;
+
+yyaxis right;
+lns = [];
+lns(3) = plot(nBins_tWindow(2:end),smooth(mean(mean_z(1:7,:)),nSmooth),'r-','lineWidth',2);
+hold on
+lns(4) = plot(nBins_tWindow(2:end),smooth(mean(mean_z(8:10,:)),nSmooth),'k-','lineWidth',2);
+xlim([-1 1])
+grid on;
+ylabel('bracketed z-score');
+
+legend('BURST Low RT (<200ms)','BURST High RT','Z Low RT (<200ms)','Z High RT','location','northwest');
+legend('boxoff');
