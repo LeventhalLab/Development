@@ -1,10 +1,14 @@
 % the fraction of units whose activity is significantly different between
 % ipsi/contra trials
-pVal = 0.99;
+pVal = 0.95;
 
-if true
+if false
     useEvents = 1:7;
     trialTypes = {'correct'};
+    
+    binMs = 50;
+    binS = binMs / 1000;
+    nBins_tWindow = [-tWindow:binS:tWindow];
 
     requireTrials = 5;
     nShuffle = 1000;
@@ -67,7 +71,7 @@ dirSelNeurons = logical(dirSelNeurons);
 
 % see ipsiContraShuffle.m
 useEvents = [1:7];
-figuree(1200,400);
+figuree(1050,400);
 for iEvent = 1:numel(useEvents)
     subplot(1,numel(useEvents),iEvent)
     eventBins = zeros(1,size(pNeuronDiff,3));
@@ -86,9 +90,12 @@ for iEvent = 1:numel(useEvents)
     xlim([1 size(all_zscores,3)]);
     xticks([1 round(size(all_zscores,3)/2) size(all_zscores,3)]);
     xticklabels({'-1','0','1'});
+    xlabel('time (s)');
     grid on;
-    xlabel(eventFieldnames{iEvent});
+    title(eventFieldnames{iEvent});
     if iEvent == 1
-        ylabel('Fraction of units < 0.05');
+        ylabel('Fraction of units p < .05');
     end
+    set(gca,'fontSize',16);
 end
+set(gcf,'color','w');

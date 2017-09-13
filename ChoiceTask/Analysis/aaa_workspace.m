@@ -1,6 +1,6 @@
 eventFieldnames = {'cueOn';'centerIn';'tone';'centerOut';'sideIn';'sideOut';'foodRetrieval'};
 tWindow = 1;
-binMs = 20;
+binMs = 50;
 trialTypes = {'correct'};
 useEvents = 1:7;
 useTiming = {};

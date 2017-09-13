@@ -1,10 +1,10 @@
-function [unitEvents,all_zscores,unitClasses] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents,useTiming)
+function [unitEvents,all_zscores,unitClass] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents,useTiming)
 binS = binMs / 1000;
 nBins_tWindow = [-tWindow:binS:tWindow];
 
 unitEvents = {};
 all_zscores = [];
-unitClasses = [];
+unitClass = [];
 for iNeuron = 1:numel(analysisConf.neurons)
     neuronName = analysisConf.neurons{iNeuron};
     disp(['classifyUnitsToEvents: ',neuronName]);
@@ -75,5 +75,5 @@ for iNeuron = 1:numel(analysisConf.neurons)
     end
         
     unitEvents{iNeuron}.class = neuronClasses;
-    unitClasses(iNeuron) = neuronClasses(1);
+    unitClass(iNeuron) = neuronClasses(1);
 end

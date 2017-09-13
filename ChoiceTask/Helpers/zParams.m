@@ -5,7 +5,7 @@ function z = zParams(ts,trials)
 dodebug = false;
 
 eventFieldnames = {'cueOn';'centerIn';'tone';'centerOut';'sideIn';'sideOut';'foodRetrieval'};
-binMs = 20;
+binMs = 50; % probably should use 20
 tWindow = 2;
 nSmooth = 5;
 tsPeths = eventsPeth(trials,ts,tWindow,eventFieldnames);
