@@ -1,6 +1,6 @@
 doSetup = true;
 timingField = 'MT';
-limitToSide = 'contra';
+limitToSide = 'N/A';
 useDirSel = true;
 nMeanBins = 10;
 binMs = 20;
@@ -21,7 +21,7 @@ end
 
 if doSetup
     binS = binMs / 1000;
-    nBins_tWindow = [-tWindow:binS:tWindow];
+    binEdges = [-tWindow:binS:tWindow];
     all_curUseTime_sorted = [];
     allSubject_trialCount = 1;
     k = [];
@@ -127,7 +127,7 @@ if doSetup
                 curRefTs = usePeths{iTrial,1};
                 if numel(curTs) < 3; continue; end;
                 
-                counts = histcounts(curTs,nBins_tWindow);
+                counts = histcounts(curTs,binEdges);
                 curZ = smooth((counts - zBinMean) / zBinStd,3);
                 all_z(allSubject_trialCount,:) = curZ;
                 
@@ -465,9 +465,9 @@ grid on;
 
 yyaxis right;
 lns = [];
-lns(3) = plot(nBins_tWindow(2:end),smooth(mean(mean_z(1:7,:)),nSmooth),'-','color',meanColors(1,:),'lineWidth',2);
+lns(3) = plot(binEdges(2:end),smooth(mean(mean_z(1:7,:)),nSmooth),'-','color',meanColors(1,:),'lineWidth',2);
 hold on
-lns(4) = plot(nBins_tWindow(2:end),smooth(mean(mean_z(8:10,:)),nSmooth),'-','color',meanColors(8,:),'lineWidth',2);
+lns(4) = plot(binEdges(2:end),smooth(mean(mean_z(8:10,:)),nSmooth),'-','color',meanColors(8,:),'lineWidth',2);
 xlim([-1 1])
 grid on;
 ylabel('bracketed z-score');
