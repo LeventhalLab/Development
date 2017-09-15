@@ -1,8 +1,8 @@
-doSetup = true;
-useDirSel = true;
-limitToSide = 'contra';
+doSetup = false;
+useDirSel = false;
+limitToSide = 'N/A';
 timingField = 'RT';
-requireZ = 1.5;
+requireZ = 0.5;
 useEventPeth = 4;
 useNeuronClasses = [4];
 binMs = 50;
@@ -89,6 +89,10 @@ if doSetup
             theta_allTs_centerIn = [theta_allTs_centerIn curTs_centerIn];
             theta_burstTs_centerIn = [theta_burstTs_centerIn curTsBurst_centerIn];
             
+            if numel(theta_burstTs_centerIn) > numel(theta_allTs_centerIn)
+                disp('big numbers');
+            end
+            
             % bottom half of plot
             theta_allTs = [theta_allTs curTs(curTs >= 0 & curTs < curMT)];
             theta_burstTs = [theta_burstTs curTsBurst(curTsBurst >= 0 & curTsBurst < curMT)];
@@ -99,12 +103,12 @@ if doSetup
     end
 end
 
-doplot1 = true;
-doplot2 = false;
+doplot1 = false;
+doplot2 = true;
 
 if doplot1
     colors = lines(4);
-    nbins = 24;
+    nbins = 12;
     lowRT = .2;
     lowMT = .25;
     lowRTMT = lowRT + lowMT;
@@ -149,8 +153,8 @@ end
 if doplot2
     nbins = 12;
     % top half of plot
-    counts_allTs_centerIn = histcounts(theta_allTs_centerIn,linspace(0,1,nbins));
-    counts_allTsBurst_centerIn = histcounts(theta_burstTs_centerIn,linspace(0,1,nbins));
+    counts_allTs_centerIn = histcounts(theta_allTs_centerIn,linspace(-1,1,nbins));
+    counts_allTsBurst_centerIn = histcounts(theta_burstTs_centerIn,linspace(-1,1,nbins));
     burstFractionBins_centerIn = counts_allTs_centerIn - counts_allTsBurst_centerIn;
     
     % bottom half of plot
@@ -159,11 +163,11 @@ if doplot2
     burstFractionBins = counts_allTs - counts_allTsBurst;
     
     figuree(800,800);
-    polarhistogram('BinEdges',linspace(0,pi,nbins),'BinCounts',burstFractionBins_centerIn,'FaceColor',colors(1,:),'EdgeColor',colors(3,:),'FaceAlpha',faceAlpha,'normalization','probability');
+    polarhistogram('BinEdges',linspace(0,pi,nbins),'BinCounts',counts_allTs_centerIn,'FaceColor',colors(1,:),'EdgeColor',colors(3,:),'FaceAlpha',faceAlpha,'normalization','probability');
     hold on;
-    polarhistogram('BinEdges',linspace(pi,2*pi,nbins),'BinCounts',burstFractionBins,'FaceColor',colors(3,:),'EdgeColor',colors(3,:),'FaceAlpha',faceAlpha,'normalization','probability');
+    polarhistogram('BinEdges',linspace(pi,2*pi,nbins),'BinCounts',counts_allTs,'FaceColor',colors(3,:),'EdgeColor',colors(3,:),'FaceAlpha',faceAlpha,'normalization','probability');
     thetaticks([0 90 180]);
     thetaticklabels({'side in','nose in','nose out'});
-    title('Fraction of spikes in burst');
+    title('spiking');
 %     legend('Fraction of spikes in burst','location','south');
 end
