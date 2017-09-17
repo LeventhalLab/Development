@@ -1,16 +1,16 @@
 doSetup = true;
-timingField = 'MT';
+timingField = 'RT';
 limitToSide = 'N/A';
-useDirSel = true;
+useDirSel = false;
 nMeanBins = 10;
 binMs = 20;
-requireZ = 1.5;
+requireZ = 1.0;
 areaUnderS = .200; % or within MT window?
 tWindow = 1;
 nSmoothz = 1;
 
 useEventPeth = 4;
-useNeuronClasses = [4];
+useNeuronClasses = [3,4];
 plotBySubject = false;
 
 if plotBySubject
@@ -27,6 +27,7 @@ if doSetup
     k = [];
     allRasters = {};
     all_z = [];
+    all_unitClasses = [];
     
     sessionNames = {};
     sessionCount = 0;
@@ -156,6 +157,7 @@ if doSetup
                 all_burst_start = {};
                 all_burstTs{allSubject_trialCount} = tsPeths_burst{iTrial,useEventPeth};
                 
+                all_unitClasses(allSubject_trialCount) = unitClasses(iNeuron);
                 trialCount = trialCount + 1;
                 allSubject_trialCount = allSubject_trialCount + 1;
             end
@@ -206,8 +208,8 @@ end
 % spike raster
 subplot(rows,cols,2);
 allRasters_sorted = allRasters(k);
-allRasters_sorted = makeRasterReadable(allRasters_sorted',15);
-plotSpikeRaster(allRasters_sorted,'PlotType','scatter','AutoLabel',false); hold on;
+allRasters_sorted_readable = makeRasterReadable(allRasters_sorted',15);
+plotSpikeRaster(allRasters_sorted_readable,'PlotType','scatter','AutoLabel',false); hold on;
 plot([0 0],[1 numel(allRasters_sorted)],'r:');
 xlimVals = [-tWindow tWindow];
 xlim(xlimVals);
@@ -376,7 +378,12 @@ allRasters_sorted = allRasters(k);
 allRasters_sorted_readable = makeRasterReadable(allRasters_sorted',20);
 plotSpikeRaster(allRasters_sorted_readable,'PlotType','scatter','AutoLabel',false); hold on;
 hold on;
-toneLine = plot(0-all_curUseTime_sorted,1:numel(all_curUseTime_sorted),'g','linewidth',2);
+if useEventPeth == 3
+    toneLine = plot(all_curUseTime_sorted,1:numel(all_curUseTime_sorted),'g','linewidth',2);
+    
+elseif useEventPeth == 4
+    toneLine = plot(0-all_curUseTime_sorted,1:numel(all_curUseTime_sorted),'g','linewidth',2);
+end
 plot([0 0],[1 numel(all_curUseTime_sorted)],'g:','linewidth',1);
 if show200ms
     plot([-1 1],[find(all_curUseTime_sorted >= .200,1) find(all_curUseTime_sorted >= .200,1)],'y-');
@@ -385,20 +392,24 @@ end
 xlimVals = [-tWindow tWindow];
 xlim(xlimVals);
 ylabel('trials');
-title({'All Spikes'});
+title({['e:',eventFieldlabels{useEventPeth},', s:',eventFieldlabels{useNeuronClasses}],'All Spikes'});
 legend(toneLine,'Tone');
 set(gca,'fontSize',16);
 
 subplot(212)
-plotSpikeRaster(all_burstTs_sorted,'PlotType','scatter','AutoLabel',false);
+[xPoints, yPoints] = plotSpikeRaster(all_burstTs_sorted,'PlotType','scatter','AutoLabel',false);
 hold on;
-plot(0-all_curUseTime_sorted,1:numel(all_curUseTime_sorted),'g','linewidth',2);
+if useEventPeth == 3
+    toneLine = plot(all_curUseTime_sorted,1:numel(all_curUseTime_sorted),'g','linewidth',2);
+elseif useEventPeth == 4
+    toneLine = plot(0-all_curUseTime_sorted,1:numel(all_curUseTime_sorted),'g','linewidth',2);
+end
 plot([0 0],[1 numel(all_curUseTime_sorted)],'g:','linewidth',1);
 if show200ms
     plot([-1 1],[find(all_curUseTime_sorted >= .200,1) find(all_curUseTime_sorted >= .200,1)],'y-');
     text(-1,find(all_curUseTime_sorted >= .200,1),'200 ms','BackgroundColor','y');
 end
-title({'Only Bursts'});
+title({['e:',eventFieldlabels{useEventPeth},', s:',eventFieldlabels{useNeuronClasses}],'Only Bursts'});
 xlabel('time (s)');
 ylabel('trials');
 set(gca,'fontSize',16);
