@@ -11,168 +11,164 @@ nSmoothz = 1;
 
 useEventPeth = 3;
 useNeuronClasses = [3];
-plotBySubject = false;
-
-if plotBySubject
-    nSubjects = numel(analysisConf.subjects);
-else
-    nSubjects = 1;
-end
 
 if doSetup
     binS = binMs / 1000;
     binEdges = [-tWindow:binS:tWindow];
     all_curUseTime_sorted = [];
-    allSubject_trialCount = 1;
-    k = [];
-    allRasters = {};
-    all_z = [];
-    all_unitClasses = [];
+    trialCount = 1;
+    allTrial_rasters = {};
+    allTrial_z = [];
+    allTrial_unitClasses = [];
+    allTrial_useTime = [];
     
-    sessionNames = {};
+    allTrial_sessionNames = {};
     sessionCount = 0;
     lastSession = '';
-    all_sessionCount = [];
+    allTrial_sessionCount = [];
     
-    subjectNames = {};
+    allTrial_subjectNames = {};
     subjectCount = 0;
     lastSubject = '';
-    all_subjectCount = [];
-    for iSubject = 1:nSubjects
-        all_curUseTime = [];
-        all_burst_RS = {};
-        all_burst_length = {};
-        all_burst_start = {};
-        trialCount = 1;
-        useSubject = analysisConf.subjects{iSubject};
-        for iNeuron = 1:numel(analysisConf.neurons)
-            if plotBySubject && ~strcmp(analysisConf.sessionConfs{iNeuron}.subjects__name,useSubject)
-                continue;
-            end
+    allTrial_subjectCount = [];
 
-            neuronName = analysisConf.neurons{iNeuron};
-            sessionName = analysisConf.sessionConfs{iNeuron}.sessions__name;
-            subjectName = analysisConf.sessionConfs{iNeuron}.subjects__name;
-            dirSelNote = 'NO';
-            if useDirSel && ~dirSelNeurons(iNeuron)
-                dirSelNote = 'YES';
-                continue;
-            end
-            
-            if ~ismember(unitClasses(iNeuron),useNeuronClasses)
-                continue;
-            end
-            
-            if unitEvents{iNeuron}.maxz(unitClasses(iNeuron)) <= requireZ
-                continue;
-            end
-            
-            disp(['Using neuron ',num2str(iNeuron),' (class=',num2str(unitClasses(iNeuron)),', maxz=',num2str(unitEvents{iNeuron}.maxz(unitClasses(iNeuron))),') ',neuronName]);
+    useSubject = analysisConf.subjects{iSubject};
+    for iNeuron = 1:numel(analysisConf.neurons)
+        if plotBySubject && ~strcmp(analysisConf.sessionConfs{iNeuron}.subjects__name,useSubject)
+            continue;
+        end
 
-            curTrials = all_trials{iNeuron};
-            [useTrials,allTimes] = sortTrialsBy(curTrials,timingField);
-            trialIdInfo = organizeTrialsById(curTrials);
+        neuronName = analysisConf.neurons{iNeuron};
+        sessionName = analysisConf.sessionConfs{iNeuron}.sessions__name;
+        subjectName = analysisConf.sessionConfs{iNeuron}.subjects__name;
+        dirSelNote = 'NO';
+        if useDirSel && ~dirSelNeurons(iNeuron)
+            dirSelNote = 'YES';
+            continue;
+        end
 
-            t_useTrials = [];
-            t_allTimes = [];
-            tc = 1;
-            for iTrial = 1:numel(useTrials)
-                if ismember(useTrials(iTrial),trialIdInfo.correctContra)
-                    t_useTrials(tc) = useTrials(iTrial);
-                    t_allTimes(tc) = allTimes(iTrial);
-                    tc = tc + 1;
-                end
-            end
-            markContraTrials = tc - 1;
-            for iTrial = 1:numel(useTrials)
-                if ismember(useTrials(iTrial),trialIdInfo.correctIpsi)
-                    t_useTrials(tc) = useTrials(iTrial);
-                    t_allTimes(tc) = allTimes(iTrial);
-                    tc = tc + 1;
-                end
-            end
-            useTrials = t_useTrials;
-            allTimes = t_allTimes;
+        if ~ismember(unitClasses(iNeuron),useNeuronClasses)
+            continue;
+        end
 
-            tsPeths = {};
-            ts = all_ts{iNeuron};
-            [tsISI,tsLTS,tsPoisson,tsPoissonLTS,ISI_n,LTS_n,poisson_n,poissonLTS_n] = tsBurstFilters(ts);
-            % Poisson
-            tsPoisson_inclusive = [];
-            for iBurst = 1:numel(tsPoisson)
-                tsPoisson_inclusive = [tsPoisson_inclusive;ts(tsPoisson(iBurst):tsPoisson(iBurst)+poisson_n(iBurst)-1)];
-            end
-            tsPeths_poisson = eventsPeth(curTrials(useTrials),tsPoisson_inclusive,tWindow,eventFieldnames);
-            % LTS
-            tsLTS_inclusive = [];
-            for iBurst = 1:numel(tsLTS)
-                tsLTS_inclusive = [tsLTS_inclusive;ts(tsLTS(iBurst):tsLTS(iBurst)+LTS_n(iBurst)-1)];
-            end
-            tsPeths_LTS = eventsPeth(curTrials(useTrials),tsPoisson_inclusive,tWindow,eventFieldnames);
-            
-            z = zParams(ts,curTrials);
-            zBinMean = z.FRmean * (binMs/1000);
-            zBinStd = z.FRstd * (binMs/1000);
-            tsPeths = eventsPeth(curTrials(useTrials),ts,tWindow,eventFieldnames);
-            
-            switch limitToSide
-                case 'contra'
-                    usePeths = tsPeths(1:markContraTrials,:);
-                    useTimes = allTimes(1:markContraTrials);
-                case 'ipsi'
-                    usePeths = tsPeths(markContraTrials+1:end,:);
-                    useTimes = allTimes(markContraTrials+1:end);
-                otherwise                  
-                    usePeths = tsPeths;
-                    useTimes = allTimes;
-            end
+        if unitEvents{iNeuron}.maxz(unitClasses(iNeuron)) <= requireZ
+            continue;
+        end
 
-            curZ = [];
-            for iTrial = 1:numel(useTimes)
-                curTs = usePeths{iTrial,useEventPeth};
-                curRefTs = usePeths{iTrial,1};
-                if numel(curTs) < 3; continue; end;
-                
-                counts = histcounts(curTs,binEdges);
-                curZ = smooth((counts - zBinMean) / zBinStd,3);
-                all_z(allSubject_trialCount,:) = curZ;
-                
-                curUseTime = useTimes(iTrial);
+        disp(['Using neuron ',num2str(iNeuron),' (class=',num2str(unitClasses(iNeuron)),', maxz=',num2str(unitEvents{iNeuron}.maxz(unitClasses(iNeuron))),') ',neuronName]);
 
-                all_curUseTime(trialCount) = curUseTime;
-                allRasters{allSubject_trialCount} = curTs;
-                
-                if ~strcmp(lastSession,sessionName)
-                    sessionCount = sessionCount + 1;
-                    lastSession = sessionName;
-                end
-                sessionNames{allSubject_trialCount} = sessionName;
-                all_sessionCount(allSubject_trialCount) = sessionCount;
-                
-                if ~strcmp(lastSubject,subjectName)
-                    subjectCount = subjectCount + 1;
-                    lastSubject = subjectName;
-                end
-                subjectNames{allSubject_trialCount} = subjectName;
-                all_subjectCount(allSubject_trialCount) = subjectCount;
-                
-                % !! if peth isempty() fill with NaN for raster?
-                all_burst_RS = {};
-                all_burst_length = {};
-                all_burst_start = {};
-                all_burstTs{allSubject_trialCount} = tsPeths_poisson{iTrial,useEventPeth};
-                
-                all_unitClasses(allSubject_trialCount) = unitClasses(iNeuron);
-                trialCount = trialCount + 1;
-                allSubject_trialCount = allSubject_trialCount + 1;
+        curTrials = all_trials{iNeuron};
+        [useTrials,allTimes] = sortTrialsBy(curTrials,timingField);
+        trialIdInfo = organizeTrialsById(curTrials);
+
+        t_useTrials = [];
+        t_allTimes = [];
+        tc = 1;
+        for iTrial = 1:numel(useTrials)
+            if ismember(useTrials(iTrial),trialIdInfo.correctContra)
+                t_useTrials(tc) = useTrials(iTrial);
+                t_allTimes(tc) = allTimes(iTrial);
+                tc = tc + 1;
             end
         end
-        % compile from per-subject
-        [vs,ks] = sort(all_curUseTime);
-        all_curUseTime_sorted = [all_curUseTime_sorted vs];
-        k = [k ks];
+        markContraTrials = tc - 1;
+        for iTrial = 1:numel(useTrials)
+            if ismember(useTrials(iTrial),trialIdInfo.correctIpsi)
+                t_useTrials(tc) = useTrials(iTrial);
+                t_allTimes(tc) = allTimes(iTrial);
+                tc = tc + 1;
+            end
+        end
+        useTrials = t_useTrials;
+        allTimes = t_allTimes;
+
+        tsPeths = {};
+        ts = all_ts{iNeuron};
+        [tsISI,tsLTS,tsPoisson,tsPoissonLTS,ISI_n,LTS_n,poisson_n,poissonLTS_n] = tsBurstFilters(ts);
+        % Poisson
+        tsPoisson_inclusive = [];
+        for iBurst = 1:numel(tsPoisson)
+            tsPoisson_inclusive = [tsPoisson_inclusive;ts(tsPoisson(iBurst):tsPoisson(iBurst)+poisson_n(iBurst)-1)];
+        end
+        tsPeths_poisson = eventsPeth(curTrials(useTrials),tsPoisson_inclusive,tWindow,eventFieldnames);
+        % LTS
+        tsLTS_inclusive = [];
+        for iBurst = 1:numel(tsLTS)
+            tsLTS_inclusive = [tsLTS_inclusive;ts(tsLTS(iBurst):tsLTS(iBurst)+LTS_n(iBurst)-1)];
+        end
+        tsPeths_LTS = eventsPeth(curTrials(useTrials),tsLTS_inclusive,tWindow,eventFieldnames);
+
+        z = zParams(ts,curTrials);
+        zBinMean = z.FRmean * (binMs/1000);
+        zBinStd = z.FRstd * (binMs/1000);
+        tsPeths = eventsPeth(curTrials(useTrials),ts,tWindow,eventFieldnames);
+
+        switch limitToSide
+            case 'contra'
+                usePeths = tsPeths(1:markContraTrials,:);
+                useTimes = allTimes(1:markContraTrials);
+            case 'ipsi'
+                usePeths = tsPeths(markContraTrials+1:end,:);
+                useTimes = allTimes(markContraTrials+1:end);
+            otherwise                  
+                usePeths = tsPeths;
+                useTimes = allTimes;
+        end
+
+        curZ = [];
+        for iTrial = 1:numel(useTimes)
+            curTs = usePeths{iTrial,useEventPeth};
+            if numel(curTs) < 3; continue; end;
+
+            counts = histcounts(curTs,binEdges);
+            curZ = smooth((counts - zBinMean) / zBinStd,3);
+            allTrial_z(trialCount,:) = curZ;
+
+            curUseTime = useTimes(iTrial);
+
+            allTrial_useTime(trialCount) = curUseTime;
+            allTrial_rasters{trialCount} = curTs;
+
+            if ~strcmp(lastSession,sessionName)
+                sessionCount = sessionCount + 1;
+                lastSession = sessionName;
+            end
+            allTrial_sessionNames{trialCount} = sessionName;
+            allTrial_sessionCount(trialCount) = sessionCount;
+
+            if ~strcmp(lastSubject,subjectName)
+                subjectCount = subjectCount + 1;
+                lastSubject = subjectName;
+            end
+            allTrial_subjectNames{trialCount} = subjectName;
+            allTrial_subjectCount(trialCount) = subjectCount;
+
+            % !! if peth isempty() fill with NaN for raster?
+            tempPeth = tsPeths_poisson{iTrial,useEventPeth};
+            if isempty(tempPeth)
+                allTrial_poissonPeths{trialCount} = NaN;
+            else
+                allTrial_poissonPeths{trialCount} = tempPeth;
+            end
+            tempPeth = tsPeths_LTS{iTrial,useEventPeth};
+            if isempty(tempPeth)
+                allTrial_LTSPeths{trialCount} = NaN;
+            else
+                allTrial_LTSPeths{trialCount} = tempPeth;
+            end
+
+            allTrial_unitClasses(trialCount) = unitClasses(iNeuron);
+            trialCount = trialCount + 1;
+        end
     end
 end
+
+% compile from per-subject
+[v,k] = sort(allTrial_useTime);
+all_curUseTime_sorted = [all_curUseTime_sorted vs];
+
+
+
 
 % figure;
 % plot(all_subjectCount(k),all_curUseTime_sorted,'.');
@@ -195,10 +191,10 @@ ylabel('trials');
 grid on;
 hold on;
 
-all_sessionCount_sorted = all_sessionCount(k);
-all_subjectCount_sorted = all_subjectCount(k);
-uniqueSessions = numel(unique(all_sessionCount));
-uniqueSubjects = numel(unique(all_subjectCount));
+all_sessionCount_sorted = allTrial_sessionCount(k);
+all_subjectCount_sorted = allTrial_subjectCount(k);
+uniqueSessions = numel(unique(allTrial_sessionCount));
+uniqueSubjects = numel(unique(allTrial_subjectCount));
 sessionSpan = linspace(1.2,1.5,uniqueSessions);
 subjectSpan = linspace(1,1.1,uniqueSubjects);
 sessionColors = jet(uniqueSessions);
@@ -212,7 +208,7 @@ end
 
 % spike raster
 subplot(rows,cols,2);
-allRasters_sorted = allRasters(k);
+allRasters_sorted = allTrial_rasters(k);
 allRasters_sorted_readable = makeRasterReadable(allRasters_sorted',15);
 plotSpikeRaster(allRasters_sorted_readable,'PlotType','scatter','AutoLabel',false); hold on;
 plot([0 0],[1 numel(allRasters_sorted)],'r:');
@@ -225,7 +221,7 @@ title([timingField,' spikes']);
 meanBins = floor(linspace(1,numel(allRasters_sorted),nMeanBins+1));
 makeyStart = floor(linspace((numel(allRasters_sorted)*.1),numel(allRasters_sorted)-(numel(allRasters_sorted)*.05),nMeanBins));
 meanColors = cool(numel(meanBins)-1);
-all_z_sorted = all_z(k,:);
+all_z_sorted = allTrial_z(k,:);
 mean_z = [];
 std_z = [];
 meanCentersIdx = [];
@@ -379,7 +375,7 @@ end
 show200ms = false;
 figuree(500,800);
 subplot(211);
-allRasters_sorted = allRasters(k);
+allRasters_sorted = allTrial_rasters(k);
 allRasters_sorted_readable = makeRasterReadable(allRasters_sorted',20);
 plotSpikeRaster(allRasters_sorted_readable,'PlotType','scatter','AutoLabel',false); hold on;
 hold on;

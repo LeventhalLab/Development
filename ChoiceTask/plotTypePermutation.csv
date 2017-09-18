@@ -1,0 +1,37 @@
+Event,UnitType,MovementDir,SortedBy
+tone,tone,all,RT
+tone,tone,all,MT
+tone,tone,contra,RT
+tone,tone,contra,MT
+tone,tone,ipsi,RT
+tone,tone,ipsi,MT
+tone,nose out,all,RT
+tone,nose out,all,MT
+tone,nose out,contra,RT
+tone,nose out,contra,MT
+tone,nose out,ipsi,RT
+tone,nose out,ipsi,MT
+tone,dirSel,all,RT
+tone,dirSel,all,MT
+tone,dirSel,contra,RT
+tone,dirSel,contra,MT
+tone,dirSel,ipsi,RT
+tone,dirSel,ipsi,MT
+nose out,tone,all,RT
+nose out,tone,all,MT
+nose out,tone,contra,RT
+nose out,tone,contra,MT
+nose out,tone,ipsi,RT
+nose out,tone,ipsi,MT
+nose out,nose out,all,RT
+nose out,nose out,all,MT
+nose out,nose out,contra,RT
+nose out,nose out,contra,MT
+nose out,nose out,ipsi,RT
+nose out,nose out,ipsi,MT
+nose out,dirSel,all,RT
+nose out,dirSel,all,MT
+nose out,dirSel,contra,RT
+nose out,dirSel,contra,MT
+nose out,dirSel,ipsi,RT
+nose out,dirSel,ipsi,MT
