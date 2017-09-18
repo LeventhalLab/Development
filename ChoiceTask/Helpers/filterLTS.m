@@ -6,7 +6,7 @@ function [tsLTS, LTS_n] = filterLTS(tsBurst, varargin)
 %   tsLTS - timestamps of first spike in each LTS burst
 %   LTS_n - number of spikes in each LTS burst
 
-hp = 0.1; %hyperpolarization 100ms
+hp = 0.05; %hyperpolarization 100ms
 LTS_idx = (diff(tsBurst) < hp);
 tsLTS = tsBurst(LTS_idx);
 

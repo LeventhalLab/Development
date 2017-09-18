@@ -8,7 +8,7 @@ function [tsISI,tsLTS,tsPoisson,tsPoissonLTS,ISI_n,LTS_n,poisson_n,poissonLTS_n]
 % Tip: you can use the *_n arrays to discard bursts containing less than
 % some amount of spikes.
 
-maxBurstISI = 0.007; % seconds
+maxBurstISI = 0.01; % seconds
 
 tsISI = [];
 tsLTS = [];

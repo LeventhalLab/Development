@@ -9,7 +9,7 @@ for iTrial = 1:size(all_burstTs_sorted,2)
 end
 
 figure;
-[xPoints,yPoints] = plotSpikeRaster(all_burstTs_sorted','PlotType','scatter','AutoLabel',false);
+[xPoints,yPoints] = plotSpikeRaster(allRasters_sorted','PlotType','scatter','AutoLabel',false);
 all_unitClasses_sorted = all_unitClasses(k);
 % setup for raster function
 groups = all_unitClasses_sorted;

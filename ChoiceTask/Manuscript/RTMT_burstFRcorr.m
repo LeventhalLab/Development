@@ -9,8 +9,8 @@ areaUnderS = .200; % or within MT window?
 tWindow = 1;
 nSmoothz = 1;
 
-useEventPeth = 4;
-useNeuronClasses = [3,4];
+useEventPeth = 3;
+useNeuronClasses = [3];
 plotBySubject = false;
 
 if plotBySubject
@@ -96,14 +96,19 @@ if doSetup
 
             tsPeths = {};
             ts = all_ts{iNeuron};
-%             [tsISI,tsLTS,tsPoisson] = tsBurstFilters(ts);
-            [archive_burst_RS,archive_burst_length,archive_burst_start] = burst(ts);
-%             ts_burstStart = ts(archive_burst_start);
-            tsBurst = [];
-            for iBurst = 1:numel(archive_burst_start)
-                tsBurst = [tsBurst;ts(archive_burst_start(iBurst):archive_burst_start(iBurst)+archive_burst_length(iBurst)-1)];
+            [tsISI,tsLTS,tsPoisson,tsPoissonLTS,ISI_n,LTS_n,poisson_n,poissonLTS_n] = tsBurstFilters(ts);
+            % Poisson
+            tsPoisson_inclusive = [];
+            for iBurst = 1:numel(tsPoisson)
+                tsPoisson_inclusive = [tsPoisson_inclusive;ts(tsPoisson(iBurst):tsPoisson(iBurst)+poisson_n(iBurst)-1)];
             end
-            tsPeths_burst = eventsPeth(curTrials(useTrials),tsBurst,tWindow,eventFieldnames);
+            tsPeths_poisson = eventsPeth(curTrials(useTrials),tsPoisson_inclusive,tWindow,eventFieldnames);
+            % LTS
+            tsLTS_inclusive = [];
+            for iBurst = 1:numel(tsLTS)
+                tsLTS_inclusive = [tsLTS_inclusive;ts(tsLTS(iBurst):tsLTS(iBurst)+LTS_n(iBurst)-1)];
+            end
+            tsPeths_LTS = eventsPeth(curTrials(useTrials),tsPoisson_inclusive,tWindow,eventFieldnames);
             
             z = zParams(ts,curTrials);
             zBinMean = z.FRmean * (binMs/1000);
@@ -155,7 +160,7 @@ if doSetup
                 all_burst_RS = {};
                 all_burst_length = {};
                 all_burst_start = {};
-                all_burstTs{allSubject_trialCount} = tsPeths_burst{iTrial,useEventPeth};
+                all_burstTs{allSubject_trialCount} = tsPeths_poisson{iTrial,useEventPeth};
                 
                 all_unitClasses(allSubject_trialCount) = unitClasses(iNeuron);
                 trialCount = trialCount + 1;
@@ -420,7 +425,8 @@ set(gcf,'color','w');
 % all brackets as colored lines
 figure;
 mean_burstHist = [];
-binEdges = linspace(-1,1,41);
+mean_burstFraction = [];
+% binEdges = linspace(-1,1,41);
 nSmooth = 3;
 legendText = {};
 for iBin = 1:numel(meanBins)-1
