@@ -2,7 +2,7 @@
 % ipsi/contra trials
 pVal = 0.95;
 
-if false
+if true
     useEvents = 1:7;
     trialTypes = {'correct'};
     

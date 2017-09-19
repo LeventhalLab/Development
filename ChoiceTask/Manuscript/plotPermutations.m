@@ -11,28 +11,8 @@ savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/permutationFigures';
 events = [3,4];
 unitTypes = {eventFieldlabels{3},eventFieldlabels{4},'dirSel'};
 timingFields = {'RT','MT'};
-movementDirs = {'all','contra','ipsi'};
-
-    all_useTime_sorted = [];
-    trialCount = 1;
-    allTrial_tsPeths = {};
-    allTrial_PoissonPeths = {};
-    allTrial_LTSPeths = {};
-    allTrial_z = [];
-    allTrial_unitClasses = [];
-    allTrial_useTime = [];
-    
-    allTrial_sessionNames = {};
-    sessionCount = 0;
-    lastSession = '';
-    allTrial_sessionCount = [];
-    
-    allTrial_subjectNames = {};
-    subjectCount = 0;
-    lastSubject = '';
-    allTrial_subjectCount = [];
-    
-    unitCount = 0;
+% movementDirs = {'all','contra','ipsi'};
+movementDirs = {'all'};
     
 for ii_events = 1:numel(events)
     useEvent = events(ii_events);
@@ -55,7 +35,27 @@ for ii_events = 1:numel(events)
 
             for ii_timingFields = 1:numel(timingFields)
                 timingField = timingFields{ii_timingFields};
+                
+                % reset all variables
+                unitCount = 0;
+                trialCount = 1;
+                allTrial_tsPeths = {};
+                allTrial_PoissonPeths = {};
+                allTrial_LTSPeths = {};
+                allTrial_z = [];
+                allTrial_unitClasses = [];
+                allTrial_useTime = [];
 
+                allTrial_sessionNames = {};
+                sessionCount = 0;
+                lastSession = '';
+                allTrial_sessionCount = [];
+
+                allTrial_subjectNames = {};
+                subjectCount = 0;
+                lastSubject = '';
+                allTrial_subjectCount = [];
+                
                 for iNeuron = 1:numel(analysisConf.neurons)
                     neuronName = analysisConf.neurons{iNeuron};
                     sessionName = analysisConf.sessionConfs{iNeuron}.sessions__name;
@@ -210,10 +210,14 @@ for ii_events = 1:numel(events)
                     title(rasterLabels{ii_doRasters});
                     if useEvent == 3
                         toneLine = plot(all_useTime_sorted,1:numel(all_useTime_sorted),'g','linewidth',2);
-                        legend(toneLine,'Tone');
+                        legend(toneLine,timingField);
                     elseif useEvent == 4
-                        toneLine = plot(0-all_useTime_sorted,1:numel(all_useTime_sorted),'g','linewidth',2);
-                        legend(toneLine,'Tone');
+                        if strcmp(timingField,'RT')
+                            toneLine = plot(0-all_useTime_sorted,1:numel(all_useTime_sorted),'g','linewidth',2);
+                        elseif strcmp(timingField,'MT')
+                            toneLine = plot(all_useTime_sorted,1:numel(all_useTime_sorted),'g','linewidth',2);
+                        end
+                        legend(toneLine,timingField);
                     end
                 end
                 
