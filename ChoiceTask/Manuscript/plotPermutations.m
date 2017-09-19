@@ -1,8 +1,9 @@
-nMeanBins = 10;
+nMeanBins = 7;
 binMs = 20;
 binS = binMs / 1000;
 tWindow = 1;
 binEdges = -tWindow:binS:tWindow;
+savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/permutationFigures';
 
 % % plotTypes = {'raster','bracketed','high/low'};
 % % burstCriterias = {'none','Poisson','LTS'};
@@ -12,7 +13,7 @@ unitTypes = {eventFieldlabels{3},eventFieldlabels{4},'dirSel'};
 timingFields = {'RT','MT'};
 movementDirs = {'all','contra','ipsi'};
 
-    all_curUseTime_sorted = [];
+    all_useTime_sorted = [];
     trialCount = 1;
     allTrial_tsPeths = {};
     allTrial_PoissonPeths = {};
@@ -31,6 +32,7 @@ movementDirs = {'all','contra','ipsi'};
     lastSubject = '';
     allTrial_subjectCount = [];
     
+    unitCount = 0;
     
 for ii_events = 1:numel(events)
     useEvent = events(ii_events);
@@ -67,8 +69,9 @@ for ii_events = 1:numel(events)
                         continue;
                     end
 
-                    disp(['Using neuron ',num2str(iNeuron),' (class=',num2str(unitClasses(iNeuron)),', maxz=',num2str(unitEvents{iNeuron}.maxz(unitClasses(iNeuron))),') ',neuronName]);
-
+                    disp(['Using unit ',num2str(iNeuron),' (class=',num2str(unitClasses(iNeuron)),', maxz=',num2str(unitEvents{iNeuron}.maxz(unitClasses(iNeuron))),') ',neuronName]);
+                    unitCount = unitCount + 1;
+                    
                     curTrials = all_trials{iNeuron};
                     [useTrials,allTimes] = sortTrialsBy(curTrials,timingField);
                     trialIdInfo = organizeTrialsById(curTrials);
@@ -176,13 +179,16 @@ for ii_events = 1:numel(events)
                     end
                 end
                 
-                % figure
+                % --- figure
                 rows = 3;
-                cols = 4;
+                cols = 3;
+                nSmooth = 3;
+                lineWidth = 1.5;
+                plotMargins = [.08 .08];
                 xlimVals = [-tWindow tWindow];
                 n_rasterReadable = 15;
-                h1 = figuree(1400,800);
-                [all_curUseTime_sorted,k] = sort(allTrial_useTime);
+                h = figuree(1400,800);
+                [all_useTime_sorted,k] = sort(allTrial_useTime);
                 
                 allTrial_z_sorted = allTrial_z(k,:);
                 allTrial_tsPeths_sorted = allTrial_tsPeths(k);
@@ -191,21 +197,23 @@ for ii_events = 1:numel(events)
                 
                 doRasters = {allTrial_tsPeths_sorted,allTrial_PoissonPeths_sorted,allTrial_LTSPeths_sorted};
                 rasterLabels = {'all spikes','Poisson spikes','LTS spikes'};
-                rasterSubplots = [1,5,9];
+                rasterSubplots = [1,4,7];
                 for ii_doRasters = 1:numel(doRasters)
-                    subplot(rows,cols,rasterSubplots(ii_doRasters));
+                    subplot_tight(rows,cols,rasterSubplots(ii_doRasters),plotMargins);
                     curRaster = doRasters{ii_doRasters};
-                    curRaster_sorted_readable = makeRasterReadable(curRaster_sorted',n_rasterReadable);
+                    curRaster_sorted_readable = makeRasterReadable(curRaster',n_rasterReadable);
                     plotSpikeRaster(curRaster_sorted_readable,'PlotType','scatter','AutoLabel',false); hold on;
-                    plot([0 0],[1 numel(curRaster_sorted)],'r-');
+                    plot([0 0],[1 numel(curRaster)],'r-');
                     xlim(xlimVals);
                     xlabel('time (s)');
                     ylabel('trial');
                     title(rasterLabels{ii_doRasters});
                     if useEvent == 3
-                        toneLine = plot(all_curUseTime_sorted,1:numel(all_curUseTime_sorted),'g','linewidth',2);
+                        toneLine = plot(all_useTime_sorted,1:numel(all_useTime_sorted),'g','linewidth',2);
+                        legend(toneLine,'Tone');
                     elseif useEvent == 4
-                        toneLine = plot(0-all_curUseTime_sorted,1:numel(all_curUseTime_sorted),'g','linewidth',2);
+                        toneLine = plot(0-all_useTime_sorted,1:numel(all_useTime_sorted),'g','linewidth',2);
+                        legend(toneLine,'Tone');
                     end
                 end
                 
@@ -221,73 +229,101 @@ for ii_events = 1:numel(events)
 
                 tMean = linspace(xlimVals(1),xlimVals(2),size(allTrial_z_sorted,2));
                 for iBin = 1:numel(meanBins)-1
-                    mean_z(iBin,:) = mean(allTrial_z_sorted(meanBins(iBin):meanBins(iBin+1),:));
+                    mean_z(iBin,:) = smooth(mean(allTrial_z_sorted(meanBins(iBin):meanBins(iBin+1),:)),nSmooth);
                     
                     cur_ts = [allTrial_tsPeths_sorted{meanBins(iBin):meanBins(iBin+1)}];
                     cur_Poisson = [allTrial_PoissonPeths_sorted{meanBins(iBin):meanBins(iBin+1)}];
                     cur_LTS = [allTrial_LTSPeths_sorted{meanBins(iBin):meanBins(iBin+1)}];
                     
-                    mean_Poisson(iBin,:) = histcounts(cur_Poisson,binEdges);
-                    mean_LTS(iBin,:) = histcounts(cur_LTS,binEdges);
+                    mean_Poisson(iBin,:) = smooth(histcounts(cur_Poisson,binEdges),nSmooth);
+                    mean_LTS(iBin,:) = smooth(histcounts(cur_LTS,binEdges),nSmooth);
                     
                     cur_ts_count = histcounts(cur_ts,binEdges);
-                    mean_PoissonFraction(iBin,:) = mean_Poisson(iBin,:) ./ cur_ts_count;
-                    mean_LTSFraction(iBin,:) = mean_LTS(iBin,:) ./ cur_ts_count;
+                    mean_PoissonFraction(iBin,:) = smooth(mean_Poisson(iBin,:) ./ cur_ts_count,nSmooth);
+                    mean_LTSFraction(iBin,:) = smooth(mean_LTS(iBin,:) ./ cur_ts_count,nSmooth);
                     
-                    bracketLegendText{iBin} = [timingField,' < ',num2str(all_curUseTime_sorted(meanBins(iBin_+1)),2),' s'];
+                    bracketLegendText{iBin} = [timingField,' < ',num2str(all_useTime_sorted(meanBins(iBin+1)),2),' s'];
                 end
                 
                 % Z score
-                subplot(rows,cols,2);
-                lns = plot(mean_z');
+                subplot_tight(rows,cols,2,plotMargins);
+                lns = plot(mean_z','lineWidth',lineWidth);
                 set(lns,{'color'},num2cell(meanColors,2));
                 title('Z score');
+                xlabel('time (s)');
                 ylabel('Z');
+                ylim([-.5 2]);
                 xticks([1 floor(size(allTrial_z,2)/2) size(allTrial_z,2)]);
                 xticklabels({num2str(-tWindow),'0',num2str(tWindow)});
                 grid on;
                 
-                % Prevalence
-                subplot(rows,cols,6);
-                lns = plot(mean_Poisson');
+                subplot(rows,cols,3);
+                lns = plot(mean_z');
                 set(lns,{'color'},num2cell(meanColors,2));
-                title('Poisson Prevalence');
+                ylim([100 101]);
+                xlim([100 101]);
+                yticks([]);
+                xticks([]);
+                legend(bracketLegendText,'location','south');
+                legend boxoff;
+                set(gca,'Visible','off')
+                set(gca,'fontsize',16);
+                
+                % Prevalence
+                subplot_tight(rows,cols,5,plotMargins);
+                lns = plot(mean_Poisson','lineWidth',lineWidth);
+                set(lns,{'color'},num2cell(meanColors,2));
+                title('Poisson prevalence');
+                xlabel('time (s)');
                 ylabel('burst count');
                 xticks([1 floor(size(allTrial_z,2)/2) size(allTrial_z,2)]);
                 xticklabels({num2str(-tWindow),'0',num2str(tWindow)});
                 grid on;
                 
-                subplot(rows,cols,10);
-                lns = plot(mean_LTS');
+                subplot_tight(rows,cols,8,plotMargins);
+                lns = plot(mean_LTS','lineWidth',lineWidth);
                 set(lns,{'color'},num2cell(meanColors,2));
-                title('LTS Prevalence');
+                title('LTS prevalence');
+                xlabel('time (s)');
                 ylabel('burst count');
                 xticks([1 floor(size(allTrial_z,2)/2) size(allTrial_z,2)]);
                 xticklabels({num2str(-tWindow),'0',num2str(tWindow)});
                 grid on;
                 
                 % Fraction
-                subplot(rows,cols,10);
-                lns = plot(mean_PoissonFraction');
+                subplot_tight(rows,cols,6,plotMargins);
+                lns = plot(mean_PoissonFraction','lineWidth',lineWidth);
                 set(lns,{'color'},num2cell(meanColors,2));
                 title('Poisson fraction');
+                xlabel('time (s)');
                 ylabel('burst spikes / all spikes');
                 xticks([1 floor(size(allTrial_z,2)/2) size(allTrial_z,2)]);
                 xticklabels({num2str(-tWindow),'0',num2str(tWindow)});
                 grid on;
                 
-                subplot(rows,cols,10);
-                lns = plot(mean_LTSFraction');
+                subplot_tight(rows,cols,9,plotMargins);
+                lns = plot(mean_LTSFraction','lineWidth',lineWidth);
                 set(lns,{'color'},num2cell(meanColors,2));
                 title('LTS fraction');
+                xlabel('time (s)');
                 ylabel('burst spikes / all spikes');
                 xticks([1 floor(size(allTrial_z,2)/2) size(allTrial_z,2)]);
                 xticklabels({num2str(-tWindow),'0',num2str(tWindow)});
                 grid on;
                 
-                noteText = {['event: ',eventFieldlabels{useEvent}],['class: ',unitTypes{ii_unitTypes}],...
-                    ['move: ',movementDir],['timing: ',timingField]};
-                addNote(h1,noteText);
+                set(gcf,'color','w');
+                
+                noteText = {['event: ',eventFieldlabels{useEvent}],['class: ',unitTypes{ii_unitTypes}],['units: ',num2str(unitCount)]...
+                    ['move: ',movementDir],['sortBy: ',timingField]};
+                addNote(h,noteText);
+                
+                saveFile = [eventFieldlabels{useEvent},' units_',unitTypes{ii_unitTypes},' event_n',num2str(unitCount),'_movDir ',movementDir,'_sortBy ',timingField];
+                
+                set(h,'PaperOrientation','landscape');
+                set(h,'PaperUnits','normalized');
+                set(h,'PaperPosition', [0 0 1 1]);
+                print(gcf,'-dpdf', fullfile(savePath,[strrep(saveFile,' ','-'),'.pdf']));
+                close(h);
             end
         end
     end
@@ -307,10 +343,10 @@ h = figuree(1200,800);
 rows = 2;
 cols = 3;
 
-subplot(rows,cols,1);
-plot(all_curUseTime_sorted,1:numel(all_curUseTime_sorted),'k');
+subplot_tight(rows,cols,1);
+plot(all_useTime_sorted,1:numel(all_useTime_sorted),'k');
 set(gca,'YDir','reverse');
-ylim([1 numel(all_curUseTime_sorted)]);
+ylim([1 numel(all_useTime_sorted)]);
 xlim([0 1.5]);
 xticks([0 0.25 0.5 0.75 1.05 1.35]);
 xticklabels({'0','0.25','0.5','0.75','Subjects','Sessions'});
@@ -328,15 +364,15 @@ sessionSpan = linspace(1.2,1.5,uniqueSessions);
 subjectSpan = linspace(1,1.1,uniqueSubjects);
 sessionColors = jet(uniqueSessions);
 subjectColors = lines(uniqueSubjects);
-for iTrial = 1:numel(all_curUseTime_sorted)
-    curTime = all_curUseTime_sorted(iTrial);
+for iTrial = 1:numel(all_useTime_sorted)
+    curTime = all_useTime_sorted(iTrial);
     plot(sessionSpan(all_sessionCount_sorted(iTrial)),iTrial,'.','markerSize',1,'color',sessionColors(all_sessionCount_sorted(iTrial),:));
     plot(subjectSpan(all_subjectCount_sorted(iTrial)),iTrial,'.','markerSize',1,'color',subjectColors(all_subjectCount_sorted(iTrial),:));
 end
 
 
 % spike raster
-subplot(rows,cols,2);
+subplot_tight(rows,cols,2);
 allTrial_tsPeths_sorted = allTrial_tsPeths(k);
 allTrial_tsPeths_sorted_readable = makeRasterReadable(allTrial_tsPeths_sorted',15);
 plotSpikeRaster(allTrial_tsPeths_sorted_readable,'PlotType','scatter','AutoLabel',false); hold on;
@@ -371,7 +407,7 @@ for iBin = 1:numel(meanBins)-1
 end
 
 % heatmap
-subplot(rows,cols,3);
+subplot_tight(rows,cols,3);
 imagesc(allTrial_z_sorted);
 colormap(jet);
 xticks([1 floor(size(allTrial_z_sorted,2)/2) size(allTrial_z_sorted,2)]);
@@ -386,14 +422,14 @@ minIdxs = floor(size(allTrial_z_sorted,2)/8):floor(size(allTrial_z_sorted,2)/2);
 
 % scatter all max z-scores
 markerSize = 3;
-subplot(rows,cols,4);
+subplot_tight(rows,cols,4);
 % yyaxis left;
 lns = [];
 [maxv,maxk] = max(allTrial_z_sorted(:,maxIdxs)');
 [minv,mink] = min(allTrial_z_sorted(:,minIdxs)');
-lns(1) = plot(all_curUseTime_sorted,maxv,'g.','MarkerSize',markerSize);
+lns(1) = plot(all_useTime_sorted,maxv,'g.','MarkerSize',markerSize);
 hold on;
-lns(2) = plot(all_curUseTime_sorted,minv,'r.','MarkerSize',markerSize);
+lns(2) = plot(all_useTime_sorted,minv,'r.','MarkerSize',markerSize);
 % ylim([-40 120]);
 ylabel('trial z-score');
 xlabel('time (s)');
@@ -401,13 +437,13 @@ legend(lns,{'max z ~t0','min z < t0'});
 grid on;
 
 yyaxis right;
-lns(3) = plot(all_curUseTime_sorted+1,trapz(allTrial_z_sorted(:,areaIdxs)'),'b.','MarkerSize',markerSize);
+lns(3) = plot(all_useTime_sorted+1,trapz(allTrial_z_sorted(:,areaIdxs)'),'b.','MarkerSize',markerSize);
 xlim([0 2]);
 xticks([0 1 2]);
 xticklabels({'0','1/0','1'});
 
-[RHO_zxt,PVAL_zxt] = corr(all_curUseTime_sorted',maxv');
-[RHO_axt,PVAL_axt] = corr(all_curUseTime_sorted',trapz(allTrial_z_sorted(:,areaIdxs)')');
+[RHO_zxt,PVAL_zxt] = corr(all_useTime_sorted',maxv');
+[RHO_axt,PVAL_axt] = corr(all_useTime_sorted',trapz(allTrial_z_sorted(:,areaIdxs)')');
 [RHO_zxz,PVAL_zxz] = corr(minv',maxv');
 title({[timingField,' bracketed z-score'],...
     ['corr maxz x t = ',num2str(RHO_zxt),', p = ',num2str(PVAL_zxt)]...
@@ -421,22 +457,22 @@ legend(lns,{'max z ~t0','min z < t0',['z area <= ',num2str(areaUnderS)]});
 
 lns = [];
 markerSize = 20;
-subplot(rows,cols,5);
+subplot_tight(rows,cols,5);
 yyaxis left;
 [maxv,maxk] = max(mean_z(:,maxIdxs)');
 [minv,mink] = min(mean_z(:,minIdxs)');
 
-errorbar(all_curUseTime_sorted(meanCentersIdx),maxv,mean(std_z'),mean(std_z'),...
-    all_curUseTime_sorted(meanCentersIdx)-all_curUseTime_sorted(meanBins(1:end-1)),...
-    all_curUseTime_sorted(meanBins(2:end))-all_curUseTime_sorted(meanCentersIdx),'.','Color',[.7 .7 .7]);
+errorbar(all_useTime_sorted(meanCentersIdx),maxv,mean(std_z'),mean(std_z'),...
+    all_useTime_sorted(meanCentersIdx)-all_useTime_sorted(meanBins(1:end-1)),...
+    all_useTime_sorted(meanBins(2:end))-all_useTime_sorted(meanCentersIdx),'.','Color',[.7 .7 .7]);
 hold on;
-lns(1) = plot(all_curUseTime_sorted(meanCentersIdx),maxv,'g.','MarkerSize',markerSize); hold on;
+lns(1) = plot(all_useTime_sorted(meanCentersIdx),maxv,'g.','MarkerSize',markerSize); hold on;
 set(gca,'yColor','g');
 
 % errorbar(all_curUseTime_sorted(meanCentersIdx),minv,mean(std_z'),mean(std_z'),...
 %     all_curUseTime_sorted(meanCentersIdx)-all_curUseTime_sorted(meanBins(1:end-1)),...
 %     all_curUseTime_sorted(meanBins(2:end))-all_curUseTime_sorted(meanCentersIdx),'.','Color',[.7 .7 .7]);
-lns(2) = plot(all_curUseTime_sorted(meanCentersIdx),minv,'r.','MarkerSize',markerSize);
+lns(2) = plot(all_useTime_sorted(meanCentersIdx),minv,'r.','MarkerSize',markerSize);
 
 ylabel('min max z');
 xlim([0 1]);
@@ -449,12 +485,12 @@ grid on;
 % plot(f,all_curUseTime_sorted(meanBins(2:end))',maxv');
 
 yyaxis right;
-lns(3) = plot(all_curUseTime_sorted(meanCentersIdx),area_z,'b.','MarkerSize',markerSize);
+lns(3) = plot(all_useTime_sorted(meanCentersIdx),area_z,'b.','MarkerSize',markerSize);
 set(gca,'yColor','b');
 ylabel('area z');
 
-[RHO_zxt,PVAL_zxt] = corr(all_curUseTime_sorted(meanCentersIdx)',maxv');
-[RHO_axt,PVAL_axt] = corr(all_curUseTime_sorted(meanCentersIdx)',area_z');
+[RHO_zxt,PVAL_zxt] = corr(all_useTime_sorted(meanCentersIdx)',maxv');
+[RHO_axt,PVAL_axt] = corr(all_useTime_sorted(meanCentersIdx)',area_z');
 [RHO_zxz,PVAL_zxz] = corr(minv',maxv');
 title({[timingField,' bracketed z-score'],...
     ['corr maxz x t = ',num2str(RHO_zxt),', p = ',num2str(PVAL_zxt)]...
@@ -468,14 +504,14 @@ legend(lns,{'max z ~t0','min z < t0',['z area <= ',num2str(areaUnderS)]});
 % % ylabel('max bin (ms)');
 % % ylim([0 300]);
 
-subplot(rows,cols,6);
+subplot_tight(rows,cols,6);
 bracketLegendText = {};
 lns = [];
 
 for ii = 1:size(mean_z,1)
     lns(ii) = plot(smooth(mean_z(ii,:),nSmoothz),'color',meanColors(ii,:));
     hold on;
-    bracketLegendText{ii} = [num2str(all_curUseTime_sorted(meanCentersIdx(ii))),' ms'];
+    bracketLegendText{ii} = [num2str(all_useTime_sorted(meanCentersIdx(ii))),' ms'];
 end
 legend(lns,bracketLegendText,'Location','eastoutside');
 xlim([1 size(allTrial_z_sorted,2)]);
@@ -503,21 +539,21 @@ end
 % all ts and burst rasters
 show200ms = false;
 figuree(500,800);
-subplot(211);
+subplot_tight(211);
 allTrial_tsPeths_sorted = allTrial_tsPeths(k);
 allTrial_tsPeths_sorted_readable = makeRasterReadable(allTrial_tsPeths_sorted',20);
 plotSpikeRaster(allTrial_tsPeths_sorted_readable,'PlotType','scatter','AutoLabel',false); hold on;
 hold on;
 if useEvent == 3
-    toneLine = plot(all_curUseTime_sorted,1:numel(all_curUseTime_sorted),'g','linewidth',2);
+    toneLine = plot(all_useTime_sorted,1:numel(all_useTime_sorted),'g','linewidth',2);
     
 elseif useEvent == 4
-    toneLine = plot(0-all_curUseTime_sorted,1:numel(all_curUseTime_sorted),'g','linewidth',2);
+    toneLine = plot(0-all_useTime_sorted,1:numel(all_useTime_sorted),'g','linewidth',2);
 end
-plot([0 0],[1 numel(all_curUseTime_sorted)],'g:','linewidth',1);
+plot([0 0],[1 numel(all_useTime_sorted)],'g:','linewidth',1);
 if show200ms
-    plot([-1 1],[find(all_curUseTime_sorted >= .200,1) find(all_curUseTime_sorted >= .200,1)],'y-');
-    text(-1,find(all_curUseTime_sorted >= .200,1),'200 ms','BackgroundColor','y');
+    plot([-1 1],[find(all_useTime_sorted >= .200,1) find(all_useTime_sorted >= .200,1)],'y-');
+    text(-1,find(all_useTime_sorted >= .200,1),'200 ms','BackgroundColor','y');
 end
 xlimVals = [-tWindow tWindow];
 xlim(xlimVals);
@@ -526,18 +562,18 @@ title({['e:',eventFieldlabels{useEvent},', s:',eventFieldlabels{useNeuronClass}]
 legend(toneLine,'Tone');
 set(gca,'fontSize',16);
 
-subplot(212)
+subplot_tight(212)
 [xPoints, yPoints] = plotSpikeRaster(all_burstTs_sorted,'PlotType','scatter','AutoLabel',false);
 hold on;
 if useEvent == 3
-    toneLine = plot(all_curUseTime_sorted,1:numel(all_curUseTime_sorted),'g','linewidth',2);
+    toneLine = plot(all_useTime_sorted,1:numel(all_useTime_sorted),'g','linewidth',2);
 elseif useEvent == 4
-    toneLine = plot(0-all_curUseTime_sorted,1:numel(all_curUseTime_sorted),'g','linewidth',2);
+    toneLine = plot(0-all_useTime_sorted,1:numel(all_useTime_sorted),'g','linewidth',2);
 end
-plot([0 0],[1 numel(all_curUseTime_sorted)],'g:','linewidth',1);
+plot([0 0],[1 numel(all_useTime_sorted)],'g:','linewidth',1);
 if show200ms
-    plot([-1 1],[find(all_curUseTime_sorted >= .200,1) find(all_curUseTime_sorted >= .200,1)],'y-');
-    text(-1,find(all_curUseTime_sorted >= .200,1),'200 ms','BackgroundColor','y');
+    plot([-1 1],[find(all_useTime_sorted >= .200,1) find(all_useTime_sorted >= .200,1)],'y-');
+    text(-1,find(all_useTime_sorted >= .200,1),'200 ms','BackgroundColor','y');
 end
 title({['e:',eventFieldlabels{useEvent},', s:',eventFieldlabels{useNeuronClass}],'Only Bursts'});
 xlabel('time (s)');
@@ -559,7 +595,7 @@ for iBin = 1:numel(meanBins)-1
     mean_burstHist(iBin,:) = histcounts(curTsBurst,binEdges);
     mean_burstFraction(iBin,:) = mean_burstHist(iBin,:) ./ histcounts(curTs,binEdges);
     plot(binEdges(2:end),smooth(mean_burstHist(iBin,:),nSmooth),'color',meanColors(iBin,:),'lineWidth',2); hold on;
-    bracketLegendText{iBin} = [timingField,' > ',num2str(all_curUseTime_sorted(meanCentersIdx(iBin)),2),' s'];
+    bracketLegendText{iBin} = [timingField,' > ',num2str(all_useTime_sorted(meanCentersIdx(iBin)),2),' s'];
 end
 grid on;
 xlim([-1 1]);
