@@ -21,13 +21,11 @@ if true
         if strcmp(neuronName(1:5),'R0154')
             nexStruct = fixMissingEvents(logData,nexStruct);
         end
-        % let's first make sure logData RT == tril
-        corrIdx = find(logData.outcome == 0);
-        corrIdx_trials = find([trials(:).correct] == 1);
+        
+%         corrIdx = find(logData.outcome == 0);
+%         corrIdx_trials = find([trials(:).correct] == 1);
         trials = createTrialsStruct_simpleChoice(logData,nexStruct);
 
-        % of course plotting these looks interesting, RT/MT sorted
-        % independently!
         timingField = 'RT';
         [trialIds,rt] = sortTrialsBy(trials,timingField); % forces to be 'correct'
         all_rt = [all_rt rt];

@@ -8,26 +8,32 @@ savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/permutationFigures';
 % % plotTypes = {'raster','bracketed','high/low'};
 % % burstCriterias = {'none','Poisson','LTS'};
 
-events = [3,4];
-unitTypes = {eventFieldlabels{3},eventFieldlabels{4},'dirSel'};
+events = [4];
+% unitTypes = {eventFieldlabels{3},eventFieldlabels{4},'dirSel','~dirSel'};
+unitTypes = {'dirSel','~dirSel'};
 timingFields = {'RT','MT'};
-% movementDirs = {'all','contra','ipsi'};
-movementDirs = {'all'};
+movementDirs = {'all','contra','ipsi'};
     
 for ii_events = 1:numel(events)
     useEvent = events(ii_events);
 
     for ii_unitTypes = 1:numel(unitTypes)
+        filterBy_dirSel = false;
         switch unitTypes{ii_unitTypes}
             case eventFieldlabels{3}
                 useNeuronClass = 3;
-                useDirSel = false;
+                dirSel = false;
             case eventFieldlabels{4}
                 useNeuronClass = 4;
-                useDirSel = false;
+                dirSel = false;
             case 'dirSel'
-                useNeuronClass = [3,4];
-                useDirSel = true;
+                useNeuronClass = 4;
+                filterBy_dirSel = true;
+                dirSel = true;
+            case '~dirSel'
+                useNeuronClass = 4;
+                filterBy_dirSel = true;
+                dirSel = false;
         end
 
         for ii_movementDirs = 1:numel(movementDirs)
@@ -61,8 +67,10 @@ for ii_events = 1:numel(events)
                     sessionName = analysisConf.sessionConfs{iNeuron}.sessions__name;
                     subjectName = analysisConf.sessionConfs{iNeuron}.subjects__name;
 
-                    if useDirSel && ~dirSelNeurons(iNeuron)
-                        continue;
+                    if filterBy_dirSel
+                        if (dirSel && ~dirSelNeurons(iNeuron)) || (~dirSel && dirSelNeurons(iNeuron))
+                            continue;
+                        end
                     end
 
                     if ~ismember(unitClasses(iNeuron),useNeuronClass)
@@ -321,7 +329,7 @@ for ii_events = 1:numel(events)
                     ['move: ',movementDir],['sortBy: ',timingField]};
                 addNote(h,noteText);
                 
-                saveFile = [eventFieldlabels{useEvent},' units_',unitTypes{ii_unitTypes},' event_n',num2str(unitCount),'_movDir ',movementDir,'_sortBy ',timingField];
+                saveFile = [eventFieldlabels{useEvent},' event_',unitTypes{ii_unitTypes},' units_n',num2str(unitCount),'_movDir ',movementDir,'_sortBy ',timingField];
                 
                 set(h,'PaperOrientation','landscape');
                 set(h,'PaperUnits','normalized');
