@@ -1,3 +1,4 @@
+doSave = true;
 nMeanBins = 7;
 binMs = 20;
 binS = binMs / 1000;
@@ -8,11 +9,13 @@ savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/permutationFigures';
 % % plotTypes = {'raster','bracketed','high/low'};
 % % burstCriterias = {'none','Poisson','LTS'};
 
-events = [4];
+events = [2];
 % unitTypes = {eventFieldlabels{3},eventFieldlabels{4},'dirSel','~dirSel'};
-unitTypes = {'dirSel','~dirSel'};
-timingFields = {'RT','MT'};
-movementDirs = {'all','contra','ipsi'};
+% unitTypes = {'~dirSel','dirSel'};
+unitTypes = {eventFieldlabels{2}};
+timingFields = {'MT','RT'};
+% movementDirs = {'all','contra','ipsi'};
+movementDirs = {'all'};
     
 for ii_events = 1:numel(events)
     useEvent = events(ii_events);
@@ -20,18 +23,33 @@ for ii_events = 1:numel(events)
     for ii_unitTypes = 1:numel(unitTypes)
         filterBy_dirSel = false;
         switch unitTypes{ii_unitTypes}
+            case eventFieldlabels{1}
+                useNeuronClass = 1;
+                dirSel = false;
+            case eventFieldlabels{2}
+                useNeuronClass = 2;
+                dirSel = false;
             case eventFieldlabels{3}
                 useNeuronClass = 3;
                 dirSel = false;
             case eventFieldlabels{4}
                 useNeuronClass = 4;
                 dirSel = false;
+            case eventFieldlabels{5}
+                useNeuronClass = 5;
+                dirSel = false;
+            case eventFieldlabels{6}
+                useNeuronClass = 6;
+                dirSel = false;
+            case eventFieldlabels{7}
+                useNeuronClass = 7;
+                dirSel = false;
             case 'dirSel'
-                useNeuronClass = 4;
+                useNeuronClass = [3,4,5];
                 filterBy_dirSel = true;
                 dirSel = true;
             case '~dirSel'
-                useNeuronClass = 4;
+                useNeuronClass = [3,4,5];
                 filterBy_dirSel = true;
                 dirSel = false;
         end
@@ -191,7 +209,7 @@ for ii_events = 1:numel(events)
                 rows = 3;
                 cols = 3;
                 nSmooth = 3;
-                lineWidth = 1.5;
+                lineWidth = 1;
                 plotMargins = [.08 .08];
                 xlimVals = [-tWindow tWindow];
                 n_rasterReadable = 15;
@@ -204,6 +222,7 @@ for ii_events = 1:numel(events)
                 allTrial_LTSPeths_sorted = allTrial_LTSPeths(k);
                 
                 doRasters = {allTrial_tsPeths_sorted,allTrial_PoissonPeths_sorted,allTrial_LTSPeths_sorted};
+                doRasters = {allTrial_tsPeths_sorted};
                 rasterLabels = {'all spikes','Poisson spikes','LTS spikes'};
                 rasterSubplots = [1,4,7];
                 for ii_doRasters = 1:numel(doRasters)
@@ -230,9 +249,31 @@ for ii_events = 1:numel(events)
                 end
                 
                 % make mean z-score bins
-                meanBins = floor(linspace(1,numel(allTrial_tsPeths),nMeanBins+1));
+                binInc = 0.02;
+                switch timingField
+                    case 'RT'
+                        meanBinsSeconds = [0.05:binInc:(median(all_rt) + 2*std(all_rt))];
+                    case 'MT'
+                        meanBinsSeconds = [0.18:binInc:(median(all_mt) + 2*std(all_mt))];
+                    otherwise
+                        meanBinsSeconds = 0:binInc:max(all_useTime_sorted);
+                end
+                meanBins = [1];
+                tBins = [];
+                for ii = 1:numel(meanBinsSeconds)-1
+                    minIdx = find(all_useTime_sorted > meanBinsSeconds(ii),1,'first');
+                    meanBins = [meanBins minIdx];
+                end
+                meanBins(end) = numel(all_useTime_sorted);
+                
+%                 meanBins = floor(linspace(1,numel(allTrial_tsPeths),nMeanBins+1));
                 meanColors = cool(numel(meanBins)-1);
                 mean_z = [];
+                auc_min = [];
+                auc_max = [];
+                auc_max_t = [];
+                auc_min_z = [];
+                auc_max_z = [];
                 mean_Poisson = [];
                 mean_PoissonFraction = [];
                 mean_LTS = [];
@@ -243,18 +284,36 @@ for ii_events = 1:numel(events)
                 for iBin = 1:numel(meanBins)-1
                     mean_z(iBin,:) = smooth(mean(allTrial_z_sorted(meanBins(iBin):meanBins(iBin+1),:)),nSmooth);
                     
+                    % area under curve, assumes tWindow = 1
+                    z_curve = smooth(mean(allTrial_z_sorted(meanBins(iBin):meanBins(iBin+1),:)),10);
+                    min_start = round(.1/binS);
+                    min_end = round(.8/binS);
+                    min_curve = z_curve(min_start:min_end);
+                    min_curve_norm = min_curve - min_curve(1);
+                    auc_min_z(iBin) = min(min_curve);
+                    auc_min(iBin) = trapz(min_curve_norm(min_curve_norm <= 0));
+                    
+                    max_start = round(.8/binS);
+                    max_end = round(1.5/binS);
+                    max_curve = z_curve(max_start:max_end);
+                    [max_v,max_k] = max(max_curve);
+                     
+                    max_curve_norm = max_curve - max_curve(1);
+                    auc_max_z(iBin) = max_v;
+                    auc_max_t(iBin) = binEdges((max_start + max_k - 1));
+                    auc_max(iBin) = trapz(max_curve_norm(max_curve_norm > 0));
+                    
+                    % bursting
                     cur_ts = [allTrial_tsPeths_sorted{meanBins(iBin):meanBins(iBin+1)}];
                     cur_Poisson = [allTrial_PoissonPeths_sorted{meanBins(iBin):meanBins(iBin+1)}];
                     cur_LTS = [allTrial_LTSPeths_sorted{meanBins(iBin):meanBins(iBin+1)}];
-                    
                     mean_Poisson(iBin,:) = smooth(histcounts(cur_Poisson,binEdges),nSmooth);
                     mean_LTS(iBin,:) = smooth(histcounts(cur_LTS,binEdges),nSmooth);
-                    
                     cur_ts_count = histcounts(cur_ts,binEdges);
                     mean_PoissonFraction(iBin,:) = smooth(mean_Poisson(iBin,:) ./ cur_ts_count,nSmooth);
                     mean_LTSFraction(iBin,:) = smooth(mean_LTS(iBin,:) ./ cur_ts_count,nSmooth);
                     
-                    bracketLegendText{iBin} = [timingField,' < ',num2str(all_useTime_sorted(meanBins(iBin+1)),2),' s'];
+                    bracketLegendText{iBin} = [timingField,' < ',num2str(meanBinsSeconds(iBin+1),2),' s'];
                 end
                 
                 % Z score
@@ -276,52 +335,110 @@ for ii_events = 1:numel(events)
                 xlim([100 101]);
                 yticks([]);
                 xticks([]);
-                legend(bracketLegendText,'location','south');
+                columnlegend(3,bracketLegendText,'location','east');
                 legend boxoff;
                 set(gca,'Visible','off')
-                set(gca,'fontsize',16);
+                set(gca,'fontsize',8);
                 
-                % Prevalence
-                subplot_tight(rows,cols,5,plotMargins);
-                lns = plot(mean_Poisson','lineWidth',lineWidth);
-                set(lns,{'color'},num2cell(meanColors,2));
-                title('Poisson prevalence');
-                xlabel('time (s)');
-                ylabel('burst count');
-                xticks([1 floor(size(allTrial_z,2)/2) size(allTrial_z,2)]);
-                xticklabels({num2str(-tWindow),'0',num2str(tWindow)});
+                
+                % area under curve
+                markerSize = 30;
+                subplot_tight(rows,cols,4,plotMargins);
+                scatter(auc_min,auc_max,markerSize,meanColors,'filled');
+                xlabel('auc_min','interpreter','none');
+                ylabel('auc_max','interpreter','none');
+                [RHO,PVAL] = corr(auc_min',auc_max');
+                title({'auc_min vs. auc_max',['RHO = ',num2str(RHO,2),', PVAL = ',num2str(PVAL,2)]},'interpreter','none');
                 grid on;
+                
+                markerSize = 30;
+                subplot_tight(rows,cols,7,plotMargins);
+                scatter(auc_min_z,auc_max_z,markerSize,meanColors,'filled');
+                xlabel('auc_min_z','interpreter','none');
+                ylabel('auc_max_z','interpreter','none');
+                [RHO,PVAL] = corr(auc_min_z',auc_max_z');
+                title({'auc_min_z vs. auc_max_z',['RHO = ',num2str(RHO,2),', PVAL = ',num2str(PVAL,2)]},'interpreter','none');
+                grid on;
+                
+                subplot_tight(rows,cols,5,plotMargins);
+                scatter(meanBinsSeconds(2:end),auc_max,markerSize,meanColors,'filled');
+                xlabel(timingField,'interpreter','none');
+                ylabel('auc_max','interpreter','none');
+                [RHO,PVAL] = corr(meanBinsSeconds(2:end)',auc_max');
+                title({[timingField,' vs. auc_max'],['RHO = ',num2str(RHO,2),', PVAL = ',num2str(PVAL,2)]},'interpreter','none');
+                grid on;
+                xlim([0 1]);
                 
                 subplot_tight(rows,cols,8,plotMargins);
-                lns = plot(mean_LTS','lineWidth',lineWidth);
-                set(lns,{'color'},num2cell(meanColors,2));
-                title('LTS prevalence');
-                xlabel('time (s)');
-                ylabel('burst count');
-                xticks([1 floor(size(allTrial_z,2)/2) size(allTrial_z,2)]);
-                xticklabels({num2str(-tWindow),'0',num2str(tWindow)});
+                scatter(meanBinsSeconds(2:end),auc_max_z,markerSize,meanColors,'filled');
+                xlabel(timingField,'interpreter','none');
+                ylabel('auc_max_z','interpreter','none');
+                [RHO,PVAL] = corr(meanBinsSeconds(2:end)',auc_max_z');
+                title({[timingField,' vs. auc_max_z'],['RHO = ',num2str(RHO,2),', PVAL = ',num2str(PVAL,2)]},'interpreter','none');
                 grid on;
+                xlim([0 1]);
                 
-                % Fraction
                 subplot_tight(rows,cols,6,plotMargins);
-                lns = plot(mean_PoissonFraction','lineWidth',lineWidth);
-                set(lns,{'color'},num2cell(meanColors,2));
-                title('Poisson fraction');
-                xlabel('time (s)');
-                ylabel('burst spikes / all spikes');
-                xticks([1 floor(size(allTrial_z,2)/2) size(allTrial_z,2)]);
-                xticklabels({num2str(-tWindow),'0',num2str(tWindow)});
+                scatter(meanBinsSeconds(2:end),auc_max_t,markerSize,meanColors,'filled');
+                xlabel(timingField,'interpreter','none');
+                ylabel('auc_max_t','interpreter','none');
+                [RHO,PVAL] = corr(meanBinsSeconds(2:end)',auc_max_t');
+                title({[timingField,' vs. auc_max_t'],['RHO = ',num2str(RHO,2),', PVAL = ',num2str(PVAL,2)]},'interpreter','none');
                 grid on;
+                xlim([0 1]);
                 
                 subplot_tight(rows,cols,9,plotMargins);
-                lns = plot(mean_LTSFraction','lineWidth',lineWidth);
-                set(lns,{'color'},num2cell(meanColors,2));
-                title('LTS fraction');
-                xlabel('time (s)');
-                ylabel('burst spikes / all spikes');
-                xticks([1 floor(size(allTrial_z,2)/2) size(allTrial_z,2)]);
-                xticklabels({num2str(-tWindow),'0',num2str(tWindow)});
+                scatter(auc_max,auc_max_t,markerSize,meanColors,'filled');
+                xlabel('auc_max','interpreter','none');
+                ylabel('auc_max_t','interpreter','none');
+                [RHO,PVAL] = corr(auc_max',auc_max_t');
+                title({['auc_max vs. auc_max_t'],['RHO = ',num2str(RHO,2),', PVAL = ',num2str(PVAL,2)]},'interpreter','none');
                 grid on;
+
+                
+                % --- burst quant START
+                % Prevalence
+% %                 subplot_tight(rows,cols,5,plotMargins);
+% %                 lns = plot(mean_Poisson','lineWidth',lineWidth);
+% %                 set(lns,{'color'},num2cell(meanColors,2));
+% %                 title('Poisson prevalence');
+% %                 xlabel('time (s)');
+% %                 ylabel('burst count');
+% %                 xticks([1 floor(size(allTrial_z,2)/2) size(allTrial_z,2)]);
+% %                 xticklabels({num2str(-tWindow),'0',num2str(tWindow)});
+% %                 grid on;
+% %                 
+% %                 subplot_tight(rows,cols,8,plotMargins);
+% %                 lns = plot(mean_LTS','lineWidth',lineWidth);
+% %                 set(lns,{'color'},num2cell(meanColors,2));
+% %                 title('LTS prevalence');
+% %                 xlabel('time (s)');
+% %                 ylabel('burst count');
+% %                 xticks([1 floor(size(allTrial_z,2)/2) size(allTrial_z,2)]);
+% %                 xticklabels({num2str(-tWindow),'0',num2str(tWindow)});
+% %                 grid on;
+% %                 
+% %                 % Fraction
+% %                 subplot_tight(rows,cols,6,plotMargins);
+% %                 lns = plot(mean_PoissonFraction','lineWidth',lineWidth);
+% %                 set(lns,{'color'},num2cell(meanColors,2));
+% %                 title('Poisson fraction');
+% %                 xlabel('time (s)');
+% %                 ylabel('burst spikes / all spikes');
+% %                 xticks([1 floor(size(allTrial_z,2)/2) size(allTrial_z,2)]);
+% %                 xticklabels({num2str(-tWindow),'0',num2str(tWindow)});
+% %                 grid on;
+% %                 
+% %                 subplot_tight(rows,cols,9,plotMargins);
+% %                 lns = plot(mean_LTSFraction','lineWidth',lineWidth);
+% %                 set(lns,{'color'},num2cell(meanColors,2));
+% %                 title('LTS fraction');
+% %                 xlabel('time (s)');
+% %                 ylabel('burst spikes / all spikes');
+% %                 xticks([1 floor(size(allTrial_z,2)/2) size(allTrial_z,2)]);
+% %                 xticklabels({num2str(-tWindow),'0',num2str(tWindow)});
+% %                 grid on;
+                % --- burst quant END
                 
                 set(gcf,'color','w');
                 
@@ -329,12 +446,14 @@ for ii_events = 1:numel(events)
                     ['move: ',movementDir],['sortBy: ',timingField]};
                 addNote(h,noteText);
                 
-                saveFile = [eventFieldlabels{useEvent},' event_',unitTypes{ii_unitTypes},' units_n',num2str(unitCount),'_movDir ',movementDir,'_sortBy ',timingField];
+                saveFile = ['auc_wo1_',eventFieldlabels{useEvent},' event_',unitTypes{ii_unitTypes},' units_n',num2str(unitCount),'_movDir ',movementDir,'_sortBy ',timingField];
                 
                 set(h,'PaperOrientation','landscape');
                 set(h,'PaperUnits','normalized');
                 set(h,'PaperPosition', [0 0 1 1]);
-                print(gcf,'-dpdf', fullfile(savePath,[strrep(saveFile,' ','-'),'.pdf']));
+                if doSave
+                    export_fig(gcf,'-dpdf', fullfile(savePath,[strrep(saveFile,' ','-'),'.pdf']));
+                end
                 close(h);
             end
         end

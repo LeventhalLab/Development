@@ -8,7 +8,7 @@
 compiledEvents = zeros(numel(eventFieldnames),1);
 dirSelByEvent = zeros(numel(eventFieldnames),1);
 for iNeuron = 1:numel(unitEvents)
-    if isempty(unitEvents{iNeuron}.class) && unitEvents{iNeuron}.maxz(unitEvents{iNeuron}.class(1)) > 1.96
+    if isempty(unitEvents{iNeuron}.class)% && unitEvents{iNeuron}.maxz(unitEvents{iNeuron}.class(1)) > 1.96
         continue;
     end
     compiledEvents(unitEvents{iNeuron}.class(1),1) = compiledEvents(unitEvents{iNeuron}.class(1)) + 1;
@@ -28,7 +28,7 @@ for iEvent = 1:numel(eventFieldnames)
         if isempty(unitEvents{iNeuron}.class)
             continue;
         end
-        if unitEvents{iNeuron}.class(1) == iEvent && numel(unitEvents{iNeuron}.class) > 0.5 && unitEvents{iNeuron}.maxz(unitEvents{iNeuron}.class(2)) > 0.5
+        if unitEvents{iNeuron}.class(1) == iEvent % && numel(unitEvents{iNeuron}.class) > 0.5 && unitEvents{iNeuron}.maxz(unitEvents{iNeuron}.class(2)) > 0.5
             xm(iEvent,unitEvents{iNeuron}.class(2)) = xm(iEvent,unitEvents{iNeuron}.class(2)) + 1; % increment
             xmm(iEvent,unitEvents{iNeuron}.class(2)) = xm(iEvent,unitEvents{iNeuron}.class(2)) + 1; % increment
             classCount = classCount + 1;
