@@ -5,16 +5,25 @@ binS = binMs / 1000;
 tWindow = 1;
 binEdges = -tWindow:binS:tWindow;
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/permutationFigures';
+doBursts = false;
+% for figure
+binInc = 0.02;
+z_smooth = 2;
+auc_smooth = 5;
+lineWidth = 1;
+
+% % clear all_z_raw;
 
 % % plotTypes = {'raster','bracketed','high/low'};
 % % burstCriterias = {'none','Poisson','LTS'};
 
-events = [2];
-% unitTypes = {eventFieldlabels{3},eventFieldlabels{4},'dirSel','~dirSel'};
-% unitTypes = {'~dirSel','dirSel'};
-unitTypes = {eventFieldlabels{2}};
-timingFields = {'MT','RT'};
-% movementDirs = {'all','contra','ipsi'};
+events = [2,4];
+LRTHMT = false;
+HRTLMT = false;
+% unitTypes = {eventFieldlabels{:},'dirSel','~dirSel'};
+unitTypes = {''};
+% unitTypes = {eventFieldlabels{3},eventFieldlabels{4}};
+timingFields = {'RT','MT'};
 movementDirs = {'all'};
     
 for ii_events = 1:numel(events)
@@ -22,6 +31,7 @@ for ii_events = 1:numel(events)
 
     for ii_unitTypes = 1:numel(unitTypes)
         filterBy_dirSel = false;
+        excludeUnits = [];
         switch unitTypes{ii_unitTypes}
             case eventFieldlabels{1}
                 useNeuronClass = 1;
@@ -52,6 +62,19 @@ for ii_events = 1:numel(events)
                 useNeuronClass = [3,4,5];
                 filterBy_dirSel = true;
                 dirSel = false;
+            case 'tone_centerOut'
+                useNeuronClass = [3,4];
+                filterBy_dirSel = false;
+                dirSel = false;
+            case '~tone_centerOut'
+                useNeuronClass = [1:7];
+                filterBy_dirSel = false;
+                dirSel = false;
+                for iNeuron = 1:numel(analysisConf.neurons)
+                    if ~isempty(unitEvents{iNeuron}.class) && any(ismember(unitEvents{iNeuron}.class(1:2),[3,4]))
+                        excludeUnits = [excludeUnits iNeuron];
+                    end
+                end
         end
 
         for ii_movementDirs = 1:numel(movementDirs)
@@ -94,12 +117,44 @@ for ii_events = 1:numel(events)
                     if ~ismember(unitClasses(iNeuron),useNeuronClass)
                         continue;
                     end
+                    
+                    if ismember(iNeuron,excludeUnits)
+                        continue;
+                    end
 
                     disp(['Using unit ',num2str(iNeuron),' (class=',num2str(unitClasses(iNeuron)),', maxz=',num2str(unitEvents{iNeuron}.maxz(unitClasses(iNeuron))),') ',neuronName]);
                     unitCount = unitCount + 1;
                     
                     curTrials = all_trials{iNeuron};
-                    [useTrials,allTimes] = sortTrialsBy(curTrials,timingField);
+                    
+                    [trialIds,allRT,allMT] = sortTrialsByRTMT(curTrials,timingField);
+                    if LRTHMT
+                        LRTHMT_idx = allRT < median(all_rt) & allMT > median(all_mt);
+                        allRT = allRT(LRTHMT_idx);
+                        allMT = allMT(LRTHMT_idx);
+                        useTrials = trialIds(LRTHMT);
+                    end
+                    if HRTLMT
+                        HRTLMT_idx = allRT > median(all_rt) & allMT < median(all_mt);
+                        allRT = allRT(HRTLMT_idx);
+                        allMT = allMT(HRTLMT_idx);
+                        useTrials = trialIds(HRTLMT);
+                    end
+
+                    switch timingField
+                        case 'RT'
+% %                             [useTrials,allTimes] = sortTrialsBy(curTrials,timingField);
+                            allTimes = allRT;
+                        case 'MT'
+% %                             [useTrials,allTimes] = sortTrialsBy(curTrials,timingField);
+                            allTimes = allMT;
+% %                         case 'RTMT'
+% %                             allTimes = allRT + allMT;
+                    end
+
+% %                     [allTimes,k] = sort(allTimes);
+% %                     useTrials = trialIds(k);
+
                     trialIdInfo = organizeTrialsById(curTrials);
 
                     t_useTrials = [];
@@ -125,21 +180,24 @@ for ii_events = 1:numel(events)
 
                     tsPeths = {};
                     ts = all_ts{iNeuron};
-                    [tsISI,tsLTS,tsPoisson,tsPoissonLTS,ISI_n,LTS_n,poisson_n,poissonLTS_n] = tsBurstFilters(ts);
-                    % Poisson
-                    tsPoisson_inclusive = [];
-                    for iBurst = 1:numel(tsPoisson)
-                        tsIdx = find(ts == tsPoisson(iBurst));
-                        tsPoisson_inclusive = [tsPoisson_inclusive;ts(tsIdx:tsIdx+poisson_n(iBurst)-1)];
+                    
+                    if doBursts
+                        [tsISI,tsLTS,tsPoisson,tsPoissonLTS,ISI_n,LTS_n,poisson_n,poissonLTS_n] = tsBurstFilters(ts);
+                        % Poisson
+                        tsPoisson_inclusive = [];
+                        for iBurst = 1:numel(tsPoisson)
+                            tsIdx = find(ts == tsPoisson(iBurst));
+                            tsPoisson_inclusive = [tsPoisson_inclusive;ts(tsIdx:tsIdx+poisson_n(iBurst)-1)];
+                        end
+                        tsPeths_Poisson = eventsPeth(curTrials(useTrials),tsPoisson_inclusive,tWindow,eventFieldnames);
+                        % LTS
+                        tsLTS_inclusive = [];
+                        for iBurst = 1:numel(tsLTS)
+                            tsIdx = find(ts == tsLTS(iBurst));
+                            tsLTS_inclusive = [tsLTS_inclusive;ts(tsIdx:tsIdx+LTS_n(iBurst)-1)];
+                        end
+                        tsPeths_LTS = eventsPeth(curTrials(useTrials),tsLTS_inclusive,tWindow,eventFieldnames);
                     end
-                    tsPeths_Poisson = eventsPeth(curTrials(useTrials),tsPoisson_inclusive,tWindow,eventFieldnames);
-                    % LTS
-                    tsLTS_inclusive = [];
-                    for iBurst = 1:numel(tsLTS)
-                        tsIdx = find(ts == tsLTS(iBurst));
-                        tsLTS_inclusive = [tsLTS_inclusive;ts(tsIdx:tsIdx+LTS_n(iBurst)-1)];
-                    end
-                    tsPeths_LTS = eventsPeth(curTrials(useTrials),tsLTS_inclusive,tWindow,eventFieldnames);
 
                     z = zParams(ts,curTrials);
                     zBinMean = z.FRmean * (binMs/1000);
@@ -186,20 +244,21 @@ for ii_events = 1:numel(events)
                         allTrial_subjectNames{trialCount} = subjectName;
                         allTrial_subjectCount(trialCount) = subjectCount;
 
-                        % !! if peth isempty() fill with NaN for raster?
-                        tempPeth = tsPeths_Poisson{iTrial,useEvent};
-                        if isempty(tempPeth)
-                            allTrial_PoissonPeths{trialCount} = NaN;
-                        else
-                            allTrial_PoissonPeths{trialCount} = tempPeth;
+                        if doBursts
+                            % !! if peth isempty() fill with NaN for raster?
+                            tempPeth = tsPeths_Poisson{iTrial,useEvent};
+                            if isempty(tempPeth)
+                                allTrial_PoissonPeths{trialCount} = NaN;
+                            else
+                                allTrial_PoissonPeths{trialCount} = tempPeth;
+                            end
+                            tempPeth = tsPeths_LTS{iTrial,useEvent};
+                            if isempty(tempPeth)
+                                allTrial_LTSPeths{trialCount} = NaN;
+                            else
+                                allTrial_LTSPeths{trialCount} = tempPeth;
+                            end
                         end
-                        tempPeth = tsPeths_LTS{iTrial,useEvent};
-                        if isempty(tempPeth)
-                            allTrial_LTSPeths{trialCount} = NaN;
-                        else
-                            allTrial_LTSPeths{trialCount} = tempPeth;
-                        end
-
                         allTrial_unitClasses(trialCount) = unitClasses(iNeuron);
                         trialCount = trialCount + 1;
                     end
@@ -208,8 +267,6 @@ for ii_events = 1:numel(events)
                 % --- figure
                 rows = 3;
                 cols = 3;
-                nSmooth = 3;
-                lineWidth = 1;
                 plotMargins = [.08 .08];
                 xlimVals = [-tWindow tWindow];
                 n_rasterReadable = 15;
@@ -218,10 +275,12 @@ for ii_events = 1:numel(events)
                 
                 allTrial_z_sorted = allTrial_z(k,:);
                 allTrial_tsPeths_sorted = allTrial_tsPeths(k);
-                allTrial_PoissonPeths_sorted = allTrial_PoissonPeths(k);
-                allTrial_LTSPeths_sorted = allTrial_LTSPeths(k);
+                if doBursts
+                    allTrial_PoissonPeths_sorted = allTrial_PoissonPeths(k);
+                    allTrial_LTSPeths_sorted = allTrial_LTSPeths(k);
+                    doRasters = {allTrial_tsPeths_sorted,allTrial_PoissonPeths_sorted,allTrial_LTSPeths_sorted};
+                end
                 
-                doRasters = {allTrial_tsPeths_sorted,allTrial_PoissonPeths_sorted,allTrial_LTSPeths_sorted};
                 doRasters = {allTrial_tsPeths_sorted};
                 rasterLabels = {'all spikes','Poisson spikes','LTS spikes'};
                 rasterSubplots = [1,4,7];
@@ -236,25 +295,38 @@ for ii_events = 1:numel(events)
                     ylabel('trial');
                     title(rasterLabels{ii_doRasters});
                     if useEvent == 3
-                        toneLine = plot(all_useTime_sorted,1:numel(all_useTime_sorted),'g','linewidth',2);
-                        legend(toneLine,timingField);
+                        if strcmp(timingField,'RT')
+                            toneLine = plot(all_useTime_sorted,1:numel(all_useTime_sorted),'g','linewidth',2);
+                            legend(toneLine,timingField);
+                        end
                     elseif useEvent == 4
                         if strcmp(timingField,'RT')
-                            toneLine = plot(0-all_useTime_sorted,1:numel(all_useTime_sorted),'g','linewidth',2);
+                            toneLine = plot(-all_useTime_sorted,1:numel(all_useTime_sorted),'g','linewidth',2);
+                            legend(toneLine,timingField);
                         elseif strcmp(timingField,'MT')
                             toneLine = plot(all_useTime_sorted,1:numel(all_useTime_sorted),'g','linewidth',2);
+                            legend(toneLine,timingField);
                         end
-                        legend(toneLine,timingField);
+                    elseif useEvent == 5
+                        if strcmp(timingField,'MT')
+                            toneLine = plot(-all_useTime_sorted,1:numel(all_useTime_sorted),'g','linewidth',2);
+                            legend(toneLine,timingField);
+                        end
+                    end
+                    if strcmp(timingField,'RTMT')
+                         toneLine = plot(all_useTime_sorted,1:numel(all_useTime_sorted),'g','linewidth',2);
+                         legend(toneLine,timingField);
                     end
                 end
                 
                 % make mean z-score bins
-                binInc = 0.02;
                 switch timingField
                     case 'RT'
                         meanBinsSeconds = [0.05:binInc:(median(all_rt) + 2*std(all_rt))];
                     case 'MT'
                         meanBinsSeconds = [0.18:binInc:(median(all_mt) + 2*std(all_mt))];
+                    case 'RTMT'
+                        meanBinsSeconds = [0.3:binInc:0.8];
                     otherwise
                         meanBinsSeconds = 0:binInc:max(all_useTime_sorted);
                 end
@@ -269,6 +341,7 @@ for ii_events = 1:numel(events)
 %                 meanBins = floor(linspace(1,numel(allTrial_tsPeths),nMeanBins+1));
                 meanColors = cool(numel(meanBins)-1);
                 mean_z = [];
+                z_raw = [];
                 auc_min = [];
                 auc_max = [];
                 auc_max_t = [];
@@ -282,36 +355,50 @@ for ii_events = 1:numel(events)
 
                 tMean = linspace(xlimVals(1),xlimVals(2),size(allTrial_z_sorted,2));
                 for iBin = 1:numel(meanBins)-1
-                    mean_z(iBin,:) = smooth(mean(allTrial_z_sorted(meanBins(iBin):meanBins(iBin+1),:)),nSmooth);
+                    this_z = mean(allTrial_z_sorted(meanBins(iBin):meanBins(iBin+1),:));
                     
-                    % area under curve, assumes tWindow = 1
-                    z_curve = smooth(mean(allTrial_z_sorted(meanBins(iBin):meanBins(iBin+1),:)),10);
-                    min_start = round(.1/binS);
-                    min_end = round(.8/binS);
-                    min_curve = z_curve(min_start:min_end);
-                    min_curve_norm = min_curve - min_curve(1);
-                    auc_min_z(iBin) = min(min_curve);
-                    auc_min(iBin) = trapz(min_curve_norm(min_curve_norm <= 0));
-                    
-                    max_start = round(.8/binS);
-                    max_end = round(1.5/binS);
-                    max_curve = z_curve(max_start:max_end);
-                    [max_v,max_k] = max(max_curve);
-                     
-                    max_curve_norm = max_curve - max_curve(1);
-                    auc_max_z(iBin) = max_v;
-                    auc_max_t(iBin) = binEdges((max_start + max_k - 1));
-                    auc_max(iBin) = trapz(max_curve_norm(max_curve_norm > 0));
-                    
-                    % bursting
-                    cur_ts = [allTrial_tsPeths_sorted{meanBins(iBin):meanBins(iBin+1)}];
-                    cur_Poisson = [allTrial_PoissonPeths_sorted{meanBins(iBin):meanBins(iBin+1)}];
-                    cur_LTS = [allTrial_LTSPeths_sorted{meanBins(iBin):meanBins(iBin+1)}];
-                    mean_Poisson(iBin,:) = smooth(histcounts(cur_Poisson,binEdges),nSmooth);
-                    mean_LTS(iBin,:) = smooth(histcounts(cur_LTS,binEdges),nSmooth);
-                    cur_ts_count = histcounts(cur_ts,binEdges);
-                    mean_PoissonFraction(iBin,:) = smooth(mean_Poisson(iBin,:) ./ cur_ts_count,nSmooth);
-                    mean_LTSFraction(iBin,:) = smooth(mean_LTS(iBin,:) ./ cur_ts_count,nSmooth);
+                    % --- init, this is a poor way, should use NaNs above,
+                    % !! FIX
+                    auc_min_z(iBin) = NaN;
+                    auc_min(iBin) = NaN;
+                    auc_max_z(iBin) = NaN;
+                    auc_max_t(iBin) = NaN;
+                    auc_max(iBin) = NaN;
+                    % ---
+                    if numel(this_z) > 1
+                        z_raw(iBin,:) = this_z;
+                        mean_z(iBin,:) = smooth(z_raw(iBin,:),z_smooth);
+                        % area under curve, assumes tWindow = 1
+                        z_curve = smooth(z_raw(iBin,:),auc_smooth);
+                        min_start = round(.1/binS);
+                        min_end = round(.8/binS);
+                        min_curve = z_curve(min_start:min_end);
+                        min_curve_norm = min_curve - min_curve(1);
+                        auc_min_z(iBin) = min(min_curve);
+                        auc_min(iBin) = trapz(min_curve_norm(min_curve_norm <= 0));
+
+                        max_start = round(.8/binS);
+                        max_end = round(1.5/binS);
+                        max_curve = z_curve(max_start:max_end);
+                        [max_v,max_k] = max(max_curve);
+
+                        max_curve_norm = max_curve - max_curve(1);
+                        auc_max_z(iBin) = max_v;
+                        auc_max_t(iBin) = binEdges((max_start + max_k - 1));
+                        auc_max(iBin) = trapz(max_curve_norm(max_curve_norm > 0));
+
+                        % bursting
+                        if doBursts
+                            cur_ts = [allTrial_tsPeths_sorted{meanBins(iBin):meanBins(iBin+1)}];
+                            cur_Poisson = [allTrial_PoissonPeths_sorted{meanBins(iBin):meanBins(iBin+1)}];
+                            cur_LTS = [allTrial_LTSPeths_sorted{meanBins(iBin):meanBins(iBin+1)}];
+                            mean_Poisson(iBin,:) = smooth(histcounts(cur_Poisson,binEdges),z_smooth);
+                            mean_LTS(iBin,:) = smooth(histcounts(cur_LTS,binEdges),z_smooth);
+                            cur_ts_count = histcounts(cur_ts,binEdges);
+                            mean_PoissonFraction(iBin,:) = smooth(mean_Poisson(iBin,:) ./ cur_ts_count,z_smooth);
+                            mean_LTSFraction(iBin,:) = smooth(mean_LTS(iBin,:) ./ cur_ts_count,z_smooth);
+                        end
+                    end
                     
                     bracketLegendText{iBin} = [timingField,' < ',num2str(meanBinsSeconds(iBin+1),2),' s'];
                 end
@@ -446,13 +533,17 @@ for ii_events = 1:numel(events)
                     ['move: ',movementDir],['sortBy: ',timingField]};
                 addNote(h,noteText);
                 
-                saveFile = ['auc_wo1_',eventFieldlabels{useEvent},' event_',unitTypes{ii_unitTypes},' units_n',num2str(unitCount),'_movDir ',movementDir,'_sortBy ',timingField];
+                saveFile = ['ev',eventFieldlabels{useEvent},'_un',unitTypes{ii_unitTypes},'_n',num2str(unitCount),...
+                    '_movDir',movementDir,'_by',timingField,'_binIncMs',num2str(binInc*1000),'_binMs',num2str(binMs)];
+                
+                
+                all_z_raw.(genvarname(strrep(saveFile,' ',''))) = z_raw;
                 
                 set(h,'PaperOrientation','landscape');
                 set(h,'PaperUnits','normalized');
                 set(h,'PaperPosition', [0 0 1 1]);
                 if doSave
-                    export_fig(gcf,'-dpdf', fullfile(savePath,[strrep(saveFile,' ','-'),'.pdf']));
+                    export_fig(gcf,'-dpdf', fullfile(savePath,[saveFile,'.pdf']));
                 end
                 close(h);
             end
@@ -718,14 +809,14 @@ set(gcf,'color','w');
 figure;
 mean_burstHist = [];
 mean_burstFraction = [];
-nSmooth = 3;
+z_smooth = 3;
 bracketLegendText = {};
 for iBin = 1:numel(meanBins)-1
     curTsBurst = [all_burstTs_sorted{meanBins(iBin):meanBins(iBin+1)}];
     curTs = [allTrial_tsPeths_sorted{meanBins(iBin):meanBins(iBin+1)}];
     mean_burstHist(iBin,:) = histcounts(curTsBurst,binEdges);
     mean_burstFraction(iBin,:) = mean_burstHist(iBin,:) ./ histcounts(curTs,binEdges);
-    plot(binEdges(2:end),smooth(mean_burstHist(iBin,:),nSmooth),'color',meanColors(iBin,:),'lineWidth',2); hold on;
+    plot(binEdges(2:end),smooth(mean_burstHist(iBin,:),z_smooth),'color',meanColors(iBin,:),'lineWidth',2); hold on;
     bracketLegendText{iBin} = [timingField,' > ',num2str(all_useTime_sorted(meanCentersIdx(iBin)),2),' s'];
 end
 grid on;
@@ -740,12 +831,12 @@ set(gcf,'color','w');
 
 
 % bar plot
-nSmooth = 1;
+z_smooth = 1;
 lns = [];
 figure;
-lns(1) = bar(binEdges(2:end),smooth(mean(mean_burstFraction(1:7,:)),nSmooth),'facecolor','r','edgecolor','none','facealpha',.3);
+lns(1) = bar(binEdges(2:end),smooth(mean(mean_burstFraction(1:7,:)),z_smooth),'facecolor','r','edgecolor','none','facealpha',.3);
 hold on;
-lns(2) = bar(binEdges(2:end),smooth(mean(mean_burstFraction(8:10,:)),nSmooth),'facecolor','k','edgecolor','none','facealpha',.3);
+lns(2) = bar(binEdges(2:end),smooth(mean(mean_burstFraction(8:10,:)),z_smooth),'facecolor','k','edgecolor','none','facealpha',.3);
 xlim([-1 1]);
 xlabel('time (s)');
 ylabel('All Spikes / Spike Bursts');
@@ -757,14 +848,14 @@ set(gcf,'color','w');
 
 
 % burst occurence with z-score lines low/high RT
-nSmooth = 1;
+z_smooth = 1;
 lns = [];
 figuree(500,400);
 
 yyaxis left;
-lns(1) = bar(binEdges(2:end),smooth(mean(mean_burstHist(1:7,:)),nSmooth),'facecolor','r','edgecolor','none','facealpha',.3);
+lns(1) = bar(binEdges(2:end),smooth(mean(mean_burstHist(1:7,:)),z_smooth),'facecolor','r','edgecolor','none','facealpha',.3);
 hold on;
-lns(2) = bar(binEdges(2:end),smooth(mean(mean_burstHist(8:10,:)),nSmooth),'facecolor','k','edgecolor','none','facealpha',.3);
+lns(2) = bar(binEdges(2:end),smooth(mean(mean_burstHist(8:10,:)),z_smooth),'facecolor','k','edgecolor','none','facealpha',.3);
 xlim([-1 1]);
 xlabel('time (s)');
 ylabel('Poisson bursts');
@@ -773,9 +864,9 @@ grid on;
 
 yyaxis right;
 lns = [];
-lns(3) = plot(binEdges(2:end),smooth(mean(mean_z(1:7,:)),nSmooth),'-','color',meanColors(1,:),'lineWidth',2);
+lns(3) = plot(binEdges(2:end),smooth(mean(mean_z(1:7,:)),z_smooth),'-','color',meanColors(1,:),'lineWidth',2);
 hold on
-lns(4) = plot(binEdges(2:end),smooth(mean(mean_z(8:10,:)),nSmooth),'-','color',meanColors(8,:),'lineWidth',2);
+lns(4) = plot(binEdges(2:end),smooth(mean(mean_z(8:10,:)),z_smooth),'-','color',meanColors(8,:),'lineWidth',2);
 xlim([-1 1])
 grid on;
 ylabel('bracketed z-score');
