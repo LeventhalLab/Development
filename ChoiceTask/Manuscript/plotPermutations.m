@@ -18,11 +18,10 @@ lineWidth = 1;
 % % burstCriterias = {'none','Poisson','LTS'};
 
 events = [2,4];
-LRTHMT = false;
+LRTHMT = true;
 HRTLMT = false;
 % unitTypes = {eventFieldlabels{:},'dirSel','~dirSel'};
-unitTypes = {''};
-% unitTypes = {eventFieldlabels{3},eventFieldlabels{4}};
+unitTypes = {eventFieldlabels{3},eventFieldlabels{4}};
 timingFields = {'RT','MT'};
 movementDirs = {'all'};
     
@@ -128,17 +127,20 @@ for ii_events = 1:numel(events)
                     curTrials = all_trials{iNeuron};
                     
                     [trialIds,allRT,allMT] = sortTrialsByRTMT(curTrials,timingField);
+                    LH_RTMT_note = '';
                     if LRTHMT
                         LRTHMT_idx = allRT < median(all_rt) & allMT > median(all_mt);
                         allRT = allRT(LRTHMT_idx);
                         allMT = allMT(LRTHMT_idx);
-                        useTrials = trialIds(LRTHMT);
+                        useTrials = trialIds(LRTHMT_idx);
+                        LH_RTMT_note = 'LRTHMT';
                     end
                     if HRTLMT
                         HRTLMT_idx = allRT > median(all_rt) & allMT < median(all_mt);
                         allRT = allRT(HRTLMT_idx);
                         allMT = allMT(HRTLMT_idx);
-                        useTrials = trialIds(HRTLMT);
+                        useTrials = trialIds(HRTLMT_idx);
+                        LH_RTMT_note = 'HRTLMT';
                     end
 
                     switch timingField
@@ -330,13 +332,23 @@ for ii_events = 1:numel(events)
                     otherwise
                         meanBinsSeconds = 0:binInc:max(all_useTime_sorted);
                 end
-                meanBins = [1];
+
+                meanBins = [];
                 tBins = [];
-                for ii = 1:numel(meanBinsSeconds)-1
-                    minIdx = find(all_useTime_sorted > meanBinsSeconds(ii),1,'first');
-                    meanBins = [meanBins minIdx];
+                adj_meanBinsSeconds = [];
+                for iBinSeconds = 1:numel(meanBinsSeconds)-1
+                    minIdx = find(meanBinsSeconds(iBinSeconds) < all_useTime_sorted,1,'first');
+                    adj_meanBinsSeconds(iBinSeconds) = meanBinsSeconds(iBinSeconds);
+                    if isempty(minIdx)
+%                         adj_meanBinsSeconds(iBinSeconds+1) = meanBinsSeconds(iBinSeconds+1);
+                        break;
+                    else
+                        meanBins(iBinSeconds) = minIdx;
+                    end
                 end
-                meanBins(end) = numel(all_useTime_sorted);
+                meanBins(iBinSeconds) = numel(all_useTime_sorted);
+                meanBins = [1 meanBins];
+                meanBinsSeconds = adj_meanBinsSeconds;
                 
 %                 meanBins = floor(linspace(1,numel(allTrial_tsPeths),nMeanBins+1));
                 meanColors = cool(numel(meanBins)-1);
@@ -400,7 +412,7 @@ for ii_events = 1:numel(events)
                         end
                     end
                     
-                    bracketLegendText{iBin} = [timingField,' < ',num2str(meanBinsSeconds(iBin+1),2),' s'];
+                    bracketLegendText{iBin} = [timingField,' < ',num2str(meanBinsSeconds(iBin),2),' s'];
                 end
                 
                 % Z score
@@ -529,13 +541,15 @@ for ii_events = 1:numel(events)
                 
                 set(gcf,'color','w');
                 
-                noteText = {['event: ',eventFieldlabels{useEvent}],['class: ',unitTypes{ii_unitTypes}],['units: ',num2str(unitCount)]...
-                    ['move: ',movementDir],['sortBy: ',timingField]};
+                noteText = {['event: ',eventFieldlabels{useEvent}],['class: ',unitTypes{ii_unitTypes}],['units: ',num2str(unitCount)],...
+                    ['move: ',movementDir],['sortBy: ',timingField],['binInc: ',num2str(binInc*1000)],['binMs: ',num2str(binMs)],...
+                    [LH_RTMT_note]};
                 addNote(h,noteText);
                 
                 saveFile = ['ev',eventFieldlabels{useEvent},'_un',unitTypes{ii_unitTypes},'_n',num2str(unitCount),...
-                    '_movDir',movementDir,'_by',timingField,'_binIncMs',num2str(binInc*1000),'_binMs',num2str(binMs)];
+                    '_movDir',movementDir,'_by',timingField,'_binIncMs',num2str(binInc*1000),'_binMs',num2str(binMs),LH_RTMT_note];
                 
+                saveFile = [saveFile,LH_RTMT_note];
                 
                 all_z_raw.(genvarname(strrep(saveFile,' ',''))) = z_raw;
                 
