@@ -8,7 +8,7 @@ if false
 end
 
 if true
-    nShuffle = 1000;
+    nShuffle = 100;
     pVal = 0.95;
     neuronCount = 1;
 

@@ -8,10 +8,9 @@ if true
     
     binMs = 50;
     binS = binMs / 1000;
-    nBins_tWindow = [-tWindow:binS:tWindow];
-
+    binEdges = -tWindow:binS:tWindow;
     requireTrials = 5;
-    nShuffle = 1000;
+    nShuffle = 100;
     pNeuronDiff = [];
     pNeuronAll = [];
     
@@ -21,6 +20,22 @@ if true
         curTrials = all_trials{iNeuron};
 
         trialIdInfo = organizeTrialsById(curTrials);
+        [trialIds,allRT,allMT] = sortTrialsByRTMT(curTrials,timingField);
+        
+        if LRTHMT
+            LRTHMT_idx = allRT < .2 & allMT > median(all_mt);
+            allRT = allRT(LRTHMT_idx);
+            allMT = allMT(LRTHMT_idx);
+            useTrials = trialIds(LRTHMT_idx);
+            LH_RTMT_note = 'LRTHMT';
+        end
+        if HRTLMT
+            HRTLMT_idx = allRT > .2 & allMT < median(all_mt);
+            allRT = allRT(HRTLMT_idx);
+            allMT = allMT(HRTLMT_idx);
+            useTrials = trialIds(HRTLMT_idx);
+            LH_RTMT_note = 'HRTLMT';
+        end
 
         if numel(trialIdInfo.correctContra) < requireTrials || numel(trialIdInfo.correctIpsi) < requireTrials
             continue;
@@ -40,7 +55,7 @@ if true
             curPeths = tsPeths(:,iEvent);
             eventMatrix = [];
             for iTrial = 1:numel(curPeths)
-                [counts,centers] = hist(curPeths{iTrial},nBins_tWindow);
+                [counts,centers] = hist(curPeths{iTrial},binEdges);
                 eventMatrix(iTrial,:) = counts;
             end
 
@@ -87,8 +102,8 @@ for iEvent = 1:numel(useEvents)
     hold on;
     ylim([0 0.4]);
     yticks([0:0.2:0.4]);
-    xlim([1 size(all_zscores,3)]);
-    xticks([1 round(size(all_zscores,3)/2) size(all_zscores,3)]);
+    xlim([1 size(pNeuronDiff,3)]);
+    xticks([1 round(size(pNeuronDiff,3)/2) size(pNeuronDiff,3)]);
     xticklabels({'-1','0','1'});
     xlabel('time (s)');
     grid on;

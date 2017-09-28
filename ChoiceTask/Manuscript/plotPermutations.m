@@ -1,15 +1,15 @@
 doSave = true;
 nMeanBins = 7;
-binMs = 20;
+binMs = 50;
 binS = binMs / 1000;
 tWindow = 1;
 binEdges = -tWindow:binS:tWindow;
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/permutationFigures';
 doBursts = false;
 % for figure
-binInc = 0.02;
-z_smooth = 2;
-auc_smooth = 5;
+binInc = 0.01;
+z_smooth = 4;
+auc_smooth = 4;
 lineWidth = 1;
 
 % % clear all_z_raw;
@@ -17,11 +17,13 @@ lineWidth = 1;
 % % plotTypes = {'raster','bracketed','high/low'};
 % % burstCriterias = {'none','Poisson','LTS'};
 
-events = [2,4];
-LRTHMT = true;
+events = [4];
+LRTHMT = false;
 HRTLMT = false;
-% unitTypes = {eventFieldlabels{:},'dirSel','~dirSel'};
-unitTypes = {eventFieldlabels{3},eventFieldlabels{4}};
+LRTLMT = false;
+HRTHMT = true;
+unitTypes = {eventFieldlabels{4}};
+% unitTypes = {eventFieldlabels{3},eventFieldlabels{4}};
 timingFields = {'RT','MT'};
 movementDirs = {'all'};
     
@@ -128,19 +130,38 @@ for ii_events = 1:numel(events)
                     
                     [trialIds,allRT,allMT] = sortTrialsByRTMT(curTrials,timingField);
                     LH_RTMT_note = '';
+                    useTrials = [];
                     if LRTHMT
-                        LRTHMT_idx = allRT < median(all_rt) & allMT > median(all_mt);
+                        LRTHMT_idx = allRT < .2 & allMT > median(all_mt);
                         allRT = allRT(LRTHMT_idx);
                         allMT = allMT(LRTHMT_idx);
                         useTrials = trialIds(LRTHMT_idx);
                         LH_RTMT_note = 'LRTHMT';
                     end
                     if HRTLMT
-                        HRTLMT_idx = allRT > median(all_rt) & allMT < median(all_mt);
+                        HRTLMT_idx = allRT > .2 & allMT < median(all_mt);
                         allRT = allRT(HRTLMT_idx);
                         allMT = allMT(HRTLMT_idx);
                         useTrials = trialIds(HRTLMT_idx);
                         LH_RTMT_note = 'HRTLMT';
+                    end
+                    if LRTLMT
+                        LRTLMT_idx = allRT < .2 & allMT < median(all_mt);
+                        allRT = allRT(LRTLMT_idx);
+                        allMT = allMT(LRTLMT_idx);
+                        useTrials = trialIds(LRTLMT_idx);
+                        LH_RTMT_note = 'LRTLMT';
+                    end
+                    if HRTHMT
+                        HRTHMT_idx = allRT > .2 & allMT > median(all_mt);
+                        allRT = allRT(HRTHMT_idx);
+                        allMT = allMT(HRTHMT_idx);
+                        useTrials = trialIds(HRTHMT_idx);
+                        LH_RTMT_note = 'HRTHMT';
+                    end
+                    
+                    if isempty(allRT) || isempty(allMT)
+                        continue;
                     end
 
                     switch timingField
@@ -152,6 +173,11 @@ for ii_events = 1:numel(events)
                             allTimes = allMT;
 % %                         case 'RTMT'
 % %                             allTimes = allRT + allMT;
+                        case 'pretone'
+                            [useTrials,allTimes] = sortTrialsBy(curTrials,timingField);
+                    end
+                    if isempty(useTrials)
+                        useTrials = trialIds;
                     end
 
 % %                     [allTimes,k] = sort(allTimes);
@@ -271,7 +297,6 @@ for ii_events = 1:numel(events)
                 cols = 3;
                 plotMargins = [.08 .08];
                 xlimVals = [-tWindow tWindow];
-                n_rasterReadable = 15;
                 h = figuree(1400,800);
                 [all_useTime_sorted,k] = sort(allTrial_useTime);
                 
@@ -289,6 +314,8 @@ for ii_events = 1:numel(events)
                 for ii_doRasters = 1:numel(doRasters)
                     subplot_tight(rows,cols,rasterSubplots(ii_doRasters),plotMargins);
                     curRaster = doRasters{ii_doRasters};
+% %                     n_rasterReadable = round(100000 / numel(curRaster));
+                    n_rasterReadable = 1000;
                     curRaster_sorted_readable = makeRasterReadable(curRaster',n_rasterReadable);
                     plotSpikeRaster(curRaster_sorted_readable,'PlotType','scatter','AutoLabel',false); hold on;
                     plot([0 0],[1 numel(curRaster)],'r-');
@@ -324,11 +351,15 @@ for ii_events = 1:numel(events)
                 % make mean z-score bins
                 switch timingField
                     case 'RT'
-                        meanBinsSeconds = [0.05:binInc:(median(all_rt) + 2*std(all_rt))];
+%                         meanBinsSeconds = [median(all_rt)-std(all_rt):binInc:median(all_rt)+std(all_rt)];
+                        meanBinsSeconds = [min(all_rt):binInc:max(all_rt)];
                     case 'MT'
-                        meanBinsSeconds = [0.18:binInc:(median(all_mt) + 2*std(all_mt))];
+%                         meanBinsSeconds = [median(all_mt)-std(all_mt):binInc:median(all_mt)+std(all_mt)];
+                        meanBinsSeconds = [min(all_mt):binInc:max(all_mt)];
                     case 'RTMT'
-                        meanBinsSeconds = [0.3:binInc:0.8];
+                        meanBinsSeconds = [0.3:binInc:max(all_rt+all_mt)];
+                    case 'pretone'
+                        meanBinsSeconds = [0.5:binInc:1];
                     otherwise
                         meanBinsSeconds = 0:binInc:max(all_useTime_sorted);
                 end
@@ -348,7 +379,9 @@ for ii_events = 1:numel(events)
                 end
                 meanBins(iBinSeconds) = numel(all_useTime_sorted);
                 meanBins = [1 meanBins];
-                meanBinsSeconds = adj_meanBinsSeconds;
+                fixOnesIdx = find(meanBins == 1,1,'last');
+                meanBins = meanBins(fixOnesIdx:end);
+                meanBinsSeconds = adj_meanBinsSeconds(fixOnesIdx:end);
                 
 %                 meanBins = floor(linspace(1,numel(allTrial_tsPeths),nMeanBins+1));
                 meanColors = cool(numel(meanBins)-1);
@@ -366,6 +399,8 @@ for ii_events = 1:numel(events)
                 bracketLegendText = {};
 
                 tMean = linspace(xlimVals(1),xlimVals(2),size(allTrial_z_sorted,2));
+                z_raw = NaN(numel(meanBins)-1,size(allTrial_z_sorted,2));
+                mean_z = z_raw;
                 for iBin = 1:numel(meanBins)-1
                     this_z = mean(allTrial_z_sorted(meanBins(iBin):meanBins(iBin+1),:));
                     
@@ -460,28 +495,28 @@ for ii_events = 1:numel(events)
                 grid on;
                 
                 subplot_tight(rows,cols,5,plotMargins);
-                scatter(meanBinsSeconds(2:end),auc_max,markerSize,meanColors,'filled');
+                scatter(meanBinsSeconds,auc_max,markerSize,meanColors,'filled');
                 xlabel(timingField,'interpreter','none');
                 ylabel('auc_max','interpreter','none');
-                [RHO,PVAL] = corr(meanBinsSeconds(2:end)',auc_max');
+                [RHO,PVAL] = corr(meanBinsSeconds',auc_max');
                 title({[timingField,' vs. auc_max'],['RHO = ',num2str(RHO,2),', PVAL = ',num2str(PVAL,2)]},'interpreter','none');
                 grid on;
                 xlim([0 1]);
                 
                 subplot_tight(rows,cols,8,plotMargins);
-                scatter(meanBinsSeconds(2:end),auc_max_z,markerSize,meanColors,'filled');
+                scatter(meanBinsSeconds,auc_max_z,markerSize,meanColors,'filled');
                 xlabel(timingField,'interpreter','none');
                 ylabel('auc_max_z','interpreter','none');
-                [RHO,PVAL] = corr(meanBinsSeconds(2:end)',auc_max_z');
+                [RHO,PVAL] = corr(meanBinsSeconds',auc_max_z');
                 title({[timingField,' vs. auc_max_z'],['RHO = ',num2str(RHO,2),', PVAL = ',num2str(PVAL,2)]},'interpreter','none');
                 grid on;
                 xlim([0 1]);
                 
                 subplot_tight(rows,cols,6,plotMargins);
-                scatter(meanBinsSeconds(2:end),auc_max_t,markerSize,meanColors,'filled');
+                scatter(meanBinsSeconds,auc_max_t,markerSize,meanColors,'filled');
                 xlabel(timingField,'interpreter','none');
                 ylabel('auc_max_t','interpreter','none');
-                [RHO,PVAL] = corr(meanBinsSeconds(2:end)',auc_max_t');
+                [RHO,PVAL] = corr(meanBinsSeconds',auc_max_t');
                 title({[timingField,' vs. auc_max_t'],['RHO = ',num2str(RHO,2),', PVAL = ',num2str(PVAL,2)]},'interpreter','none');
                 grid on;
                 xlim([0 1]);
@@ -548,10 +583,9 @@ for ii_events = 1:numel(events)
                 
                 saveFile = ['ev',eventFieldlabels{useEvent},'_un',unitTypes{ii_unitTypes},'_n',num2str(unitCount),...
                     '_movDir',movementDir,'_by',timingField,'_binIncMs',num2str(binInc*1000),'_binMs',num2str(binMs),LH_RTMT_note];
-                
-                saveFile = [saveFile,LH_RTMT_note];
-                
+
                 all_z_raw.(genvarname(strrep(saveFile,' ',''))) = z_raw;
+                all_allTrial_z_sorted.(genvarname(strrep(saveFile,' ',''))) = allTrial_z_sorted;
                 
                 set(h,'PaperOrientation','landscape');
                 set(h,'PaperUnits','normalized');
@@ -564,10 +598,6 @@ for ii_events = 1:numel(events)
         end
     end
 end
-
-
-
-
 
 
 

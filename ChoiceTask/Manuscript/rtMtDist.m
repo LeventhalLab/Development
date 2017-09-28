@@ -39,7 +39,8 @@ if true
         all_mt_c{iCount} = mt;
         
         all_subjects__id = [all_subjects__id sessionConf.subjects__id];
-        iCount = iCount + 1
+        iCount = iCount + 1;
+        disp(['Session: ',num2str(iCount)]);
     end
 end
 figure('position',[0 0 900 700]);

@@ -1,6 +1,6 @@
 dosteps = [1,2]; % step 1: select laser epoch, step 2: generate plots
 protocol = 1; % 1 = long, 2 = short, 3 = custom
-useUnits = [2]; % empty runs plots for all units in NEX file
+useUnits = [1]; % empty runs plots for all units in NEX file
 
 if false % make false if data is already in MATLAB; save time, time = money, money is everything
     % extract system-specific data
