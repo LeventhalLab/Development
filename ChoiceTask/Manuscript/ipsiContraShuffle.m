@@ -19,23 +19,17 @@ if true
         neuronName = analysisConf.neurons{iNeuron}
         curTrials = all_trials{iNeuron};
 
-        trialIdInfo = organizeTrialsById(curTrials);
-        [trialIds,allRT,allMT] = sortTrialsByRTMT(curTrials,timingField);
-        
-        if LRTHMT
-            LRTHMT_idx = allRT < .2 & allMT > median(all_mt);
-            allRT = allRT(LRTHMT_idx);
-            allMT = allMT(LRTHMT_idx);
-            useTrials = trialIds(LRTHMT_idx);
-            LH_RTMT_note = 'LRTHMT';
-        end
-        if HRTLMT
-            HRTLMT_idx = allRT > .2 & allMT < median(all_mt);
-            allRT = allRT(HRTLMT_idx);
-            allMT = allMT(HRTLMT_idx);
-            useTrials = trialIds(HRTLMT_idx);
-            LH_RTMT_note = 'HRTLMT';
-        end
+%         trialIdInfo = organizeTrialsById(curTrials);
+%         minMT = 0;
+%         maxMT = median(all_mt);
+%         minMT = median(all_mt);
+%         maxMT = 1;
+%         trialIdInfo = organizeTrialsById_MT(curTrials,minMT,maxMT);
+%         minRT = 0;
+%         maxRT = .2;
+        minRT = .2;
+        maxRT = 1;
+        trialIdInfo = organizeTrialsById_RT(curTrials,minRT,maxRT);
 
         if numel(trialIdInfo.correctContra) < requireTrials || numel(trialIdInfo.correctIpsi) < requireTrials
             continue;
