@@ -1,4 +1,4 @@
-doSave = true;
+doSave = false;
 nMeanBins = 7;
 binMs = 50;
 binS = binMs / 1000;
@@ -21,10 +21,10 @@ events = [4];
 LRTHMT = false;
 HRTLMT = false;
 LRTLMT = false;
-HRTHMT = true;
+HRTHMT = false;
 unitTypes = {eventFieldlabels{4}};
 % unitTypes = {eventFieldlabels{3},eventFieldlabels{4}};
-timingFields = {'RT','MT'};
+timingFields = {'RT'};
 movementDirs = {'all'};
     
 for ii_events = 1:numel(events)
@@ -168,9 +168,11 @@ for ii_events = 1:numel(events)
                         case 'RT'
 % %                             [useTrials,allTimes] = sortTrialsBy(curTrials,timingField);
                             allTimes = allRT;
+                            allTimes2 = allMT;
                         case 'MT'
 % %                             [useTrials,allTimes] = sortTrialsBy(curTrials,timingField);
                             allTimes = allMT;
+                            allTimes2 = allRT;
 % %                         case 'RTMT'
 % %                             allTimes = allRT + allMT;
                         case 'pretone'
@@ -187,11 +189,13 @@ for ii_events = 1:numel(events)
 
                     t_useTrials = [];
                     t_allTimes = [];
+                    t_allTimes2 = [];
                     tc = 1;
                     for iTrial = 1:numel(useTrials)
                         if ismember(useTrials(iTrial),trialIdInfo.correctContra)
                             t_useTrials(tc) = useTrials(iTrial);
                             t_allTimes(tc) = allTimes(iTrial);
+                            t_allTimes2(tc) = allTimes2(iTrial);
                             tc = tc + 1;
                         end
                     end
@@ -200,11 +204,13 @@ for ii_events = 1:numel(events)
                         if ismember(useTrials(iTrial),trialIdInfo.correctIpsi)
                             t_useTrials(tc) = useTrials(iTrial);
                             t_allTimes(tc) = allTimes(iTrial);
+                            t_allTimes2(tc) = allTimes2(iTrial);
                             tc = tc + 1;
                         end
                     end
                     useTrials = t_useTrials;
                     allTimes = t_allTimes;
+                    allTimes2 = t_allTimes2;
 
                     tsPeths = {};
                     ts = all_ts{iNeuron};
@@ -236,12 +242,15 @@ for ii_events = 1:numel(events)
                         case 'contra'
                             usePeths = tsPeths(1:markContraTrials,:);
                             useTimes = allTimes(1:markContraTrials);
+                            useTimes2 = allTimes2(1:markContraTrials);
                         case 'ipsi'
                             usePeths = tsPeths(markContraTrials+1:end,:);
                             useTimes = allTimes(markContraTrials+1:end);
+                            useTimes2 = allTimes(markContraTrials+1:end);
                         otherwise                  
                             usePeths = tsPeths;
                             useTimes = allTimes;
+                            useTimes2 = allTimes2;
                     end
 
                     curZ = [];
@@ -254,8 +263,10 @@ for ii_events = 1:numel(events)
                         allTrial_z(trialCount,:) = curZ;
 
                         curUseTime = useTimes(iTrial);
+                        curUseTime2 = useTimes2(iTrial);
 
                         allTrial_useTime(trialCount) = curUseTime;
+                        allTrial_useTime2(trialCount) = curUseTime2;
                         allTrial_tsPeths{trialCount} = curTs;
 
                         if ~strcmp(lastSession,sessionName)
