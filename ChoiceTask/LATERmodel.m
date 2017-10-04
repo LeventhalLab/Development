@@ -1,11 +1,11 @@
 % from: http://www.neural-code.com/index.php/tutorials/action/reaction-time/83-reciprobit-distribution
 %% Histogram
-rt = all_rt(all_rt > 0.02) * 1000;
+rt = all_rt(all_rt > 0)*1000;
 x  = 0:50:1000; % reaction time bins (ms)
 N  = histcounts(rt,x);  % count reactions in bin
 N  = 100*N./sum(N); % percentage
- 
-figure(1) % graphics
+
+figure; % #1 graphics
 h  = bar(x(2:end),N); % histogram/bar plot
 % Making figure nicer to look at
 set(h,'FaceColor',[.7 .7 .7]); % setting the color of the bars to gray
@@ -19,20 +19,21 @@ xlim([0 1000]);
 % Since this test compares with the normal distribution, we have to
 % normalize the data, which we can do with zscore, which is the same as: 
 % z = (x-mean(x))/std(x)
-[h,p]  = kstest(zscore(rt)); % for reaction time
-if h
-  str    = ['The null hypothesis that the reaction time distribution is Gaussian distributed is rejected, with P = ' num2str(p)];
-else
-  str    = ['The null hypothesis that the reaction time distribution is Gaussian distributed is NOT rejected, with P = ' num2str(p)];
-end
-disp(str); % display the results in command window
-[h,p]  = kstest(zscore(rtinv)); % for inverse reaction time
-if h
-  str    = ['The null hypothesis that the inverse reaction time distribution is Gaussian distributed is rejected, with P = ' num2str(p)];
-else
-  str    = ['The null hypothesis that the inverse reaction time distribution is Gaussian distributed is NOT rejected, with P = ' num2str(p)];
-end
-disp(str); % display the results in command window
+
+% % [h,p]  = kstest(zscore(rt)); % for reaction time
+% % if h
+% %   str    = ['The null hypothesis that the reaction time distribution is Gaussian distributed is rejected, with P = ' num2str(p)];
+% % else
+% %   str    = ['The null hypothesis that the reaction time distribution is Gaussian distributed is NOT rejected, with P = ' num2str(p)];
+% % end
+% % disp(str); % display the results in command window
+% % [h,p]  = kstest(zscore(rtinv)); % for inverse reaction time
+% % if h
+% %   str    = ['The null hypothesis that the inverse reaction time distribution is Gaussian distributed is rejected, with P = ' num2str(p)];
+% % else
+% %   str    = ['The null hypothesis that the inverse reaction time distribution is Gaussian distributed is NOT rejected, with P = ' num2str(p)];
+% % end
+% % disp(str); % display the results in command window
 
 %% Inverse reaction time
 rtinv  = 1./rt; % inverse reaction time / promptness (ms-1)
@@ -42,7 +43,7 @@ x = linspace(1/2000,0.01,n); % promptness bins
 N    = histcounts(rtinv,x);
 N    = 100*N./sum(N);
  
-figure(2)
+figure; % #2
 h = bar(x(2:end)*1000,N);
 hold on
 set(h,'FaceColor',[.7 .7 .7]);
@@ -66,13 +67,14 @@ plot(x*1000,y,'ks-','LineWidth',2,'MarkerFaceColor','w');
 x = sort(1000*rtinv);
 n = numel(rtinv); % number of data points
 y = 100*(1:n)./n; % cumulative probability for every data point
-figure(3)
+figure; % #3
 plot(x,y,'k.');
 hold on
  
 % Now, plot it cumulative probability in quantiles
 % this is easier to compare between different distributions
-p    = [2 5 10 20 50 80 90 95 98 99]/100; % some arbitrary probabilities
+% % p    = [2 5 10 20 50 80 90 95 98 99]/100; % some arbitrary probabilities
+p = round(linspace(1,100,20))/100;
 q    = quantile(rtinv,p); % instead of hist, let's use quantiles
  
 h = plot(q*1000,p*100,'ko','LineWidth',2,'MarkerFaceColor','r');
@@ -92,7 +94,7 @@ myerfinv    = sqrt(2)*erfinv(myerf);
 chi         = myerfinv;
 
 %% Probit
-figure(4)
+figure; % #4
 % raw data
 x = -1./sort((rt)); % multiply by -1 to mirror abscissa
 n = numel(rtinv); % number of data points

@@ -1,6 +1,6 @@
 % the fraction of units whose activity is significantly different between
 % ipsi/contra trials
-pVal = 0.95;
+pVal = 0.99;
 
 if true
     useEvents = 1:7;
@@ -68,7 +68,7 @@ if true
                 curMDS = matrixDiffShuffle(:,iBin);
                 pEventDiff(iEvent,iBin) = numel(find(matrixDiff(iBin) > curMDS)) / nShuffle;
             end
-            if iEvent == 4 && sum(pEventDiff(iEvent,:) > pVal) > 8
+            if iEvent == 4 && sum(pEventDiff(iEvent,:) > pVal) > 4
                 dirSelNeurons(iNeuron) = 1;
             end
         end

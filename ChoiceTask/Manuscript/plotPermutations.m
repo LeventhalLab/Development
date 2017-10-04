@@ -1,18 +1,25 @@
-doSave = false;
-nMeanBins = 7;
-binMs = 50;
+doSave = true;
+nMeanBins = 20;
+binMs = 20;
 binS = binMs / 1000;
 tWindow = 1;
 binEdges = -tWindow:binS:tWindow;
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/permutationFigures';
 doBursts = false;
 % for figure
-binInc = 0.01;
-z_smooth = 4;
-auc_smooth = 4;
-lineWidth = 1;
+binInc = 0.02;
+z_smooth = 5;
+auc_smooth = 5;
+lineWidth = 1.5;
+minZ = 0;
 
-% % clear all_z_raw;
+useOrdinaryRTs = false;
+% qx_intercepts = ezReciprobit(all_rt,10);
+ordinaryRTmin = qx_intercepts(2);
+ordinaryRTmax =  qx_intercepts(10);
+
+
+clear all_z_raw;
 
 % % plotTypes = {'raster','bracketed','high/low'};
 % % burstCriterias = {'none','Poisson','LTS'};
@@ -22,9 +29,9 @@ LRTHMT = false;
 HRTLMT = false;
 LRTLMT = false;
 HRTHMT = false;
-unitTypes = {eventFieldlabels{4}};
+unitTypes = {'dirSel'};
 % unitTypes = {eventFieldlabels{3},eventFieldlabels{4}};
-timingFields = {'RT'};
+timingFields = {'RT','MT'};
 movementDirs = {'all'};
     
 for ii_events = 1:numel(events)
@@ -56,11 +63,11 @@ for ii_events = 1:numel(events)
                 useNeuronClass = 7;
                 dirSel = false;
             case 'dirSel'
-                useNeuronClass = [3,4,5];
+                useNeuronClass = [3,4,5,6,7];
                 filterBy_dirSel = true;
                 dirSel = true;
             case '~dirSel'
-                useNeuronClass = [3,4,5];
+                useNeuronClass = [4];
                 filterBy_dirSel = true;
                 dirSel = false;
             case 'tone_centerOut'
@@ -122,6 +129,10 @@ for ii_events = 1:numel(events)
                     if ismember(iNeuron,excludeUnits)
                         continue;
                     end
+                    
+                    if unitEvents{iNeuron}.maxz(unitClasses(iNeuron)) < minZ
+                        continue;
+                    end
 
                     disp(['Using unit ',num2str(iNeuron),' (class=',num2str(unitClasses(iNeuron)),', maxz=',num2str(unitEvents{iNeuron}.maxz(unitClasses(iNeuron))),') ',neuronName]);
                     unitCount = unitCount + 1;
@@ -132,14 +143,14 @@ for ii_events = 1:numel(events)
                     LH_RTMT_note = '';
                     useTrials = [];
                     if LRTHMT
-                        LRTHMT_idx = allRT < .2 & allMT > median(all_mt);
+                        LRTHMT_idx = allRT < median(all_rt) + std(all_rt) & allMT > median(all_mt);
                         allRT = allRT(LRTHMT_idx);
                         allMT = allMT(LRTHMT_idx);
                         useTrials = trialIds(LRTHMT_idx);
                         LH_RTMT_note = 'LRTHMT';
                     end
                     if HRTLMT
-                        HRTLMT_idx = allRT > .2 & allMT < median(all_mt);
+                        HRTLMT_idx = allMT < median(all_mt);
                         allRT = allRT(HRTLMT_idx);
                         allMT = allMT(HRTLMT_idx);
                         useTrials = trialIds(HRTLMT_idx);
@@ -158,6 +169,13 @@ for ii_events = 1:numel(events)
                         allMT = allMT(HRTHMT_idx);
                         useTrials = trialIds(HRTHMT_idx);
                         LH_RTMT_note = 'HRTHMT';
+                    end
+                    if useOrdinaryRTs
+                        ordinary_idx = allRT >= ordinaryRTmin & allRT < ordinaryRTmax;
+                        allRT = allRT(ordinary_idx);
+                        allMT = allMT(ordinary_idx);
+                        useTrials = trialIds(ordinary_idx);
+                        LH_RTMT_note = 'ORD';
                     end
                     
                     if isempty(allRT) || isempty(allMT)
@@ -325,8 +343,7 @@ for ii_events = 1:numel(events)
                 for ii_doRasters = 1:numel(doRasters)
                     subplot_tight(rows,cols,rasterSubplots(ii_doRasters),plotMargins);
                     curRaster = doRasters{ii_doRasters};
-% %                     n_rasterReadable = round(100000 / numel(curRaster));
-                    n_rasterReadable = 1000;
+                    n_rasterReadable = round(100000 / numel(curRaster));
                     curRaster_sorted_readable = makeRasterReadable(curRaster',n_rasterReadable);
                     plotSpikeRaster(curRaster_sorted_readable,'PlotType','scatter','AutoLabel',false); hold on;
                     plot([0 0],[1 numel(curRaster)],'r-');
@@ -363,7 +380,9 @@ for ii_events = 1:numel(events)
                 switch timingField
                     case 'RT'
 %                         meanBinsSeconds = [median(all_rt)-std(all_rt):binInc:median(all_rt)+std(all_rt)];
-                        meanBinsSeconds = [min(all_rt):binInc:max(all_rt)];
+%                         meanBinsSeconds = [min(all_rt):binInc:max(all_rt)];
+                        meanBinsSeconds = [min(all_rt),.12:binInc:.45,max(all_rt)];
+%                         meanBinsSeconds = [min(all_rt):binInc:max(all_rt)];
                     case 'MT'
 %                         meanBinsSeconds = [median(all_mt)-std(all_mt):binInc:median(all_mt)+std(all_mt)];
                         meanBinsSeconds = [min(all_mt):binInc:max(all_mt)];
@@ -376,25 +395,30 @@ for ii_events = 1:numel(events)
                 end
 
                 meanBins = [];
-                tBins = [];
-                adj_meanBinsSeconds = [];
-                for iBinSeconds = 1:numel(meanBinsSeconds)-1
-                    minIdx = find(meanBinsSeconds(iBinSeconds) < all_useTime_sorted,1,'first');
-                    adj_meanBinsSeconds(iBinSeconds) = meanBinsSeconds(iBinSeconds);
-                    if isempty(minIdx)
-%                         adj_meanBinsSeconds(iBinSeconds+1) = meanBinsSeconds(iBinSeconds+1);
-                        break;
-                    else
-                        meanBins(iBinSeconds) = minIdx;
-                    end
+                for iBinSeconds = 1:numel(meanBinsSeconds)
+                    [idx, val] = closest(all_useTime_sorted,meanBinsSeconds(iBinSeconds));
+                    meanBins(iBinSeconds) = idx;
                 end
-                meanBins(iBinSeconds) = numel(all_useTime_sorted);
-                meanBins = [1 meanBins];
-                fixOnesIdx = find(meanBins == 1,1,'last');
-                meanBins = meanBins(fixOnesIdx:end);
-                meanBinsSeconds = adj_meanBinsSeconds(fixOnesIdx:end);
                 
-%                 meanBins = floor(linspace(1,numel(allTrial_tsPeths),nMeanBins+1));
+%                 adj_meanBinsSeconds = [];
+%                 for iBinSeconds = 1:numel(meanBinsSeconds)-1
+%                     minIdx = find(meanBinsSeconds(iBinSeconds) < all_useTime_sorted,1,'first');
+%                     adj_meanBinsSeconds(iBinSeconds) = meanBinsSeconds(iBinSeconds);
+%                     if isempty(minIdx)
+% %                         adj_meanBinsSeconds(iBinSeconds+1) = meanBinsSeconds(iBinSeconds+1);
+%                         break;
+%                     else
+%                         meanBins(iBinSeconds) = minIdx;
+%                     end
+%                 end
+%                 meanBins(iBinSeconds) = numel(all_useTime_sorted);
+%                 meanBins = [1 meanBins];
+%                 fixOnesIdx = find(meanBins == 1,1,'last');
+%                 meanBins = meanBins(fixOnesIdx:end);
+%                 meanBinsSeconds = adj_meanBinsSeconds(fixOnesIdx:end);
+                
+                meanBins = floor(linspace(1,numel(allTrial_tsPeths),nMeanBins+1));
+                meanBinsSeconds = all_useTime_sorted(meanBins);
                 meanColors = cool(numel(meanBins)-1);
                 mean_z = [];
                 z_raw = [];
@@ -458,7 +482,7 @@ for ii_events = 1:numel(events)
                         end
                     end
                     
-                    bracketLegendText{iBin} = [timingField,' < ',num2str(meanBinsSeconds(iBin),2),' s'];
+                    bracketLegendText{iBin,1} = [num2str(all_useTime_sorted(meanBins(iBin)),2),'s < ',timingField,' < ',num2str(all_useTime_sorted(meanBins(iBin+1)),2),' s'];
                 end
                 
                 % Z score
@@ -481,7 +505,6 @@ for ii_events = 1:numel(events)
                 yticks([]);
                 xticks([]);
                 columnlegend(3,bracketLegendText,'location','east');
-                legend boxoff;
                 set(gca,'Visible','off')
                 set(gca,'fontsize',8);
                 
@@ -506,28 +529,28 @@ for ii_events = 1:numel(events)
                 grid on;
                 
                 subplot_tight(rows,cols,5,plotMargins);
-                scatter(meanBinsSeconds,auc_max,markerSize,meanColors,'filled');
+                scatter(meanBinsSeconds(2:end),auc_max,markerSize,meanColors,'filled');
                 xlabel(timingField,'interpreter','none');
                 ylabel('auc_max','interpreter','none');
-                [RHO,PVAL] = corr(meanBinsSeconds',auc_max');
+                [RHO,PVAL] = corr(meanBinsSeconds(2:end)',auc_max');
                 title({[timingField,' vs. auc_max'],['RHO = ',num2str(RHO,2),', PVAL = ',num2str(PVAL,2)]},'interpreter','none');
                 grid on;
                 xlim([0 1]);
                 
                 subplot_tight(rows,cols,8,plotMargins);
-                scatter(meanBinsSeconds,auc_max_z,markerSize,meanColors,'filled');
+                scatter(meanBinsSeconds(2:end),auc_max_z,markerSize,meanColors,'filled');
                 xlabel(timingField,'interpreter','none');
                 ylabel('auc_max_z','interpreter','none');
-                [RHO,PVAL] = corr(meanBinsSeconds',auc_max_z');
+                [RHO,PVAL] = corr(meanBinsSeconds(2:end)',auc_max_z');
                 title({[timingField,' vs. auc_max_z'],['RHO = ',num2str(RHO,2),', PVAL = ',num2str(PVAL,2)]},'interpreter','none');
                 grid on;
                 xlim([0 1]);
                 
                 subplot_tight(rows,cols,6,plotMargins);
-                scatter(meanBinsSeconds,auc_max_t,markerSize,meanColors,'filled');
+                scatter(meanBinsSeconds(2:end),auc_max_t,markerSize,meanColors,'filled');
                 xlabel(timingField,'interpreter','none');
                 ylabel('auc_max_t','interpreter','none');
-                [RHO,PVAL] = corr(meanBinsSeconds',auc_max_t');
+                [RHO,PVAL] = corr(meanBinsSeconds(2:end)',auc_max_t');
                 title({[timingField,' vs. auc_max_t'],['RHO = ',num2str(RHO,2),', PVAL = ',num2str(PVAL,2)]},'interpreter','none');
                 grid on;
                 xlim([0 1]);
@@ -588,12 +611,12 @@ for ii_events = 1:numel(events)
                 set(gcf,'color','w');
                 
                 noteText = {['event: ',eventFieldlabels{useEvent}],['class: ',unitTypes{ii_unitTypes}],['units: ',num2str(unitCount)],...
-                    ['move: ',movementDir],['sortBy: ',timingField],['binInc: ',num2str(binInc*1000)],['binMs: ',num2str(binMs)],...
+                    ['move: ',movementDir],['sortBy: ',timingField],['bins: ',num2str(nMeanBins)],['binMs: ',num2str(binMs)],...
                     [LH_RTMT_note]};
                 addNote(h,noteText);
                 
                 saveFile = ['ev',eventFieldlabels{useEvent},'_un',unitTypes{ii_unitTypes},'_n',num2str(unitCount),...
-                    '_movDir',movementDir,'_by',timingField,'_binIncMs',num2str(binInc*1000),'_binMs',num2str(binMs),LH_RTMT_note];
+                    '_movDir',movementDir,'_by',timingField,'_bins',num2str(nMeanBins),'_binMs',num2str(binMs),LH_RTMT_note];
 
                 all_z_raw.(genvarname(strrep(saveFile,' ',''))) = z_raw;
                 all_allTrial_z_sorted.(genvarname(strrep(saveFile,' ',''))) = allTrial_z_sorted;
