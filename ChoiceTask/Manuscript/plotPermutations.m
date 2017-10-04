@@ -1,14 +1,15 @@
-doSave = true;
-nMeanBins = 20;
+doSave = false;
+nMeanBins = 10;
 binMs = 20;
 binS = binMs / 1000;
 tWindow = 1;
 binEdges = -tWindow:binS:tWindow;
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/permutationFigures';
+sessionsPath = '/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions';
 doBursts = false;
 % for figure
 binInc = 0.02;
-z_smooth = 5;
+z_smooth = 3;
 auc_smooth = 5;
 lineWidth = 1.5;
 minZ = 0;
@@ -29,9 +30,9 @@ LRTHMT = false;
 HRTLMT = false;
 LRTLMT = false;
 HRTHMT = false;
-unitTypes = {'dirSel'};
-% unitTypes = {eventFieldlabels{3},eventFieldlabels{4}};
-timingFields = {'RT','MT'};
+% unitTypes = {eventFieldlabels{3},eventFieldlabels{4},'dirSel','~dirSel'};
+unitTypes = {eventFieldlabels{3}};
+timingFields = {'RT'};
 movementDirs = {'all'};
     
 for ii_events = 1:numel(events)
@@ -63,11 +64,11 @@ for ii_events = 1:numel(events)
                 useNeuronClass = 7;
                 dirSel = false;
             case 'dirSel'
-                useNeuronClass = [3,4,5,6,7];
+                useNeuronClass = [3,4];
                 filterBy_dirSel = true;
                 dirSel = true;
             case '~dirSel'
-                useNeuronClass = [4];
+                useNeuronClass = [3,4];
                 filterBy_dirSel = true;
                 dirSel = false;
             case 'tone_centerOut'
@@ -452,15 +453,15 @@ for ii_events = 1:numel(events)
                         mean_z(iBin,:) = smooth(z_raw(iBin,:),z_smooth);
                         % area under curve, assumes tWindow = 1
                         z_curve = smooth(z_raw(iBin,:),auc_smooth);
-                        min_start = round(.1/binS);
-                        min_end = round(.8/binS);
+                        min_start = round(.2/binS);
+                        min_end = round(.7/binS);
                         min_curve = z_curve(min_start:min_end);
                         min_curve_norm = min_curve - min_curve(1);
                         auc_min_z(iBin) = min(min_curve);
                         auc_min(iBin) = trapz(min_curve_norm(min_curve_norm <= 0));
 
                         max_start = round(.8/binS);
-                        max_end = round(1.5/binS);
+                        max_end = round(1.2/binS);
                         max_curve = z_curve(max_start:max_end);
                         [max_v,max_k] = max(max_curve);
 
@@ -626,6 +627,7 @@ for ii_events = 1:numel(events)
                 set(h,'PaperPosition', [0 0 1 1]);
                 if doSave
                     export_fig(gcf,'-dpdf', fullfile(savePath,[saveFile,'.pdf']));
+                    save(fullfile(sessionsPath,[saveFile,datestr(now,'YYYYMMDD')]),'z_raw','meanBinsSeconds','mean_z','auc_min','auc_max','auc_max_t','auc_min_z','auc_max_z');
                 end
                 close(h);
             end
