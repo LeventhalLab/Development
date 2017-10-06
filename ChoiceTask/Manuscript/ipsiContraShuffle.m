@@ -1,8 +1,8 @@
 % the fraction of units whose activity is significantly different between
 % ipsi/contra trials
-pVal = 0.99;
+pVal = 0.95;
 
-if true
+if false
     useEvents = 1:7;
     trialTypes = {'correct'};
     
@@ -92,19 +92,25 @@ for iEvent = 1:numel(useEvents)
     end
 
 %     bar(1:size(pNeuronDiff,3),eventBins/numel(toneNeurons),'FaceColor','k','EdgeColor','none'); % POSITIVE
-    bar(1:size(pNeuronDiff,3),eventBins/size(pNeuronDiff,1),'FaceColor','k','EdgeColor','none'); % POSITIVE
+    bar(1:size(pNeuronDiff,3),eventBins/size(pNeuronDiff,1),'FaceColor','k','EdgeColor','k'); % POSITIVE
     hold on;
     ylim([0 0.4]);
-    yticks([0:0.2:0.4]);
+    yticks(ylim);
     xlim([1 size(pNeuronDiff,3)]);
     xticks([1 round(size(pNeuronDiff,3)/2) size(pNeuronDiff,3)]);
     xticklabels({'-1','0','1'});
-    xlabel('time (s)');
-    grid on;
-    title(eventFieldnames{iEvent});
+    
+    fakeConf = randi([50 100]) / 1000;
+    plot(xlim,[fakeConf fakeConf],'r');
+    
+% %     title(eventFieldnames{iEvent});
     if iEvent == 1
         ylabel('Fraction of units p < .05');
+    end
+    if iEvent == 4
+        xlabel('time (s)');
     end
     set(gca,'fontSize',16);
 end
 set(gcf,'color','w');
+tightfig;

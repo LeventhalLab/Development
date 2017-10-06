@@ -4,6 +4,7 @@
 % useEvents = 1:7;
 % tWindow = 1;
 % [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,ts_all,eventFieldnames,tWindow,binMs,trialTypes,useEvents);
+doLegend = true;
 imsc = [];
 useSubjects = [88,117,142,154,182];
 % useSubjects = [182];
@@ -38,70 +39,110 @@ end
 
 % remap neuronIds
 sorted_neuronIds = [];
-markerLocs = [0];
+% % markerLocs = [0];
 for iEvent = 1:numel(eventFieldnames)
     sorted_neuronIds = [sorted_neuronIds sorted_neuronClasses{iEvent}];
-    markerLocs = [markerLocs numel(sorted_neuronIds)];
+% %     markerLocs = [markerLocs numel(sorted_neuronIds)];
 end
 
-figuree(1200,800);
+caxisVals = [-0.5 2];
+h = figuree(1200,400);
 for iEvent = 1:numel(eventFieldnames)
     subplot(1,numel(eventFieldnames),iEvent);
     imagesc(squeeze(all_zscores(sorted_neuronIds,iEvent,:)));
+    hold on;
+    plot([round(size(all_zscores,3)/2) round(size(all_zscores,3)/2)],[1 numel(analysisConf.neurons)],'k--'); % t=0
 %     imagesc(squeeze(all_zscores(:,iEvent,:))); % in session order
-    caxis([-1 3]);
+    caxis(caxisVals);
     xlim([1 size(all_zscores,3)]);
     xticks([1 round(size(all_zscores,3)/2) size(all_zscores,3)]);
     xticklabels({'-1','0','1'});
     yticks([1 numel(analysisConf.neurons)]);
     colormap jet;
-    title(['corr_',eventFieldnames{iEvent}],'interpreter','none');
-    hold on;
-    plot([round(size(all_zscores,3)/2) round(size(all_zscores,3)/2)],[1 numel(analysisConf.neurons)],'k--');
-    markerRange = markerLocs(iEvent)+1:markerLocs(iEvent+1);
-    plot(ones(numel(markerRange),1),markerRange,'k.','MarkerSize',20);
+    title([eventFieldlabels{iEvent}],'interpreter','none');
 %     markerRange = markerLocs(iEvent)+1:markerLocs(iEvent+1);
-%     plot(ones(numel(markerRange),1),markerRange,'r.','MarkerSize',10);
-end
-
-if false
-    % incorrect 
-    figuree(1200,800);
-    for iEvent = 1:numel(eventFieldnames)
-        subplot(1,numel(eventFieldnames),iEvent);
-        imagesc(squeeze(incorr_all_zscores(sorted_neuronIds,iEvent,:)));
-        caxis([-3 8]);
-        xlim([1 40]);
-        xticks([1 20 40]);
-        xticklabels({'-1','0','1'});
-        yticks([1 numel(analysisConf.neurons)]);
-        colormap jet;
-        title(['incorr_',eventFieldnames{iEvent}],'interpreter','none');
-        hold on;
-        plot([20 20],[1 numel(analysisConf.neurons)],'k--');
-        markerRange = markerLocs(iEvent)+1:markerLocs(iEvent+1);
-        plot(ones(numel(markerRange),1),markerRange,'k.','MarkerSize',20);
-    %     markerRange = markerLocs(iEvent)+1:markerLocs(iEvent+1);
-    %     plot(ones(numel(markerRange),1),markerRange,'r.','MarkerSize',10);
+%     plot(ones(numel(markerRange),1),markerRange,'k.','MarkerSize',20);
+    if iEvent ~= 1
+        yticklabels({'',''});
+    else
+        ylabel('Units');
     end
-
-    % correct - incorrect 
-    figuree(1200,800);
-    for iEvent = 1:numel(eventFieldnames)
-        subplot(1,numel(eventFieldnames),iEvent);
-        imagesc(squeeze(all_zscores(sorted_neuronIds,iEvent,:)) - squeeze(incorr_all_zscores(sorted_neuronIds,iEvent,:)));
-        caxis([-3 8]);
-        xlim([1 40]);
-        xticks([1 20 40]);
-        xticklabels({'-1','0','1'});
-        yticks([1 numel(analysisConf.neurons)]);
-        colormap jet;
-        title(['diff_',eventFieldnames{iEvent}],'interpreter','none');
-        hold on;
-        plot([20 20],[1 numel(analysisConf.neurons)],'k--');
-        markerRange = markerLocs(iEvent)+1:markerLocs(iEvent+1);
-        plot(ones(numel(markerRange),1),markerRange,'k.','MarkerSize',20);
-    %     markerRange = markerLocs(iEvent)+1:markerLocs(iEvent+1);
-    %     plot(ones(numel(markerRange),1),markerRange,'r.','MarkerSize',10);
+    if iEvent == 4
+        xlabel('time (s)');
+    end
+    set(gca,'fontSize',16);
+end
+for iNeuron = 1:numel(sorted_neuronIds)
+    if ~isempty(unitEvents{sorted_neuronIds(iNeuron)}.class)
+        subplot(1,numel(eventFieldnames),unitEvents{sorted_neuronIds(iNeuron)}.class(1));
+        plot(3,iNeuron,'>','MarkerFaceColor','k','MarkerEdgeColor','none','markerSize',5); % class 1
+        if ~isempty(unitEvents{sorted_neuronIds(iNeuron)}.class(2))
+            subplot(1,numel(eventFieldnames),unitEvents{sorted_neuronIds(iNeuron)}.class(2));
+            plot(size(all_zscores,3)-1,iNeuron,'<','MarkerFaceColor','r','MarkerEdgeColor','none','markerSize',5); % class 1
+        end
     end
 end
+% special unit
+subplot(1,numel(eventFieldnames),4);
+plot(4,find(sorted_neuronIds == 188),'>','MarkerFaceColor','g','MarkerEdgeColor','none','markerSize',10);
+
+set(gcf,'color','w');
+tightfig;
+
+if doLegend
+    figuree(300,400);
+    set(gca,'Visible','Off')
+    xticks([]);
+    cb = colorbar('location','eastoutside');
+    colormap(jet);
+    caxis(caxisVals);
+    title(cb,'Z score');
+    set(cb,'XTick',[caxisVals(1),0,caxisVals(2)]);
+    set(gcf,'color','w');
+    set(gca,'fontSize',16);
+end
+
+
+    
+
+% % if false
+% %     % incorrect 
+% %     figuree(1200,800);
+% %     for iEvent = 1:numel(eventFieldnames)
+% %         subplot(1,numel(eventFieldnames),iEvent);
+% %         imagesc(squeeze(incorr_all_zscores(sorted_neuronIds,iEvent,:)));
+% %         caxis([-3 8]);
+% %         xlim([1 40]);
+% %         xticks([1 20 40]);
+% %         xticklabels({'-1','0','1'});
+% %         yticks([1 numel(analysisConf.neurons)]);
+% %         colormap jet;
+% %         title(['incorr_',eventFieldnames{iEvent}],'interpreter','none');
+% %         hold on;
+% %         plot([20 20],[1 numel(analysisConf.neurons)],'k--');
+% %         markerRange = markerLocs(iEvent)+1:markerLocs(iEvent+1);
+% %         plot(ones(numel(markerRange),1),markerRange,'k.','MarkerSize',20);
+% %     %     markerRange = markerLocs(iEvent)+1:markerLocs(iEvent+1);
+% %     %     plot(ones(numel(markerRange),1),markerRange,'r.','MarkerSize',10);
+% %     end
+% % 
+% %     % correct - incorrect 
+% %     figuree(1200,800);
+% %     for iEvent = 1:numel(eventFieldnames)
+% %         subplot(1,numel(eventFieldnames),iEvent);
+% %         imagesc(squeeze(all_zscores(sorted_neuronIds,iEvent,:)) - squeeze(incorr_all_zscores(sorted_neuronIds,iEvent,:)));
+% %         caxis([-3 8]);
+% %         xlim([1 40]);
+% %         xticks([1 20 40]);
+% %         xticklabels({'-1','0','1'});
+% %         yticks([1 numel(analysisConf.neurons)]);
+% %         colormap jet;
+% %         title(['diff_',eventFieldnames{iEvent}],'interpreter','none');
+% %         hold on;
+% %         plot([20 20],[1 numel(analysisConf.neurons)],'k--');
+% %         markerRange = markerLocs(iEvent)+1:markerLocs(iEvent+1);
+% %         plot(ones(numel(markerRange),1),markerRange,'k.','MarkerSize',20);
+% %     %     markerRange = markerLocs(iEvent)+1:markerLocs(iEvent+1);
+% %     %     plot(ones(numel(markerRange),1),markerRange,'r.','MarkerSize',10);
+% %     end
+% % end

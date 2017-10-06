@@ -35,7 +35,7 @@ if true
     end
 end
 
-figuree(1300,400);
+figuree(1200,400);
 lns = [];
 colors = lines(3);
 for iEvent = 1:numel(useEvents)

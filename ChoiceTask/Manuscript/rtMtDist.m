@@ -1,5 +1,5 @@
 % function rtMtDist(analysisConf)
-if true
+if false
     all_rt = [];
     all_rt_c = {};
     all_mt = [];
@@ -43,60 +43,79 @@ if true
         disp(['Session: ',num2str(iCount)]);
     end
 end
-figure('position',[0 0 900 700]);
+figuree(1200,250);
+cols = 3;
 
-histInt = .02;
+histInt = .01;
 xlimVals = [0 1];
-subplot(221);
+subplot(1,cols,1);
 [counts,centers] = hist(all_rt,[xlimVals(1):histInt:xlimVals(2)]+histInt);
-bar(centers,counts,'r');
-xlabel('Reaction time (s)');
+bar(centers,counts,'faceColor','k','edgeColor','k');
+xlabel('RT (s)');
 xlim(xlimVals);
+xticks(xlimVals);
+ylim([0 200]);
+yticks(ylim);
 ylabel('trials');
-title(['RT Distribution, ',num2str(numel(all_rt)),' trials, ',num2str(histInt*1000),' ms bins']);
-grid on;
+set(gca,'fontSize',16);
+% title(['RT Distribution, ',num2str(numel(all_rt)),' trials, ',num2str(histInt*1000),' ms bins']);
 
 [counts,centers] = hist(all_mt,[xlimVals(1):histInt:xlimVals(2)]+histInt);
-subplot(222);
-bar(centers,counts,'b');
-xlabel('Movement time (s)');
+subplot(1,cols,2);
+bar(centers,counts,'faceColor','k','edgeColor','k');
+xlabel('MT (s)');
 xlim(xlimVals);
+xticks(xlimVals);
+ylim([0 200]);
+yticks(ylim);
 ylabel('trials');
-title(['MT Distribution, ',num2str(numel(all_mt)),' trials, ',num2str(histInt*1000),' ms bins']);
-grid on;
+set(gca,'fontSize',16);
+% title(['MT Distribution, ',num2str(numel(all_mt)),' trials, ',num2str(histInt*1000),' ms bins']);
 
-% RT-MT correlation
-subplot(223);
-colors = jet(numel(all_mt_c));
-for iSession = 1:numel(all_rt_c)
-    plot(all_rt_c{iSession},all_mt_c{iSession},'.','color',colors(iSession,:),'MarkerSize',10);
-    hold on;
-end
-grid on;
-xlim(xlimVals);
-ylim([.1 1]);
-xlabel('RT (s)');
-ylabel('MT (s)');
-title(['by session, N = ',num2str(numel(all_mt_c))]);
-
-subplot(224);
+subplot(1,cols,3);
 subjects__ids = unique(all_subjects__id);
-colors = summer(numel(subjects__ids));
+colors = lines(numel(subjects__ids));
 curSubject = all_subjects__id(1);
 curColor = 1;
-ln = [];
+lns = [];
 for iSession = 1:numel(all_subjects__id)
     if curSubject ~= all_subjects__id(iSession)
         curColor = curColor + 1;
         curSubject = all_subjects__id(iSession);
     end
-    ln(curColor) = plot(all_rt_c{iSession},all_mt_c{iSession},'.','color',colors(curColor,:),'MarkerSize',10);
+    plot(all_rt_c{iSession},all_mt_c{iSession},'.','color',colors(curColor,:),'MarkerSize',10);
     hold on;
 end
-grid on;
+for iSubject = 1:numel(subjects__ids)
+    lns(iSubject) = plot(-1,-1,'.','color',colors(iSubject,:),'MarkerSize',40);
+end
 xlim(xlimVals);
-ylim([.1 1]);
+xticks(xlimVals);
+ylim([0 1]);
+yticks(ylim);
 xlabel('RT (s)');
 ylabel('MT (s)');
-title(['by subject, n = ',num2str(numel(subjects__ids))]);
-legend(ln,num2str(subjects__ids(:)));
+% title(['by subject, n = ',num2str(numel(subjects__ids))]);
+legend(lns,num2str(subjects__ids(:)));
+legend boxoff;
+set(gca,'fontSize',16);
+
+if cols > 3
+    % RT-MT correlation
+    subplot(1,cols,4);
+    colors = jet(numel(all_mt_c));
+    for iSession = 1:numel(all_rt_c)
+        plot(all_rt_c{iSession},all_mt_c{iSession},'.','color',colors(iSession,:),'MarkerSize',10);
+        hold on;
+    end
+    grid on;
+    xlim(xlimVals);
+    ylim([0 1]);
+    xlabel('RT (s)');
+    ylabel('MT (s)');
+    title(['by session, N = ',num2str(numel(all_mt_c))]);
+    set(gca,'fontSize',16);
+end
+
+set(gcf,'color','w');
+tightfig;

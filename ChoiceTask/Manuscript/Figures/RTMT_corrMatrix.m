@@ -2,6 +2,7 @@ figuree(1400,800);
 rows = 4;
 cols = 3;
 z_yLims = [-.5 2];
+markerSize = 50;
 
 for iRow = 1:rows
     switch iRow
@@ -14,6 +15,7 @@ for iRow = 1:rows
             byMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_unNose Out_n76_movDirall_byMT_bins10_binMs2020171504.mat');
             unitType = 'Nose Out';
         case 3
+%             byRT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_un~dirSel_n56_movDirall_byRT_bins10_binMs2020171604.mat');
             byRT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n60_movDirall_byRT_bins10_binMs2020171504.mat');
             byMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n60_movDirall_byMT_bins10_binMs2020171604.mat');
             unitType = 'dirSel';
@@ -51,18 +53,19 @@ for iRow = 1:rows
     
     iCol = 3;
     subplot(rows,cols,((iRow*cols)-cols) + iCol);
-%     scatter(byRT.meanBinsSeconds(2:end),byRT.auc_max_z,markerSize,rt_meanColors,'filled');
-%     hold on;
-    f = fit(byRT.meanBinsSeconds(2:end)',byRT.auc_max_z','exp1');
-    plot(f,byRT.meanBinsSeconds(2:end)',byRT.auc_max_z');
+    % RT
+    scatter(byRT.meanBinsSeconds(2:end),byRT.auc_max_z,markerSize,rt_meanColors,'filled');
     hold on;
-    
-%     scatter(byMT.meanBinsSeconds(2:end),byMT.auc_max_z,markerSize,mt_meanColors,'filled');
-    f = fit(byMT.meanBinsSeconds(2:end)',byMT.auc_max_z','exp1');
-    plot(f,byMT.meanBinsSeconds(2:end)',byMT.auc_max_z');
+    f = fit(byRT.meanBinsSeconds(2:end)',byRT.auc_max_z','poly1');
+    plot(linspace(0,1,100),f(linspace(0,1,100)),'color',rt_meanColors(1,:),'lineWidth',1.5);
+    % MT
+    scatter(byMT.meanBinsSeconds(2:end),byMT.auc_max_z,markerSize,mt_meanColors,'filled');
+    f = fit(byMT.meanBinsSeconds(2:end)',byMT.auc_max_z','poly1');
+    plot(linspace(0,1,100),f(linspace(0,1,100)),'color',mt_meanColors(1,:),'lineWidth',1.5);
     
     xlabel('RT/MT','interpreter','none');
-    ylabel('maz Z','interpreter','none');
+    ylabel('max Z','interpreter','none');
+    ylim(z_yLims);
 %     [RHO,PVAL] = corr(meanBinsSeconds(2:end)',auc_max');
 %     title({[timingField,' vs. auc_max'],['RHO = ',num2str(RHO,2),', PVAL = ',num2str(PVAL,2)]},'interpreter','none');
     xlim([0 1]);

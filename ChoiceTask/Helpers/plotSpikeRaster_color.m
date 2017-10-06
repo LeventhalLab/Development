@@ -7,7 +7,9 @@ end
 
 yPoints_unique = unique(yPoints);
 
-figure('position',figPos);
+if ~isempty(figPos)
+    figure('position',figPos);
+end
 for iTrial = 1:numel(unique(yPoints))
     cur_y = yPoints_unique(iTrial);
     pointIdxs = find(yPoints == cur_y);
@@ -16,5 +18,7 @@ for iTrial = 1:numel(unique(yPoints))
 end
 ylim([1 numel(unique(yPoints))]);
 set(gca,'ydir','reverse');
-xlabel('time (s)');
-ylabel('trials');
+if ~isempty(figPos)
+    xlabel('time (s)');
+    ylabel('trials');
+end
