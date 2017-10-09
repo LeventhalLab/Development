@@ -59,3 +59,10 @@ plot(useTime,last_zcumsum,'.');
 
 % subplot(313);
 % plot(mt,last_zcumsum,'.');
+
+figure;
+colors = cool(size(mean_z,1));
+for ii = 1:numel(mean_z)
+    plot(cumsum(mean_z(ii,:)),'color',colors(ii,:));
+    hold on;
+end

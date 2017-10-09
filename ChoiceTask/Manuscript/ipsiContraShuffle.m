@@ -1,8 +1,8 @@
 % the fraction of units whose activity is significantly different between
 % ipsi/contra trials
-pVal = 0.95;
+pVal = 0.99;
 
-if false
+if true
     useEvents = 1:7;
     trialTypes = {'correct'};
     
@@ -10,7 +10,7 @@ if false
     binS = binMs / 1000;
     binEdges = -tWindow:binS:tWindow;
     requireTrials = 5;
-    nShuffle = 100;
+    nShuffle = 1000;
     pNeuronDiff = [];
     pNeuronAll = [];
     

@@ -1,4 +1,4 @@
-doSave = false;
+doSave = true;
 nMeanBins = 10;
 binMs = 20;
 binS = binMs / 1000;
@@ -10,14 +10,16 @@ doBursts = false;
 % for figure
 binInc = 0.02;
 z_smooth = 3;
-auc_smooth = 5;
-lineWidth = 1.5;
+auc_smooth = 3;
+lineWidth = 2;
 minZ = 0;
 
-useOrdinaryRTs = false;
-% qx_intercepts = ezReciprobit(all_rt,10);
-ordinaryRTmin = qx_intercepts(2);
-ordinaryRTmax =  qx_intercepts(10);
+useOrdinary = true;
+% RT_intercepts = ezReciprobit(all_rt,10);
+% MT_intercepts = ezReciprobit(all_mt,10);
+ordinaryRTmin = RT_intercepts(2);
+ordinaryRTmax =  RT_intercepts(10);
+ordinaryMTmax = MT_intercepts(10);
 
 
 clear all_z_raw;
@@ -30,10 +32,10 @@ LRTHMT = false;
 HRTLMT = false;
 LRTLMT = false;
 HRTHMT = false;
-% unitTypes = {eventFieldlabels{3},eventFieldlabels{4},'dirSel','~dirSel'};
-unitTypes = {eventFieldlabels{3}};
-timingFields = {'RT'};
-movementDirs = {'all'};
+unitTypes = {eventFieldlabels{3},eventFieldlabels{4},'dirSel','~dirSel'};
+% unitTypes = {'dirSel'};
+timingFields = {'RT','MT'};
+movementDirs = {'ipsi','contra','all'};
     
 for ii_events = 1:numel(events)
     useEvent = events(ii_events);
@@ -64,11 +66,17 @@ for ii_events = 1:numel(events)
                 useNeuronClass = 7;
                 dirSel = false;
             case 'dirSel'
-                useNeuronClass = [3,4];
+                % must have first or second class of nose out
+                for iNeuron = 1:numel(analysisConf.neurons)
+                    if ~isempty(unitEvents{iNeuron}.class) && ~any(ismember(unitEvents{iNeuron}.class(1:2),4))
+                        excludeUnits = [excludeUnits iNeuron];
+                    end
+                end
+                useNeuronClass = [1:7];
                 filterBy_dirSel = true;
                 dirSel = true;
             case '~dirSel'
-                useNeuronClass = [3,4];
+                useNeuronClass = useEvent;
                 filterBy_dirSel = true;
                 dirSel = false;
             case 'tone_centerOut'
@@ -171,8 +179,8 @@ for ii_events = 1:numel(events)
                         useTrials = trialIds(HRTHMT_idx);
                         LH_RTMT_note = 'HRTHMT';
                     end
-                    if useOrdinaryRTs
-                        ordinary_idx = allRT >= ordinaryRTmin & allRT < ordinaryRTmax;
+                    if useOrdinary
+                        ordinary_idx = allRT >= ordinaryRTmin & allRT < ordinaryRTmax & allMT < ordinaryMTmax;
                         allRT = allRT(ordinary_idx);
                         allMT = allMT(ordinary_idx);
                         useTrials = trialIds(ordinary_idx);
@@ -323,11 +331,11 @@ for ii_events = 1:numel(events)
                 end
                 
                 % --- figure
-                rows = 3;
+                rows = 4;
                 cols = 3;
                 plotMargins = [.08 .08];
                 xlimVals = [-tWindow tWindow];
-                h = figuree(1400,800);
+                h = figuree(1300,800);
                 [all_useTime_sorted,k] = sort(allTrial_useTime);
                 
                 allTrial_z_sorted = allTrial_z(k,:);
@@ -428,6 +436,8 @@ for ii_events = 1:numel(events)
                 auc_max_t = [];
                 auc_min_z = [];
                 auc_max_z = [];
+                cumsum_min = [];
+                cumsum_max = [];
                 mean_Poisson = [];
                 mean_PoissonFraction = [];
                 mean_LTS = [];
@@ -447,6 +457,8 @@ for ii_events = 1:numel(events)
                     auc_max_z(iBin) = NaN;
                     auc_max_t(iBin) = NaN;
                     auc_max(iBin) = NaN;
+                    cumsum_min(iBin) = NaN;
+                    cumsum_max(iBin) = NaN;
                     % ---
                     if numel(this_z) > 1
                         z_raw(iBin,:) = this_z;
@@ -456,9 +468,13 @@ for ii_events = 1:numel(events)
                         min_start = round(.2/binS);
                         min_end = round(.7/binS);
                         min_curve = z_curve(min_start:min_end);
+                        
                         min_curve_norm = min_curve - min_curve(1);
                         auc_min_z(iBin) = min(min_curve);
+                        min_cumsum = cumsum(min_curve);
+                        cumsum_min(iBin) = min_cumsum(end);
                         auc_min(iBin) = trapz(min_curve_norm(min_curve_norm <= 0));
+                        
 
                         max_start = round(.8/binS);
                         max_end = round(1.2/binS);
@@ -468,6 +484,8 @@ for ii_events = 1:numel(events)
                         max_curve_norm = max_curve - max_curve(1);
                         auc_max_z(iBin) = max_v;
                         auc_max_t(iBin) = binEdges((max_start + max_k - 1));
+                        max_cumsum = cumsum(max_curve);
+                        cumsum_max(iBin) = max_cumsum(end);
                         auc_max(iBin) = trapz(max_curve_norm(max_curve_norm > 0));
 
                         % bursting
@@ -485,6 +503,8 @@ for ii_events = 1:numel(events)
                     
                     bracketLegendText{iBin,1} = [num2str(all_useTime_sorted(meanBins(iBin)),2),'s < ',timingField,' < ',num2str(all_useTime_sorted(meanBins(iBin+1)),2),' s'];
                 end
+                
+                meanBinCenters = (meanBinsSeconds(2:end)+meanBinsSeconds(1:end-1)) / 2;
                 
                 % Z score
                 subplot_tight(rows,cols,2,plotMargins);
@@ -516,8 +536,10 @@ for ii_events = 1:numel(events)
                 scatter(auc_min,auc_max,markerSize,meanColors,'filled');
                 xlabel('auc_min','interpreter','none');
                 ylabel('auc_max','interpreter','none');
-                [RHO,PVAL] = corr(auc_min',auc_max');
-                title({'auc_min vs. auc_max',['RHO = ',num2str(RHO,2),', PVAL = ',num2str(PVAL,2)]},'interpreter','none');
+                [f,gof] = fit(auc_min',auc_max','poly1');
+                hold on;
+                plot(auc_min,f(auc_min),'r','lineWidth',2);
+                title({'auc_min vs. auc_max',['rsquare = ',num2str(gof.rsquare,3)]},'interpreter','none');
                 grid on;
                 
                 markerSize = 30;
@@ -525,44 +547,104 @@ for ii_events = 1:numel(events)
                 scatter(auc_min_z,auc_max_z,markerSize,meanColors,'filled');
                 xlabel('auc_min_z','interpreter','none');
                 ylabel('auc_max_z','interpreter','none');
-                [RHO,PVAL] = corr(auc_min_z',auc_max_z');
-                title({'auc_min_z vs. auc_max_z',['RHO = ',num2str(RHO,2),', PVAL = ',num2str(PVAL,2)]},'interpreter','none');
+                [f,gof] = fit(auc_min_z',auc_max_z','poly1');
+                hold on;
+                plot(auc_min_z,f(auc_min_z),'r','lineWidth',2);
+                title({'auc_min_z vs. auc_max_z',['rsquare = ',num2str(gof.rsquare,3)]},'interpreter','none');
+                grid on;
+                
+                markerSize = 30;
+                subplot_tight(rows,cols,10,plotMargins);
+                scatter(cumsum_min,cumsum_max,markerSize,meanColors,'filled');
+                xlabel('cumsum_min','interpreter','none');
+                ylabel('cumsum_max','interpreter','none');
+                [f,gof] = fit(cumsum_min',cumsum_max','poly1');
+                hold on;
+                plot(cumsum_min,f(cumsum_min),'r','lineWidth',2);
+                title({'cumsum_min vs. cumsum_max',['rsquare = ',num2str(gof.rsquare,3)]},'interpreter','none');
                 grid on;
                 
                 subplot_tight(rows,cols,5,plotMargins);
-                scatter(meanBinsSeconds(2:end),auc_max,markerSize,meanColors,'filled');
-                xlabel(timingField,'interpreter','none');
+                scatter(1:numel(auc_max),auc_max,markerSize,meanColors,'filled');
+                xlabel([timingField,' Quantile'],'interpreter','none');
                 ylabel('auc_max','interpreter','none');
-                [RHO,PVAL] = corr(meanBinsSeconds(2:end)',auc_max');
-                title({[timingField,' vs. auc_max'],['RHO = ',num2str(RHO,2),', PVAL = ',num2str(PVAL,2)]},'interpreter','none');
-                grid on;
-                xlim([0 1]);
+                [f,gof] = fit([1:numel(auc_max)]',auc_max','poly1');
+                hold on;
+                plot(1:numel(auc_max),f(1:numel(auc_max)),'r','lineWidth',2);
+                title({['auc_max vs. ',timingField],['rsquare = ',num2str(gof.rsquare,3)]},'interpreter','none');
+% %                 grid on;
+                xticks([1:numel(auc_max)]);
+                xticklabels(compose('%1.3f',meanBinCenters));
+                xtickangle(90);
                 
                 subplot_tight(rows,cols,8,plotMargins);
-                scatter(meanBinsSeconds(2:end),auc_max_z,markerSize,meanColors,'filled');
-                xlabel(timingField,'interpreter','none');
+                scatter(1:numel(auc_max_z),auc_max_z,markerSize,meanColors,'filled');
+                xlabel([timingField,' Quantile'],'interpreter','none');
                 ylabel('auc_max_z','interpreter','none');
-                [RHO,PVAL] = corr(meanBinsSeconds(2:end)',auc_max_z');
-                title({[timingField,' vs. auc_max_z'],['RHO = ',num2str(RHO,2),', PVAL = ',num2str(PVAL,2)]},'interpreter','none');
-                grid on;
-                xlim([0 1]);
+                [f,gof] = fit([1:numel(auc_max_z)]',auc_max_z','poly1');
+                hold on;
+                plot(1:numel(auc_max_z),f(1:numel(auc_max_z)),'r','lineWidth',2);
+                title({['auc_max_z vs. ',timingField],['rsquare = ',num2str(gof.rsquare,3)]},'interpreter','none');
+% %                 grid on;
+                xticks([1:numel(auc_max_z)]);
+                xticklabels(compose('%1.3f',meanBinCenters));
+                xtickangle(90);
+                
+                subplot_tight(rows,cols,11,plotMargins);
+                scatter(1:numel(cumsum_max),cumsum_max,markerSize,meanColors,'filled');
+                xlabel([timingField,' Quantile'],'interpreter','none');
+                ylabel('auc_max_z','interpreter','none');
+                [f,gof] = fit([1:numel(cumsum_max)]',cumsum_max','poly1');
+                hold on;
+                plot(1:numel(cumsum_max),f(1:numel(cumsum_max)),'r','lineWidth',2);
+                title({['cumsum_max vs. ',timingField],['rsquare = ',num2str(gof.rsquare,3)]},'interpreter','none');
+% %                 grid on;
+                xticks([1:numel(cumsum_max)]);
+                xticklabels(compose('%1.3f',meanBinCenters));
+                xtickangle(90);
+                
+                % trying 1/timing corr
+                x = -1./meanBinCenters;
                 
                 subplot_tight(rows,cols,6,plotMargins);
-                scatter(meanBinsSeconds(2:end),auc_max_t,markerSize,meanColors,'filled');
-                xlabel(timingField,'interpreter','none');
-                ylabel('auc_max_t','interpreter','none');
-                [RHO,PVAL] = corr(meanBinsSeconds(2:end)',auc_max_t');
-                title({[timingField,' vs. auc_max_t'],['RHO = ',num2str(RHO,2),', PVAL = ',num2str(PVAL,2)]},'interpreter','none');
-                grid on;
-                xlim([0 1]);
+                scatter(x,auc_max,markerSize,meanColors,'filled');
+                xlabel(['1/',timingField],'interpreter','none');
+                ylabel('auc_max','interpreter','none');
+                [f,gof] = fit(x',auc_max','poly1');
+                hold on;
+                plot(x,f(x),'r','lineWidth',2);
+                title({['auc_max vs. ',timingField],['rsquare = ',num2str(gof.rsquare,3)]},'interpreter','none');
+% %                 grid on;
+                xticks(x);
+                xticklabels(compose('%1.3f',x));
+                xtickangle(90);
                 
                 subplot_tight(rows,cols,9,plotMargins);
-                scatter(auc_max,auc_max_t,markerSize,meanColors,'filled');
-                xlabel('auc_max','interpreter','none');
-                ylabel('auc_max_t','interpreter','none');
-                [RHO,PVAL] = corr(auc_max',auc_max_t');
-                title({['auc_max vs. auc_max_t'],['RHO = ',num2str(RHO,2),', PVAL = ',num2str(PVAL,2)]},'interpreter','none');
-                grid on;
+                scatter(x,auc_max_z,markerSize,meanColors,'filled');
+                xlabel(['1/',timingField],'interpreter','none');
+                ylabel('auc_max_z','interpreter','none');
+                [f,gof] = fit(x',auc_max_z','poly1');
+                hold on;
+                plot(x,f(x),'r','lineWidth',2);
+                title({['auc_max_z vs. ',timingField],['rsquare = ',num2str(gof.rsquare,3)]},'interpreter','none');
+% %                 grid on;
+                xticks(x);
+                xticklabels(compose('%1.3f',x));
+                xtickangle(90);
+                
+                subplot_tight(rows,cols,12,plotMargins);
+                scatter(x,cumsum_max,markerSize,meanColors,'filled');
+                xlabel(['1/',timingField],'interpreter','none');
+                ylabel('cumsum_max','interpreter','none');
+                [f,gof] = fit(x',cumsum_max','poly1');
+                hold on;
+                plot(x,f(x),'r','lineWidth',2);
+                title({['cumsum_max vs. ',timingField],['rsquare = ',num2str(gof.rsquare,3)]},'interpreter','none');
+% %                 grid on;
+                xticks(x);
+                xticklabels(compose('%1.3f',x));
+                xtickangle(90);
+                
 
                 
                 % --- burst quant START
