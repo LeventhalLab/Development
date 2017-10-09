@@ -99,6 +99,7 @@ for iEvent = 1:numel(useEvents)
     xlim([1 size(pNeuronDiff,3)]);
     xticks([1 round(size(pNeuronDiff,3)/2) size(pNeuronDiff,3)]);
     xticklabels({'-1','0','1'});
+    plot([round(size(pNeuronDiff,3)/2),round(size(pNeuronDiff,3)/2)],xlim,'r-');
     
     fakeConf = randi([50 100]) / 1000;
     plot(xlim,[fakeConf fakeConf],'r');

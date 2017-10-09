@@ -32,7 +32,7 @@ LRTHMT = false;
 HRTLMT = false;
 LRTLMT = false;
 HRTHMT = false;
-unitTypes = {eventFieldlabels{3},eventFieldlabels{4},'dirSel','~dirSel'};
+unitTypes = {eventFieldlabels{4},'dirSel','~dirSel'};
 % unitTypes = {'dirSel'};
 timingFields = {'RT','MT'};
 movementDirs = {'ipsi','contra','all'};
@@ -331,7 +331,7 @@ for ii_events = 1:numel(events)
                 end
                 
                 % --- figure
-                rows = 4;
+                rows = 3;
                 cols = 3;
                 plotMargins = [.08 .08];
                 xlimVals = [-tWindow tWindow];
@@ -553,17 +553,6 @@ for ii_events = 1:numel(events)
                 title({'auc_min_z vs. auc_max_z',['rsquare = ',num2str(gof.rsquare,3)]},'interpreter','none');
                 grid on;
                 
-                markerSize = 30;
-                subplot_tight(rows,cols,10,plotMargins);
-                scatter(cumsum_min,cumsum_max,markerSize,meanColors,'filled');
-                xlabel('cumsum_min','interpreter','none');
-                ylabel('cumsum_max','interpreter','none');
-                [f,gof] = fit(cumsum_min',cumsum_max','poly1');
-                hold on;
-                plot(cumsum_min,f(cumsum_min),'r','lineWidth',2);
-                title({'cumsum_min vs. cumsum_max',['rsquare = ',num2str(gof.rsquare,3)]},'interpreter','none');
-                grid on;
-                
                 subplot_tight(rows,cols,5,plotMargins);
                 scatter(1:numel(auc_max),auc_max,markerSize,meanColors,'filled');
                 xlabel([timingField,' Quantile'],'interpreter','none');
@@ -571,11 +560,15 @@ for ii_events = 1:numel(events)
                 [f,gof] = fit([1:numel(auc_max)]',auc_max','poly1');
                 hold on;
                 plot(1:numel(auc_max),f(1:numel(auc_max)),'r','lineWidth',2);
+                ci = confint(f);
+                plot(1:numel(auc_max),[1:numel(auc_max)]*ci(1,1)+c(1,2),'r--');
+                plot(1:numel(auc_max),[1:numel(auc_max)]*ci(2,1)+c(2,2),'r--');
                 title({['auc_max vs. ',timingField],['rsquare = ',num2str(gof.rsquare,3)]},'interpreter','none');
 % %                 grid on;
                 xticks([1:numel(auc_max)]);
                 xticklabels(compose('%1.3f',meanBinCenters));
                 xtickangle(90);
+                ylim([0,15]);
                 
                 subplot_tight(rows,cols,8,plotMargins);
                 scatter(1:numel(auc_max_z),auc_max_z,markerSize,meanColors,'filled');
@@ -584,24 +577,15 @@ for ii_events = 1:numel(events)
                 [f,gof] = fit([1:numel(auc_max_z)]',auc_max_z','poly1');
                 hold on;
                 plot(1:numel(auc_max_z),f(1:numel(auc_max_z)),'r','lineWidth',2);
+                ci = confint(f);
+                plot(1:numel(auc_max_z),[1:numel(auc_max_z)]*ci(1,1)+c(1,2),'r--');
+                plot(1:numel(auc_max_z),[1:numel(auc_max_z)]*ci(2,1)+c(2,2),'r--');
                 title({['auc_max_z vs. ',timingField],['rsquare = ',num2str(gof.rsquare,3)]},'interpreter','none');
 % %                 grid on;
                 xticks([1:numel(auc_max_z)]);
                 xticklabels(compose('%1.3f',meanBinCenters));
                 xtickangle(90);
-                
-                subplot_tight(rows,cols,11,plotMargins);
-                scatter(1:numel(cumsum_max),cumsum_max,markerSize,meanColors,'filled');
-                xlabel([timingField,' Quantile'],'interpreter','none');
-                ylabel('auc_max_z','interpreter','none');
-                [f,gof] = fit([1:numel(cumsum_max)]',cumsum_max','poly1');
-                hold on;
-                plot(1:numel(cumsum_max),f(1:numel(cumsum_max)),'r','lineWidth',2);
-                title({['cumsum_max vs. ',timingField],['rsquare = ',num2str(gof.rsquare,3)]},'interpreter','none');
-% %                 grid on;
-                xticks([1:numel(cumsum_max)]);
-                xticklabels(compose('%1.3f',meanBinCenters));
-                xtickangle(90);
+                ylim([0,2]);
                 
                 % trying 1/timing corr
                 x = -1./meanBinCenters;
@@ -613,11 +597,15 @@ for ii_events = 1:numel(events)
                 [f,gof] = fit(x',auc_max','poly1');
                 hold on;
                 plot(x,f(x),'r','lineWidth',2);
+                ci = confint(f);
+                plot(x,x*ci(1,1)+c(1,2),'r--');
+                plot(x,x*ci(2,1)+c(2,2),'r--');
                 title({['auc_max vs. ',timingField],['rsquare = ',num2str(gof.rsquare,3)]},'interpreter','none');
 % %                 grid on;
                 xticks(x);
                 xticklabels(compose('%1.3f',x));
                 xtickangle(90);
+                ylim([0,15]);
                 
                 subplot_tight(rows,cols,9,plotMargins);
                 scatter(x,auc_max_z,markerSize,meanColors,'filled');
@@ -626,26 +614,16 @@ for ii_events = 1:numel(events)
                 [f,gof] = fit(x',auc_max_z','poly1');
                 hold on;
                 plot(x,f(x),'r','lineWidth',2);
+                ci = confint(f);
+                plot(x,x*ci(1,1)+c(1,2),'r--');
+                plot(x,x*ci(2,1)+c(2,2),'r--');
                 title({['auc_max_z vs. ',timingField],['rsquare = ',num2str(gof.rsquare,3)]},'interpreter','none');
 % %                 grid on;
                 xticks(x);
                 xticklabels(compose('%1.3f',x));
                 xtickangle(90);
+                ylim([0,2]);
                 
-                subplot_tight(rows,cols,12,plotMargins);
-                scatter(x,cumsum_max,markerSize,meanColors,'filled');
-                xlabel(['1/',timingField],'interpreter','none');
-                ylabel('cumsum_max','interpreter','none');
-                [f,gof] = fit(x',cumsum_max','poly1');
-                hold on;
-                plot(x,f(x),'r','lineWidth',2);
-                title({['cumsum_max vs. ',timingField],['rsquare = ',num2str(gof.rsquare,3)]},'interpreter','none');
-% %                 grid on;
-                xticks(x);
-                xticklabels(compose('%1.3f',x));
-                xtickangle(90);
-                
-
                 
                 % --- burst quant START
                 % Prevalence
