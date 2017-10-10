@@ -35,7 +35,7 @@ HRTHMT = false;
 unitTypes = {eventFieldlabels{4},'dirSel','~dirSel'};
 % unitTypes = {'dirSel'};
 timingFields = {'RT','MT'};
-movementDirs = {'ipsi','contra','all'};
+movementDirs = {'all','ipsi','contra'};
     
 for ii_events = 1:numel(events)
     useEvent = events(ii_events);
@@ -476,8 +476,8 @@ for ii_events = 1:numel(events)
                         auc_min(iBin) = trapz(min_curve_norm(min_curve_norm <= 0));
                         
 
-                        max_start = round(.8/binS);
-                        max_end = round(1.2/binS);
+                        max_start = round(.7/binS);
+                        max_end = round(1.3/binS);
                         max_curve = z_curve(max_start:max_end);
                         [max_v,max_k] = max(max_curve);
 
@@ -505,6 +505,7 @@ for ii_events = 1:numel(events)
                 end
                 
                 meanBinCenters = (meanBinsSeconds(2:end)+meanBinsSeconds(1:end-1)) / 2;
+                markerSize = 30;
                 
                 % Z score
                 subplot_tight(rows,cols,2,plotMargins);
@@ -531,94 +532,108 @@ for ii_events = 1:numel(events)
                 
                 
                 % area under curve
-                markerSize = 30;
                 subplot_tight(rows,cols,4,plotMargins);
-                scatter(auc_min,auc_max,markerSize,meanColors,'filled');
+                x = auc_min';
+                y = auc_max';
+                scatter(x,y,markerSize,meanColors,'filled');
                 xlabel('auc_min','interpreter','none');
                 ylabel('auc_max','interpreter','none');
-                [f,gof] = fit(auc_min',auc_max','poly1');
-                hold on;
-                plot(auc_min,f(auc_min),'r','lineWidth',2);
+                [f,gof] = fit(x,y,'poly1');
+                [p,s] = polyfit(x,y,1);
+                [yfit,dy] = polyconf(p,x,s,'predopt','curve');
+                [xsort,k] = sort(x);
+                line(xsort,yfit(k),'color','r');
+                line(xsort,yfit(k)-dy,'color','r','linestyle','--');
+                line(xsort,yfit(k)+dy,'color','r','linestyle','--');
                 title({'auc_min vs. auc_max',['rsquare = ',num2str(gof.rsquare,3)]},'interpreter','none');
-                grid on;
                 
-                markerSize = 30;
                 subplot_tight(rows,cols,7,plotMargins);
-                scatter(auc_min_z,auc_max_z,markerSize,meanColors,'filled');
+                x = auc_min_z';
+                y = auc_max_z'
+                scatter(x,y,markerSize,meanColors,'filled');
                 xlabel('auc_min_z','interpreter','none');
                 ylabel('auc_max_z','interpreter','none');
-                [f,gof] = fit(auc_min_z',auc_max_z','poly1');
-                hold on;
-                plot(auc_min_z,f(auc_min_z),'r','lineWidth',2);
+                [f,gof] = fit(x,y,'poly1');
+                [p,s] = polyfit(x,y,1);
+                [yfit,dy] = polyconf(p,x,s,'predopt','curve');
+                [xsort,k] = sort(x);
+                line(xsort,yfit(k),'color','r');
+                line(xsort,yfit(k)-dy,'color','r','linestyle','--');
+                line(xsort,yfit(k)+dy,'color','r','linestyle','--');
                 title({'auc_min_z vs. auc_max_z',['rsquare = ',num2str(gof.rsquare,3)]},'interpreter','none');
-                grid on;
                 
                 subplot_tight(rows,cols,5,plotMargins);
-                scatter(1:numel(auc_max),auc_max,markerSize,meanColors,'filled');
+                x = [1:numel(auc_max)]';
+                y = auc_max';
+                scatter(x,y,markerSize,meanColors,'filled');
                 xlabel([timingField,' Quantile'],'interpreter','none');
                 ylabel('auc_max','interpreter','none');
-                [f,gof] = fit([1:numel(auc_max)]',auc_max','poly1');
-                hold on;
-                plot(1:numel(auc_max),f(1:numel(auc_max)),'r','lineWidth',2);
-                ci = confint(f);
-                plot(1:numel(auc_max),[1:numel(auc_max)]*ci(1,1)+c(1,2),'r--');
-                plot(1:numel(auc_max),[1:numel(auc_max)]*ci(2,1)+c(2,2),'r--');
+                [f,gof] = fit(x,y,'poly1');
+                [p,s] = polyfit(x,y,1);
+                [yfit,dy] = polyconf(p,x,s,'predopt','curve');
+                [xsort,k] = sort(x);
+                line(xsort,yfit(k),'color','r');
+                line(xsort,yfit(k)-dy,'color','r','linestyle','--');
+                line(xsort,yfit(k)+dy,'color','r','linestyle','--');
                 title({['auc_max vs. ',timingField],['rsquare = ',num2str(gof.rsquare,3)]},'interpreter','none');
-% %                 grid on;
-                xticks([1:numel(auc_max)]);
+                xticks(x);
                 xticklabels(compose('%1.3f',meanBinCenters));
                 xtickangle(90);
-                ylim([0,15]);
+                ylim([0,20]);
                 
                 subplot_tight(rows,cols,8,plotMargins);
-                scatter(1:numel(auc_max_z),auc_max_z,markerSize,meanColors,'filled');
+                x = [1:numel(auc_max_z)]';
+                y = auc_max_z';
+                scatter(x,y,markerSize,meanColors,'filled');
                 xlabel([timingField,' Quantile'],'interpreter','none');
                 ylabel('auc_max_z','interpreter','none');
-                [f,gof] = fit([1:numel(auc_max_z)]',auc_max_z','poly1');
-                hold on;
-                plot(1:numel(auc_max_z),f(1:numel(auc_max_z)),'r','lineWidth',2);
-                ci = confint(f);
-                plot(1:numel(auc_max_z),[1:numel(auc_max_z)]*ci(1,1)+c(1,2),'r--');
-                plot(1:numel(auc_max_z),[1:numel(auc_max_z)]*ci(2,1)+c(2,2),'r--');
+                [f,gof] = fit(x,y,'poly1');
+                [p,s] = polyfit(x,y,1);
+                [yfit,dy] = polyconf(p,x,s,'predopt','curve');
+                [xsort,k] = sort(x);
+                line(xsort,yfit(k),'color','r');
+                line(xsort,yfit(k)-dy,'color','r','linestyle','--');
+                line(xsort,yfit(k)+dy,'color','r','linestyle','--');
                 title({['auc_max_z vs. ',timingField],['rsquare = ',num2str(gof.rsquare,3)]},'interpreter','none');
-% %                 grid on;
-                xticks([1:numel(auc_max_z)]);
+                xticks(x);
                 xticklabels(compose('%1.3f',meanBinCenters));
                 xtickangle(90);
                 ylim([0,2]);
                 
                 % trying 1/timing corr
-                x = -1./meanBinCenters;
+                x = -1./meanBinCenters';
                 
                 subplot_tight(rows,cols,6,plotMargins);
-                scatter(x,auc_max,markerSize,meanColors,'filled');
+                y = auc_max';
+                scatter(x,y,markerSize,meanColors,'filled');
                 xlabel(['1/',timingField],'interpreter','none');
                 ylabel('auc_max','interpreter','none');
-                [f,gof] = fit(x',auc_max','poly1');
-                hold on;
-                plot(x,f(x),'r','lineWidth',2);
-                ci = confint(f);
-                plot(x,x*ci(1,1)+c(1,2),'r--');
-                plot(x,x*ci(2,1)+c(2,2),'r--');
+                [f,gof] = fit(x,y,'poly1');
+                [p,s] = polyfit(x,y,1);
+                [yfit,dy] = polyconf(p,x,s,'predopt','curve');
+                [xsort,k] = sort(x);
+                line(xsort,yfit(k),'color','r');
+                line(xsort,yfit(k)-dy,'color','r','linestyle','--');
+                line(xsort,yfit(k)+dy,'color','r','linestyle','--');
                 title({['auc_max vs. ',timingField],['rsquare = ',num2str(gof.rsquare,3)]},'interpreter','none');
-% %                 grid on;
                 xticks(x);
                 xticklabels(compose('%1.3f',x));
                 xtickangle(90);
-                ylim([0,15]);
+                ylim([0,20]);
                 
                 subplot_tight(rows,cols,9,plotMargins);
-                scatter(x,auc_max_z,markerSize,meanColors,'filled');
+                y = auc_max_z';
+                scatter(x,y,markerSize,meanColors,'filled');
                 xlabel(['1/',timingField],'interpreter','none');
                 ylabel('auc_max_z','interpreter','none');
-                [f,gof] = fit(x',auc_max_z','poly1');
-                hold on;
-                plot(x,f(x),'r','lineWidth',2);
-                ci = confint(f);
-                plot(x,x*ci(1,1)+c(1,2),'r--');
-                plot(x,x*ci(2,1)+c(2,2),'r--');
+                [f,gof] = fit(x,y,'poly1');
+                [p,s] = polyfit(x,y,1);
+                [yfit,dy] = polyconf(p,x,s,'predopt','curve');
+                [xsort,k] = sort(x);
+                line(xsort,yfit(k),'color','r');
+                line(xsort,yfit(k)-dy,'color','r','linestyle','--');
+                line(xsort,yfit(k)+dy,'color','r','linestyle','--');
                 title({['auc_max_z vs. ',timingField],['rsquare = ',num2str(gof.rsquare,3)]},'interpreter','none');
-% %                 grid on;
                 xticks(x);
                 xticklabels(compose('%1.3f',x));
                 xtickangle(90);
@@ -687,7 +702,8 @@ for ii_events = 1:numel(events)
                 set(h,'PaperPosition', [0 0 1 1]);
                 if doSave
                     export_fig(gcf,'-dpdf', fullfile(savePath,[saveFile,'.pdf']));
-                    save(fullfile(sessionsPath,[saveFile,datestr(now,'YYYYMMDD')]),'z_raw','meanBinsSeconds','mean_z','auc_min','auc_max','auc_max_t','auc_min_z','auc_max_z');
+                    save(fullfile(sessionsPath,[saveFile,datestr(now,'yyyymmdd')]),'doRasters','z_raw','meanBinsSeconds','mean_z',...
+                        'auc_min','auc_max','auc_max_t','auc_min_z','auc_max_z','all_useTime_sorted');
                 end
                 close(h);
             end
