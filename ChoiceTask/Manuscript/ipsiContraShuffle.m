@@ -2,7 +2,7 @@
 % ipsi/contra trials
 pVal = 0.99;
 
-if true
+if false
     useEvents = 1:7;
     trialTypes = {'correct'};
     
@@ -80,7 +80,7 @@ dirSelNeurons = logical(dirSelNeurons);
 
 % see ipsiContraShuffle.m
 useEvents = [1:7];
-figuree(1050,400);
+figuree(1200,400);
 for iEvent = 1:numel(useEvents)
     subplot(1,numel(useEvents),iEvent)
     eventBins = zeros(1,size(pNeuronDiff,3));
@@ -94,24 +94,29 @@ for iEvent = 1:numel(useEvents)
 %     bar(1:size(pNeuronDiff,3),eventBins/numel(toneNeurons),'FaceColor','k','EdgeColor','none'); % POSITIVE
     bar(1:size(pNeuronDiff,3),eventBins/size(pNeuronDiff,1),'FaceColor','k','EdgeColor','k'); % POSITIVE
     hold on;
-    ylim([0 0.4]);
-    yticks(ylim);
+    ylim([0 0.25]);
     xlim([1 size(pNeuronDiff,3)]);
     xticks([1 round(size(pNeuronDiff,3)/2) size(pNeuronDiff,3)]);
     xticklabels({'-1','0','1'});
     plot([round(size(pNeuronDiff,3)/2),round(size(pNeuronDiff,3)/2)],xlim,'r-');
+    plot([round(size(pNeuronDiff,3)/2) round(size(pNeuronDiff,3)/2)],ylim,'k--');
     
-    fakeConf = randi([50 100]) / 1000;
-    plot(xlim,[fakeConf fakeConf],'r');
+    % !!! DO FOR REAL
+% %     fakeConf = randi([50 100]) / 1000;
+% %     plot(xlim,[fakeConf fakeConf],'r');
     
 % %     title(eventFieldnames{iEvent});
     if iEvent == 1
         ylabel('Fraction of units p < .05');
+        yticks(ylim);
+    else
+        yticks([]);
     end
     if iEvent == 4
         xlabel('time (s)');
     end
     set(gca,'fontSize',16);
+    box off;
 end
 set(gcf,'color','w');
 tightfig;

@@ -53,7 +53,7 @@ for iNeuron = 188%1:numel(analysisConf.neurons)
         
 % %         plot([-tWindow tWindow],[n_correctContra n_correctContra],'r:');
 % %         plot([-tWindow tWindow],[n_correctIpsi n_correctIpsi],'r:');
-        plot([-tWindow tWindow],[n_incorrectContra n_incorrectContra],'k--','lineWidth',1.5);
+        plot([-tWindow tWindow],[n_incorrectContra n_incorrectContra],'k-','lineWidth',1.5);
 % %         plot([-tWindow tWindow],[n_incorrectIpsi n_incorrectIpsi],'r:');
         ytickVals = [n_correctContra,n_correctIpsi,n_incorrectContra,n_incorrectIpsi];
         ytickReplaceIdx = find(diff(ytickVals) == 0);
@@ -76,8 +76,11 @@ for iNeuron = 188%1:numel(analysisConf.neurons)
         if iEvent == 4
             xlabel('time (s)');
         end
+        
+        plot([0 0],ylim,'k--'); % zero line
         title(eventFieldlabels{iEvent});
         set(gca,'fontSize',16);
+        box off;
     end
     set(gcf,'color','w');
     tightfig;

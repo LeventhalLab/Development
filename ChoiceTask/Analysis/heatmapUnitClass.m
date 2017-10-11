@@ -93,7 +93,7 @@ if doLegend
     figuree(300,400);
     set(gca,'Visible','Off')
     xticks([]);
-    cb = colorbar('location','eastoutside');
+    cb = colorbar('location','south');
     colormap(jet);
     caxis(caxisVals);
     title(cb,'Z score');
