@@ -19,21 +19,21 @@ function RTMT_corrMatrix()
     savePath = '/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp';
     
     % plots
-    h = plot_type1(ndirRT,rt_meanColors);
-    print(h,'-painters','-depsc',fullfile(savePath,['ndirRT','.eps']));
-    close(h);
-    
-    h = plot_type1(ndirMT,mt_meanColors);
-    print(h,'-painters','-depsc',fullfile(savePath,['ndirMT','.eps']));
-    close(h);
-    
-    h = plot_type1(dirRT,rt_meanColors);
-    print(h,'-painters','-depsc',fullfile(savePath,['dirRT','.eps']));
-    close(h);
-    
-    h = plot_type1(dirMT,mt_meanColors);
-    print(h,'-painters','-depsc',fullfile(savePath,['dirMT','.eps']));
-    close(h);
+% %     h = plot_type1(ndirRT,rt_meanColors);
+% %     print(h,'-painters','-depsc',fullfile(savePath,['ndirRT','.eps']));
+% %     close(h);
+% %     
+% %     h = plot_type1(ndirMT,mt_meanColors);
+% %     print(h,'-painters','-depsc',fullfile(savePath,['ndirMT','.eps']));
+% %     close(h);
+% %     
+% %     h = plot_type1(dirRT,rt_meanColors);
+% %     print(h,'-painters','-depsc',fullfile(savePath,['dirRT','.eps']));
+% %     close(h);
+% %     
+% %     h = plot_type1(dirMT,mt_meanColors);
+% %     print(h,'-painters','-depsc',fullfile(savePath,['dirMT','.eps']));
+% %     close(h);
     
     h = plot_type2(ndirContra,ndirIpsi);
     print(h,'-painters','-depsc',fullfile(savePath,['ndirContraIpsi','.eps']));
@@ -43,13 +43,13 @@ function RTMT_corrMatrix()
     print(h,'-painters','-depsc',fullfile(savePath,['dirContraIpsi','.eps']));
     close(h);
     
-    h = plot_typeRaster(ndirRT,'RT',rt_meanColors);
-    print(h,'-painters','-depsc',fullfile(savePath,['ndirRT_raster','.eps']));
-    close(h);
-    
-    h = plot_typeRaster(dirMT,'MT',mt_meanColors);
-    print(h,'-painters','-depsc',fullfile(savePath,['dirMT_raster','.eps']));
-    close(h);
+% %     h = plot_typeRaster(ndirRT,'RT',rt_meanColors);
+% %     print(h,'-painters','-depsc',fullfile(savePath,['ndirRT_raster','.eps']));
+% %     close(h);
+% %     
+% %     h = plot_typeRaster(dirMT,'MT',mt_meanColors);
+% %     print(h,'-painters','-depsc',fullfile(savePath,['dirMT_raster','.eps']));
+% %     close(h);
 end
 
 function h = plot_typeRaster(loadData,timingField,meanColors)

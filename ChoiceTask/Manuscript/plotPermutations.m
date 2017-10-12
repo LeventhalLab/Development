@@ -12,7 +12,9 @@ binInc = 0.02;
 z_smooth = 3;
 auc_smooth = 3;
 lineWidth = 2;
+
 minZ = 0;
+primSec = primSecClass(unitEvents,minZ);
 
 useOrdinary = true;
 % RT_intercepts = ezReciprobit(all_rt,10);
@@ -32,10 +34,10 @@ LRTHMT = false;
 HRTLMT = false;
 LRTLMT = false;
 HRTHMT = false;
-unitTypes = {eventFieldlabels{4},'dirSel','~dirSel'};
+unitTypes = {'dirSel','~dirSel'};
 % unitTypes = {'dirSel'};
 timingFields = {'RT','MT'};
-movementDirs = {'all','ipsi','contra'};
+movementDirs = {'all'};
     
 for ii_events = 1:numel(events)
     useEvent = events(ii_events);
@@ -67,8 +69,9 @@ for ii_events = 1:numel(events)
                 dirSel = false;
             case 'dirSel'
                 % must have first or second class of nose out
+                excludeUnits = any(ismember(primSec,[3,4]),2);
                 for iNeuron = 1:numel(analysisConf.neurons)
-                    if ~isempty(unitEvents{iNeuron}.class) && ~any(ismember(unitEvents{iNeuron}.class(1:2),4))
+                    if ~isempty(unitEvents{iNeuron}.class) && ~any(ismember(unitEvents{iNeuron}.class(1:2),[3,4]))
                         excludeUnits = [excludeUnits iNeuron];
                     end
                 end
@@ -76,7 +79,12 @@ for ii_events = 1:numel(events)
                 filterBy_dirSel = true;
                 dirSel = true;
             case '~dirSel'
-                useNeuronClass = useEvent;
+                for iNeuron = 1:numel(analysisConf.neurons)
+                    if ~isempty(unitEvents{iNeuron}.class) && ~any(ismember(unitEvents{iNeuron}.class(1:2),[3,4]))
+                        excludeUnits = [excludeUnits iNeuron];
+                    end
+                end
+                useNeuronClass = [1:7];
                 filterBy_dirSel = true;
                 dirSel = false;
             case 'tone_centerOut'
@@ -136,10 +144,6 @@ for ii_events = 1:numel(events)
                     end
                     
                     if ismember(iNeuron,excludeUnits)
-                        continue;
-                    end
-                    
-                    if unitEvents{iNeuron}.maxz(unitClasses(iNeuron)) < minZ
                         continue;
                     end
 

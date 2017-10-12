@@ -6,13 +6,13 @@ if doSetup
     ts = nexStruct.neurons{8, 1}.timestamps;
     % set SEV file
     SEVfilename = '/Volumes/RecordingsLeventhal2/ChoiceTask/R0088/R0088-rawdata/R0088_20151102a/R0088_20151102a/R0088_20151102_R0088_20151102-1_data_ch40.sev';
-    [meanWaveform, upperStd, lowerStd, ch, windowSize] = aveWaveform(ts, SEVfilename);
+    [meanWaveform, upperStd, lowerStd, ch, windowSize] = aveWaveform(ts,SEVfilename);
 end
 
 % plotAveWaveform(meanWaveform, upperStd, lowerStd, ch, windowSize, 'color',[0 0 0]);
 
 color = [0 0 0];
-figuree(500,250);
+figuree(250,500);
 subplot(121);
 t = linspace(-windowSize/2, windowSize/2, length(meanWaveform));
 fill([t fliplr(t)], [upperStd fliplr(lowerStd)], color, 'edgeColor', color);
@@ -23,7 +23,7 @@ xlimVals = [-.001 .001];
 xlim(xlimVals);
 xticks([xlimVals(1) 0 xlimVals(2)]);
 xticklabels({'-1','0','1'});
-ytickVals = [-150 100];
+ytickVals = [-200 150];
 ylim(ytickVals);
 yticks([ytickVals(1) 0 ytickVals(2)]);
 xlabel('time (ms)');

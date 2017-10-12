@@ -1,6 +1,6 @@
 % eventFieldnames = {'cueOn';'centerIn';'tone';'centerOut';'sideIn';'sideOut';'foodRetrieval'};
 doAnalysis = 1; % 1 = all events, 2 = dirSel
-colors = lines(7);
+colors = jet(7);
 dirColors = [1 0 0;.5 .5 .5];
 dotSize_mm = .04;
 atlas_ims = [];
@@ -88,24 +88,26 @@ switch doAnalysis
                 hold on;
             end
             legend(lns,eventFieldlabels(useEvents));
-            figure;
+            figuree(200,500);
             for ii = 1:numel(useEvents)
                 counts = histcounts(a1_hist{ii},binEdges);
                 plot(smooth(interp(counts,nSmooth),nSmooth),interp(binEdges(2:end),nSmooth),'lineWidth',lineWidth,'color',colors(ii,:));
                 hold on;
             end
+            ylim([5.9 7.9]);
         case 2
             for ii = 1:2
                 lns(ii) = plot(Inf,Inf,'.','markerSize',20,'color',dirColors(ii,:));
                 hold on;
             end
             legend(lns,{'Directionally Selective','Not Directionally Selective'});
-            figure;
+            figuree(200,500);
             for ii = 1:2
                 counts = histcounts(a2_hist{ii},binEdges);
                 plot(smooth(interp(counts,nSmooth),nSmooth),interp(binEdges(2:end),nSmooth),'lineWidth',lineWidth,'color',dirColors(ii,:));
                 hold on;
             end
+            ylim([5.9 7.9]);
 end
 
 ylabel('DV');
