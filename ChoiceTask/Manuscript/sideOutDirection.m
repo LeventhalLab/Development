@@ -1,12 +1,14 @@
-function imageCount = sideOutDirection(trials,nexData,videoPath)
+function recordMatrix = sideOutDirection(trials,nexData,videoPath)
 behaviorStartTime = getBehaviorStartTime(nexData);
 video = VideoReader(videoPath);
 savePath = fileparts(videoPath);
 nImages = 5;
 nBetween = 5;
-imageCount = 0;
+
+recordMatrix = zeros(numel(trials),1);
 
 for iTrial = 1:numel(trials)
+    recordMatrix(iTrial,1) = 1;
     disp(['Trial: ',num2str(iTrial,'%03d')]);
     if isfield(trials(iTrial).timestamps,'sideOut')
         sideOutVideoTs = trials(iTrial).timestamps.sideOut - behaviorStartTime;
