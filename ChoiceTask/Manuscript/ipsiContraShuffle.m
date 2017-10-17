@@ -1,6 +1,7 @@
 % the fraction of units whose activity is significantly different between
 % ipsi/contra trials
 pVal = 0.99;
+colors = lines(2);
 
 if true
     useEvents = 1:7;
@@ -12,11 +13,12 @@ if true
     requireTrials = 5;
     nShuffle = 1000;
     pNeuronDiff = [];
-    pNeuronAll = [];
+    pNeuronDiff_neg = [];
     
     dirSelNeurons = zeros(numel(analysisConf.neurons),1);
     for iNeuron = 1:numel(analysisConf.neurons)
-        neuronName = analysisConf.neurons{iNeuron}
+        neuronName = analysisConf.neurons{iNeuron};
+        disp(neuronName);
         curTrials = all_trials{iNeuron};
 
         trialIdInfo = organizeTrialsById(curTrials);
@@ -44,7 +46,7 @@ if true
         tsPeths = eventsPeth(curTrials(useTrials),all_ts{iNeuron},tWindow,eventFieldnames);
 
         pEventDiff = [];
-        pEventAll = [];
+        pEventDiff_neg = [];
         for iEvent = 1:numel(useEvents)
             curPeths = tsPeths(:,iEvent);
             eventMatrix = [];
@@ -55,25 +57,28 @@ if true
 
             contraMean = mean(eventMatrix(trialClass == 1,:));
             ipsiMean = mean(eventMatrix(trialClass == 0,:));
-            matrixDiff = abs(contraMean - ipsiMean);
+            matrixDiff = contraMean - ipsiMean;
+% %             matrixDiff = abs(contraMean - ipsiMean);
             matrixDiffShuffle = [];
             for iShuffle = 1:nShuffle
                 shuffledTrialTypes = trialClass(randperm(numel(trialClass)));
                 contraMeanShuffled = mean(eventMatrix(shuffledTrialTypes == 1,:));
                 ipsiMeanShuffled = mean(eventMatrix(shuffledTrialTypes == 0,:));
-                matrixDiffShuffle(iShuffle,:) = abs(contraMeanShuffled - ipsiMeanShuffled);
+                matrixDiffShuffle(iShuffle,:) = contraMeanShuffled - ipsiMeanShuffled;
+% %                 matrixDiffShuffle(iShuffle,:) = abs(contraMeanShuffled - ipsiMeanShuffled);
             end
             % how often is matrixDiff greater than matrixDiffShuffle?
             for iBin = 1:numel(matrixDiff)
                 curMDS = matrixDiffShuffle(:,iBin);
                 pEventDiff(iEvent,iBin) = numel(find(matrixDiff(iBin) > curMDS)) / nShuffle;
+                pEventDiff_neg(iEvent,iBin) = numel(find(matrixDiff(iBin) < curMDS)) / nShuffle;
             end
-            if iEvent == 4 && sum(pEventDiff(iEvent,:) > pVal) > 4
+            if iEvent == 4 && (sum(pEventDiff(iEvent,:) > pVal) > 4 || sum(pEventDiff_neg(iEvent,:) > pVal) > 4)
                 dirSelNeurons(iNeuron) = 1;
             end
         end
         pNeuronDiff(iNeuron,:,:) = pEventDiff;
-        pNeuronAll(iNeuron,:,:) = pEventAll;
+        pNeuronDiff_neg(iNeuron,:,:) = pEventDiff_neg;
     end
 end
 dirSelNeurons = logical(dirSelNeurons);
@@ -84,36 +89,39 @@ figuree(1200,400);
 for iEvent = 1:numel(useEvents)
     subplot(1,numel(useEvents),iEvent)
     eventBins = zeros(1,size(pNeuronDiff,3));
+    eventBins_neg = zeros(1,size(pNeuronDiff_neg,3));
     for iNeuron = 1:size(pNeuronDiff,1)
         if ~isempty(unitEvents{iNeuron}.class)%% && unitEvents{iNeuron}.class(1) == 3 % tone
             curBins = squeeze(pNeuronDiff(iNeuron,iEvent,:)); % 40 bins per-event
+            curBins_neg = squeeze(pNeuronDiff_neg(iNeuron,iEvent,:));
             eventBins = eventBins + (curBins > pVal);
+            eventBins_neg = eventBins_neg + (curBins_neg > pVal);
         end
     end
 
-%     bar(1:size(pNeuronDiff,3),eventBins/numel(toneNeurons),'FaceColor','k','EdgeColor','none'); % POSITIVE
-    bar(1:size(pNeuronDiff,3),eventBins/size(pNeuronDiff,1),'FaceColor','k','EdgeColor','k'); % POSITIVE
+    bar(1:size(pNeuronDiff,3),eventBins/size(pNeuronDiff,1),'FaceColor',colors(1,:),'EdgeColor',colors(1,:)); % POSITIVE
     hold on;
-    ylim([0 0.25]);
+    bar(1:size(pNeuronDiff_neg,3),-eventBins_neg/size(pNeuronDiff_neg,1),'FaceColor',colors(2,:),'EdgeColor',colors(2,:)); % POSITIVE
+    ylim([-.2 .2]);
     xlim([1 size(pNeuronDiff,3)]);
     xticks([1 round(size(pNeuronDiff,3)/2) size(pNeuronDiff,3)]);
     xticklabels({'-1','0','1'});
-    plot([round(size(pNeuronDiff,3)/2),round(size(pNeuronDiff,3)/2)],xlim,'r-');
     plot([round(size(pNeuronDiff,3)/2) round(size(pNeuronDiff,3)/2)],ylim,'k--');
     
-    % !!! DO FOR REAL
-% %     fakeConf = randi([50 100]) / 1000;
-% %     plot(xlim,[fakeConf fakeConf],'r');
+    % Given pVal, what fraction is due to chance?
+    X = binoinv(pVal,size(pNeuronDiff,1),1-pVal) / size(pNeuronDiff,1);
+    plot(xlim,[X X],'r');
+    plot(xlim,[-X -X],'r');
     
 % %     title(eventFieldnames{iEvent});
     if iEvent == 1
-        ylabel('Fraction of units p < .05');
+        ylabel(['Fraction of units p < ',num2str(1-pVal,'%1.2f')]);
         yticks(ylim);
     else
         yticks([]);
     end
     if iEvent == 4
-        xlabel('time (s)');
+        xlabel('Time (s)');
     end
     set(gca,'fontSize',16);
     box off;

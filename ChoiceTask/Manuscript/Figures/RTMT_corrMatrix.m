@@ -1,5 +1,7 @@
 function RTMT_corrMatrix()
 
+    doSave = false;
+
     ndirRT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_un~dirSel_n54_movDirall_byRT_bins10_binMs20ORD20172409.mat');
     ndirMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_un~dirSel_n54_movDirall_byMT_bins10_binMs20ORD20172509.mat');
     dirRT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n42_movDirall_byRT_bins10_binMs20ORD20172209.mat');
@@ -19,29 +21,37 @@ function RTMT_corrMatrix()
     savePath = '/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp';
     
     % plots
-% %     h = plot_type1(ndirRT,rt_meanColors);
-% %     print(h,'-painters','-depsc',fullfile(savePath,['ndirRT','.eps']));
-% %     close(h);
-% %     
-% %     h = plot_type1(ndirMT,mt_meanColors);
-% %     print(h,'-painters','-depsc',fullfile(savePath,['ndirMT','.eps']));
-% %     close(h);
-% %     
-% %     h = plot_type1(dirRT,rt_meanColors);
-% %     print(h,'-painters','-depsc',fullfile(savePath,['dirRT','.eps']));
-% %     close(h);
-% %     
-% %     h = plot_type1(dirMT,mt_meanColors);
-% %     print(h,'-painters','-depsc',fullfile(savePath,['dirMT','.eps']));
-% %     close(h);
+    h = plot_type1(ndirRT,rt_meanColors);
+    if doSave
+        print(h,'-painters','-depsc',fullfile(savePath,['ndirRT','.eps']));
+        close(h);
+    end
     
-    h = plot_type2(ndirContra,ndirIpsi);
-    print(h,'-painters','-depsc',fullfile(savePath,['ndirContraIpsi','.eps']));
-    close(h);
+    h = plot_type1(ndirMT,mt_meanColors);
+    if doSave
+        print(h,'-painters','-depsc',fullfile(savePath,['ndirMT','.eps']));
+        close(h);
+    end
     
-    h = plot_type2(dirContra,dirIpsi);
-    print(h,'-painters','-depsc',fullfile(savePath,['dirContraIpsi','.eps']));
-    close(h);
+    h = plot_type1(dirRT,rt_meanColors);
+    if doSave
+        print(h,'-painters','-depsc',fullfile(savePath,['dirRT','.eps']));
+        close(h);
+    end
+    
+    h = plot_type1(dirMT,mt_meanColors);
+    if doSave
+        print(h,'-painters','-depsc',fullfile(savePath,['dirMT','.eps']));
+        close(h);
+    end
+    
+% %     h = plot_type2(ndirContra,ndirIpsi);
+% %     print(h,'-painters','-depsc',fullfile(savePath,['ndirContraIpsi','.eps']));
+% %     close(h);
+% %     
+% %     h = plot_type2(dirContra,dirIpsi);
+% %     print(h,'-painters','-depsc',fullfile(savePath,['dirContraIpsi','.eps']));
+% %     close(h);
     
 % %     h = plot_typeRaster(ndirRT,'RT',rt_meanColors);
 % %     print(h,'-painters','-depsc',fullfile(savePath,['ndirRT_raster','.eps']));
@@ -121,6 +131,7 @@ function h = plot_type1(loadData,meanColors)
     z_xtickVals = [1 floor(size(loadData.z_raw,2)/2) size(loadData.z_raw,2)];
     z_xticklabelText = {'-1','0','1'};
     scatter_maxZ_ylimVals = [0 2];
+    scatter_minZ_ylimVals = [-0.5 0];
     upperRightPos = [.65 .7 .2 .2];
     upperLeftPos = [.2 .7 .2 .2];
     markerSize = 15;
@@ -141,12 +152,14 @@ function h = plot_type1(loadData,meanColors)
     box off;
     
     axes('Position',upperLeftPos);
-    x = loadData.auc_min_z';
-    y = loadData.auc_max_z';
+    x = [1:numel(loadData.auc_min_z)]';
+    y = loadData.auc_min_z';
+% %     y = loadData.auc_max_z';
     scatter(x,y,markerSize,'k','filled');
-    xlabel('min Z');
-    ylabel('max Z');
+    xlabel('RT');
+    ylabel('min Z');
     [f,gof] = fit(x,y,'poly1');
+    [RHO,PVAL] = corr(x,y);
     [p,s] = polyfit(x,y,1);
     [yfit,dy] = polyconf(p,x,s,'predopt','curve');
     [xsort,k] = sort(x);
@@ -155,13 +168,12 @@ function h = plot_type1(loadData,meanColors)
     line(xsort,yfit(k)+dy,'color','k','linestyle','-');
     xlim([min(x) max(x)]);
     xticks(xlim);
-    xticklabels(compose('%1.2f',xlim));
-    ylim(scatter_maxZ_ylimVals);
+    xticklabels(compose('%1.2f',loadData.meanBinsSeconds([1 end])));
+    ylim(scatter_minZ_ylimVals);
     yticks(ylim);
-
     curxlim = xlim;
     curylim = ylim;
-    text(curxlim(2),curylim(2),['R^2 = ',num2str(gof.rsquare,3)],'HorizontalAlignment','right','VerticalAlignment','top');
+    text(curxlim(2),curylim(2),{['r^2 = ',num2str(gof.rsquare,3)],['p = ',num2str(PVAL,3)]},'HorizontalAlignment','right','VerticalAlignment','top');
 
     axes('Position',upperRightPos);
     x = [1:numel(loadData.auc_max_z)]';
@@ -169,6 +181,7 @@ function h = plot_type1(loadData,meanColors)
     scatter(x,y,markerSize,'k','filled');
     xlabel('RT');
     [f,gof] = fit(x,y,'poly1');
+    [RHO,PVAL] = corr(x,y);
     [p,s] = polyfit(x,y,1);
     [yfit,dy] = polyconf(p,x,s,'predopt','curve');
     [xsort,k] = sort(x);
@@ -177,12 +190,13 @@ function h = plot_type1(loadData,meanColors)
     line(xsort,yfit(k)+dy,'color','k','linestyle','-');
     xlim([min(x) max(x)]);
     xticks(xlim);
+    xticklabels(compose('%1.2f',loadData.meanBinsSeconds([1 end])));
     ylim(scatter_maxZ_ylimVals);
     yticks(ylim);
 
     curxlim = xlim;
     curylim = ylim;
-    text(curxlim(2),curylim(2),['R^2 = ',num2str(gof.rsquare,3)],'HorizontalAlignment','right','VerticalAlignment','top');
+    text(curxlim(2),curylim(2),{['r^2 = ',num2str(gof.rsquare,3)],['p = ',num2str(PVAL,3)]},'HorizontalAlignment','right','VerticalAlignment','top');
 
     set(gcf,'color','w');
 end

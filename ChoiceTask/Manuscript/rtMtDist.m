@@ -43,6 +43,33 @@ if false
         disp(['Session: ',num2str(iCount)]);
     end
 end
+
+% let's try per-subject RT/MT line histograms
+RTcounts = [];
+histInt = .01;
+xlimVals = [0 1];
+subjects__ids = unique(all_subjects__id);
+RTcounts = [];
+MTcounts = [];
+nSmooth = 5;
+for iSubject = 1:numel(subjects__ids)
+    curSubject = subjects__ids(iSubject);
+    curRTsessions = all_rt_c(all_subjects__id == curSubject);
+    curRT = [curRTsessions{:}];
+    curMTsessions = all_mt_c(all_subjects__id == curSubject);
+    curMT = [curMTsessions{:}];
+    [counts,~] = hist(curRT,[xlimVals(1):histInt:xlimVals(2)]+histInt);
+    RTcounts(iSubject,:) = smooth(interp(normalize(counts),nSmooth),nSmooth);
+    [counts,~] = hist(curMT,[xlimVals(1):histInt:xlimVals(2)]+histInt);
+    MTcounts(iSubject,:) = smooth(interp(normalize(counts),nSmooth),nSmooth);
+end
+
+figure;
+plot(RTcounts','lineWidth',2);
+
+figure;
+plot(MTcounts','lineWidth',2);
+
 figuree(1200,250);
 cols = 3;
 
@@ -96,8 +123,8 @@ yticks(ylim);
 xlabel('RT (s)');
 ylabel('MT (s)');
 % title(['by subject, n = ',num2str(numel(subjects__ids))]);
-legend(lns,num2str(subjects__ids(:)));
-legend boxoff;
+% % legend(lns,num2str(subjects__ids(:)));
+% % legend boxoff;
 set(gca,'fontSize',16);
 
 if cols > 3
