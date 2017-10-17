@@ -1,6 +1,6 @@
 function RTMT_corrMatrix()
 
-    doSave = false;
+    doSave = true;
 
     ndirRT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_un~dirSel_n54_movDirall_byRT_bins10_binMs20ORD20172409.mat');
     ndirMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_un~dirSel_n54_movDirall_byMT_bins10_binMs20ORD20172509.mat');
@@ -180,6 +180,7 @@ function h = plot_type1(loadData,meanColors)
     y = loadData.auc_max_z';
     scatter(x,y,markerSize,'k','filled');
     xlabel('RT');
+    ylabel('max Z');
     [f,gof] = fit(x,y,'poly1');
     [RHO,PVAL] = corr(x,y);
     [p,s] = polyfit(x,y,1);
