@@ -21,25 +21,25 @@ function RTMT_corrMatrix()
     savePath = '/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp';
     
     % plots
-    h = plot_type1(ndirRT,rt_meanColors);
+    h = plot_type1(ndirRT,rt_meanColors,'RT');
     if doSave
         print(h,'-painters','-depsc',fullfile(savePath,['ndirRT','.eps']));
         close(h);
     end
     
-    h = plot_type1(ndirMT,mt_meanColors);
+    h = plot_type1(ndirMT,mt_meanColors,'MT');
     if doSave
         print(h,'-painters','-depsc',fullfile(savePath,['ndirMT','.eps']));
         close(h);
     end
     
-    h = plot_type1(dirRT,rt_meanColors);
+    h = plot_type1(dirRT,rt_meanColors,'RT');
     if doSave
         print(h,'-painters','-depsc',fullfile(savePath,['dirRT','.eps']));
         close(h);
     end
     
-    h = plot_type1(dirMT,mt_meanColors);
+    h = plot_type1(dirMT,mt_meanColors,'MT');
     if doSave
         print(h,'-painters','-depsc',fullfile(savePath,['dirMT','.eps']));
         close(h);
@@ -125,7 +125,7 @@ function h = plot_type2(loadData_contra,loadData_ipsi)
     set(gcf,'color','w');
 end
 
-function h = plot_type1(loadData,meanColors)
+function h = plot_type1(loadData,meanColors,timingField)
     z_yLims = [-.5 2];
     z_xlimVals = [1 size(loadData.z_raw,2)];
     z_xtickVals = [1 floor(size(loadData.z_raw,2)/2) size(loadData.z_raw,2)];
@@ -156,7 +156,7 @@ function h = plot_type1(loadData,meanColors)
     y = loadData.auc_min_z';
 % %     y = loadData.auc_max_z';
     scatter(x,y,markerSize,'k','filled');
-    xlabel('RT');
+    xlabel(timingField);
     ylabel('min Z');
     [f,gof] = fit(x,y,'poly1');
     [RHO,PVAL] = corr(x,y);
@@ -179,7 +179,7 @@ function h = plot_type1(loadData,meanColors)
     x = [1:numel(loadData.auc_max_z)]';
     y = loadData.auc_max_z';
     scatter(x,y,markerSize,'k','filled');
-    xlabel('RT');
+    xlabel(timingField);
     ylabel('max Z');
     [f,gof] = fit(x,y,'poly1');
     [RHO,PVAL] = corr(x,y);

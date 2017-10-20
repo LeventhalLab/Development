@@ -10,7 +10,7 @@ for iNeuron = 1:numel(unitEvents)
     if ~isempty(unitEvents{iNeuron}.class)
         if unitEvents{iNeuron}.maxz(unitEvents{iNeuron}.class(1)) > minZ
             primSec(iNeuron,1) = unitEvents{iNeuron}.class(1);
-            if unitEvents{iNeuron}.maxz(unitEvents{iNeuron}.class(2)) > unitEvents{iNeuron}.maxz(unitEvents{iNeuron}.class(1)) / 2
+            if (unitEvents{iNeuron}.maxz(unitEvents{iNeuron}.class(2)) > unitEvents{iNeuron}.maxz(unitEvents{iNeuron}.class(1)) / 2) || unitEvents{iNeuron}.maxz(unitEvents{iNeuron}.class(2)) > minZ
                 primSec(iNeuron,2) = unitEvents{iNeuron}.class(2);
             end
         end
@@ -29,8 +29,14 @@ xticklabels(eventFieldlabels);
 ylabel('units');
 ylim([0 200]);
 legend({'primary','secondary','together'},'location','southoutside');
-fractions = barVals ./ [sum(~isnan(primSec(:,1)));sum(~isnan(primSec(:,2)));sum(~isnan(primSec(:)))];
+%  Not sure if these fractions should only be for non NaNs, or include all
+%  units, depends on the question?
+fractions = barVals ./ [numel(unitEvents);numel(unitEvents);numel(primSec)];
+% % fractions = barVals ./ [sum(~isnan(primSec(:,1)));sum(~isnan(primSec(:,2)));sum(~isnan(primSec(:)))];
 strfmt = '%1.2f';
+
+% % p_compare = [primSec(~isnan(primSec(:,1)),1);primSec(~isnan(primSec(:,2)),2)];
+% % groups = [zeros(sum(~isnan(primSec(:,1))),1);ones(sum(~isnan(primSec(:,2))),1)];
 for iEvent = 1:7
     tstr = [num2str(fractions(1,iEvent),strfmt),', ',num2str(fractions(2,iEvent),strfmt),', ',num2str(fractions(3,iEvent),strfmt)];
     text(iEvent,175,tstr,'HorizontalAlignment','center','fontSize',7);
