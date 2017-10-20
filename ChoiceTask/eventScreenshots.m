@@ -1,7 +1,7 @@
 function eventScreenshots(sessionConf,nexData)
 behaviorStartTime = getBehaviorStartTime(nexData);
 
-leventhalPaths = buildLeventhalPaths(sessionConf);
+leventhalPaths = buildLeventhalPathsv2(sessionConf);
 eventScreenshotsPath = fullfile(leventhalPaths.graphs,'eventScreenshots');
 if ~isdir(eventScreenshotsPath)
     mkdir(eventScreenshotsPath);
