@@ -1,9 +1,12 @@
 function sideOutDirection(analysisConf,all_trials)
-
+    excludeSessions = {'R0142_20161207a','R0117_20160508a','R0117_20160510a'}; % corrupt video
     % get all unique sessions
     [sessionNames,IA] = unique(analysisConf.sessionNames);
     for iSession = 1:numel(sessionNames)
         sessionConf = analysisConf.sessionConfs{IA(iSession)};
+        if ismember(sessionConf.sessions__name,excludeSessions)
+            continue;
+        end
         nexMatFile = [sessionConf.leventhalPaths.nex,'.mat'];
         if exist(nexMatFile,'file')
             disp(['Loading ',nexMatFile]);
@@ -24,12 +27,13 @@ function recordMatrix = write_sideOutDirection(sessionConf,nexData,trials)
         mkdir(savePath);
     end
     aviFile = dir(fullfile(leventhalPaths.rawdata,'*.avi'));
-    if isempty(aviFile)
-        return;
-    end
     videoPath = fullfile(leventhalPaths.rawdata,aviFile(end).name);
     disp(['Reading ',videoPath]);
-    video = VideoReader(videoPath);
+    try
+        video = VideoReader(videoPath);
+    catch ME
+        return;
+    end
     
     resizeScale = 0.25;
     nImages = 5;
