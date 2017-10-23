@@ -86,6 +86,7 @@ end
 % see ipsiContraShuffle.m
 useEvents = [1:7];
 figuree(1200,400);
+all_eventBins = [];
 for iEvent = 1:numel(useEvents)
     subplot(1,numel(useEvents),iEvent)
     eventBins = zeros(1,size(pNeuronDiff,3));
