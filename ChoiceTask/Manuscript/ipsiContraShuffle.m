@@ -1,6 +1,7 @@
 % the fraction of units whose activity is significantly different between
 % ipsi/contra trials
 pVal = 0.99;
+pVal_minBins = 4;
 colors = lines(2);
 
 if true
@@ -15,31 +16,29 @@ if true
     pNeuronDiff = [];
     pNeuronDiff_neg = [];
     
-    dirSelNeurons = zeros(numel(analysisConf.neurons),1);
+    dirSelNeurons = false(numel(analysisConf.neurons),1);
+    dirSelNeurons_contra = false(numel(analysisConf.neurons),1);
+    dirSelNeurons_ipsi = false(numel(analysisConf.neurons),1);
     for iNeuron = 1:numel(analysisConf.neurons)
         neuronName = analysisConf.neurons{iNeuron};
         disp(neuronName);
         curTrials = all_trials{iNeuron};
 
         trialIdInfo = organizeTrialsById(curTrials);
-%         minMT = 0;
-%         maxMT = median(all_mt);
-%         minMT = median(all_mt);
-%         maxMT = 1;
-%         trialIdInfo = organizeTrialsById_MT(curTrials,minMT,maxMT);
-%         minRT = 0;
-%         maxRT = .2;
-%         minRT = .2;
-%         maxRT = 1;
-%         trialIdInfo = organizeTrialsById_RT(curTrials,minRT,maxRT);
+        
+        contraTrials = trialIdInfo.toneContra;
+        ipsiTrials = trialIdInfo.toneIpsi;
+        
+%         contraTrials = trialIdInfo.moveContra;
+%         ipsiTrials = trialIdInfo.moveIpsi;
 
-        if numel(trialIdInfo.correctContra) < requireTrials || numel(trialIdInfo.correctIpsi) < requireTrials
+        if numel(contraTrials) < requireTrials || numel(ipsiTrials) < requireTrials
             continue;
         end
 
-        useTrials = [trialIdInfo.correctContra trialIdInfo.correctIpsi];
+        useTrials = [contraTrials ipsiTrials];
         trialClass = zeros(numel(useTrials),1);
-        trialClass(1:numel(trialIdInfo.correctContra)) = ones(numel(trialIdInfo.correctContra),1);
+        trialClass(1:numel(contraTrials)) = ones(numel(contraTrials),1);
 
 
         % (ordered according to useTrials)
@@ -73,15 +72,16 @@ if true
                 pEventDiff(iEvent,iBin) = numel(find(matrixDiff(iBin) > curMDS)) / nShuffle;
                 pEventDiff_neg(iEvent,iBin) = numel(find(matrixDiff(iBin) < curMDS)) / nShuffle;
             end
-            if iEvent == 4 && (sum(pEventDiff(iEvent,:) > pVal) > 4 || sum(pEventDiff_neg(iEvent,:) > pVal) > 4)
-                dirSelNeurons(iNeuron) = 1;
+            if iEvent == 4
+                dirSelNeurons_contra(iNeuron) = sum(pEventDiff(iEvent,:) > pVal) > pVal_minBins;
+                dirSelNeurons_ipsi(iNeuron) = sum(pEventDiff_neg(iEvent,:) > pVal) > pVal_minBins;
+                dirSelNeurons(iNeuron) = dirSelNeurons_contra(iNeuron) | dirSelNeurons_ipsi(iNeuron);
             end
         end
         pNeuronDiff(iNeuron,:,:) = pEventDiff;
         pNeuronDiff_neg(iNeuron,:,:) = pEventDiff_neg;
     end
 end
-dirSelNeurons = logical(dirSelNeurons);
 
 % see ipsiContraShuffle.m
 useEvents = [1:7];

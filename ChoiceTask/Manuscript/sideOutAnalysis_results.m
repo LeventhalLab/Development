@@ -33,3 +33,5 @@ bar(y,'stacked');
 xticklabels({'contra','ipsi'});
 title('Trial Type vs. Side Out Agreement');
 ylabel('trials');
+text(1,totalContraTrials+10,num2str(100*contraAgreementTrials/totalContraTrials,'%2.2f'));
+text(2,totalIpsiTrials+10,num2str(100*ipsiAgreementTrials/totalIpsiTrials,'%2.2f'))
