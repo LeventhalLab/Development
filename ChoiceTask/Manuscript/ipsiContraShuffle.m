@@ -11,7 +11,7 @@ if true
     binMs = 50;
     binS = binMs / 1000;
     binEdges = -tWindow:binS:tWindow;
-    requireTrials = 5;
+    requireTrials = 2;
     nShuffle = 1000;
     pNeuronDiff = [];
     pNeuronDiff_neg = [];
@@ -26,13 +26,19 @@ if true
 
         trialIdInfo = organizeTrialsById(curTrials);
         
-        contraTrials = trialIdInfo.toneContra;
-        ipsiTrials = trialIdInfo.toneIpsi;
-        
-%         contraTrials = trialIdInfo.moveContra;
-%         ipsiTrials = trialIdInfo.moveIpsi;
+        % for chi-square tests
+        % chi-#1
+        contraTrials = [trialIdInfo.correctContra];
+        ipsiTrials = [trialIdInfo.correctIpsi];
+        % chi-#2
+% %         contraTrials = [trialIdInfo.correctContra trialIdInfo.incorrectIpsi];
+% %         ipsiTrials = [trialIdInfo.correctIpsi trialIdInfo.incorrectContra];
+        % chi-#3
+% %         contraTrials = [trialIdInfo.correctContra trialIdInfo.incorrectIpsi];
+% %         ipsiTrials = [trialIdInfo.correctIpsi trialIdInfo.incorrectContra];
 
         if numel(contraTrials) < requireTrials || numel(ipsiTrials) < requireTrials
+            disp([num2str(iNeuron),' not enough trials']);
             continue;
         end
 
@@ -82,6 +88,11 @@ if true
         pNeuronDiff_neg(iNeuron,:,:) = pEventDiff_neg;
     end
 end
+
+% just save these in running form
+all_dirSelNeurons(size(all_dirSelNeurons,1)+1,1,:) = dirSelNeurons_contra;
+all_dirSelNeurons(size(all_dirSelNeurons,1)+1,2,:) = dirSelNeurons_ipsi;
+all_dirSelNeurons(size(all_dirSelNeurons,1)+1,3,:) = dirSelNeurons;
 
 % see ipsiContraShuffle.m
 useEvents = [1:7];
