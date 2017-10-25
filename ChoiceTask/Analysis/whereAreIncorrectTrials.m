@@ -5,6 +5,7 @@ iSessions = 0;
 lastSession = '';
 lns = [];
 lns_t = [];
+accuracy = [];
 for iNeuron = 1:numel(analysisConf.neurons)
     neuronName = analysisConf.neurons{iNeuron};
     curTrials = all_trials{iNeuron};
@@ -35,8 +36,27 @@ for iNeuron = 1:numel(analysisConf.neurons)
     if ~isempty(lns_t)
         lns(4) = lns_t(1);
     end
+    
+    totalCorrect = numel(trialIdInfo.correctContra) + numel(trialIdInfo.correctIpsi);
+    totalIncorrect = numel(trialIdInfo.incorrectContra) + numel(trialIdInfo.incorrectIpsi);
+    accuracy = [accuracy; totalCorrect / (totalCorrect + totalIncorrect)];
 end
 yticks([1:numel(analysisConf.neurons)]);
 yticklabels(yLabels);
 set(gca,'TickLabelInterpreter','none');
 legend(lns,{'correctContra','correctIpsi','incorrectContra','incorrectIpsi'});
+
+figuree(400,200);
+% % plotSpread(accuracy);
+histogram(accuracy,linspace(0,1,10),'FaceColor','k','EdgeColor','k','FaceAlpha',1);
+xticks([0 0.5 1]);
+xticklabels({'0%','50%','100%'});
+set(gca,'fontSize',16);
+set(gcf,'color','w');
+xlabel('Percent Correct');
+ylabel('Sessions');
+hold on;
+cur_ylim = ylim;
+plot([0.5 0.5],cur_ylim,'k--');
+tx = text(0.45,mean(cur_ylim),'chance','fontSize',16,'HorizontalAlignment','center');
+set(tx,'Rotation',90);

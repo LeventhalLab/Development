@@ -64,11 +64,30 @@ for iSubject = 1:numel(subjects__ids)
     MTcounts(iSubject,:) = smooth(interp(normalize(counts),nSmooth),nSmooth);
 end
 
-figure;
-plot(RTcounts','lineWidth',2);
+% looks like trash, deprecate
+% % figure;
+% % plot(RTcounts','lineWidth',2);
+% % 
+% % figure;
+% % plot(MTcounts','lineWidth',2);
 
-figure;
-plot(MTcounts','lineWidth',2);
+nSmooth = 5;
+lineWidth = 4;
+figuree(600,300);
+[rt_counts,rt_centers] = hist(all_rt,[xlimVals(1):histInt:xlimVals(2)]+histInt);
+[mt_counts,mt_centers] = hist(all_mt,[xlimVals(1):histInt:xlimVals(2)]+histInt);
+lns_rt = colormapline(interp(rt_centers,nSmooth),interp(rt_counts,nSmooth),[],cool(1000));
+set(lns_rt,'lineWidth',lineWidth);
+hold on;
+lns_mt = colormapline(interp(mt_centers,nSmooth),interp(mt_counts,nSmooth),[],summer(1000));
+set(lns_mt,'lineWidth',lineWidth);
+xlim([0 1]);
+xticks(xlim);
+xlabel('RT & MT (s)');
+ylabel('Trials');
+set(gca,'fontSize',16);
+set(gcf,'color','w');
+
 
 figuree(1200,250);
 cols = 3;
