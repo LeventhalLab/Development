@@ -1,8 +1,8 @@
-function qx_intercepts = ezReciprobit(rt,nquant)
+function [qx_intercepts,gof] = ezReciprobit(rt,nquant)
 rtMs = rt * 1000;
 rtinv  = 1./rtMs;
 % raw data
-x = -1./sort((rtMs)); % multiply by -1 to mirror abscissa
+x = -1./sort(rtMs); % multiply by -1 to mirror abscissa
 n = numel(rtinv); % number of data points
 y = pa_probit((1:n)./n); % cumulative probability for every data point converted to probit scale
 % figure;
@@ -20,6 +20,11 @@ xticks(xtickVals);
 xlim([min(xtickVals) max(xtickVals)]);
 xticklabels({'50','100','1000'});
 plot(q,probit,'ko','Color','k','MarkerFaceColor','r','LineWidth',1);
+
+[f,gof] = fit(q(2:end-1)',probit(2:end-1)','poly1');
+hold on;
+plot(xlim,f(xlim));
+
 yticks(probit);
 yticklabels(p*100);
 set(gca,'YTick',probit,'YTickLabel',p*100);
@@ -28,7 +33,7 @@ axis square;
 box off
 xlabel('Latency (ms)');
 ylabel('Cumulative probability');
-title('Probit ordinate');
+title({['adj r^2 = ',num2str(gof.adjrsquare,'%0.4f')],['rmse = ',num2str(gof.rmse,'%0.4f')]});
 grid on;
 
 qx_intercepts = (-1./q) / 1000;

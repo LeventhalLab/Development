@@ -1,42 +1,55 @@
-% % dirSelNeurons_contra_incorrContra
-% % dirSelNeurons_ipsi_incorrIpsi
-% % dirSelNeurons_sameDir
-% % 
-% % dirSelNeurons_contra_incorrIpsi
-% % dirSelNeurons_ipsi_incorrContra
-% % dirSelNeurons_not_sameDir
+x = unique(sort(all_rt));
+figure;
+plot(x);
+hold on;
+for ii = 1:numel(qx_intercepts)
+    idx = find(x >= qx_intercepts(ii),1);
+    plot(idx,x(idx),'ro');
+end
+
+y = 1:numel(y);
+x = unique(sort(all_rt));
+figure;
+plot(x,y);
+
+[fitresult, gof] = curive_smoothingSpline(x,y);
+figure;
+xx = linspace(0,1,numel(y));
+plot(xx,fitresult(xx));
+
+pp = spline(x,y);
+figure;
+yyaxis left;
+fnplt(pp)
+hold on
+plot(x,y,'o');
+yyaxis right;
+ppd2 = fnder(pp,2);
+fnplt(ppd2);
 
 
-
-
+y2 = smooth(y,200)';
+y2d2 = diff(y2,2);
+figure;
+plot(1:numel(y),y);
+hold on;
+plot(1:numel(y2),y2);
 
 figure;
-barData = [sum(dirSelNeurons_contra_corr) sum(dirSelNeurons_ipsi_corr);...
-    sum(dirSelNeurons_contra_incorrContra) sum(dirSelNeurons_ipsi_incorrIpsi);...
-    sum(dirSelNeurons_contra_incorrIpsi) sum(dirSelNeurons_ipsi_incorrContra)];
-bar(barData);
-xticklabels({['corr (',num2str(barData(1,:)),' = ',num2str(sum(barData(1,:))),')'],...
-    ['+incorr SAME move (',num2str(barData(2,:)),' = ',num2str(sum(barData(2,:))),')'],...
-    ['+incorr DIFF move (',num2str(barData(3,:)),' = ',num2str(sum(barData(3,:))),')']});
-xtickangle(30);
-ylim([0 80]);
-
-title('dirSel when incorr trials are included');
-
-[x2,p] = chiSquare(sum(dirSelNeurons_contra_corr),sum(dirSelNeurons_ipsi_corr),...
-    sum(dirSelNeurons_contra_incorrContra),sum(dirSelNeurons_ipsi_incorrIpsi));
-text(1.5,40,{['\chi^2 = ',num2str(x2,'%1.3f')],['p = ',num2str(1-p,'%0.5f')]},'HorizontalAlignment','center');
-
-[x2,p] = chiSquare(sum(dirSelNeurons_contra_corr),sum(dirSelNeurons_ipsi_corr),...
-    sum(dirSelNeurons_contra_incorrIpsi),sum(dirSelNeurons_ipsi_incorrContra));
-text(2,70,{['\chi^2 = ',num2str(x2,'%1.3f')],['p = ',num2str(1-p,'%0.5f')]},'HorizontalAlignment','center');
-
-[x2,p] = chiSquare(sum(dirSelNeurons_contra_incorrContra),sum(dirSelNeurons_ipsi_incorrIpsi),...
-    sum(dirSelNeurons_contra_incorrIpsi),sum(dirSelNeurons_ipsi_incorrContra));
-text(2.5,40,{['\chi^2 = ',num2str(x2,'%1.3f')],['p = ',num2str(1-p,'%0.5f')]},'HorizontalAlignment','center');
+plot(1:numel(y2d2),y2d2);
 
 
+slm = slmengine(x,y2,'plot','on');
 
-% % dirSelNeurons_contra_corr = dirSelNeurons_contra;
-% % dirSelNeurons_ipsi_corr = dirSelNeurons_ipsi;
-% % dirSelNeurons_corr = dirSelNeurons;
+figure;
+ppd2 = fnder(pp,2);
+fnplt(ppd2)
+grid on
+
+% % pp = spline(x,y);
+% % fnplt(pp)
+% % hold on
+% % plot(x,y,'o')
+% % 
+% % ppd2 = fnder(pp,2);
+% % fnplt(ppd2)

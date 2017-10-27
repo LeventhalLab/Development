@@ -24,8 +24,8 @@ figure;
 qx_intercepts = ezReciprobit(all_rt,10);
 figure;
 ezReciprobit(all_rt(all_rt <= qx_intercepts(2)),10);
-ezReciprobit(all_rt(all_rt > qx_intercepts(2) & all_rt <= qx_intercepts(11)),10);
-% ezReciprobit(all_rt(all_rt > qx_intercepts(10)),10);
+ezReciprobit(all_rt(all_rt > qx_intercepts(2) & all_rt <= qx_intercepts(9)),10);
+ezReciprobit(all_rt(all_rt > qx_intercepts(10)),10);
 
 figure;
 ezReciprobit(all_mt(all_mt <= .450),10);

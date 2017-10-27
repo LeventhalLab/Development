@@ -287,7 +287,7 @@ for ii_events = 1:numel(events)
                     curZ = [];
                     for iTrial = 1:numel(useTimes)
                         curTs = usePeths{iTrial,useEvent};
-                        if numel(curTs) < 3; continue; end;
+                        if numel(curTs) < 3; continue; end
 
                         counts = histcounts(curTs,binEdges);
                         curZ = smooth((counts - zBinMean) / zBinStd,3);

@@ -1,6 +1,6 @@
 % from: http://www.neural-code.com/index.php/tutorials/action/reaction-time/83-reciprobit-distribution
 %% Histogram
-rt = all_rt(all_rt > .1)*1000;
+rt = all_rt(all_rt > 0)*1000;
 x  = 0:50:1000; % reaction time bins (ms)
 N  = histcounts(rt,x);  % count reactions in bin
 N  = 100*N./sum(N); % percentage
