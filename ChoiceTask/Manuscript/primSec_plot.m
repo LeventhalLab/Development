@@ -1,4 +1,12 @@
-close all
+show_primFate = false; % false = show_secOrigin
+plotOpt = 2; % 1 = both sides of x-axis, 2 = mosaic
+
+if show_primFate
+    plotTitle = 'Primary Fate';
+else
+    plotTitle = 'Secondary Origin';
+    plotOpt = 2;
+end
 
 doSetup = false;
 if doSetup
@@ -17,37 +25,94 @@ end
 primSec_wNC = primSec;
 primSec_wNC(isnan(primSec_wNC)) = 8;
 
-figuree(1400,400);
-rlimVals = [0 80];
-cols = 7;
-colors = parula(14);
-colors = colors(3:3+7,:);
-colors(8,:) = [.7 .7 .7];
-% fate of primary units
-for iEvent = 1:cols
-    subplot(1,cols,iEvent);
-    secUnits = primSec_wNC(primSec_wNC(:,1) == iEvent,2);
-    primCount = sum(primSec_wNC(:,1) == iEvent);
-    add_const = 15 + (primCount / 5);
-    counts = (histcounts(secUnits,0.5:8.5)) + add_const;
-    edges = linspace(0,2*pi,9);
-    for iCounts = 1:numel(counts)
-        polarhistogram('BinEdges',edges(iCounts:iCounts+1),'BinCounts',counts(iCounts),'EdgeColor','w','FaceColor',colors(iCounts,:),'FaceAlpha',1);
-        hold on;
-    end
-    rlim(rlimVals);
-    thetaticks('');
-    rticks(0);
-    rticklabels(num2str(primCount));
-    set(gca,'fontSize',16);
-    
-    
-    counts = linspace(0,2*pi,add_const);
-    h2 = polarhistogram(counts,1,'FaceColor','w','FaceAlpha',1,'EdgeColor','none','FaceColor',colors(iEvent,:));
-    thetaticks('');
+figuree(500,400);
+% cols = 7;
+colors = parula(8);
+% colors = colors(1:end,:);
+colors(8,:) = [.8 .8 .8];
+
+primBars = histcounts(primSec_wNC(:,1),0.5:8.5);
+secBars = histcounts(primSec_wNC(:,2),0.5:8.5);
+
+for iBar = 1:numel(secBars)
+    bar(iBar,primBars(iBar) + secBars(iBar),'FaceColor',colors(iBar,:),'FaceAlpha',0.2,'EdgeColor','w','lineWidth',2);
+    hold on;
+    bar(iBar,primBars(iBar),'FaceColor',colors(iBar,:),'EdgeColor','w','lineWidth',2);
 end
 
+if plotOpt == 1
+    barMult = -1;
+    barWidth = 0.8;
+else
+    barMult = 1;
+    barWidth = 0.4;
+end
+
+primFate = [];
+secOrigin = [];
+for iEvent = 1:8
+    primFate(iEvent,:) =  histcounts(primSec_wNC(primSec_wNC(:,1) == iEvent,2),0.5:8.5);
+    secOrigin(iEvent,:) = [primBars(iEvent) histcounts(primSec_wNC(primSec_wNC(:,2) == iEvent,1),0.5:8.5)];
+end
+
+if show_primFate
+    b = bar(primFate*barMult,'stacked','FaceColor','flat','EdgeColor','w','lineWidth',2,'BarWidth',barWidth);
+    for k = 1:size(primFate,2)
+        b(k).CData = colors(k,:);
+    end
+else
+    b = bar(secOrigin*barMult,'stacked','FaceColor','flat','EdgeColor','w','lineWidth',2,'BarWidth',barWidth);
+    for iBar = 1:numel(secBars) % replot this
+        bar(iBar,primBars(iBar),'FaceColor',colors(iBar,:),'EdgeColor','w','lineWidth',2);
+    end
+    for k = 1:size(primFate,2) % ignore bottom-most bar (where primaries are)
+        b(k+1).CData = colors(k,:);
+    end
+end
+
+% formatting
+set(gca,'fontsize',16);
+
+xticks(1:8);
+xticklabels({eventFieldlabels{:},'N.C.'});
+ax = gca;
+ax.XAxis.FontSize = 12;
+xtickangle(45);
+
+if plotOpt == 1
+    ylimVals = [-150 200];
+    ylim(ylimVals);
+    yticks([ylimVals(1) 0 ylimVals(2)]);
+    yticklabels({num2str(ylimVals(1)*-1),'0',num2str(ylimVals(2))});
+else
+    ylimVals = [0 200];
+    ylim(ylimVals);
+    yticks(ylimVals);
+end
+ylabel('Units');
+title(plotTitle);
+box off;
 set(gcf,'color','w');
 
-% % figure;
-% % histogram(secUnits,0.5:8.5);
+
+% pie charts
+if show_primFate
+    pieData = primFate;
+else
+    pieData = secOrigin(:,2:end);
+end
+
+figuree(1200,400);
+for iEvent = 1:8
+    subplot(1,8,iEvent);
+    p = pie(pieData(iEvent,:)+.001,{'','','','','','','','',});
+    colormap(colors);
+    if iEvent == 1
+        title({plotTitle,eventFieldlabels{iEvent}});
+    elseif iEvent == 8
+        title('N.C.');
+    else
+        title(eventFieldlabels{iEvent});
+    end
+end
+set(gcf,'color','w');
