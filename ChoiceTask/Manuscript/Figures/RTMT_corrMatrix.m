@@ -2,14 +2,23 @@ function RTMT_corrMatrix()
 
     doSave = true;
 
-    ndirRT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_un~dirSel_n54_movDirall_byRT_bins10_binMs20ORD20172409.mat');
-    ndirMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_un~dirSel_n54_movDirall_byMT_bins10_binMs20ORD20172509.mat');
-    dirRT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n42_movDirall_byRT_bins10_binMs20ORD20172209.mat');
-    dirMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n42_movDirall_byMT_bins10_binMs20ORD20172309.mat');
+    ndirRT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_un~dirSel_n65_movDirall_byRT_bins10_binMs20ORD20171028.mat');
+    ndirMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_un~dirSel_n65_movDirall_byMT_bins10_binMs20ORD20171028.mat');
+    dirRT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n19_movDirall_byRT_bins10_binMs20ORD20171028.mat');
+    dirMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n19_movDirall_byMT_bins10_binMs20ORD20171028.mat');
     dirIpsi = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n42_movDiripsi_byRT_bins10_binMs20ORD20172309.mat');
     dirContra = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n42_movDircontra_byRT_bins10_binMs20ORD20172409.mat');
     ndirIpsi = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_un~dirSel_n54_movDiripsi_byRT_bins10_binMs20ORD20172509.mat');
     ndirContra = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_un~dirSel_n54_movDircontra_byRT_bins10_binMs20ORD20172609.mat');
+        % original
+% %     ndirRT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_un~dirSel_n54_movDirall_byRT_bins10_binMs20ORD20172409.mat');
+% %     ndirMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_un~dirSel_n54_movDirall_byMT_bins10_binMs20ORD20172509.mat');
+% %     dirRT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n42_movDirall_byRT_bins10_binMs20ORD20172209.mat');
+% %     dirMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n42_movDirall_byMT_bins10_binMs20ORD20172309.mat');
+% %     dirIpsi = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n42_movDiripsi_byRT_bins10_binMs20ORD20172309.mat');
+% %     dirContra = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n42_movDircontra_byRT_bins10_binMs20ORD20172409.mat');
+% %     ndirIpsi = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_un~dirSel_n54_movDiripsi_byRT_bins10_binMs20ORD20172509.mat');
+% %     ndirContra = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_un~dirSel_n54_movDircontra_byRT_bins10_binMs20ORD20172609.mat');
 
     % setup
     rt_meanColors = cool(numel(ndirRT.meanBinsSeconds)-1);
@@ -45,21 +54,21 @@ function RTMT_corrMatrix()
         close(h);
     end
     
-% %     h = plot_type2(ndirContra,ndirIpsi);
-% %     print(h,'-painters','-depsc',fullfile(savePath,['ndirContraIpsi','.eps']));
-% %     close(h);
-% %     
-% %     h = plot_type2(dirContra,dirIpsi);
-% %     print(h,'-painters','-depsc',fullfile(savePath,['dirContraIpsi','.eps']));
-% %     close(h);
+    h = plot_type2(ndirContra,ndirIpsi);
+    print(h,'-painters','-depsc',fullfile(savePath,['ndirContraIpsi','.eps']));
+    close(h);
     
-% %     h = plot_typeRaster(ndirRT,'RT',rt_meanColors);
-% %     print(h,'-painters','-depsc',fullfile(savePath,['ndirRT_raster','.eps']));
-% %     close(h);
-% %     
-% %     h = plot_typeRaster(dirMT,'MT',mt_meanColors);
-% %     print(h,'-painters','-depsc',fullfile(savePath,['dirMT_raster','.eps']));
-% %     close(h);
+    h = plot_type2(dirContra,dirIpsi);
+    print(h,'-painters','-depsc',fullfile(savePath,['dirContraIpsi','.eps']));
+    close(h);
+    
+    h = plot_typeRaster(ndirRT,'RT',rt_meanColors);
+    print(h,'-painters','-depsc',fullfile(savePath,['ndirRT_raster','.eps']));
+    close(h);
+    
+    h = plot_typeRaster(dirMT,'MT',mt_meanColors);
+    print(h,'-painters','-depsc',fullfile(savePath,['dirMT_raster','.eps']));
+    close(h);
 end
 
 function h = plot_typeRaster(loadData,timingField,meanColors)

@@ -55,20 +55,21 @@ legend({'classified','NaN class'},'location','southoutside')
 title('Secondary NaN classes');
 set(gcf,'color','w');
 
-figuree(1100,300);
-for iEvent = 1:7
-    subplot(1,7,iEvent);
-    primIdx = primSec(:,1) == iEvent;
-    secCounts = histcounts(primSec(primIdx,2),linspace(0.5,7.5,8));
-    bar(secCounts,'k');
-    xticklabels(eventFieldlabels);
-    ylabel('units');
-    ylim([0 40]);
-    xtickangle(90);
-    if iEvent == 4
-        title({'Fate of primary classes (i.e. what is the secondary for each primary?)',eventFieldlabels{iEvent}});
-    else
-        title(eventFieldlabels{iEvent});
-    end
-end
-set(gcf,'color','w');
+% seondary fate
+% % figuree(1100,300);
+% % for iEvent = 1:7
+% %     subplot(1,7,iEvent);
+% %     primIdx = primSec(:,1) == iEvent;
+% %     secCounts = histcounts(primSec(primIdx,2),linspace(0.5,7.5,8));
+% %     bar(secCounts,'k');
+% %     xticklabels(eventFieldlabels);
+% %     ylabel('units');
+% %     ylim([0 40]);
+% %     xtickangle(90);
+% %     if iEvent == 4
+% %         title({'Fate of primary classes (i.e. what is the secondary for each primary?)',eventFieldlabels{iEvent}});
+% %     else
+% %         title(eventFieldlabels{iEvent});
+% %     end
+% % end
+% % set(gcf,'color','w');
