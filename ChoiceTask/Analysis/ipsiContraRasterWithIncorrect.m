@@ -1,9 +1,9 @@
 saveDir = '/Users/mattgaidica/Documents/Data/ChoiceTask/spikeRasterWithIncorrect';
-doLegend = false;
+doLegend = true;
 doSave = false;
 useEvents = [1:7];
 % units: 188, 201
-for iNeuron = 201%1:numel(analysisConf.neurons)
+for iNeuron = 113%1:numel(analysisConf.neurons)
     neuronName = analysisConf.neurons{iNeuron};
     curTrials = all_trials{iNeuron};
     trialIdInfo = organizeTrialsById(curTrials);

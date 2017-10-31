@@ -8,7 +8,7 @@ if true
     useEvents = 1:7;
     trialTypes = {'correct'};
     
-    binMs = 50;
+    binMs = 20;
     binS = binMs / 1000;
     binEdges = -tWindow:binS:tWindow;
     requireTrials = 2;

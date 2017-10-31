@@ -1,6 +1,7 @@
 doSave = true;
 nMeanBins = 10;
 binMs = 20;
+
 binS = binMs / 1000;
 tWindow = 1;
 binEdges = -tWindow:binS:tWindow;
@@ -13,14 +14,12 @@ z_smooth = 3;
 auc_smooth = 3;
 lineWidth = 2;
 
-% % tWindow = 1;
-% % binMs = 50;
 % % trialTypes = {'correct'};
 % % useEvents = 1:7;
 % % useTiming = {};
 % % [unitEvents,all_zscores,unitClass] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents,useTiming);
 
-minZ = 0.5;
+minZ = 0;
 primSec = primSecClass(unitEvents,minZ);
 
 useOrdinary = true;
@@ -76,21 +75,20 @@ for ii_events = 1:numel(events)
                 dirSel = false;
             case 'dirSel'
                 % must have first or second class of Tone or Nose Out
-% %                 excludeUnits = find(ismember(primSec(:,1),[3,4]) == 0); % only primary
-                excludeUnits = find(any(ismember(primSec,[3,4]),2) == 0);
+                excludeUnits = find(ismember(primSec(:,1),[3,4]) == 0); % only primary
+% %                 excludeUnits = find(any(ismember(primSec,[3,4]),2) == 0);
 
-% %                 excludeUnits2 = [];
 % %                 for iNeuron = 1:numel(analysisConf.neurons)
 % %                     if ~isempty(unitEvents{iNeuron}.class) && ~any(ismember(unitEvents{iNeuron}.class(1:2),[3,4]))
-% %                         excludeUnits2 = [excludeUnits2 iNeuron];
+% %                         excludeUnits = [excludeUnits iNeuron];
 % %                     end
 % %                 end
                 useNeuronClass = [1:7];
                 filterBy_dirSel = true;
                 dirSel = true;
             case '~dirSel'
-% %                 excludeUnits = find(ismember(primSec(:,1),[3,4]) == 0); % only primary
-                excludeUnits = find(any(ismember(primSec,[3,4]),2) == 0);
+                excludeUnits = find(ismember(primSec(:,1),[3,4]) == 0); % only primary
+% %                 excludeUnits = find(any(ismember(primSec,[3,4]),2) == 0);
 
 % %                 for iNeuron = 1:numel(analysisConf.neurons)
 % %                     if ~isempty(unitEvents{iNeuron}.class) && ~any(ismember(unitEvents{iNeuron}.class(1:2),[3,4]))
@@ -100,19 +98,19 @@ for ii_events = 1:numel(events)
                 useNeuronClass = [1:7];
                 filterBy_dirSel = true;
                 dirSel = false;
-            case 'tone_centerOut'
-                useNeuronClass = [3,4];
-                filterBy_dirSel = false;
-                dirSel = false;
-            case '~tone_centerOut'
-                useNeuronClass = [1:7];
-                filterBy_dirSel = false;
-                dirSel = false;
-                for iNeuron = 1:numel(analysisConf.neurons)
-                    if ~isempty(unitEvents{iNeuron}.class) && any(ismember(unitEvents{iNeuron}.class(1:2),[3,4]))
-                        excludeUnits = [excludeUnits iNeuron];
-                    end
-                end
+% %             case 'tone_centerOut'
+% %                 useNeuronClass = [3,4];
+% %                 filterBy_dirSel = false;
+% %                 dirSel = false;
+% %             case '~tone_centerOut'
+% %                 useNeuronClass = [1:7];
+% %                 filterBy_dirSel = false;
+% %                 dirSel = false;
+% %                 for iNeuron = 1:numel(analysisConf.neurons)
+% %                     if ~isempty(unitEvents{iNeuron}.class) && any(ismember(unitEvents{iNeuron}.class(1:2),[3,4]))
+% %                         excludeUnits = [excludeUnits iNeuron];
+% %                     end
+% %                 end
         end
 
         for ii_movementDirs = 1:numel(movementDirs)
@@ -147,7 +145,7 @@ for ii_events = 1:numel(events)
                     subjectName = analysisConf.sessionConfs{iNeuron}.subjects__name;
 
                     if filterBy_dirSel
-                        if (dirSel && ~dirSelNeurons_p99(iNeuron)) || (~dirSel && dirSelNeurons_p90(iNeuron))
+                        if (dirSel && ~dirSelNeurons(iNeuron)) || (~dirSel && dirSelNeurons_p90(iNeuron))
                             continue;
                         end
                     end

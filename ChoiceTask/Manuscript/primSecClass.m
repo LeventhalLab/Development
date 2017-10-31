@@ -27,19 +27,21 @@ barVals = [primCounts;secCounts;allCounts];
 bar(barVals');
 xticklabels(eventFieldlabels);
 ylabel('units');
-ylim([0 200]);
+ylim([0 210]);
 legend({'primary','secondary','together'},'location','southoutside');
 %  Not sure if these fractions should only be for non NaNs, or include all
 %  units, depends on the question?
 fractions = barVals ./ [numel(unitEvents);numel(unitEvents);numel(primSec)];
 % % fractions = barVals ./ [sum(~isnan(primSec(:,1)));sum(~isnan(primSec(:,2)));sum(~isnan(primSec(:)))];
-strfmt = '%1.2f';
+strfmt = '%1.3f';
 
 % % p_compare = [primSec(~isnan(primSec(:,1)),1);primSec(~isnan(primSec(:,2)),2)];
 % % groups = [zeros(sum(~isnan(primSec(:,1))),1);ones(sum(~isnan(primSec(:,2))),1)];
 for iEvent = 1:7
+    tstr = [num2str(barVals(1,iEvent)),', ',num2str(barVals(2,iEvent)),', ',num2str(barVals(3,iEvent))];
+    text(iEvent,195,tstr,'HorizontalAlignment','center','fontSize',7);
     tstr = [num2str(fractions(1,iEvent),strfmt),', ',num2str(fractions(2,iEvent),strfmt),', ',num2str(fractions(3,iEvent),strfmt)];
-    text(iEvent,175,tstr,'HorizontalAlignment','center','fontSize',7);
+    text(iEvent,185,tstr,'HorizontalAlignment','center','fontSize',7);
 end
 title('Unit classes');
 

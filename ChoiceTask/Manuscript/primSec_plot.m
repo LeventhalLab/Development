@@ -1,17 +1,12 @@
 show_primFate = false; % false = show_secOrigin
 plotOpt = 2; % 1 = both sides of x-axis, 2 = mosaic
-
-if show_primFate
-    plotTitle = 'Primary Fate';
-else
-    plotTitle = 'Secondary Origin';
-    plotOpt = 2;
-end
+showMosaic = false;
+plotTitle = 'Unit Classes';
 
 doSetup = false;
 if doSetup
     tWindow = 1;
-    binMs = 50;
+    binMs = 20;
     trialTypes = {'correct'};
     useEvents = 1:7;
     useTiming = {};
@@ -25,7 +20,7 @@ end
 primSec_wNC = primSec;
 primSec_wNC(isnan(primSec_wNC)) = 8;
 
-figuree(500,400);
+figuree(500,300);
 % cols = 7;
 colors = parula(8);
 % colors = colors(1:end,:);
@@ -34,10 +29,11 @@ colors(8,:) = [.8 .8 .8];
 primBars = histcounts(primSec_wNC(:,1),0.5:8.5);
 secBars = histcounts(primSec_wNC(:,2),0.5:8.5);
 
+lns = [];
 for iBar = 1:numel(secBars)
-    bar(iBar,primBars(iBar) + secBars(iBar),'FaceColor',colors(iBar,:),'FaceAlpha',0.2,'EdgeColor','w','lineWidth',2);
+    lns(2) = bar(iBar,primBars(iBar) + secBars(iBar),'FaceColor',colors(iBar,:),'FaceAlpha',0.2,'EdgeColor','w','lineWidth',2);
     hold on;
-    bar(iBar,primBars(iBar),'FaceColor',colors(iBar,:),'EdgeColor','w','lineWidth',2);
+    lns(1) = bar(iBar,primBars(iBar),'FaceColor',colors(iBar,:),'EdgeColor','w','lineWidth',2);
 end
 
 if plotOpt == 1
@@ -55,21 +51,23 @@ for iEvent = 1:8
     secOrigin(iEvent,:) = [primBars(iEvent) histcounts(primSec_wNC(primSec_wNC(:,2) == iEvent,1),0.5:8.5)];
 end
 
-if show_primFate
-    b = bar(primFate*barMult,'stacked','FaceColor','flat','EdgeColor','w','lineWidth',2,'BarWidth',barWidth);
-    for k = 1:size(primFate,2)
-        b(k).CData = colors(k,:);
-    end
-else
-    b = bar(secOrigin*barMult,'stacked','FaceColor','flat','EdgeColor','w','lineWidth',2,'BarWidth',barWidth);
-    for iBar = 1:numel(secBars) % replot this
-        bar(iBar,primBars(iBar),'FaceColor',colors(iBar,:),'EdgeColor','w','lineWidth',2);
-    end
-    for k = 1:size(primFate,2) % ignore bottom-most bar (where primaries are)
-        b(k+1).CData = colors(k,:);
+if showMosaic
+    if show_primFate
+        b = bar(primFate*barMult,'stacked','FaceColor','flat','EdgeColor','w','lineWidth',2,'BarWidth',barWidth);
+        for k = 1:size(primFate,2)
+            b(k).CData = colors(k,:);
+        end
+    else
+        b = bar(secOrigin*barMult,'stacked','FaceColor','flat','EdgeColor','w','lineWidth',2,'BarWidth',barWidth);
+        for iBar = 1:numel(secBars) % replot this
+            bar(iBar,primBars(iBar),'FaceColor',colors(iBar,:),'EdgeColor','w','lineWidth',2);
+        end
+        for k = 1:size(primFate,2) % ignore bottom-most bar (where primaries are)
+            b(k+1).CData = colors(k,:);
+        end
     end
 end
-
+legend(lns,{'Primary','Secondary'});
 % formatting
 set(gca,'fontsize',16);
 
@@ -96,6 +94,31 @@ set(gcf,'color','w');
 
 
 % pie charts
+useEvent = 4;
+figuree(500,300);
+
+pieData = primFate;
+subplot(121);
+p = pie(pieData(useEvent,:)+.001,{eventFieldlabels{1},eventFieldlabels{2},'','','',eventFieldlabels{6},eventFieldlabels{7},'',});
+for ii = 2:2:numel(p)
+    t = p(ii);
+    t.FontSize = 16;
+end
+colormap(colors);
+title({eventFieldlabels{4},'Primary Fate'});
+setFig;
+
+pieData = secOrigin(:,2:end);
+subplot(122);
+p = pie(pieData(useEvent,:)+.001,{eventFieldlabels{1},eventFieldlabels{2},'','','',eventFieldlabels{6},eventFieldlabels{7},'',});
+for ii = 2:2:numel(p)
+    t = p(ii);
+    t.FontSize = 16;
+end
+colormap(colors);
+title({eventFieldlabels{4},'Secondary Origin'});
+setFig;
+
 if show_primFate
     pieData = primFate;
 else

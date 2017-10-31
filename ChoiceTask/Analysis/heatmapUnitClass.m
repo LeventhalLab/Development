@@ -68,7 +68,7 @@ for iEvent = 1:numel(eventFieldnames)
         ylabel('Units');
     end
     if iEvent == 4
-        xlabel('time (s)');
+        xlabel('Time (s)');
     end
     set(gca,'fontSize',16);
 end
@@ -78,13 +78,14 @@ for iNeuron = 1:numel(sorted_neuronIds)
         plot(3,iNeuron,'>','MarkerFaceColor','k','MarkerEdgeColor','none','markerSize',5); % class 1
         if ~isempty(unitEvents{sorted_neuronIds(iNeuron)}.class(2))
             subplot(1,numel(eventFieldnames),unitEvents{sorted_neuronIds(iNeuron)}.class(2));
-            plot(size(all_zscores,3)-1,iNeuron,'<','MarkerFaceColor','r','MarkerEdgeColor','none','markerSize',5); % class 1
+            plot(size(all_zscores,3)-1,iNeuron,'<','MarkerFaceColor',repmat(.5,1,3),'MarkerEdgeColor','none','markerSize',5); % class 1
         end
     end
 end
 % special unit
 subplot(1,numel(eventFieldnames),4);
 plot(4,find(sorted_neuronIds == 188),'>','MarkerFaceColor','g','MarkerEdgeColor','none','markerSize',10);
+plot(4,find(sorted_neuronIds == 113),'>','MarkerFaceColor','r','MarkerEdgeColor','none','markerSize',10);
 
 set(gcf,'color','w');
 tightfig;

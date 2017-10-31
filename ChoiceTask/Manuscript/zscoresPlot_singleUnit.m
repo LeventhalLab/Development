@@ -1,8 +1,9 @@
+doTitle = false;
 % use primary + secondary classes
 tWindow = 1;
 binMs = 20;
 binS = binMs / 1000;
-trialTypes = {'correctContra','correctIpsi'};
+trialTypes = {'correct'};
 useEvents = 1:7;
 useTiming = {};
 
@@ -15,34 +16,49 @@ cols = 7;
 nSmooth = 3;
 colors = zeros(2,3);
 lineWidth = 3;
-set_ylims = [-1 2];
-ylabelloc = 1.3;
-useNeuron = 201; % 188 (R142_1209_7b), 103, 147, 201 (R142_1210_36a)
+set_ylims = [-1 3];
+ylabelloc = 2.5;
+useNeuron = 113; % 188 (R142_1209_7b), 103, 147, 201 (R142_1210_36a)
 
-figuree(1200,600);
+figuree(1200,350);
 lns = [];
 for iEvent = 1:numel(eventFieldnames)
 % %     plot(squeeze(all_zscores(useNeurons,iEvent,:))','LineWidth',0.5,'Color',repmat(.1,1,4));
 % %     hold on;
 
-    subplot(rows,cols,iEvent);
-    rasterData = tsPeths(:,useEvents(iEvent));
-    for iTrial = 1:numel(rasterData)
-        if isempty(rasterData{iTrial})
-            rasterData{iTrial} = NaN;
+    if rows > 1
+        subplot(rows,cols,iEvent);
+
+        curTrials = all_trials{useNeuron};
+        trialIdInfo = organizeTrialsById(curTrials);
+        tsPeths = eventsPeth(curTrials(trialIdInfo.correct),all_ts{useNeuron},tWindow,eventFieldnames);
+        rasterData = tsPeths(:,useEvents(iEvent));
+        for iTrial = 1:numel(rasterData)
+            if isempty(rasterData{iTrial})
+                rasterData{iTrial} = NaN;
+            end
+        end
+        plotSpikeRaster(rasterData,'PlotType','scatter','AutoLabel',false);
+        yticks(ylim);
+        set(gca,'fontSize',16);
+        if iEvent == 1
+            ylabel('Trials');
+            if doTitle
+                title({['unit ',num2str(useNeuron)],[eventFieldnames{iEvent}]});
+            end
+        else
+            if doTitle
+                title({'',[eventFieldlabels{iEvent}]});
+            end
         end
     end
-    plotSpikeRaster(rasterData,'PlotType','scatter','AutoLabel',false);
-    yticks(ylim);
-    set(gca,'fontSize',16);
-    if iEvent == 1
-        ylabel('Trials');
-        title({['unit ',num2str(useNeuron)],[eventFieldnames{iEvent}]});
+    
+    if rows > 1
+        subplot(rows,cols,iEvent+cols);
     else
-        title({'',[eventFieldnames{iEvent}]});
+        subplot(rows,cols,iEvent);
     end
-
-    subplot(rows,cols,iEvent+cols);
+    
     if iEvent == 3
         lns(iEvent) = plot(smooth(squeeze(all_zscores(useNeuron,iEvent,:)),nSmooth),'LineWidth',lineWidth,'Color',colors(1,:));
         hold on;
@@ -50,7 +66,7 @@ for iEvent = 1:numel(eventFieldnames)
         medRT = median(all_rt);
         medRT_x = (size(all_zscores,3) / 2) + (medRT / binS);
         plot([medRT_x medRT_x],[-5 5],'k--');
-        tx = text(medRT_x,ylabelloc,'median RT','fontSize',16,'HorizontalAlignment','center','VerticalAlignment','top');
+        tx = text(medRT_x,ylabelloc,'RT','fontSize',16,'HorizontalAlignment','center','VerticalAlignment','top');
         set(tx,'Rotation',90);
     elseif iEvent == 4
         lns(iEvent) = plot(smooth(squeeze(all_zscores(useNeuron,iEvent,:)),nSmooth),'LineWidth',lineWidth,'Color',colors(2,:));
@@ -59,7 +75,7 @@ for iEvent = 1:numel(eventFieldnames)
         medMT = median(all_mt);
         medMT_x = (size(all_zscores,3) / 2) + (medMT / binS);
         plot([medMT_x medMT_x],[-5 5],'k--');
-        tx = text(medMT_x,ylabelloc,'median MT','fontSize',16,'HorizontalAlignment','center','VerticalAlignment','top');
+        tx = text(medMT_x,ylabelloc,'MT','fontSize',16,'HorizontalAlignment','center','VerticalAlignment','top');
         set(tx,'Rotation',90);
     else
         lns(iEvent) = plot(smooth(squeeze(all_zscores(useNeuron,iEvent,:)),nSmooth),'LineWidth',lineWidth,'Color','k');
@@ -71,6 +87,9 @@ for iEvent = 1:numel(eventFieldnames)
     ylim(set_ylims);
     yticks([set_ylims(1) 0 set_ylims(2)]);
     
+    if doTitle
+        title({'',[eventFieldlabels{iEvent}]});
+    end
     if iEvent == 1
         ylabel('Z score');
     end
