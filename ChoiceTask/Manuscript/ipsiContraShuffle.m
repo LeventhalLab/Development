@@ -4,7 +4,7 @@ pVal = 0.99;
 pVal_minBins = 4;
 colors = lines(2);
 
-if true
+if false
     useEvents = 1:7;
     trialTypes = {'correct'};
     
@@ -95,17 +95,20 @@ all_dirSelNeurons(size(all_dirSelNeurons,1)+1,2,:) = dirSelNeurons_ipsi;
 all_dirSelNeurons(size(all_dirSelNeurons,1)+1,3,:) = dirSelNeurons;
 
 % see ipsiContraShuffle.m
-useEvents = [1:7];
+% % useEvents = [4,6];
+% % figuree(500,400);
+useEvents = 1:7;
 figuree(1200,400);
 all_eventBins = [];
 for iEvent = 1:numel(useEvents)
+    curEvent = useEvents(iEvent);
     subplot(1,numel(useEvents),iEvent)
     eventBins = zeros(1,size(pNeuronDiff,3));
     eventBins_neg = zeros(1,size(pNeuronDiff_neg,3));
     for iNeuron = 1:size(pNeuronDiff,1)
         if ~isempty(unitEvents{iNeuron}.class)%% && unitEvents{iNeuron}.class(1) == 3 % tone
-            curBins = squeeze(pNeuronDiff(iNeuron,iEvent,:)); % 40 bins per-event
-            curBins_neg = squeeze(pNeuronDiff_neg(iNeuron,iEvent,:));
+            curBins = squeeze(pNeuronDiff(iNeuron,curEvent,:)); % 40 bins per-event
+            curBins_neg = squeeze(pNeuronDiff_neg(iNeuron,curEvent,:));
             eventBins = eventBins + (curBins > pVal);
             eventBins_neg = eventBins_neg + (curBins_neg > pVal);
         end
@@ -114,7 +117,7 @@ for iEvent = 1:numel(useEvents)
     bar(1:size(pNeuronDiff,3),eventBins/size(pNeuronDiff,1),'FaceColor',colors(1,:),'EdgeColor',colors(1,:)); % POSITIVE
     hold on;
     bar(1:size(pNeuronDiff_neg,3),-eventBins_neg/size(pNeuronDiff_neg,1),'FaceColor',colors(2,:),'EdgeColor',colors(2,:)); % POSITIVE
-    ylim([-.2 .2]);
+    ylim([-.15 .15]);
     xlim([1 size(pNeuronDiff,3)]);
     xticks([1 round(size(pNeuronDiff,3)/2) size(pNeuronDiff,3)]);
     xticklabels({'-1','0','1'});

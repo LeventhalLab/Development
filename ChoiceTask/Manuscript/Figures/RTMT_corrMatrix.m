@@ -1,156 +1,41 @@
 function RTMT_corrMatrix()
-
+    savePath = '/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp';
     doSave = true;
+    
+    % tone event, primary + secondary
+    ndirRT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evTone_un~dirSel_n93_movDirall_byRT_bins10_binMs20ORD20171031.mat');
+    ndirMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evTone_un~dirSel_n93_movDirall_byMT_bins10_binMs20ORD20171031.mat');
+    dirRT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evTone_undirSel_n72_movDirall_byRT_bins10_binMs20ORD20171031.mat');
+    dirMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evTone_undirSel_n72_movDirall_byMT_bins10_binMs20ORD20171031.mat');
+    
+    % tone event, primary only
+% %     ndirRT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evTone_un~dirSel_n48_movDirall_byRT_bins10_binMs20ORD20171031.mat');
+% %     ndirMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evTone_un~dirSel_n48_movDirall_byMT_bins10_binMs20ORD20171031.mat');
+% %     dirRT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evTone_undirSel_n34_movDirall_byRT_bins10_binMs20ORD20171031.mat');
+% %     dirMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evTone_undirSel_n34_movDirall_byMT_bins10_binMs20ORD20171031.mat');
 
-    ndirRT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_un~dirSel_n48_movDirall_byRT_bins10_binMs20ORD20171030.mat');
-    ndirMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_un~dirSel_n48_movDirall_byMT_bins10_binMs20ORD20171030.mat');
-    dirRT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n34_movDirall_byRT_bins10_binMs20ORD20171030.mat');
-    dirMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n34_movDirall_byMT_bins10_binMs20ORD20171030.mat');
-% %     dirIpsi = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n42_movDiripsi_byRT_bins10_binMs20ORD20172309.mat');
-% %     dirContra = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n42_movDircontra_byRT_bins10_binMs20ORD20172409.mat');
-% %     ndirIpsi = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_un~dirSel_n54_movDiripsi_byRT_bins10_binMs20ORD20172509.mat');
-% %     ndirContra = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_un~dirSel_n54_movDircontra_byRT_bins10_binMs20ORD20172609.mat');
-        % original
-% %     ndirRT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_un~dirSel_n54_movDirall_byRT_bins10_binMs20ORD20172409.mat');
-% %     ndirMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_un~dirSel_n54_movDirall_byMT_bins10_binMs20ORD20172509.mat');
-% %     dirRT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n42_movDirall_byRT_bins10_binMs20ORD20172209.mat');
-% %     dirMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n42_movDirall_byMT_bins10_binMs20ORD20172309.mat');
-% %     dirIpsi = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n42_movDiripsi_byRT_bins10_binMs20ORD20172309.mat');
-% %     dirContra = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n42_movDircontra_byRT_bins10_binMs20ORD20172409.mat');
-% %     ndirIpsi = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_un~dirSel_n54_movDiripsi_byRT_bins10_binMs20ORD20172509.mat');
-% %     ndirContra = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_un~dirSel_n54_movDircontra_byRT_bins10_binMs20ORD20172609.mat');
+    % nose out event, primary + secondary
+% %     ndirRT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_un~dirSel_n93_movDirall_byRT_bins10_binMs20ORD20171031.mat');
+% %     ndirMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_un~dirSel_n93_movDirall_byMT_bins10_binMs20ORD20171031.mat');
+% %     dirRT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n72_movDirall_byRT_bins10_binMs20ORD20171031.mat');
+% %     dirMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n72_movDirall_byMT_bins10_binMs20ORD20171031.mat');
 
-    all_loadData = {ndirRT,ndirMT,dirRT,dirMT};
-    legendText = {'ndirRT','ndirMT','dirRT','dirMT'};
+    % nose out event, primary only
+% %     ndirRT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_un~dirSel_n48_movDirall_byRT_bins10_binMs20ORD20171030.mat');
+% %     ndirMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_un~dirSel_n48_movDirall_byMT_bins10_binMs20ORD20171030.mat');
+% %     dirRT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n34_movDirall_byRT_bins10_binMs20ORD20171030.mat');
+% %     dirMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n34_movDirall_byMT_bins10_binMs20ORD20171030.mat');
+
     
     % setup
     grayColor = [.8 .8 .8];
     rt_meanColors = [grayColor;cool(numel(ndirRT.auc_max)-2);grayColor];
     mt_meanColors = [summer(numel(ndirMT.auc_max)-1);grayColor];
+%     rt_meanColors = cool(numel(ndirRT.auc_max));
+%     mt_meanColors = summer(numel(ndirMT.auc_max));
     
-    plot_stackedRTCorrs(all_loadData,rt_meanColors,mt_meanColors)
-    
-% %     rt_xlimVals = [0 0.4];
-% %     mt_xlimVals = [0 0.4];
-    
-    savePath = '/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp';
     
     % plots
-    dirLabel = 'ndir'; % for 1&2
-    % --- 1
-    timingField = 'RT';
-    h = plot_type1(ndirRT,rt_meanColors,timingField);
-    if doSave
-        print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'.eps']));
-        close(h);
-    end
-    
-    x = [1:numel(ndirRT.auc_min_z)]';
-    y = ndirRT.auc_min_z';
-    ylabelText = 'min Z';
-    ylimVals = [-1 1];
-    h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,ndirRT.meanBinsSeconds,rt_meanColors,timingField);
-    if doSave
-        print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
-        close(h);
-    end
-    
-    x = [1:numel(ndirRT.auc_max_z)]';
-    y = ndirRT.auc_max_z';
-    ylabelText = 'max Z';
-    ylimVals = [0 2];
-    h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,ndirRT.meanBinsSeconds,rt_meanColors,timingField);
-    if doSave
-        print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,timingField,'.eps']));
-        close(h);
-    end
-    
-    % --- 2
-    timingField = 'MT';
-    h = plot_type1(ndirMT,mt_meanColors,timingField);
-    if doSave
-        print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'.eps']));
-        close(h);
-    end
-    
-    x = [1:numel(ndirMT.auc_min_z)]';
-    y = ndirMT.auc_min_z';
-    ylabelText = 'min Z';
-    ylimVals = [-1 1];
-    h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,ndirMT.meanBinsSeconds,mt_meanColors,timingField);
-    if doSave
-        print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
-        close(h);
-    end
-    
-    x = [1:numel(ndirMT.auc_max_z)]';
-    y = ndirMT.auc_max_z';
-    ylabelText = 'max Z';
-    ylimVals = [0 2];
-    h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,ndirMT.meanBinsSeconds,mt_meanColors,timingField);
-    if doSave
-        print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
-        close(h);
-    end
-    
-    dirLabel = 'dir'; % for 3&4
-    % ---3
-    timingField = 'RT';
-    h = plot_type1(dirRT,rt_meanColors,timingField);
-    if doSave
-        print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'.eps']));
-        close(h);
-    end
-    
-    x = [1:numel(dirRT.auc_min_z)]';
-    y = dirRT.auc_min_z';
-    ylabelText = 'min Z';
-    ylimVals = [-1 1];
-    h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,dirRT.meanBinsSeconds,rt_meanColors,timingField);
-    if doSave
-        print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
-        close(h);
-    end
-    
-    x = [1:numel(dirRT.auc_max_z)]';
-    y = dirRT.auc_max_z';
-    ylabelText = 'max Z';
-    ylimVals = [0 2];
-    h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,dirRT.meanBinsSeconds,rt_meanColors,timingField);
-    if doSave
-        print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
-        close(h);
-    end
-    
-    % ---4
-    timingField = 'MT';
-    dirLabel = 'dir';
-    h = plot_type1(dirMT,mt_meanColors,timingField);
-    if doSave
-        print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'.eps']));
-        close(h);
-    end
-    
-    x = [1:numel(dirMT.auc_min_z)]';
-    y = dirMT.auc_min_z';
-    ylabelText = 'min Z';
-    ylimVals = [-1 1];
-    h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,dirMT.meanBinsSeconds,mt_meanColors,timingField);
-    if doSave
-        print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
-        close(h);
-    end
-    
-    x = [1:numel(dirMT.auc_max_z)]';
-    y = dirMT.auc_max_z';
-    ylabelText = 'max Z';
-    ylimVals = [0 2];
-    h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,dirMT.meanBinsSeconds,mt_meanColors,timingField);
-    if doSave
-        print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
-        close(h);
-    end
-
     
     h = plot_typeRaster(ndirRT,'RT',rt_meanColors);
     print(h,'-painters','-depsc',fullfile(savePath,['ndirRT_raster','.eps']));
@@ -160,6 +45,153 @@ function RTMT_corrMatrix()
     print(h,'-painters','-depsc',fullfile(savePath,['dirMT_raster','.eps']));
     close(h);
     
+    
+    
+    h = plot_type1(ndirRT,rt_meanColors,'RT');
+    if doSave
+        print(h,'-painters','-depsc',fullfile(savePath,['ndirRT','.eps']));
+        close(h);
+    end
+    
+    h = plot_type1(ndirMT,mt_meanColors,'MT');
+    if doSave
+        print(h,'-painters','-depsc',fullfile(savePath,['ndirMT','.eps']));
+        close(h);
+    end
+    
+    h = plot_type1(dirRT,rt_meanColors,'RT');
+    if doSave
+        print(h,'-painters','-depsc',fullfile(savePath,['dirRT','.eps']));
+        close(h);
+    end
+    
+    h = plot_type1(dirMT,mt_meanColors,'MT');
+    if doSave
+        print(h,'-painters','-depsc',fullfile(savePath,['dirMT','.eps']));
+        close(h);
+    end
+    
+    if false
+        all_loadData = {ndirRT,ndirMT,dirRT,dirMT};
+        legendText = {'ndirRT','ndirMT','dirRT','dirMT'};
+
+        plot_stackedRTCorrs(all_loadData,rt_meanColors,mt_meanColors)
+
+        dirLabel = 'ndir'; % for 1&2
+        % --- 1
+        timingField = 'RT';
+        h = plot_type1(ndirRT,rt_meanColors,timingField);
+        if doSave
+            print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'.eps']));
+            close(h);
+        end
+
+        x = [1:numel(ndirRT.auc_min_z)]';
+        y = ndirRT.auc_min_z';
+        ylabelText = 'min Z';
+        ylimVals = [-1 1];
+        h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,ndirRT.meanBinsSeconds,rt_meanColors,timingField);
+        if doSave
+            print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
+            close(h);
+        end
+
+        x = [1:numel(ndirRT.auc_max_z)]';
+        y = ndirRT.auc_max_z';
+        ylabelText = 'max Z';
+        ylimVals = [0 2];
+        h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,ndirRT.meanBinsSeconds,rt_meanColors,timingField);
+        if doSave
+            print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,timingField,'.eps']));
+            close(h);
+        end
+
+        % --- 2
+        timingField = 'MT';
+        h = plot_type1(ndirMT,mt_meanColors,timingField);
+        if doSave
+            print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'.eps']));
+            close(h);
+        end
+
+        x = [1:numel(ndirMT.auc_min_z)]';
+        y = ndirMT.auc_min_z';
+        ylabelText = 'min Z';
+        ylimVals = [-1 1];
+        h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,ndirMT.meanBinsSeconds,mt_meanColors,timingField);
+        if doSave
+            print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
+            close(h);
+        end
+
+        x = [1:numel(ndirMT.auc_max_z)]';
+        y = ndirMT.auc_max_z';
+        ylabelText = 'max Z';
+        ylimVals = [0 2];
+        h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,ndirMT.meanBinsSeconds,mt_meanColors,timingField);
+        if doSave
+            print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
+            close(h);
+        end
+
+        dirLabel = 'dir'; % for 3&4
+        % ---3
+        timingField = 'RT';
+        h = plot_type1(dirRT,rt_meanColors,timingField);
+        if doSave
+            print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'.eps']));
+            close(h);
+        end
+
+        x = [1:numel(dirRT.auc_min_z)]';
+        y = dirRT.auc_min_z';
+        ylabelText = 'min Z';
+        ylimVals = [-1 1];
+        h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,dirRT.meanBinsSeconds,rt_meanColors,timingField);
+        if doSave
+            print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
+            close(h);
+        end
+
+        x = [1:numel(dirRT.auc_max_z)]';
+        y = dirRT.auc_max_z';
+        ylabelText = 'max Z';
+        ylimVals = [0 2];
+        h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,dirRT.meanBinsSeconds,rt_meanColors,timingField);
+        if doSave
+            print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
+            close(h);
+        end
+
+        % ---4
+        timingField = 'MT';
+        dirLabel = 'dir';
+        h = plot_type1(dirMT,mt_meanColors,timingField);
+        if doSave
+            print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'.eps']));
+            close(h);
+        end
+
+        x = [1:numel(dirMT.auc_min_z)]';
+        y = dirMT.auc_min_z';
+        ylabelText = 'min Z';
+        ylimVals = [-1 1];
+        h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,dirMT.meanBinsSeconds,mt_meanColors,timingField);
+        if doSave
+            print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
+            close(h);
+        end
+
+        x = [1:numel(dirMT.auc_max_z)]';
+        y = dirMT.auc_max_z';
+        ylabelText = 'max Z';
+        ylimVals = [0 2];
+        h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,dirMT.meanBinsSeconds,mt_meanColors,timingField);
+        if doSave
+            print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
+            close(h);
+        end
+    end
     
 % %     h = plot_type2(ndirContra,ndirIpsi);
 % %     print(h,'-painters','-depsc',fullfile(savePath,['ndirContraIpsi','.eps']));
@@ -187,7 +219,6 @@ function plot_stackedRTCorrs(all_loadData,rt_meanColors,mt_meanColors)
         subplot(2,2,iCond);
         x = [1:numel(loadData.auc_min_z)]';
         y = loadData.auc_min_z';
-    % %     y = loadData.auc_max_z';
         scatter(x,y,markerSize,meanColors,'filled');
         hold on;
         xlabel('Time (s)');
@@ -254,13 +285,13 @@ function h = plot_typeRaster(loadData,timingField,meanColors)
     if strcmp(timingField,'RT')
         toneLine = colormapline(-loadData.all_useTime_sorted,1:numel(loadData.all_useTime_sorted),[],meanColors);
         legend(toneLine,timingField);
+        set(toneLine,'linewidth',lineWidth);
     elseif strcmp(timingField,'MT')
         toneLine = colormapline(loadData.all_useTime_sorted,1:numel(loadData.all_useTime_sorted),[],meanColors);
         legend(toneLine,timingField);
+        set(toneLine,'linewidth',lineWidth);
     end
-% %     legend(toneLine,timingField);
 
-    set(toneLine,'linewidth',lineWidth);
     set(gca,'fontSize',16);
     set(gcf,'color','w');
 end
@@ -301,7 +332,7 @@ function h = plot_type1(loadData,meanColors,timingField)
     z_xticklabelText = {'-1','0','1'};
     scatter_maxZ_ylimVals = [0 2];
     scatter_minZ_ylimVals = [-1 1];
-    upperRightPos = [.65 .7 .2 .2];
+    upperRightPos = [.65 .7 .3 .3];
     upperLeftPos = [.2 .7 .2 .2];
     markerSize = 20;
     lineWidth = 1.5;
@@ -344,28 +375,37 @@ function h = plot_type1(loadData,meanColors,timingField)
 % %     curylim = ylim;
 % %     text(curxlim(2),curylim(2),{['r^2 = ',num2str(gof.rsquare,'%0.2f')],['p = ',num2str(PVAL,'%0.6f')]},'HorizontalAlignment','right','VerticalAlignment','top');
 % % 
-% %     axes('Position',upperRightPos);
-% %     x = [1:numel(loadData.auc_max_z)]';
-% %     y = loadData.auc_max_z';
-% %     scatter(x,y,markerSize,meanColors,'filled');
-% %     xlabel(timingField);
-% %     ylabel('max Z');
-% %     [f,gof] = fit(x,y,'poly1');
-% %     [RHO,PVAL] = corr(x,y);
-% %     [p,s] = polyfit(x,y,1);
-% %     [yfit,dy] = polyconf(p,x,s,'predopt','curve');
-% %     [xsort,k] = sort(x);
-% %     line(xsort,yfit(k),'color','r');
-% %     line(xsort,yfit(k)-dy,'color','k','linestyle','-');
-% %     line(xsort,yfit(k)+dy,'color','k','linestyle','-');
-% %     xlim([min(x) max(x)]);
-% %     xticks(xlim);
-% %     xticklabels(compose('%1.2f',loadData.meanBinsSeconds([1 end])));
-% %     ylim(scatter_maxZ_ylimVals);
-% %     yticks(ylim);
-% %     curxlim = xlim;
-% %     curylim = ylim;
-% %     text(curxlim(2),curylim(2),{['r^2 = ',num2str(gof.rsquare,'%0.2f')],['p = ',num2str(PVAL,'%0.6f')]},'HorizontalAlignment','right','VerticalAlignment','top');
+    axes('Position',upperRightPos);
+%     x = [1:numel(loadData.auc_max_z)]';
+    x = [loadData.meanBinsSeconds(1:end-1) + diff(loadData.meanBinsSeconds)/2]';
+    y = loadData.auc_max_z';
+    scatter(x,y,markerSize,meanColors,'filled');
+    xlim([min(x) max(x)]);
+    xticks(xlim);
+    xlabel(timingField);
+    ylabel('max Z');
+    switch timingField
+        case 'RT'
+            x = x(2:end-1);
+            y = y(2:end-1);
+        case 'MT'
+            x = x(1:end-1);
+            y = y(1:end-1);
+    end
+    [f,gof] = fit(x,y,'poly1');
+    [RHO,PVAL] = corr(x,y);
+    [p,s] = polyfit(x,y,1);
+    [yfit,dy] = polyconf(p,x,s,'predopt','curve');
+    [xsort,k] = sort(x);
+    line(xsort,yfit(k),'color','r');
+    line(xsort,yfit(k)-dy,'color','k','linestyle','-');
+    line(xsort,yfit(k)+dy,'color','k','linestyle','-');
+    xticklabels(compose('%1.2f',loadData.meanBinsSeconds([1 end])));
+    ylim(scatter_maxZ_ylimVals);
+    yticks(ylim);
+    curxlim = xlim;
+    curylim = ylim;
+    text(curxlim(2),curylim(2),{['r^2 = ',num2str(gof.rsquare,'%0.2f')],['p = ',num2str(PVAL,'%0.6f')]},'HorizontalAlignment','right','VerticalAlignment','top');
 
     set(gcf,'color','w');
 end

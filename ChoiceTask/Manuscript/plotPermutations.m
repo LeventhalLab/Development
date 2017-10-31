@@ -75,8 +75,8 @@ for ii_events = 1:numel(events)
                 dirSel = false;
             case 'dirSel'
                 % must have first or second class of Tone or Nose Out
-                excludeUnits = find(ismember(primSec(:,1),[3,4]) == 0); % only primary
-% %                 excludeUnits = find(any(ismember(primSec,[3,4]),2) == 0);
+% %                 excludeUnits = find(ismember(primSec(:,1),[3,4]) == 0); % only primary
+                excludeUnits = find(any(ismember(primSec,[3,4]),2) == 0);
 
 % %                 for iNeuron = 1:numel(analysisConf.neurons)
 % %                     if ~isempty(unitEvents{iNeuron}.class) && ~any(ismember(unitEvents{iNeuron}.class(1:2),[3,4]))
@@ -87,8 +87,8 @@ for ii_events = 1:numel(events)
                 filterBy_dirSel = true;
                 dirSel = true;
             case '~dirSel'
-                excludeUnits = find(ismember(primSec(:,1),[3,4]) == 0); % only primary
-% %                 excludeUnits = find(any(ismember(primSec,[3,4]),2) == 0);
+% %                 excludeUnits = find(ismember(primSec(:,1),[3,4]) == 0); % only primary
+                excludeUnits = find(any(ismember(primSec,[3,4]),2) == 0);
 
 % %                 for iNeuron = 1:numel(analysisConf.neurons)
 % %                     if ~isempty(unitEvents{iNeuron}.class) && ~any(ismember(unitEvents{iNeuron}.class(1:2),[3,4]))
@@ -417,12 +417,6 @@ for ii_events = 1:numel(events)
                     otherwise
                         meanBinsSeconds = 0:binInc:max(all_useTime_sorted);
                 end
-
-                meanBins = [];
-                for iBinSeconds = 1:numel(meanBinsSeconds)
-                    [idx, val] = closest(all_useTime_sorted,meanBinsSeconds(iBinSeconds));
-                    meanBins(iBinSeconds) = idx;
-                end
                 
 %                 adj_meanBinsSeconds = [];
 %                 for iBinSeconds = 1:numel(meanBinsSeconds)-1
@@ -441,8 +435,18 @@ for ii_events = 1:numel(events)
 %                 meanBins = meanBins(fixOnesIdx:end);
 %                 meanBinsSeconds = adj_meanBinsSeconds(fixOnesIdx:end);
                 
+                % quantiles
                 meanBins = floor(linspace(1,numel(allTrial_tsPeths),nMeanBins+1));
                 meanBinsSeconds = all_useTime_sorted(meanBins);
+                
+                % linearly spaced
+% %                 meanBinSeconds = linspace(all_useTime_sorted(1),all_useTime_sorted(end),nMeanBins+1);
+% %                 meanBins = [];
+% %                 for iBinSeconds = 1:numel(meanBinsSeconds)
+% %                     [idx, val] = closest(all_useTime_sorted,meanBinsSeconds(iBinSeconds));
+% %                     meanBins(iBinSeconds) = idx;
+% %                 end
+
                 meanColors = cool(numel(meanBins)-1);
                 mean_z = [];
                 z_raw = [];
