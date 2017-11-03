@@ -7,6 +7,9 @@ trialTypes = {'correct'};
 useEvents = 1:7;
 useTiming = {};
 
+session15_rt = all_rt_c{15};
+session15_mt = all_mt_c{15};
+
 % run together
 % % [unitEvents,all_zscores,unitClass] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents,useTiming);
 % % primSec = primSecClass(unitEvents,0.5);
@@ -63,7 +66,7 @@ for iEvent = 1:numel(eventFieldnames)
         lns(iEvent) = plot(smooth(squeeze(all_zscores(useNeuron,iEvent,:)),nSmooth),'LineWidth',lineWidth,'Color',colors(1,:));
         hold on;
         lns(iEvent) = plot(smooth(squeeze(all_zscores(useNeuron,iEvent,:)),nSmooth),'LineWidth',lineWidth,'Color',colors(2,:));
-        medRT = median(all_rt);
+        medRT = median(session15_rt);
         medRT_x = (size(all_zscores,3) / 2) + (medRT / binS);
         plot([medRT_x medRT_x],[-5 5],'k--');
         tx = text(medRT_x,ylabelloc,'RT','fontSize',16,'HorizontalAlignment','center','VerticalAlignment','top');
@@ -72,7 +75,7 @@ for iEvent = 1:numel(eventFieldnames)
         lns(iEvent) = plot(smooth(squeeze(all_zscores(useNeuron,iEvent,:)),nSmooth),'LineWidth',lineWidth,'Color',colors(2,:));
         hold on;
         lns(iEvent) = plot(smooth(squeeze(all_zscores(useNeuron,iEvent,:)),nSmooth),'LineWidth',lineWidth,'Color',colors(1,:));
-        medMT = median(all_mt);
+        medMT = median(session15_mt);
         medMT_x = (size(all_zscores,3) / 2) + (medMT / binS);
         plot([medMT_x medMT_x],[-5 5],'k--');
         tx = text(medMT_x,ylabelloc,'MT','fontSize',16,'HorizontalAlignment','center','VerticalAlignment','top');

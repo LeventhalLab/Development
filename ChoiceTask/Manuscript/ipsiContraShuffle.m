@@ -117,7 +117,7 @@ for iEvent = 1:numel(useEvents)
     bar(1:size(pNeuronDiff,3),eventBins/size(pNeuronDiff,1),'FaceColor',colors(1,:),'EdgeColor',colors(1,:)); % POSITIVE
     hold on;
     bar(1:size(pNeuronDiff_neg,3),-eventBins_neg/size(pNeuronDiff_neg,1),'FaceColor',colors(2,:),'EdgeColor',colors(2,:)); % POSITIVE
-    ylim([-.15 .15]);
+    ylim([-.12 .12]);
     xlim([1 size(pNeuronDiff,3)]);
     xticks([1 round(size(pNeuronDiff,3)/2) size(pNeuronDiff,3)]);
     xticklabels({'-1','0','1'});

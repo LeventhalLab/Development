@@ -2,12 +2,28 @@ saveDir = '/Users/mattgaidica/Documents/Data/ChoiceTask/spikeRasterWithIncorrect
 doLegend = true;
 doSave = false;
 useEvents = [1:7];
-% units: 188, 201
-for iNeuron = 113%1:numel(analysisConf.neurons)
+% units: 113, 188, 201
+for iNeuron = 188%1:numel(analysisConf.neurons)
     neuronName = analysisConf.neurons{iNeuron};
     curTrials = all_trials{iNeuron};
     trialIdInfo = organizeTrialsById(curTrials);
-    trialIds = [trialIdInfo.correctContra trialIdInfo.correctIpsi trialIdInfo.incorrectContra trialIdInfo.incorrectIpsi];
+    trialIds_conds = {trialIdInfo.correctContra trialIdInfo.correctIpsi trialIdInfo.incorrectContra trialIdInfo.incorrectIpsi};
+    trialIds = [];
+    for iCond = 1:numel(trialIds_conds)
+        trialIds_cond = trialIds_conds{iCond};
+        t = [];
+        for iTrial = 1:numel(trialIds_cond)
+            if ismember(iCond,[1,2])
+                t(iTrial) = curTrials(trialIds_cond(iTrial)).timing.MT;
+            else
+                t(iTrial) = curTrials(trialIds_cond(iTrial)).timing.movementTime;
+            end
+        end
+        [v,k] = sort(t);
+        trialIds = [trialIds trialIds_cond(k)];
+    end
+% %     trialIds = [trialIdInfo.correctContra trialIdInfo.correctIpsi trialIdInfo.incorrectContra trialIdInfo.incorrectIpsi];
+    
     tsPeths = eventsPeth(curTrials(trialIds),all_ts{iNeuron},tWindow,eventFieldnames);
 % %     h = figuree(150*numel(useEvents)+300,200);
     h = figuree(1200,250);

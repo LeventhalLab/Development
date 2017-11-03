@@ -73,21 +73,32 @@ end
 
 nSmooth = 5;
 lineWidth = 4;
-figuree(600,300);
+adjLabel = 15;
+h = figuree(600,300);
 [rt_counts,rt_centers] = hist(all_rt,[xlimVals(1):histInt:xlimVals(2)]+histInt);
 [mt_counts,mt_centers] = hist(all_mt,[xlimVals(1):histInt:xlimVals(2)]+histInt);
-lns_rt = colormapline(interp(rt_centers,nSmooth),interp(rt_counts,nSmooth),[],cool(1000));
-set(lns_rt,'lineWidth',lineWidth);
+x = interp(rt_centers,nSmooth);
+y = abs(interp(rt_counts,nSmooth));
+% % lns_rt = colormapline(x,y,[],cool(1000));
+% % set(lns_rt,'lineWidth',lineWidth);
+plot(x,y,'k','lineWidth',lineWidth);
 hold on;
-lns_mt = colormapline(interp(mt_centers,nSmooth),interp(mt_counts,nSmooth),[],summer(1000));
-set(lns_mt,'lineWidth',lineWidth);
+[v,k] = max(y);
+text(x(k),v + adjLabel,'RT','fontSize',16,'HorizontalAlignment','Center');
+x = interp(mt_centers,nSmooth);
+y = abs(interp(mt_counts,nSmooth));
+% % lns_mt = colormapline(x,y,[],summer(1000));
+% % set(lns_mt,'lineWidth',lineWidth);
+lns = plot(x,y,'k','lineWidth',lineWidth);
+[v,k] = max(y);
+text(x(k),v + adjLabel,'MT','fontSize',16,'HorizontalAlignment','Center');
+ylim([0 220]);
+yticks(ylim);
 xlim([0 1]);
 xticks(xlim);
-xlabel('RT & MT (s)');
-ylabel('Trials');
-set(gca,'fontSize',16);
-set(gcf,'color','w');
+setFig('Time (s)','Trials');
 
+exportEPS(h,figPath,'RTMT_distribution');
 
 figuree(1200,250);
 cols = 3;

@@ -1,9 +1,14 @@
 % % unitEvents = corr_unitEvents;
 % % all_zscores = corr_all_zscores;
-% trialTypes = {'correctContra','correctIpsi'};
-% useEvents = 1:7;
-% tWindow = 1;
-% [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,ts_all,eventFieldnames,tWindow,binMs,trialTypes,useEvents);
+doSetup = false;
+if doSetup
+    tWindow = 1;
+    binMs = 20;
+    trialTypes = {'correct'};
+    useEvents = 1:7;
+    useTiming = {};
+    [unitEvents,all_zscores,unitClass] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents,useTiming);
+end
 doLegend = true;
 imsc = [];
 useSubjects = [88,117,142,154,182];
@@ -70,6 +75,7 @@ for iEvent = 1:numel(eventFieldnames)
     if iEvent == 4
         xlabel('Time (s)');
     end
+
     set(gca,'fontSize',16);
 end
 for iNeuron = 1:numel(sorted_neuronIds)
@@ -78,14 +84,20 @@ for iNeuron = 1:numel(sorted_neuronIds)
         plot(3,iNeuron,'>','MarkerFaceColor','k','MarkerEdgeColor','none','markerSize',5); % class 1
         if ~isempty(unitEvents{sorted_neuronIds(iNeuron)}.class(2))
             subplot(1,numel(eventFieldnames),unitEvents{sorted_neuronIds(iNeuron)}.class(2));
-            plot(size(all_zscores,3)-1,iNeuron,'<','MarkerFaceColor',repmat(.5,1,3),'MarkerEdgeColor','none','markerSize',5); % class 1
+            plot(size(all_zscores,3)-1,iNeuron,'<','MarkerFaceColor',repmat(1,1,3),'MarkerEdgeColor','none','markerSize',5); % class 1
         end
     end
 end
+for iEvent = 1:7
+    % special unit
+    subplot(1,numel(eventFieldnames),iEvent);
+    plot(4,find(sorted_neuronIds == 188),'>','MarkerFaceColor','g','MarkerEdgeColor','w','markerSize',10);
+    plot(4,find(sorted_neuronIds == 113),'>','MarkerFaceColor','r','MarkerEdgeColor','w','markerSize',10);
+end
 % special unit
-subplot(1,numel(eventFieldnames),4);
-plot(4,find(sorted_neuronIds == 188),'>','MarkerFaceColor','g','MarkerEdgeColor','none','markerSize',10);
-plot(4,find(sorted_neuronIds == 113),'>','MarkerFaceColor','r','MarkerEdgeColor','none','markerSize',10);
+% % subplot(1,numel(eventFieldnames),4);
+% % plot(4,find(sorted_neuronIds == 188),'>','MarkerFaceColor','g','MarkerEdgeColor','none','markerSize',10);
+% % plot(4,find(sorted_neuronIds == 113),'>','MarkerFaceColor','r','MarkerEdgeColor','none','markerSize',10);
 
 set(gcf,'color','w');
 tightfig;

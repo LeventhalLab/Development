@@ -19,8 +19,8 @@ lineWidth = 2;
 % % useTiming = {};
 % % [unitEvents,all_zscores,unitClass] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents,useTiming);
 
-minZ = 0;
-primSec = primSecClass(unitEvents,minZ);
+% % minZ = 1;
+% % primSec = primSecClass(unitEvents,minZ);
 
 useOrdinary = true;
 % RT_intercepts = ezReciprobit(all_rt,10);
@@ -75,8 +75,8 @@ for ii_events = 1:numel(events)
                 dirSel = false;
             case 'dirSel'
                 % must have first or second class of Tone or Nose Out
-% %                 excludeUnits = find(ismember(primSec(:,1),[3,4]) == 0); % only primary
-                excludeUnits = find(any(ismember(primSec,[3,4]),2) == 0);
+                excludeUnits = find(ismember(primSec(:,1),[3,4]) == 0); % only primary
+% %                 excludeUnits = find(any(ismember(primSec,[3,4]),2) == 0);
 
 % %                 for iNeuron = 1:numel(analysisConf.neurons)
 % %                     if ~isempty(unitEvents{iNeuron}.class) && ~any(ismember(unitEvents{iNeuron}.class(1:2),[3,4]))
@@ -87,8 +87,8 @@ for ii_events = 1:numel(events)
                 filterBy_dirSel = true;
                 dirSel = true;
             case '~dirSel'
-% %                 excludeUnits = find(ismember(primSec(:,1),[3,4]) == 0); % only primary
-                excludeUnits = find(any(ismember(primSec,[3,4]),2) == 0);
+                excludeUnits = find(ismember(primSec(:,1),[3,4]) == 0); % only primary
+% %                 excludeUnits = find(any(ismember(primSec,[3,4]),2) == 0);
 
 % %                 for iNeuron = 1:numel(analysisConf.neurons)
 % %                     if ~isempty(unitEvents{iNeuron}.class) && ~any(ismember(unitEvents{iNeuron}.class(1:2),[3,4]))

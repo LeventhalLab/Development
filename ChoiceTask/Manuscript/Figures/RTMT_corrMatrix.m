@@ -2,11 +2,17 @@ function RTMT_corrMatrix()
     savePath = '/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp';
     doSave = true;
     
+    % Nose Out event, secondary
+% %     ndirRT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_un~dirSel_n45_movDirall_byRT_bins10_binMs20ORD20171031.mat');
+% %     ndirMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_un~dirSel_n45_movDirall_byMT_bins10_binMs20ORD20171031.mat');
+% %     dirRT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n38_movDirall_byRT_bins10_binMs20ORD20171031.mat');
+% %     dirMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n38_movDirall_byMT_bins10_binMs20ORD20171031.mat');
+    
     % tone event, primary + secondary
-    ndirRT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evTone_un~dirSel_n93_movDirall_byRT_bins10_binMs20ORD20171031.mat');
-    ndirMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evTone_un~dirSel_n93_movDirall_byMT_bins10_binMs20ORD20171031.mat');
-    dirRT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evTone_undirSel_n72_movDirall_byRT_bins10_binMs20ORD20171031.mat');
-    dirMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evTone_undirSel_n72_movDirall_byMT_bins10_binMs20ORD20171031.mat');
+% %     ndirRT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evTone_un~dirSel_n93_movDirall_byRT_bins10_binMs20ORD20171031.mat');
+% %     ndirMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evTone_un~dirSel_n93_movDirall_byMT_bins10_binMs20ORD20171031.mat');
+% %     dirRT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evTone_undirSel_n72_movDirall_byRT_bins10_binMs20ORD20171031.mat');
+% %     dirMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evTone_undirSel_n72_movDirall_byMT_bins10_binMs20ORD20171031.mat');
     
     % tone event, primary only
 % %     ndirRT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evTone_un~dirSel_n48_movDirall_byRT_bins10_binMs20ORD20171031.mat');
@@ -21,10 +27,10 @@ function RTMT_corrMatrix()
 % %     dirMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n72_movDirall_byMT_bins10_binMs20ORD20171031.mat');
 
     % nose out event, primary only
-% %     ndirRT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_un~dirSel_n48_movDirall_byRT_bins10_binMs20ORD20171030.mat');
-% %     ndirMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_un~dirSel_n48_movDirall_byMT_bins10_binMs20ORD20171030.mat');
-% %     dirRT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n34_movDirall_byRT_bins10_binMs20ORD20171030.mat');
-% %     dirMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n34_movDirall_byMT_bins10_binMs20ORD20171030.mat');
+    ndirRT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_un~dirSel_n48_movDirall_byRT_bins10_binMs20ORD20171030.mat');
+    ndirMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_un~dirSel_n48_movDirall_byMT_bins10_binMs20ORD20171030.mat');
+    dirRT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n34_movDirall_byRT_bins10_binMs20ORD20171030.mat');
+    dirMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n34_movDirall_byMT_bins10_binMs20ORD20171030.mat');
 
     
     % setup
@@ -36,17 +42,6 @@ function RTMT_corrMatrix()
     
     
     % plots
-    
-    h = plot_typeRaster(ndirRT,'RT',rt_meanColors);
-    print(h,'-painters','-depsc',fullfile(savePath,['ndirRT_raster','.eps']));
-    close(h);
-    
-    h = plot_typeRaster(dirMT,'MT',mt_meanColors);
-    print(h,'-painters','-depsc',fullfile(savePath,['dirMT_raster','.eps']));
-    close(h);
-    
-    
-    
     h = plot_type1(ndirRT,rt_meanColors,'RT');
     if doSave
         print(h,'-painters','-depsc',fullfile(savePath,['ndirRT','.eps']));
@@ -70,6 +65,14 @@ function RTMT_corrMatrix()
         print(h,'-painters','-depsc',fullfile(savePath,['dirMT','.eps']));
         close(h);
     end
+    
+    h = plot_typeRaster(ndirRT,'RT',rt_meanColors);
+    print(h,'-painters','-depsc',fullfile(savePath,['ndirRT_raster','.eps']));
+    close(h);
+    
+    h = plot_typeRaster(dirMT,'MT',mt_meanColors);
+    print(h,'-painters','-depsc',fullfile(savePath,['dirMT_raster','.eps']));
+    close(h);
     
     if false
         all_loadData = {ndirRT,ndirMT,dirRT,dirMT};
@@ -200,7 +203,7 @@ function RTMT_corrMatrix()
 % %     h = plot_type2(dirContra,dirIpsi);
 % %     print(h,'-painters','-depsc',fullfile(savePath,['dirContraIpsi','.eps']));
 % %     close(h);
-end
+ end
 
 function plot_stackedRTCorrs(all_loadData,rt_meanColors,mt_meanColors)
 	markerSize = 100;
@@ -334,7 +337,7 @@ function h = plot_type1(loadData,meanColors,timingField)
     scatter_minZ_ylimVals = [-1 1];
     upperRightPos = [.65 .7 .3 .3];
     upperLeftPos = [.2 .7 .2 .2];
-    markerSize = 20;
+    markerSize = 25;
     lineWidth = 1.5;
     
     h = figuree(450,300);
@@ -379,9 +382,16 @@ function h = plot_type1(loadData,meanColors,timingField)
 %     x = [1:numel(loadData.auc_max_z)]';
     x = [loadData.meanBinsSeconds(1:end-1) + diff(loadData.meanBinsSeconds)/2]';
     y = loadData.auc_max_z';
+    % plot faint lines where data points are?
+% %     plot(repmat(x,1,2)',repmat(scatter_maxZ_ylimVals,numel(x),1)','color',[.8 .8 .8]);
+% %     hold on;
     scatter(x,y,markerSize,meanColors,'filled');
     xlim([min(x) max(x)]);
-    xticks(xlim);
+    xticks(x);
+    xticklabelVals = cell(1,numel(x)-2);
+    xticklabelVals(:) = {''};
+    xticklabelVals = {num2str(x(1),'%1.2f'),xticklabelVals{:},num2str(x(end),'%1.2f')};
+    xticklabels(xticklabelVals);
     xlabel(timingField);
     ylabel('max Z');
     switch timingField
@@ -400,7 +410,7 @@ function h = plot_type1(loadData,meanColors,timingField)
     line(xsort,yfit(k),'color','r');
     line(xsort,yfit(k)-dy,'color','k','linestyle','-');
     line(xsort,yfit(k)+dy,'color','k','linestyle','-');
-    xticklabels(compose('%1.2f',loadData.meanBinsSeconds([1 end])));
+%     xticklabels(compose('%1.2f',loadData.meanBinsSeconds([1 end])));
     ylim(scatter_maxZ_ylimVals);
     yticks(ylim);
     curxlim = xlim;

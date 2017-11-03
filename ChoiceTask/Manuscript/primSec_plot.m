@@ -13,7 +13,7 @@ if doSetup
 
     [unitEvents,all_zscores,unitClass] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents,useTiming);
     
-    minZ = 0.5;
+    minZ = 1;
     [primSec,fractions] = primSecClass(unitEvents,minZ);
 end
 
@@ -69,6 +69,12 @@ if showMosaic
 end
 legend(lns,{'Primary','Secondary'});
 % formatting
+
+for iText = 1:numel(primBars)
+    text(iText,primBars(iText),num2str(primBars(iText)),'VerticalAlignment','bottom','HorizontalAlignment','center');
+    text(iText,primBars(iText)+secBars(iText),num2str(secBars(iText)),'VerticalAlignment','bottom','HorizontalAlignment','center');
+end
+
 set(gca,'fontsize',16);
 
 xticks(1:8);
