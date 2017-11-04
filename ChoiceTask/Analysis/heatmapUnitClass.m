@@ -1,7 +1,7 @@
 % % unitEvents = corr_unitEvents;
 % % all_zscores = corr_all_zscores;
 plotSpecialArrows = false;
-doSetup = false;
+doSetup = true;
 if doSetup
     tWindow = 1;
     binMs = 20;
@@ -14,7 +14,7 @@ if doSetup
 end
 doLegend = true;
 imsc = [];
-useSubjects = [88,117,137,142,154,182];
+useSubjects = [88,117,137,140,142,154,182];
 % useSubjects = [182];
 
 % compile event classes
