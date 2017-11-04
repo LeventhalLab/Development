@@ -13,7 +13,7 @@ if doSetup
 
     [unitEvents,all_zscores,unitClass] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents,useTiming);
     
-    minZ = 1;
+    minZ = 0.75;
     [primSec,fractions] = primSecClass(unitEvents,minZ);
 end
 
@@ -78,7 +78,7 @@ end
 set(gca,'fontsize',16);
 
 xticks(1:8);
-xticklabels({eventFieldlabels{:},'N.C.'});
+xticklabels({eventFieldlabels{:},'N.R.'});
 ax = gca;
 ax.XAxis.FontSize = 12;
 xtickangle(45);
@@ -100,29 +100,29 @@ set(gcf,'color','w');
 
 
 % pie charts
-useEvent = 4;
+useEvents = [2,2];
 figuree(500,300);
 
 pieData = primFate;
 subplot(121);
-p = pie(pieData(useEvent,:)+.001,{eventFieldlabels{1},eventFieldlabels{2},'','','',eventFieldlabels{6},eventFieldlabels{7},'',});
+p = pie(mean(pieData(useEvents,:))+.001,{eventFieldlabels{1},eventFieldlabels{2},'','','',eventFieldlabels{6},eventFieldlabels{7},'',});
 for ii = 2:2:numel(p)
     t = p(ii);
     t.FontSize = 16;
 end
 colormap(colors);
-title({eventFieldlabels{4},'Primary Fate'});
+title({eventFieldlabels{useEvents},'Primary Fate'});
 setFig;
 
 pieData = secOrigin(:,2:end);
 subplot(122);
-p = pie(pieData(useEvent,:)+.001,{eventFieldlabels{1},eventFieldlabels{2},'','','',eventFieldlabels{6},eventFieldlabels{7},'',});
+p = pie(mean(pieData(useEvents,:))+.001,{eventFieldlabels{1},eventFieldlabels{2},'','','',eventFieldlabels{6},eventFieldlabels{7},'',});
 for ii = 2:2:numel(p)
     t = p(ii);
     t.FontSize = 16;
 end
 colormap(colors);
-title({eventFieldlabels{4},'Secondary Origin'});
+title({eventFieldlabels{useEvents},'Secondary Origin'});
 setFig;
 
 if show_primFate
@@ -131,17 +131,17 @@ else
     pieData = secOrigin(:,2:end);
 end
 
-figuree(1200,400);
-for iEvent = 1:8
-    subplot(1,8,iEvent);
-    p = pie(pieData(iEvent,:)+.001,{'','','','','','','','',});
-    colormap(colors);
-    if iEvent == 1
-        title({plotTitle,eventFieldlabels{iEvent}});
-    elseif iEvent == 8
-        title('N.C.');
-    else
-        title(eventFieldlabels{iEvent});
-    end
-end
-set(gcf,'color','w');
+% % figuree(1200,400);
+% % for iEvent = 1:8
+% %     subplot(1,8,iEvent);
+% %     p = pie(pieData(iEvent,:)+.001,{'','','','','','','','',});
+% %     colormap(colors);
+% %     if iEvent == 1
+% %         title({plotTitle,eventFieldlabels{iEvent}});
+% %     elseif iEvent == 8
+% %         title('N.R.');
+% %     else
+% %         title(eventFieldlabels{iEvent});
+% %     end
+% % end
+% % set(gcf,'color','w');

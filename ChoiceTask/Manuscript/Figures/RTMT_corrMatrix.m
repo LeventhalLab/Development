@@ -42,43 +42,60 @@ function RTMT_corrMatrix()
     
     
     % plots
-    h = plot_type1(ndirRT,rt_meanColors,'RT');
-    if doSave
-        print(h,'-painters','-depsc',fullfile(savePath,['ndirRT','.eps']));
-        close(h);
-    end
+% %     timingField = 'RT';
+% %     h = plot_type1(ndirRT,rt_meanColors,timingField);
+% %     if doSave
+% %         print(h,'-painters','-depsc',fullfile(savePath,['ndir',timingField,'.eps']));
+% %         close(h);
+% %     end
+% %     
+% %     timingField = 'MT';
+% %     h = plot_type1(ndirMT,mt_meanColors,timingField);
+% %     if doSave
+% %         print(h,'-painters','-depsc',fullfile(savePath,['ndir',timingField,'.eps']));
+% %         close(h);
+% %     end
+% %     
+% %     timingField = 'RT';
+% %     h = plot_type1(dirRT,rt_meanColors,timingField);
+% %     if doSave
+% %         print(h,'-painters','-depsc',fullfile(savePath,['dir',timingField,'.eps']));
+% %         close(h);
+% %     end
+% %     
+% %     timingField = 'MT';
+% %     h = plot_type1(dirMT,mt_meanColors,timingField);
+% %     if doSave
+% %         print(h,'-painters','-depsc',fullfile(savePath,['dir',timingField,'.eps']));
+% %         close(h);
+% %     end
     
-    h = plot_type1(ndirMT,mt_meanColors,'MT');
-    if doSave
-        print(h,'-painters','-depsc',fullfile(savePath,['ndirMT','.eps']));
-        close(h);
-    end
+    % RASTERS
+% %     timingField = 'RT';
+% %     h = plot_typeRaster(ndirRT,timingField,rt_meanColors);
+% %     print(h,'-painters','-depsc',fullfile(savePath,['ndir',timingField,'_raster','.eps']));
+% %     close(h);
+% %     
+% %     timingField = 'MT';
+% %     h = plot_typeRaster(ndirMT,timingField,mt_meanColors);
+% %     print(h,'-painters','-depsc',fullfile(savePath,['ndir',timingField,'_raster','.eps']));
+% %     close(h);
+% %     
+% %     timingField = 'RT';
+% %     h = plot_typeRaster(dirRT,timingField,rt_meanColors);
+% %     print(h,'-painters','-depsc',fullfile(savePath,['dir',timingField,'_raster','.eps']));
+% %     close(h);
+% %     
+% %     timingField = 'MT';
+% %     h = plot_typeRaster(dirMT,timingField,mt_meanColors);
+% %     print(h,'-painters','-depsc',fullfile(savePath,['dir',timingField,'_raster','.eps']));
+% %     close(h);
     
-    h = plot_type1(dirRT,rt_meanColors,'RT');
-    if doSave
-        print(h,'-painters','-depsc',fullfile(savePath,['dirRT','.eps']));
-        close(h);
-    end
-    
-    h = plot_type1(dirMT,mt_meanColors,'MT');
-    if doSave
-        print(h,'-painters','-depsc',fullfile(savePath,['dirMT','.eps']));
-        close(h);
-    end
-    
-    h = plot_typeRaster(ndirRT,'RT',rt_meanColors);
-    print(h,'-painters','-depsc',fullfile(savePath,['ndirRT_raster','.eps']));
-    close(h);
-    
-    h = plot_typeRaster(dirMT,'MT',mt_meanColors);
-    print(h,'-painters','-depsc',fullfile(savePath,['dirMT_raster','.eps']));
-    close(h);
-    
-    if false
+    if true
         all_loadData = {ndirRT,ndirMT,dirRT,dirMT};
         legendText = {'ndirRT','ndirMT','dirRT','dirMT'};
 
-        plot_stackedRTCorrs(all_loadData,rt_meanColors,mt_meanColors)
+% %         plot_stackedRTCorrs(all_loadData,rt_meanColors,mt_meanColors);
 
         dirLabel = 'ndir'; % for 1&2
         % --- 1
@@ -92,7 +109,7 @@ function RTMT_corrMatrix()
         x = [1:numel(ndirRT.auc_min_z)]';
         y = ndirRT.auc_min_z';
         ylabelText = 'min Z';
-        ylimVals = [-1 1];
+        ylimVals = [-0.5 0.5];
         h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,ndirRT.meanBinsSeconds,rt_meanColors,timingField);
         if doSave
             print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
@@ -120,7 +137,7 @@ function RTMT_corrMatrix()
         x = [1:numel(ndirMT.auc_min_z)]';
         y = ndirMT.auc_min_z';
         ylabelText = 'min Z';
-        ylimVals = [-1 1];
+        ylimVals = [-0.5 0.5];
         h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,ndirMT.meanBinsSeconds,mt_meanColors,timingField);
         if doSave
             print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
@@ -149,7 +166,7 @@ function RTMT_corrMatrix()
         x = [1:numel(dirRT.auc_min_z)]';
         y = dirRT.auc_min_z';
         ylabelText = 'min Z';
-        ylimVals = [-1 1];
+        ylimVals = [-0.5 0.5];
         h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,dirRT.meanBinsSeconds,rt_meanColors,timingField);
         if doSave
             print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
@@ -178,7 +195,7 @@ function RTMT_corrMatrix()
         x = [1:numel(dirMT.auc_min_z)]';
         y = dirMT.auc_min_z';
         ylabelText = 'min Z';
-        ylimVals = [-1 1];
+        ylimVals = [-0.5 0.5];
         h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,dirMT.meanBinsSeconds,mt_meanColors,timingField);
         if doSave
             print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
@@ -269,7 +286,7 @@ function plot_stackedRTCorrs(all_loadData,rt_meanColors,mt_meanColors)
 end
 
 function h = plot_typeRaster(loadData,timingField,meanColors)
-    h = figuree(450,300);
+    h = figuree(450,250);
     xlimVals = [-1 1];
     lineWidth = 4;
     
@@ -300,7 +317,7 @@ function h = plot_typeRaster(loadData,timingField,meanColors)
 end
 
 function h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,meanBinsSeconds,meanColors,timingField)
-    h = figuree(450,300);
+    h = figuree(450,250);
     markerSize = 100;
     
     scatter(x,y,markerSize,meanColors,'filled');
@@ -334,13 +351,14 @@ function h = plot_type1(loadData,meanColors,timingField)
     z_xtickVals = [1 floor(size(loadData.z_raw,2)/2) size(loadData.z_raw,2)];
     z_xticklabelText = {'-1','0','1'};
     scatter_maxZ_ylimVals = [0 2];
-    scatter_minZ_ylimVals = [-1 1];
+    scatter_minZ_ylimVals = [-0.5 0.5];
     upperRightPos = [.65 .7 .3 .3];
     upperLeftPos = [.2 .7 .2 .2];
     markerSize = 25;
     lineWidth = 1.5;
+    annotateColor = repmat(.75,1,3);
     
-    h = figuree(450,300);
+    h = figuree(450,250);
     lns = plot(loadData.mean_z','lineWidth',lineWidth);
     set(lns,{'color'},num2cell(meanColors,2));
     xlabel('Time (s)');
@@ -350,9 +368,18 @@ function h = plot_type1(loadData,meanColors,timingField)
     xlim(z_xlimVals);
     xticks(z_xtickVals);
     xticklabels(z_xticklabelText);
+    binS = 2 / z_xlimVals(2);
+    
+    % annotate min/max correlation
+    ys = repmat(1.75,1,2);
+    xs = [round(.2 / binS) round(.7 / binS)];
+    
+    annotation('doublearrow',x_to_norm_v2(xs(1),xs(2)),y_to_norm_v2(ys(1),ys(2)),'color',annotateColor);
+    xs = [round(.75 / binS) round(1.25 / binS)];
+    annotation('doublearrow',x_to_norm_v2(xs(1),xs(2)),y_to_norm_v2(ys(1),ys(2)),'color',annotateColor);
+    
     grid on;
-    set(gca,'fontSize',16);
-    box off;
+    setFig;
     
 % %     axes('Position',upperLeftPos);
 % %     x = [1:numel(loadData.auc_min_z)]';
@@ -378,46 +405,46 @@ function h = plot_type1(loadData,meanColors,timingField)
 % %     curylim = ylim;
 % %     text(curxlim(2),curylim(2),{['r^2 = ',num2str(gof.rsquare,'%0.2f')],['p = ',num2str(PVAL,'%0.6f')]},'HorizontalAlignment','right','VerticalAlignment','top');
 % % 
-    axes('Position',upperRightPos);
-%     x = [1:numel(loadData.auc_max_z)]';
-    x = [loadData.meanBinsSeconds(1:end-1) + diff(loadData.meanBinsSeconds)/2]';
-    y = loadData.auc_max_z';
-    % plot faint lines where data points are?
-% %     plot(repmat(x,1,2)',repmat(scatter_maxZ_ylimVals,numel(x),1)','color',[.8 .8 .8]);
-% %     hold on;
-    scatter(x,y,markerSize,meanColors,'filled');
-    xlim([min(x) max(x)]);
-    xticks(x);
-    xticklabelVals = cell(1,numel(x)-2);
-    xticklabelVals(:) = {''};
-    xticklabelVals = {num2str(x(1),'%1.2f'),xticklabelVals{:},num2str(x(end),'%1.2f')};
-    xticklabels(xticklabelVals);
-    xlabel(timingField);
-    ylabel('max Z');
-    switch timingField
-        case 'RT'
-            x = x(2:end-1);
-            y = y(2:end-1);
-        case 'MT'
-            x = x(1:end-1);
-            y = y(1:end-1);
-    end
-    [f,gof] = fit(x,y,'poly1');
-    [RHO,PVAL] = corr(x,y);
-    [p,s] = polyfit(x,y,1);
-    [yfit,dy] = polyconf(p,x,s,'predopt','curve');
-    [xsort,k] = sort(x);
-    line(xsort,yfit(k),'color','r');
-    line(xsort,yfit(k)-dy,'color','k','linestyle','-');
-    line(xsort,yfit(k)+dy,'color','k','linestyle','-');
-%     xticklabels(compose('%1.2f',loadData.meanBinsSeconds([1 end])));
-    ylim(scatter_maxZ_ylimVals);
-    yticks(ylim);
-    curxlim = xlim;
-    curylim = ylim;
-    text(curxlim(2),curylim(2),{['r^2 = ',num2str(gof.rsquare,'%0.2f')],['p = ',num2str(PVAL,'%0.6f')]},'HorizontalAlignment','right','VerticalAlignment','top');
 
-    set(gcf,'color','w');
+
+% %     axes('Position',upperRightPos);
+% % %     x = [1:numel(loadData.auc_max_z)]';
+% %     x = [loadData.meanBinsSeconds(1:end-1) + diff(loadData.meanBinsSeconds)/2]';
+% %     y = loadData.auc_max_z';
+% %     % plot faint lines where data points are?
+% % % %     plot(repmat(x,1,2)',repmat(scatter_maxZ_ylimVals,numel(x),1)','color',[.8 .8 .8]);
+% % % %     hold on;
+% %     scatter(x,y,markerSize,meanColors,'filled');
+% %     xlim([min(x) max(x)]);
+% %     xticks(x);
+% %     xticklabelVals = cell(1,numel(x)-2);
+% %     xticklabelVals(:) = {''};
+% %     xticklabelVals = {num2str(x(1),'%1.2f'),xticklabelVals{:},num2str(x(end),'%1.2f')};
+% %     xticklabels(xticklabelVals);
+% %     xlabel(timingField);
+% %     ylabel('max Z');
+% %     switch timingField
+% %         case 'RT'
+% %             x = x(2:end-1);
+% %             y = y(2:end-1);
+% %         case 'MT'
+% %             x = x(1:end-1);
+% %             y = y(1:end-1);
+% %     end
+% %     [f,gof] = fit(x,y,'poly1');
+% %     [RHO,PVAL] = corr(x,y);
+% %     [p,s] = polyfit(x,y,1);
+% %     [yfit,dy] = polyconf(p,x,s,'predopt','curve');
+% %     [xsort,k] = sort(x);
+% %     line(xsort,yfit(k),'color','r');
+% %     line(xsort,yfit(k)-dy,'color','k','linestyle','-');
+% %     line(xsort,yfit(k)+dy,'color','k','linestyle','-');
+% % %     xticklabels(compose('%1.2f',loadData.meanBinsSeconds([1 end])));
+% %     ylim(scatter_maxZ_ylimVals);
+% %     yticks(ylim);
+% %     curxlim = xlim;
+% %     curylim = ylim;
+% %     text(curxlim(2),curylim(2),{['r^2 = ',num2str(gof.rsquare,'%0.2f')],['p = ',num2str(PVAL,'%0.6f')]},'HorizontalAlignment','right','VerticalAlignment','top');
 end
 
 function h = plot_type2(loadData_contra,loadData_ipsi)

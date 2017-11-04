@@ -1,5 +1,6 @@
 % % unitEvents = corr_unitEvents;
 % % all_zscores = corr_all_zscores;
+plotSpecialArrows = false;
 doSetup = false;
 if doSetup
     tWindow = 1;
@@ -8,10 +9,12 @@ if doSetup
     useEvents = 1:7;
     useTiming = {};
     [unitEvents,all_zscores,unitClass] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents,useTiming);
+    minZ = 1;
+    [primSec,fractions] = primSecClass(unitEvents,minZ);
 end
 doLegend = true;
 imsc = [];
-useSubjects = [88,117,142,154,182];
+useSubjects = [88,117,137,142,154,182];
 % useSubjects = [182];
 
 % compile event classes
@@ -20,7 +23,8 @@ for iEvent = 1:numel(eventFieldnames)
     neuronClasses{iEvent} = [];
     for iNeuron = 1:numel(analysisConf.neurons)
         sessionConf = analysisConf.sessionConfs{iNeuron};
-        if isempty(unitEvents{iNeuron}.class) || ~ismember(sessionConf.subjects__id,useSubjects)
+        if isnan(primSec(iNeuron,1)) || ~ismember(sessionConf.subjects__id,useSubjects)
+            disp(['Skipping neuron ',num2str(iNeuron)]);
             continue;
         end
         if unitEvents{iNeuron}.class(1) == iEvent
@@ -88,11 +92,13 @@ for iNeuron = 1:numel(sorted_neuronIds)
         end
     end
 end
-for iEvent = 1:7
-    % special unit
-    subplot(1,numel(eventFieldnames),iEvent);
-    plot(4,find(sorted_neuronIds == 188),'>','MarkerFaceColor','g','MarkerEdgeColor','w','markerSize',10);
-    plot(4,find(sorted_neuronIds == 113),'>','MarkerFaceColor','r','MarkerEdgeColor','w','markerSize',10);
+if plotSpecialArrows
+    for iEvent = 1:7
+        % special unit
+        subplot(1,numel(eventFieldnames),iEvent);
+        plot(4,find(sorted_neuronIds == 188),'>','MarkerFaceColor','g','MarkerEdgeColor','w','markerSize',10);
+        plot(4,find(sorted_neuronIds == 113),'>','MarkerFaceColor','r','MarkerEdgeColor','w','markerSize',10);
+    end
 end
 % special unit
 % % subplot(1,numel(eventFieldnames),4);
