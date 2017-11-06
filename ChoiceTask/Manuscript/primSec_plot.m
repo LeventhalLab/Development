@@ -100,7 +100,7 @@ set(gcf,'color','w');
 
 
 % pie charts
-useEvents = [2,2];
+useEvents = [4,4];
 figuree(500,300);
 
 pieData = primFate;

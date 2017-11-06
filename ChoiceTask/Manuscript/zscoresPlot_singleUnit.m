@@ -21,7 +21,7 @@ colors = zeros(2,3);
 lineWidth = 3;
 set_ylims = [-1 3];
 ylabelloc = 2.5;
-useNeuron = 113; % 188 (R142_1209_7b), 103, 147, 201 (R142_1210_36a)
+useNeuron = 188% (R142_1209_7b), 103, 147, 201 (R142_1210_36a)
 
 figuree(1200,350);
 lns = [];

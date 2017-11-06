@@ -106,7 +106,7 @@ function RTMT_corrMatrix()
             close(h);
         end
 
-        x = [1:numel(ndirRT.auc_min_z)]';
+        x = [ndirRT.meanBinsSeconds(1:end-1) + diff(ndirRT.meanBinsSeconds)/2]';
         y = ndirRT.auc_min_z';
         ylabelText = 'min Z';
         ylimVals = [-0.5 0.5];
@@ -116,7 +116,7 @@ function RTMT_corrMatrix()
             close(h);
         end
 
-        x = [1:numel(ndirRT.auc_max_z)]';
+        x = [ndirRT.meanBinsSeconds(1:end-1) + diff(ndirRT.meanBinsSeconds)/2]';
         y = ndirRT.auc_max_z';
         ylabelText = 'max Z';
         ylimVals = [0 2];
@@ -133,8 +133,8 @@ function RTMT_corrMatrix()
             print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'.eps']));
             close(h);
         end
-
-        x = [1:numel(ndirMT.auc_min_z)]';
+        
+        x = [ndirMT.meanBinsSeconds(1:end-1) + diff(ndirMT.meanBinsSeconds)/2]';
         y = ndirMT.auc_min_z';
         ylabelText = 'min Z';
         ylimVals = [-0.5 0.5];
@@ -144,7 +144,7 @@ function RTMT_corrMatrix()
             close(h);
         end
 
-        x = [1:numel(ndirMT.auc_max_z)]';
+        x = [ndirMT.meanBinsSeconds(1:end-1) + diff(ndirMT.meanBinsSeconds)/2]';
         y = ndirMT.auc_max_z';
         ylabelText = 'max Z';
         ylimVals = [0 2];
@@ -163,7 +163,7 @@ function RTMT_corrMatrix()
             close(h);
         end
 
-        x = [1:numel(dirRT.auc_min_z)]';
+        x = [dirRT.meanBinsSeconds(1:end-1) + diff(dirRT.meanBinsSeconds)/2]';
         y = dirRT.auc_min_z';
         ylabelText = 'min Z';
         ylimVals = [-0.5 0.5];
@@ -173,7 +173,7 @@ function RTMT_corrMatrix()
             close(h);
         end
 
-        x = [1:numel(dirRT.auc_max_z)]';
+        x = [dirRT.meanBinsSeconds(1:end-1) + diff(dirRT.meanBinsSeconds)/2]';
         y = dirRT.auc_max_z';
         ylabelText = 'max Z';
         ylimVals = [0 2];
@@ -192,7 +192,7 @@ function RTMT_corrMatrix()
             close(h);
         end
 
-        x = [1:numel(dirMT.auc_min_z)]';
+        x = [dirMT.meanBinsSeconds(1:end-1) + diff(dirMT.meanBinsSeconds)/2]';
         y = dirMT.auc_min_z';
         ylabelText = 'min Z';
         ylimVals = [-0.5 0.5];
@@ -202,7 +202,7 @@ function RTMT_corrMatrix()
             close(h);
         end
 
-        x = [1:numel(dirMT.auc_max_z)]';
+        x = [dirMT.meanBinsSeconds(1:end-1) + diff(dirMT.meanBinsSeconds)/2]';
         y = dirMT.auc_max_z';
         ylabelText = 'max Z';
         ylimVals = [0 2];
@@ -321,8 +321,18 @@ function h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,meanBinsSeconds,meanCo
     markerSize = 100;
     
     scatter(x,y,markerSize,meanColors,'filled');
+% %     xlim([min(x) max(x)]);
+% %     xticklabels(compose('%1.2f',meanBinsSeconds([1 end])));
     xlabel(timingField);
     ylabel(ylabelText);
+    switch timingField
+        case 'RT'
+            x = x(2:end-1);
+            y = y(2:end-1);
+        case 'MT'
+            x = x(1:end-1);
+            y = y(1:end-1);
+    end
     [f,gof] = fit(x,y,'poly1');
     [RHO,PVAL] = corr(x,y);
     [p,s] = polyfit(x,y,1);
@@ -331,9 +341,8 @@ function h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,meanBinsSeconds,meanCo
     line(xsort,yfit(k),'color','r');
     line(xsort,yfit(k)-dy,'color','k','linestyle','-');
     line(xsort,yfit(k)+dy,'color','k','linestyle','-');
-    xlim([min(x) max(x)]);
+    xlim([0 1]); % I do not like this, RT and MT can be different
     xticks(xlim);
-    xticklabels(compose('%1.2f',meanBinsSeconds([1 end])));
     ylim(ylimVals);
     yticks(ylim);
     curxlim = xlim;
