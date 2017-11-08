@@ -59,9 +59,9 @@ for iNeuron = 1:numel(analysisConf.neurons)
         zscore_filt(iEvent,:) = zeros(size(hCounts));
         if ismember(iEvent,useEvents)
             % after t=0
-            zscore_filt(iEvent,floor(numel(hCounts)/2):end) = zscore(iEvent,floor(numel(hCounts)/2):end);
+%             zscore_filt(iEvent,floor(numel(hCounts)/2):end) = zscore(iEvent,floor(numel(hCounts)/2):end);
             % whole window
-% %             zscore_filt(iEvent,:) = zscore(iEvent,:);
+            zscore_filt(iEvent,:) = zscore(iEvent,:);
         end
     end
     all_zscores(iNeuron,:,:) = zscore;

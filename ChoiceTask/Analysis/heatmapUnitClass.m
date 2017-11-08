@@ -14,7 +14,7 @@ if doSetup
 end
 doLegend = true;
 imsc = [];
-useSubjects = [88,117,137,140,142,154,182];
+useSubjects = [88,117,142,154,182];
 % useSubjects = [182];
 
 % compile event classes

@@ -9,7 +9,7 @@ contraAgreementTrials = 0;
 totalIpsiTrials = 0;
 ipsiAgreementTrials = 0;
 
-for iSession = 12:numel(sessionNames)
+for iSession = 1:numel(sessionNames)
     sessionConf = analysisConf.sessionConfs{IA(iSession)};
     if ismember(sessionConf.sessions__name,excludeSessions)
         continue;
