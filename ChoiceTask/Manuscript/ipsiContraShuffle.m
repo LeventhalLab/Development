@@ -136,14 +136,14 @@ for iEvent = 1:numel(useEvents)
     ylim([-.12 .12]);
     
 %     yyaxis right;
-    class_colors = lines(4);
-    class_colors(3,:) = [1 1 0];
-    class_colors(4,:) = [0 1 0];
+    class_colors = parula(8);
+%     class_colors(3,:) = [1 1 0];
+%     class_colors(4,:) = [0 1 0];
     class_lns = [];
     class_lns_ii = 1;
-    for iClass = 3:4
-        class_lns(class_lns_ii) = plot(1:size(pNeuronDiff,3),eventBins_class(iClass,:)/size(pNeuronDiff,1),'-','color',class_colors(iClass,:));
-        plot(1:size(pNeuronDiff,3),-eventBins_neg_class(iClass,:)/size(pNeuronDiff,1),'-','color',class_colors(iClass,:));
+    for iClass = 1:7
+        class_lns(class_lns_ii) = plot(1:size(pNeuronDiff,3),eventBins_class(iClass,:)/size(pNeuronDiff,1),'-','color',class_colors(iClass,:),'lineWidth',2);
+        plot(1:size(pNeuronDiff,3),-eventBins_neg_class(iClass,:)/size(pNeuronDiff,1),'-','color',class_colors(iClass,:),'lineWidth',2);
         class_lns_ii = class_lns_ii + 1;
     end
 %     ylim([-1 1]);
@@ -172,6 +172,6 @@ for iEvent = 1:numel(useEvents)
     box off;
 end
 
-legend(class_lns,'tone units','nose out units')
+% % legend(class_lns,'tone units','nose out units')
 set(gcf,'color','w');
 tightfig;

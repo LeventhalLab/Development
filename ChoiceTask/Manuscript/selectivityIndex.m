@@ -19,7 +19,7 @@ binS = binMs / 1000;
 % 0.5 seconds after event
 analyzeRange = (tWindow / binS) : (tWindow / binS) + (0.5 / binS);
 nBins_tWindow = [-tWindow:binS:tWindow];
-% nSmooth = 3;
+nSmooth = 3;
 
 % si_noseOut = zeros(numel(analysisConf.neurons),1);
 % si_sideOut = zeros(numel(analysisConf.neurons),1);
@@ -66,7 +66,7 @@ for iNeuron = 1:numel(analysisConf.neurons)
         neuronCount = neuronCount - 1;
         continue;
     end
-    contra_score = hCounts / numel(useTrials);
+    contra_score = smooth(hCounts / numel(useTrials),nSmooth);
     
     useTrials = trialIdInfo.correctIpsi;
     peths = [tsPeths{useTrials,4}];
@@ -75,20 +75,28 @@ for iNeuron = 1:numel(analysisConf.neurons)
         neuronCount = neuronCount - 1;
         continue;
     end
-    ipsi_score = hCounts / numel(useTrials);
-    
+    ipsi_score = smooth(hCounts / numel(useTrials),nSmooth);
+%     si_noseOut(neuronCount,:) = ((contra_score - ipsi_score) ./ (contra_score + ipsi_score));
     si_noseOut(neuronCount,1) = max((contra_score(analyzeRange) - ipsi_score(analyzeRange)) ./ (contra_score(analyzeRange) + ipsi_score(analyzeRange)));
     
     useTrials = find(M == 1);
     peths = [tsPeths{useTrials,6}];
     hCounts = histcounts(peths,nBins_tWindow);
-    contra_score = hCounts / numel(useTrials);
+    if any(hCounts <= requireSpikes)
+        neuronCount = neuronCount - 1;
+        continue;
+    end
+    contra_score = smooth(hCounts / numel(useTrials),nSmooth);
     
     useTrials = find(M == 2);
     peths = [tsPeths{useTrials,6}];
     hCounts = histcounts(peths,nBins_tWindow);
-    ipsi_score = hCounts / numel(useTrials);
-    
+    if any(hCounts <= requireSpikes)
+        neuronCount = neuronCount - 1;
+        continue;
+    end
+    ipsi_score = smooth(hCounts / numel(useTrials),nSmooth);
+%     si_sideOut(neuronCount,:) = ((contra_score - ipsi_score) ./ (contra_score + ipsi_score));
     si_sideOut(neuronCount,1) = max((contra_score(analyzeRange) - ipsi_score(analyzeRange)) ./ (contra_score(analyzeRange) + ipsi_score(analyzeRange)));
     
     scatter_colors(neuronCount,:) = [0 0 0];

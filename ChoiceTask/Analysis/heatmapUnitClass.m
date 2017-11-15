@@ -97,7 +97,7 @@ if plotSpecialArrows
         % special unit
         subplot(1,numel(eventFieldnames),iEvent);
         plot(4,find(sorted_neuronIds == 188),'>','MarkerFaceColor','g','MarkerEdgeColor','w','markerSize',10);
-        plot(4,find(sorted_neuronIds == 113),'>','MarkerFaceColor','r','MarkerEdgeColor','w','markerSize',10);
+%         plot(4,find(sorted_neuronIds == 113),'>','MarkerFaceColor','r','MarkerEdgeColor','w','markerSize',10);
     end
 end
 % special unit
@@ -112,7 +112,7 @@ if doLegend
     figuree(300,400);
     set(gca,'Visible','Off')
     xticks([]);
-    cb = colorbar('location','south');
+    cb = colorbar('location','south','Orientation','vertical');
     colormap(jet);
     caxis(caxisVals);
     title(cb,'Z score');

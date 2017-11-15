@@ -8,12 +8,12 @@ if doSetup
     tWindow = 1;
     binMs = 20;
     trialTypes = {'correct'};
-    useEvents = 1:7;
+    useEvent = 1:7;
     useTiming = {};
 
-    [unitEvents,all_zscores,unitClass] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents,useTiming);
+    [unitEvents,all_zscores,unitClass] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvent,useTiming);
     
-    minZ = 0.75;
+    minZ = 1;
     [primSec,fractions] = primSecClass(unitEvents,minZ);
 end
 
@@ -100,29 +100,29 @@ set(gcf,'color','w');
 
 
 % pie charts
-useEvents = [4,4];
+useEvent = 4;
 figuree(500,300);
 
 pieData = primFate;
 subplot(121);
-p = pie(mean(pieData(useEvents,:))+.001,{eventFieldlabels{1},eventFieldlabels{2},'','','',eventFieldlabels{6},eventFieldlabels{7},'',});
+p = pie(pieData(useEvent,:)+.001,{eventFieldlabels{1},eventFieldlabels{2},'','','',eventFieldlabels{6},eventFieldlabels{7},'',});
 for ii = 2:2:numel(p)
     t = p(ii);
     t.FontSize = 16;
 end
 colormap(colors);
-title({eventFieldlabels{useEvents},'Primary Fate'});
+title({'Primary Fate',''});
 setFig;
 
 pieData = secOrigin(:,2:end);
 subplot(122);
-p = pie(mean(pieData(useEvents,:))+.001,{eventFieldlabels{1},eventFieldlabels{2},'','','',eventFieldlabels{6},eventFieldlabels{7},'',});
+p = pie(pieData(useEvent,:)+.001,{eventFieldlabels{1},eventFieldlabels{2},'','','',eventFieldlabels{6},eventFieldlabels{7},'',});
 for ii = 2:2:numel(p)
     t = p(ii);
     t.FontSize = 16;
 end
 colormap(colors);
-title({eventFieldlabels{useEvents},'Secondary Origin'});
+title({'Secondary Origin',''});
 setFig;
 
 if show_primFate
