@@ -1,7 +1,7 @@
 % directionally selectivity index
 % Zleft-Zright / Zleft+Zright
 % scatter for all units: Nose Out Y, Side Out X
-analysisTitle = 'All Units';
+analysisTitle = 'Dir Units';
 
 localSideOutPath = '/Users/mattgaidica/Documents/Data/ChoiceTask/sideOutAnalysis';
 excludeSessions = {'R0117_20160504a','R0142_20161207a','R0117_20160508a','R0117_20160510a'}; % corrupt video
@@ -31,18 +31,25 @@ for iNeuron = 1:numel(analysisConf.neurons)
     if ismember(sessionConf.sessions__name,excludeSessions)
         continue;
     end
-%     if ~dirSelNeurons(iNeuron)
-%         continue;
-%     end
+    % dirSel units
+% %     if ~dirSelNeurons(iNeuron)
+% %         continue;
+% %     end
+    % ~dirSel units
+    if dirSelNeurons_p95(iNeuron)
+        continue;
+    end
+    
     CSVpath = fullfile(localSideOutPath,[sessionConf.sessions__name,'_sideOutAnalysis.csv']);
     M = csvread(CSVpath);
     % make sure enough ipsi/contra trials
     if sum(M == 1) < minTrials || sum(M == 2) < minTrials
         continue;
     end
-%     if ~ismember(primSec(iNeuron,1),4)
-%         continue;
-%     end
+    % filter by class
+% %     if ~ismember(primSec(iNeuron,1),4)
+% %         continue;
+% %     end
     
     neuronCount = neuronCount + 1;
 % %     trials = all_trials{IA(iSession)};
@@ -83,10 +90,10 @@ for iNeuron = 1:numel(analysisConf.neurons)
     ipsi_score = smooth(hCounts ./ numel(useTrials),nSmooth);
     
 %     si_noseOut(neuronCount,:) = max((contra_zscore - ipsi_zscore) ./ (contra_zscore + ipsi_zscore));
-    si_noseOut(neuronCount,:) = max((contra_score - ipsi_score) ./ (contra_score + ipsi_score));
+    si_noseOut(neuronCount,:) = abs((contra_score - ipsi_score) ./ (contra_score + ipsi_score));
     
     useTrials = find(M == 1);
-    hCounts = histcounts([tsPeths{useTrials,6}],nBins_tWindow);
+    hCounts = histcounts([tsPeths{useTrials,4}],nBins_tWindow);
     if any(hCounts <= requireSpikes)
         neuronCount = neuronCount - 1;
         continue;
@@ -95,7 +102,7 @@ for iNeuron = 1:numel(analysisConf.neurons)
     contra_score = smooth(hCounts ./ numel(useTrials),nSmooth);
     
     useTrials = find(M == 2);
-    hCounts = histcounts([tsPeths{useTrials,6}],nBins_tWindow);
+    hCounts = histcounts([tsPeths{useTrials,4}],nBins_tWindow);
     if any(hCounts <= requireSpikes)
         neuronCount = neuronCount - 1;
         continue;
@@ -104,7 +111,7 @@ for iNeuron = 1:numel(analysisConf.neurons)
     ipsi_score = smooth(hCounts ./ numel(useTrials),nSmooth);
     
 %     si_sideOut(neuronCount,:) = max((contra_zscore - ipsi_zscore) ./ (contra_zscore + ipsi_zscore));
-    si_sideOut(neuronCount,:) = max((contra_score - ipsi_score) ./ (contra_score + ipsi_score));
+    si_sideOut(neuronCount,:) = abs((contra_score - ipsi_score) ./ (contra_score + ipsi_score));
     
     scatter_colors(neuronCount,:) = [1 0 0];
     if dirSelNeurons(iNeuron)
@@ -133,6 +140,26 @@ si_sideOut = si_sideOut(1:neuronCount,:);
 % % si_categories(si_noseOut < 0 & si_sideOut > 0) = 3;
 % % si_categories(si_noseOut < 0 & si_sideOut < 0) = 4;
 % % [h,pVal] = chi2gof(si_categories,'NBins',4)
+
+figuree(800,700);
+bar(mean(si_noseOut),'edgecolor','none','facealpha',0.5);
+hold on;
+bar(mean(si_sideOut),'edgecolor','none','facealpha',0.5);
+xlim([1 size(si_sideOut,2)]);
+xticks([1 round(size(si_sideOut,2)/2) size(si_sideOut,2)]);
+xticklabels([-1 0 1]);
+xlabel('Time (s) from Nose Out');
+% ylim([-0.06 0.06]);
+% yticks(ylim);
+yax = ylabel('$$\overline{Si}$$');
+set(yax,'interpreter','latex');
+legend({'Nose Out Movement','Side Out Movement'},'location','northwest');
+title(['Mean Selectivity Index ($$\overline{Si}$$) of DirSel Units (',num2str(size(si_sideOut,1)),') at Nose Out'],'interpreter','latex');
+
+set(gcf,'color','w');
+set(gca,'fontSize',16);
+grid on;
+
 
 figuree(300,600);
 subplot(211);
