@@ -32,13 +32,13 @@ for iNeuron = 1:numel(analysisConf.neurons)
         continue;
     end
     % dirSel units
-% %     if ~dirSelNeurons(iNeuron)
-% %         continue;
-% %     end
-    % ~dirSel units
-    if dirSelNeurons_p95(iNeuron)
+    if ~dirSelNeurons(iNeuron)
         continue;
     end
+    % ~dirSel units
+% %     if dirSelNeurons_p95(iNeuron)
+% %         continue;
+% %     end
     
     CSVpath = fullfile(localSideOutPath,[sessionConf.sessions__name,'_sideOutAnalysis.csv']);
     M = csvread(CSVpath);
