@@ -4,7 +4,7 @@ pVal = 0.99;
 pVal_minBins = 4;
 colors = lines(2);
 
-if false
+if true
     useEvents = 1:7;
     trialTypes = {'correct'};
     
@@ -56,8 +56,7 @@ if false
             curPeths = tsPeths(:,iEvent);
             eventMatrix = [];
             for iTrial = 1:numel(curPeths)
-                [counts,centers] = hist(curPeths{iTrial},binEdges);
-                eventMatrix(iTrial,:) = counts;
+                eventMatrix(iTrial,:) = histcounts(curPeths{iTrial},binEdges);
             end
 
             contraMean = mean(eventMatrix(trialClass == 1,:));
@@ -78,7 +77,7 @@ if false
                 pEventDiff(iEvent,iBin) = numel(find(matrixDiff(iBin) > curMDS)) / nShuffle;
                 pEventDiff_neg(iEvent,iBin) = numel(find(matrixDiff(iBin) < curMDS)) / nShuffle;
             end
-            if ismember(iEvent,[3,4])
+            if ismember(iEvent,[4])
                 dirSelNeurons_contra(iNeuron) = sum(pEventDiff(iEvent,:) > pVal) > pVal_minBins;
                 dirSelNeurons_ipsi(iNeuron) = sum(pEventDiff_neg(iEvent,:) > pVal) > pVal_minBins;
                 dirSelNeurons(iNeuron) = dirSelNeurons_contra(iNeuron) | dirSelNeurons_ipsi(iNeuron);
@@ -88,11 +87,6 @@ if false
         pNeuronDiff_neg(iNeuron,:,:) = pEventDiff_neg;
     end
 end
-
-% just save these in running form
-all_dirSelNeurons(size(all_dirSelNeurons,1)+1,1,:) = dirSelNeurons_contra;
-all_dirSelNeurons(size(all_dirSelNeurons,1)+1,2,:) = dirSelNeurons_ipsi;
-all_dirSelNeurons(size(all_dirSelNeurons,1)+1,3,:) = dirSelNeurons;
 
 % see ipsiContraShuffle.m
 % % useEvents = [4,6];
@@ -160,7 +154,7 @@ for iEvent = 1:numel(useEvents)
     
 % %     title(eventFieldnames{iEvent});
     if iEvent == 1
-        ylabel(['Fraction of units p < ',num2str(1-pVal,'%1.2f')]);
+        ylabel(['Fraction of DirSel units p < ',num2str(1-pVal,'%1.2f')]);
         yticks(ylim);
     else
         yticks([]);
