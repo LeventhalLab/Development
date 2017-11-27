@@ -1,6 +1,6 @@
 % the fraction of units whose activity is significantly different between
 % ipsi/contra trials
-pVal = 0.99;
+pVal = 0.95;
 pVal_minBins = 4;
 colors = lines(2);
 
@@ -78,9 +78,13 @@ if true
                 pEventDiff_neg(iEvent,iBin) = numel(find(matrixDiff(iBin) < curMDS)) / nShuffle;
             end
             if ismember(iEvent,[4])
-                dirSelNeurons_contra(iNeuron) = sum(pEventDiff(iEvent,:) > pVal) > pVal_minBins;
-                dirSelNeurons_ipsi(iNeuron) = sum(pEventDiff_neg(iEvent,:) > pVal) > pVal_minBins;
+                % see: http://gaidi.ca/weblog/finding-consecutive-numbers-that-exceed-a-threshold-in-matlab
+                dirSelNeurons_contra(iNeuron) = any(movsum(pEventDiff(iEvent,:) > pVal,[0 pVal_minBins-1]) == pVal_minBins);
+                dirSelNeurons_ipsi(iNeuron) = any(movsum(pEventDiff_neg(iEvent,:) > pVal,[0 pVal_minBins-1]) == pVal_minBins);
                 dirSelNeurons(iNeuron) = dirSelNeurons_contra(iNeuron) | dirSelNeurons_ipsi(iNeuron);
+                
+% %                 dirSelNeurons_contra(iNeuron) = sum(pEventDiff(iEvent,:) > pVal) > pVal_minBins;
+% %                 dirSelNeurons_ipsi(iNeuron) = sum(pEventDiff_neg(iEvent,:) > pVal) > pVal_minBins;
             end
         end
         pNeuronDiff(iNeuron,:,:) = pEventDiff;
@@ -127,7 +131,7 @@ for iEvent = 1:numel(useEvents)
     bar(1:size(pNeuronDiff,3),eventBins/size(pNeuronDiff,1),'FaceColor',colors(1,:),'EdgeColor',colors(1,:)); % POSITIVE
     hold on;
     bar(1:size(pNeuronDiff_neg,3),-eventBins_neg/size(pNeuronDiff_neg,1),'FaceColor',colors(2,:),'EdgeColor',colors(2,:)); % POSITIVE
-    ylim([-.12 .12]);
+    ylim([-.15 .15]);
     
 %     yyaxis right;
     class_colors = parula(8);
