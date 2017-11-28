@@ -2,9 +2,6 @@ doSave = true;
 nMeanBins = 10;
 binMs = 20;
 
-binS = binMs / 1000;
-tWindow = 1;
-binEdges = -tWindow:binS:tWindow;
 if ismac
     savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/permutationFigures';
     sessionsPath = '/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions';
@@ -12,6 +9,7 @@ else
     savePath = 'C:\Users\Administrator\Documents\Data\ChoiceTask\permutationFigures';
     sessionsPath = 'C:\Users\Administrator\Documents\MATLAB\Development\ChoiceTask\temp\uSessions';
 end
+
 doBursts = false;
 % for figure
 binInc = 0.02;
@@ -27,13 +25,8 @@ lineWidth = 2;
 % % minZ = 1;
 % % primSec = primSecClass(unitEvents,minZ);
 
-useOrdinary = true;
 % RT_intercepts = ezReciprobit(all_rt,10);
 % MT_intercepts = ezReciprobit(all_mt,10);
-ordinaryRTmin = RT_intercepts(1);
-ordinaryRTmax =  RT_intercepts(11);
-ordinaryMTmax = MT_intercepts(11);
-
 
 clear all_z_raw;
 
@@ -41,15 +34,22 @@ clear all_z_raw;
 % % burstCriterias = {'none','Poisson','LTS'};
 
 events = [4];
-LRTHMT = false;
-HRTLMT = false;
-LRTLMT = false;
-HRTHMT = false;
 unitTypes = {'dirSel'}; % ,'~dirSel'
+dirSelType = 'NO'; % NO or SO
 % unitTypes = {'dirSel'};
 timingFields = {'RT','MT'};
-movementDirs = {'contra','ipsi','all'};
-    
+movementDirs = {'all'};
+
+% --- END CONFIG
+binS = binMs / 1000;
+tWindow = 1;
+binEdges = -tWindow:binS:tWindow;
+if strcmp(dirSelType,'NO')
+    use_dirSelNeurons = dirSelNeuronsNO;
+else
+    use_dirSelNeurons = dirSelNeuronsSO;
+end
+
 for ii_events = 1:numel(events)
     useEvent = events(ii_events);
 
@@ -83,11 +83,6 @@ for ii_events = 1:numel(events)
                 excludeUnits = find(ismember(primSec(:,1),[3,4]) == 0); % only primary
 % %                 excludeUnits = find(any(ismember(primSec,[3,4]),2) == 0);
 
-% %                 for iNeuron = 1:numel(analysisConf.neurons)
-% %                     if ~isempty(unitEvents{iNeuron}.class) && ~any(ismember(unitEvents{iNeuron}.class(1:2),[3,4]))
-% %                         excludeUnits = [excludeUnits iNeuron];
-% %                     end
-% %                 end
                 useNeuronClass = [1:7];
                 filterBy_dirSel = true;
                 dirSel = true;
@@ -95,27 +90,9 @@ for ii_events = 1:numel(events)
                 excludeUnits = find(ismember(primSec(:,1),[3,4]) == 0); % only primary
 % %                 excludeUnits = find(any(ismember(primSec,[3,4]),2) == 0);
 
-% %                 for iNeuron = 1:numel(analysisConf.neurons)
-% %                     if ~isempty(unitEvents{iNeuron}.class) && ~any(ismember(unitEvents{iNeuron}.class(1:2),[3,4]))
-% %                         excludeUnits = [excludeUnits iNeuron];
-% %                     end
-% %                 end
                 useNeuronClass = [1:7];
                 filterBy_dirSel = true;
                 dirSel = false;
-% %             case 'tone_centerOut'
-% %                 useNeuronClass = [3,4];
-% %                 filterBy_dirSel = false;
-% %                 dirSel = false;
-% %             case '~tone_centerOut'
-% %                 useNeuronClass = [1:7];
-% %                 filterBy_dirSel = false;
-% %                 dirSel = false;
-% %                 for iNeuron = 1:numel(analysisConf.neurons)
-% %                     if ~isempty(unitEvents{iNeuron}.class) && any(ismember(unitEvents{iNeuron}.class(1:2),[3,4]))
-% %                         excludeUnits = [excludeUnits iNeuron];
-% %                     end
-% %                 end
         end
 
         for ii_movementDirs = 1:numel(movementDirs)
@@ -150,7 +127,7 @@ for ii_events = 1:numel(events)
                     subjectName = analysisConf.sessionConfs{iNeuron}.subjects__name;
 
                     if filterBy_dirSel
-                        if (dirSel && ~dirSelNeuronsNO(iNeuron)) || (~dirSel && dirSelNeurons_p90(iNeuron))
+                        if (dirSel && ~use_dirSelNeurons(iNeuron)) || (~dirSel && dirSelNeurons_p90(iNeuron))
                             continue;
                         end
                     end
@@ -167,46 +144,9 @@ for ii_events = 1:numel(events)
                     unitCount = unitCount + 1;
                     
                     curTrials = all_trials{iNeuron};
-                    
                     [trialIds,allRT,allMT] = sortTrialsByRTMT(curTrials,timingField);
-                    LH_RTMT_note = '';
                     useTrials = [];
-                    if LRTHMT
-                        LRTHMT_idx = allRT < median(all_rt) + std(all_rt) & allMT > median(all_mt);
-                        allRT = allRT(LRTHMT_idx);
-                        allMT = allMT(LRTHMT_idx);
-                        useTrials = trialIds(LRTHMT_idx);
-                        LH_RTMT_note = 'LRTHMT';
-                    end
-                    if HRTLMT
-                        HRTLMT_idx = allMT < median(all_mt);
-                        allRT = allRT(HRTLMT_idx);
-                        allMT = allMT(HRTLMT_idx);
-                        useTrials = trialIds(HRTLMT_idx);
-                        LH_RTMT_note = 'HRTLMT';
-                    end
-                    if LRTLMT
-                        LRTLMT_idx = allRT < .2 & allMT < median(all_mt);
-                        allRT = allRT(LRTLMT_idx);
-                        allMT = allMT(LRTLMT_idx);
-                        useTrials = trialIds(LRTLMT_idx);
-                        LH_RTMT_note = 'LRTLMT';
-                    end
-                    if HRTHMT
-                        HRTHMT_idx = allRT > .2 & allMT > median(all_mt);
-                        allRT = allRT(HRTHMT_idx);
-                        allMT = allMT(HRTHMT_idx);
-                        useTrials = trialIds(HRTHMT_idx);
-                        LH_RTMT_note = 'HRTHMT';
-                    end
-                    if useOrdinary
-                        ordinary_idx = allRT >= ordinaryRTmin & allRT < ordinaryRTmax & allMT < ordinaryMTmax;
-                        allRT = allRT(ordinary_idx);
-                        allMT = allMT(ordinary_idx);
-                        useTrials = trialIds(ordinary_idx);
-                        LH_RTMT_note = 'ORD';
-                    end
-                    
+
                     if isempty(allRT) || isempty(allMT)
                         continue;
                     end
@@ -351,7 +291,7 @@ for ii_events = 1:numel(events)
                 end
                 
                 % --- figure
-                rows = 3;
+                rows = 2;
                 cols = 3;
                 plotMargins = [.08 .08];
                 xlimVals = [-tWindow tWindow];
@@ -406,15 +346,18 @@ for ii_events = 1:numel(events)
                 end
                 
                 % make mean z-score bins
+                grayColor = [.8 .8 .8];
                 switch timingField
                     case 'RT'
 %                         meanBinsSeconds = [median(all_rt)-std(all_rt):binInc:median(all_rt)+std(all_rt)];
 %                         meanBinsSeconds = [min(all_rt):binInc:max(all_rt)];
                         meanBinsSeconds = [min(all_rt),.12:binInc:.45,max(all_rt)];
+                        meanColors = [grayColor;cool(numel(ndirRT.auc_max)-2);grayColor];
 %                         meanBinsSeconds = [min(all_rt):binInc:max(all_rt)];
                     case 'MT'
 %                         meanBinsSeconds = [median(all_mt)-std(all_mt):binInc:median(all_mt)+std(all_mt)];
                         meanBinsSeconds = [min(all_mt):binInc:max(all_mt)];
+                        meanColors = [summer(numel(ndirMT.auc_max)-1);grayColor];
                     case 'RTMT'
                         meanBinsSeconds = [0.3:binInc:max(all_rt+all_mt)];
                     case 'pretone'
@@ -422,23 +365,6 @@ for ii_events = 1:numel(events)
                     otherwise
                         meanBinsSeconds = 0:binInc:max(all_useTime_sorted);
                 end
-                
-%                 adj_meanBinsSeconds = [];
-%                 for iBinSeconds = 1:numel(meanBinsSeconds)-1
-%                     minIdx = find(meanBinsSeconds(iBinSeconds) < all_useTime_sorted,1,'first');
-%                     adj_meanBinsSeconds(iBinSeconds) = meanBinsSeconds(iBinSeconds);
-%                     if isempty(minIdx)
-% %                         adj_meanBinsSeconds(iBinSeconds+1) = meanBinsSeconds(iBinSeconds+1);
-%                         break;
-%                     else
-%                         meanBins(iBinSeconds) = minIdx;
-%                     end
-%                 end
-%                 meanBins(iBinSeconds) = numel(all_useTime_sorted);
-%                 meanBins = [1 meanBins];
-%                 fixOnesIdx = find(meanBins == 1,1,'last');
-%                 meanBins = meanBins(fixOnesIdx:end);
-%                 meanBinsSeconds = adj_meanBinsSeconds(fixOnesIdx:end);
                 
                 % quantiles
                 meanBins = floor(linspace(1,numel(allTrial_tsPeths),nMeanBins+1));
@@ -452,7 +378,6 @@ for ii_events = 1:numel(events)
 % %                     meanBins(iBinSeconds) = idx;
 % %                 end
 
-                meanColors = cool(numel(meanBins)-1);
                 mean_z = [];
                 z_raw = [];
                 auc_min = [];
@@ -543,6 +468,7 @@ for ii_events = 1:numel(events)
                 xticklabels({num2str(-tWindow),'0',num2str(tWindow)});
                 grid on;
                 
+                % legend
                 subplot(rows,cols,3);
                 lns = plot(mean_z');
                 set(lns,{'color'},num2cell(meanColors,2));
@@ -550,120 +476,80 @@ for ii_events = 1:numel(events)
                 xlim([100 101]);
                 yticks([]);
                 xticks([]);
-                columnlegend(3,bracketLegendText,'location','east');
+                columnlegend(2,bracketLegendText,'location','east');
                 set(gca,'Visible','off')
                 set(gca,'fontsize',8);
-                
-                
-                % area under curve
+
+                % min Z
                 subplot_tight(rows,cols,4,plotMargins);
-                x = auc_min';
-                y = auc_max';
+                x = [meanBinsSeconds(1:end-1) + diff(meanBinsSeconds)/2]';
+                y = auc_min_z';
+                ylabelText = 'min Z';
+                ylimVals = [-0.5 0.5];
+                markerSize = 100;
                 scatter(x,y,markerSize,meanColors,'filled');
-                xlabel('auc_min','interpreter','none');
-                ylabel('auc_max','interpreter','none');
+                xlabel(timingField);
+                ylabel(ylabelText);
+                switch timingField
+                    case 'RT'
+                        x = x(2:end-1);
+                        y = y(2:end-1);
+                    case 'MT'
+                        x = x(1:end-1);
+                        y = y(1:end-1);
+                end
                 [f,gof] = fit(x,y,'poly1');
+                [RHO,PVAL] = corr(x,y);
                 [p,s] = polyfit(x,y,1);
                 [yfit,dy] = polyconf(p,x,s,'predopt','curve');
                 [xsort,k] = sort(x);
                 line(xsort,yfit(k),'color','r');
-                line(xsort,yfit(k)-dy,'color','r','linestyle','--');
-                line(xsort,yfit(k)+dy,'color','r','linestyle','--');
-                title({'auc_min vs. auc_max',['rsquare = ',num2str(gof.rsquare,3)]},'interpreter','none');
+                line(xsort,yfit(k)-dy,'color','k','linestyle','-');
+                line(xsort,yfit(k)+dy,'color','k','linestyle','-');
+                xlim([0 1]); % I do not like this, RT and MT can be different
+                xticks(xlim);
+                ylim(ylimVals);
+                yticks(ylim);
+                curxlim = xlim;
+                curylim = ylim;
+                text(curxlim(2),curylim(2),{['r^2 = ',num2str(gof.rsquare,'%0.5f')],['p = ',num2str(PVAL,'%0.5f')]},'HorizontalAlignment','right',...
+                    'VerticalAlignment','top','fontSize',10);
                 
-                subplot_tight(rows,cols,7,plotMargins);
-                x = auc_min_z';
-                y = auc_max_z'
-                scatter(x,y,markerSize,meanColors,'filled');
-                xlabel('auc_min_z','interpreter','none');
-                ylabel('auc_max_z','interpreter','none');
-                [f,gof] = fit(x,y,'poly1');
-                [p,s] = polyfit(x,y,1);
-                [yfit,dy] = polyconf(p,x,s,'predopt','curve');
-                [xsort,k] = sort(x);
-                line(xsort,yfit(k),'color','r');
-                line(xsort,yfit(k)-dy,'color','r','linestyle','--');
-                line(xsort,yfit(k)+dy,'color','r','linestyle','--');
-                title({'auc_min_z vs. auc_max_z',['rsquare = ',num2str(gof.rsquare,3)]},'interpreter','none');
-                
+                % max Z
                 subplot_tight(rows,cols,5,plotMargins);
-                x = [1:numel(auc_max)]';
-                y = auc_max';
-                scatter(x,y,markerSize,meanColors,'filled');
-                xlabel([timingField,' Quantile'],'interpreter','none');
-                ylabel('auc_max','interpreter','none');
-                [f,gof] = fit(x,y,'poly1');
-                [p,s] = polyfit(x,y,1);
-                [yfit,dy] = polyconf(p,x,s,'predopt','curve');
-                [xsort,k] = sort(x);
-                line(xsort,yfit(k),'color','r');
-                line(xsort,yfit(k)-dy,'color','r','linestyle','--');
-                line(xsort,yfit(k)+dy,'color','r','linestyle','--');
-                title({['auc_max vs. ',timingField],['rsquare = ',num2str(gof.rsquare,3)]},'interpreter','none');
-                xticks(x);
-                xticklabels(compose('%1.3f',meanBinCenters));
-                xtickangle(90);
-                ylim([0,20]);
-                
-                subplot_tight(rows,cols,8,plotMargins);
-                x = [1:numel(auc_max_z)]';
+                x = [meanBinsSeconds(1:end-1) + diff(meanBinsSeconds)/2]';
                 y = auc_max_z';
+                ylabelText = 'max Z';
+                ylimVals = [0 2];
+                markerSize = 100;
                 scatter(x,y,markerSize,meanColors,'filled');
-                xlabel([timingField,' Quantile'],'interpreter','none');
-                ylabel('auc_max_z','interpreter','none');
+                xlabel(timingField);
+                ylabel(ylabelText);
+                switch timingField
+                    case 'RT'
+                        x = x(2:end-1);
+                        y = y(2:end-1);
+                    case 'MT'
+                        x = x(1:end-1);
+                        y = y(1:end-1);
+                end
                 [f,gof] = fit(x,y,'poly1');
+                [RHO,PVAL] = corr(x,y);
                 [p,s] = polyfit(x,y,1);
                 [yfit,dy] = polyconf(p,x,s,'predopt','curve');
                 [xsort,k] = sort(x);
                 line(xsort,yfit(k),'color','r');
-                line(xsort,yfit(k)-dy,'color','r','linestyle','--');
-                line(xsort,yfit(k)+dy,'color','r','linestyle','--');
-                title({['auc_max_z vs. ',timingField],['rsquare = ',num2str(gof.rsquare,3)]},'interpreter','none');
-                xticks(x);
-                xticklabels(compose('%1.3f',meanBinCenters));
-                xtickangle(90);
-                ylim([0,2]);
-                
-                % trying 1/timing corr
-                x = -1./meanBinCenters';
-                
-                subplot_tight(rows,cols,6,plotMargins);
-                y = auc_max';
-                scatter(x,y,markerSize,meanColors,'filled');
-                xlabel(['1/',timingField],'interpreter','none');
-                ylabel('auc_max','interpreter','none');
-                [f,gof] = fit(x,y,'poly1');
-                [p,s] = polyfit(x,y,1);
-                [yfit,dy] = polyconf(p,x,s,'predopt','curve');
-                [xsort,k] = sort(x);
-                line(xsort,yfit(k),'color','r');
-                line(xsort,yfit(k)-dy,'color','r','linestyle','--');
-                line(xsort,yfit(k)+dy,'color','r','linestyle','--');
-                title({['auc_max vs. ',timingField],['rsquare = ',num2str(gof.rsquare,3)]},'interpreter','none');
-                xticks(x);
-                xticklabels(compose('%1.3f',x));
-                xtickangle(90);
-                ylim([0,20]);
-                
-                subplot_tight(rows,cols,9,plotMargins);
-                y = auc_max_z';
-                scatter(x,y,markerSize,meanColors,'filled');
-                xlabel(['1/',timingField],'interpreter','none');
-                ylabel('auc_max_z','interpreter','none');
-                [f,gof] = fit(x,y,'poly1');
-                [p,s] = polyfit(x,y,1);
-                [yfit,dy] = polyconf(p,x,s,'predopt','curve');
-                [xsort,k] = sort(x);
-                line(xsort,yfit(k),'color','r');
-                line(xsort,yfit(k)-dy,'color','r','linestyle','--');
-                line(xsort,yfit(k)+dy,'color','r','linestyle','--');
-                title({['auc_max_z vs. ',timingField],['rsquare = ',num2str(gof.rsquare,3)]},'interpreter','none');
-                xticks(x);
-                xticklabels(compose('%1.3f',x));
-                xtickangle(90);
-                ylim([0,2]);
-                
-                
+                line(xsort,yfit(k)-dy,'color','k','linestyle','-');
+                line(xsort,yfit(k)+dy,'color','k','linestyle','-');
+                xlim([0 1]); % I do not like this, RT and MT can be different
+                xticks(xlim);
+                ylim(ylimVals);
+                yticks(ylim);
+                curxlim = xlim;
+                curylim = ylim;
+                text(curxlim(2),curylim(2),{['r^2 = ',num2str(gof.rsquare,'%0.5f')],['p = ',num2str(PVAL,'%0.5f')]},'HorizontalAlignment','right',...
+                    'VerticalAlignment','top','fontSize',10);
+
                 % --- burst quant START
                 % Prevalence
 % %                 subplot_tight(rows,cols,5,plotMargins);
@@ -711,12 +597,11 @@ for ii_events = 1:numel(events)
                 set(gcf,'color','w');
                 
                 noteText = {['event: ',eventFieldlabels{useEvent}],['class: ',unitTypes{ii_unitTypes}],['units: ',num2str(unitCount)],...
-                    ['move: ',movementDir],['sortBy: ',timingField],['bins: ',num2str(nMeanBins)],['binMs: ',num2str(binMs)],...
-                    [LH_RTMT_note]};
+                    ['move: ',movementDir],['sortBy: ',timingField],['bins: ',num2str(nMeanBins)],['binMs: ',num2str(binMs)],['dirType: ',dirSelType]};
                 addNote(h,noteText);
                 
                 saveFile = ['ev',eventFieldlabels{useEvent},'_un',unitTypes{ii_unitTypes},'_n',num2str(unitCount),...
-                    '_movDir',movementDir,'_by',timingField,'_bins',num2str(nMeanBins),'_binMs',num2str(binMs),LH_RTMT_note];
+                    '_movDir',movementDir,'_by',timingField,'_bins',num2str(nMeanBins),'_binMs',num2str(binMs),'_',dirSelType];
 
                 all_z_raw.(genvarname(strrep(saveFile,' ',''))) = z_raw;
                 all_allTrial_z_sorted.(genvarname(strrep(saveFile,' ',''))) = allTrial_z_sorted;
@@ -735,7 +620,7 @@ for ii_events = 1:numel(events)
     end
 end
 
-
+return;
 
 % figure;
 % plot(all_subjectCount(k),all_curUseTime_sorted,'.');

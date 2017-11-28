@@ -2,7 +2,7 @@
 % ipsi/contra trials
 pVal = 0.95;
 pVal_minBinsNO = 2;
-pVal_minBinsSO = 4;
+pVal_minBinsSO = 2;
 colors = lines(2);
 
 if false
@@ -18,7 +18,7 @@ if false
     pNeuronDiff_neg = [];
     
     analyzeRange_noseOut = (tWindow / binS) : (tWindow / binS) + (0.25 / binS);
-    analyzeRange_sideOut = (tWindow / binS) : (tWindow / binS) + (0.5 / binS);
+    analyzeRange_sideOut = (tWindow / binS) : (tWindow / binS) + (0.25 / binS);
     
     dirSelNeurons = false(numel(analysisConf.neurons),1);
     
