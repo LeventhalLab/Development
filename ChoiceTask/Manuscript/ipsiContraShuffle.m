@@ -1,11 +1,21 @@
 % the fraction of units whose activity is significantly different between
 % ipsi/contra trials
 pVal = 0.95;
-pVal_minBinsNO = 2;
-pVal_minBinsSO = 2;
+pVal_minBins = 2;
 colors = lines(2);
+analyzeRange = (tWindow / binS) : (tWindow / binS) + (0.25 / binS);
+dirSelType = 'NO'; % NO or SO
 
-if false
+if ismac
+    localSideOutPath = '/Users/mattgaidica/Documents/Data/ChoiceTask/sideOutAnalysis';
+else
+    localSideOutPath = '\\172.20.138.142\RecordingsLeventhal2\ChoiceTask\sideOutAnalysis';
+end
+
+excludeSessions = {'R0117_20160504a','R0142_20161207a','R0117_20160508a','R0117_20160510a'}; % corrupt video
+[sessionNames,IA] = unique(analysisConf.sessionNames);
+
+if true
     useEvents = 1:7;
     trialTypes = {'correct'};
     
@@ -16,36 +26,36 @@ if false
     nShuffle = 1000;
     pNeuronDiff = [];
     pNeuronDiff_neg = [];
-    
-    analyzeRange_noseOut = (tWindow / binS) : (tWindow / binS) + (0.25 / binS);
-    analyzeRange_sideOut = (tWindow / binS) : (tWindow / binS) + (0.25 / binS);
-    
-    dirSelNeurons = false(numel(analysisConf.neurons),1);
-    
-    dirSelNeuronsNO = false(numel(analysisConf.neurons),1);
-    dirSelNeuronsNO_contra = false(numel(analysisConf.neurons),1);
-    dirSelNeuronsNO_ipsi = false(numel(analysisConf.neurons),1);
-    
-    dirSelNeuronsSO = false(numel(analysisConf.neurons),1);
-    dirSelNeuronsSO_contra = false(numel(analysisConf.neurons),1);
-    dirSelNeuronsSO_ipsi = false(numel(analysisConf.neurons),1);
+
+    if strcmp(dirSelType,'NO')
+        dirSelNeuronsNO = false(numel(analysisConf.neurons),1);
+        dirSelNeuronsNO_contra = false(numel(analysisConf.neurons),1);
+        dirSelNeuronsNO_ipsi = false(numel(analysisConf.neurons),1);
+    else
+        dirSelNeuronsSO = false(numel(analysisConf.neurons),1);
+        dirSelNeuronsSO_contra = false(numel(analysisConf.neurons),1);
+        dirSelNeuronsSO_ipsi = false(numel(analysisConf.neurons),1);
+    end
+
     for iNeuron = 1:numel(analysisConf.neurons)
+        sessionConf = analysisConf.sessionConfs{iNeuron};
         neuronName = analysisConf.neurons{iNeuron};
         disp(neuronName);
+        if ismember(sessionConf.sessions__name,excludeSessions)
+            continue;
+        end
         curTrials = all_trials{iNeuron};
-
-        trialIdInfo = organizeTrialsById(curTrials);
         
-        % for chi-square tests
-        % chi-#1
-        contraTrials = [trialIdInfo.correctContra];
-        ipsiTrials = [trialIdInfo.correctIpsi];
-        % chi-#2
-% %         contraTrials = [trialIdInfo.correctContra trialIdInfo.incorrectIpsi];
-% %         ipsiTrials = [trialIdInfo.correctIpsi trialIdInfo.incorrectContra];
-        % chi-#3
-% %         contraTrials = [trialIdInfo.correctContra trialIdInfo.incorrectIpsi];
-% %         ipsiTrials = [trialIdInfo.correctIpsi trialIdInfo.incorrectContra];
+        if strcmp(dirSelType,'NO')
+            trialIdInfo = organizeTrialsById(curTrials);
+            contraTrials = [trialIdInfo.correctContra];
+            ipsiTrials = [trialIdInfo.correctIpsi];
+        else
+            CSVpath = fullfile(localSideOutPath,[sessionConf.sessions__name,'_sideOutAnalysis.csv']);
+            M = csvread(CSVpath);
+            contraTrials = find(M == 1)';
+            ipsiTrials = find(M == 2)';
+        end
 
         if numel(contraTrials) < requireTrials || numel(ipsiTrials) < requireTrials
             disp([num2str(iNeuron),' not enough trials']);
@@ -55,7 +65,6 @@ if false
         useTrials = [contraTrials ipsiTrials];
         trialClass = zeros(numel(useTrials),1);
         trialClass(1:numel(contraTrials)) = ones(numel(contraTrials),1);
-
 
         % (ordered according to useTrials)
         tsPeths = eventsPeth(curTrials(useTrials),all_ts{iNeuron},tWindow,eventFieldnames);
@@ -87,16 +96,16 @@ if false
                 pEventDiff(iEvent,iBin) = numel(find(matrixDiff(iBin) > curMDS)) / nShuffle;
                 pEventDiff_neg(iEvent,iBin) = numel(find(matrixDiff(iBin) < curMDS)) / nShuffle;
             end
-            if ismember(iEvent,[4])
+            if iEvent == 4 && strcmp(dirSelType,'NO')
                 % see: http://gaidi.ca/weblog/finding-consecutive-numbers-that-exceed-a-threshold-in-matlab
-                dirSelNeuronsNO_contra(iNeuron) = any(movsum(pEventDiff(iEvent,analyzeRange_noseOut) > pVal,[0 pVal_minBinsNO-1]) == pVal_minBinsNO);
-                dirSelNeuronsNO_ipsi(iNeuron) = any(movsum(pEventDiff_neg(iEvent,analyzeRange_noseOut) > pVal,[0 pVal_minBinsNO-1]) == pVal_minBinsNO);
+                dirSelNeuronsNO_contra(iNeuron) = any(movsum(pEventDiff(iEvent,analyzeRange) > pVal,[0 pVal_minBins-1]) == pVal_minBins);
+                dirSelNeuronsNO_ipsi(iNeuron) = any(movsum(pEventDiff_neg(iEvent,analyzeRange) > pVal,[0 pVal_minBins-1]) == pVal_minBins);
                 dirSelNeuronsNO(iNeuron) = dirSelNeuronsNO_contra(iNeuron) | dirSelNeuronsNO_ipsi(iNeuron);
             end
-            if ismember(iEvent,[6])
+            if iEvent == 6 && strcmp(dirSelType,'SO')
                 % see: http://gaidi.ca/weblog/finding-consecutive-numbers-that-exceed-a-threshold-in-matlab
-                dirSelNeuronsSO_contra(iNeuron) = any(movsum(pEventDiff(iEvent,analyzeRange_sideOut) > pVal,[0 pVal_minBinsSO-1]) == pVal_minBinsSO);
-                dirSelNeuronsSO_ipsi(iNeuron) = any(movsum(pEventDiff_neg(iEvent,analyzeRange_sideOut) > pVal,[0 pVal_minBinsSO-1]) == pVal_minBinsSO);
+                dirSelNeuronsSO_contra(iNeuron) = any(movsum(pEventDiff(iEvent,analyzeRange) > pVal,[0 pVal_minBins-1]) == pVal_minBins);
+                dirSelNeuronsSO_ipsi(iNeuron) = any(movsum(pEventDiff_neg(iEvent,analyzeRange) > pVal,[0 pVal_minBins-1]) == pVal_minBins);
                 dirSelNeuronsSO(iNeuron) = dirSelNeuronsSO_contra(iNeuron) | dirSelNeuronsSO_ipsi(iNeuron);
             end
         end
@@ -152,17 +161,16 @@ for iEvent = 1:numel(useEvents)
     eventBins_neg_class = zeros(8,size(pNeuronDiff_neg,3));
     for iNeuron = 1:size(pNeuronDiff,1)
         if ~isempty(unitEvents{iNeuron}.class)%% && unitEvents{iNeuron}.class(1) == 3 % tone
-            curBins = squeeze(pNeuronDiff(iNeuron,curEvent,:)); % 40 bins per-event
+            curBins = squeeze(pNeuronDiff(iNeuron,curEvent,:));
             curBins_neg = squeeze(pNeuronDiff_neg(iNeuron,curEvent,:));
             eventBins = eventBins + (curBins > pVal)';
             eventBins_neg = eventBins_neg + (curBins_neg > pVal)';
-            if ismember(4,primSec(iNeuron,:))
-                eventBins_class(4,:) = eventBins_class(4,:) + (curBins > pVal)';
-                eventBins_neg_class(4,:) = eventBins_neg_class(4,:) + (curBins_neg > pVal)';
-            end
-            if ismember(6,primSec(iNeuron,:))
-                eventBins_class(6,:) = eventBins_class(6,:) + (curBins > pVal)';
-                eventBins_neg_class(6,:) = eventBins_neg_class(6,:) + (curBins_neg > pVal)';
+            showUnitClass = [4,6];
+            for curUnitClass = showUnitClass
+                if curUnitClass == primSec(iNeuron,1)
+                    eventBins_class(curUnitClass,:) = eventBins_class(curUnitClass,:) + (curBins > pVal)';
+                    eventBins_neg_class(curUnitClass,:) = eventBins_neg_class(curUnitClass,:) + (curBins_neg > pVal)';
+                end
             end
         end
     end
