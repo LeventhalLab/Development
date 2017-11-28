@@ -1,10 +1,11 @@
 % the fraction of units whose activity is significantly different between
 % ipsi/contra trials
 pVal = 0.95;
-pVal_minBins = 4;
+pVal_minBinsNO = 2;
+pVal_minBinsSO = 4;
 colors = lines(2);
 
-if true
+if false
     useEvents = 1:7;
     trialTypes = {'correct'};
     
@@ -16,9 +17,18 @@ if true
     pNeuronDiff = [];
     pNeuronDiff_neg = [];
     
+    analyzeRange_noseOut = (tWindow / binS) : (tWindow / binS) + (0.25 / binS);
+    analyzeRange_sideOut = (tWindow / binS) : (tWindow / binS) + (0.5 / binS);
+    
     dirSelNeurons = false(numel(analysisConf.neurons),1);
-    dirSelNeurons_contra = false(numel(analysisConf.neurons),1);
-    dirSelNeurons_ipsi = false(numel(analysisConf.neurons),1);
+    
+    dirSelNeuronsNO = false(numel(analysisConf.neurons),1);
+    dirSelNeuronsNO_contra = false(numel(analysisConf.neurons),1);
+    dirSelNeuronsNO_ipsi = false(numel(analysisConf.neurons),1);
+    
+    dirSelNeuronsSO = false(numel(analysisConf.neurons),1);
+    dirSelNeuronsSO_contra = false(numel(analysisConf.neurons),1);
+    dirSelNeuronsSO_ipsi = false(numel(analysisConf.neurons),1);
     for iNeuron = 1:numel(analysisConf.neurons)
         neuronName = analysisConf.neurons{iNeuron};
         disp(neuronName);
@@ -79,18 +89,48 @@ if true
             end
             if ismember(iEvent,[4])
                 % see: http://gaidi.ca/weblog/finding-consecutive-numbers-that-exceed-a-threshold-in-matlab
-                dirSelNeurons_contra(iNeuron) = any(movsum(pEventDiff(iEvent,:) > pVal,[0 pVal_minBins-1]) == pVal_minBins);
-                dirSelNeurons_ipsi(iNeuron) = any(movsum(pEventDiff_neg(iEvent,:) > pVal,[0 pVal_minBins-1]) == pVal_minBins);
-                dirSelNeurons(iNeuron) = dirSelNeurons_contra(iNeuron) | dirSelNeurons_ipsi(iNeuron);
-                
-% %                 dirSelNeurons_contra(iNeuron) = sum(pEventDiff(iEvent,:) > pVal) > pVal_minBins;
-% %                 dirSelNeurons_ipsi(iNeuron) = sum(pEventDiff_neg(iEvent,:) > pVal) > pVal_minBins;
+                dirSelNeuronsNO_contra(iNeuron) = any(movsum(pEventDiff(iEvent,analyzeRange_noseOut) > pVal,[0 pVal_minBinsNO-1]) == pVal_minBinsNO);
+                dirSelNeuronsNO_ipsi(iNeuron) = any(movsum(pEventDiff_neg(iEvent,analyzeRange_noseOut) > pVal,[0 pVal_minBinsNO-1]) == pVal_minBinsNO);
+                dirSelNeuronsNO(iNeuron) = dirSelNeuronsNO_contra(iNeuron) | dirSelNeuronsNO_ipsi(iNeuron);
+            end
+            if ismember(iEvent,[6])
+                % see: http://gaidi.ca/weblog/finding-consecutive-numbers-that-exceed-a-threshold-in-matlab
+                dirSelNeuronsSO_contra(iNeuron) = any(movsum(pEventDiff(iEvent,analyzeRange_sideOut) > pVal,[0 pVal_minBinsSO-1]) == pVal_minBinsSO);
+                dirSelNeuronsSO_ipsi(iNeuron) = any(movsum(pEventDiff_neg(iEvent,analyzeRange_sideOut) > pVal,[0 pVal_minBinsSO-1]) == pVal_minBinsSO);
+                dirSelNeuronsSO(iNeuron) = dirSelNeuronsSO_contra(iNeuron) | dirSelNeuronsSO_ipsi(iNeuron);
             end
         end
         pNeuronDiff(iNeuron,:,:) = pEventDiff;
         pNeuronDiff_neg(iNeuron,:,:) = pEventDiff_neg;
     end
 end
+
+dirSelNeurons = dirSelNeuronsNO | dirSelNeuronsSO;
+dirSelNO = sum(dirSelNeuronsNO)
+dirSelSO = sum(dirSelNeuronsSO)
+dirSelNOSO = sum(dirSelNeurons)
+
+contra_x = sum(dirSelNeuronsNO_contra)
+x_contra = sum(dirSelNeuronsSO_contra)
+ipsi_x = sum(dirSelNeuronsNO_ipsi)
+x_ipsi = sum(dirSelNeuronsSO_ipsi)
+
+contraIpsi_x = sum(dirSelNeuronsNO_contra & dirSelNeuronsNO_ipsi)
+x_contraIpsi = sum(dirSelNeuronsSO_contra & dirSelNeuronsSO_ipsi)
+
+contra_contra = sum(dirSelNeuronsNO_contra & dirSelNeuronsSO_contra)
+contra_ipsi = sum(dirSelNeuronsNO_contra & dirSelNeuronsSO_ipsi)
+ipsi_contra = sum(dirSelNeuronsNO_ipsi & dirSelNeuronsSO_contra)
+ipsi_ipsi = sum(dirSelNeuronsNO_ipsi & dirSelNeuronsSO_ipsi)
+
+contra_NR = contra_x - (contra_contra + ipsi_contra)
+ipsi_NR = ipsi_x - (ipsi_ipsi + contra_ipsi)
+NR_ipsi = sum(~dirSelNeuronsNO & dirSelNeuronsSO_ipsi)
+NR_contra = sum(~dirSelNeuronsNO & dirSelNeuronsSO_contra)
+
+NRNO = sum(~dirSelNeuronsNO)
+NRSO = sum(~dirSelNeuronsSO)
+NR_NOSO = sum(~dirSelNeurons)
 
 % see ipsiContraShuffle.m
 % % useEvents = [4,6];
@@ -116,13 +156,13 @@ for iEvent = 1:numel(useEvents)
             curBins_neg = squeeze(pNeuronDiff_neg(iNeuron,curEvent,:));
             eventBins = eventBins + (curBins > pVal)';
             eventBins_neg = eventBins_neg + (curBins_neg > pVal)';
-            if ismember(3,primSec(iNeuron,:))
-                eventBins_class(3,:) = eventBins_class(3,:) + (curBins > pVal)';
-                eventBins_neg_class(3,:) = eventBins_neg_class(3,:) + (curBins_neg > pVal)';
-            end
             if ismember(4,primSec(iNeuron,:))
                 eventBins_class(4,:) = eventBins_class(4,:) + (curBins > pVal)';
                 eventBins_neg_class(4,:) = eventBins_neg_class(4,:) + (curBins_neg > pVal)';
+            end
+            if ismember(6,primSec(iNeuron,:))
+                eventBins_class(6,:) = eventBins_class(6,:) + (curBins > pVal)';
+                eventBins_neg_class(6,:) = eventBins_neg_class(6,:) + (curBins_neg > pVal)';
             end
         end
     end
@@ -134,7 +174,7 @@ for iEvent = 1:numel(useEvents)
     ylim([-.15 .15]);
     
 %     yyaxis right;
-    class_colors = parula(8);
+    class_colors = jet(8);
 %     class_colors(3,:) = [1 1 0];
 %     class_colors(4,:) = [0 1 0];
     class_lns = [];
@@ -170,6 +210,6 @@ for iEvent = 1:numel(useEvents)
     box off;
 end
 
-% % legend(class_lns,'tone units','nose out units')
+legend(class_lns,eventFieldlabels)
 set(gcf,'color','w');
 tightfig;

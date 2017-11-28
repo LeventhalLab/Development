@@ -3,7 +3,7 @@ plotOpt = 2; % 1 = both sides of x-axis, 2 = mosaic
 showMosaic = false;
 plotTitle = 'Unit Classes';
 
-doSetup = false;
+doSetup = true;
 if doSetup
     tWindow = 1;
     binMs = 20;

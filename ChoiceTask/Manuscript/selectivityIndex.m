@@ -4,8 +4,14 @@
 analysisTitle = 'Dir Units';
 doplot = true;
 
-localSideOutPath = '/Users/mattgaidica/Documents/Data/ChoiceTask/sideOutAnalysis';
-localExportPath = '/Users/mattgaidica/Documents/Data/ChoiceTask/sideOutAnalysis/_export';
+if ismac
+    localSideOutPath = '/Users/mattgaidica/Documents/Data/ChoiceTask/sideOutAnalysis';
+    localExportPath = '/Users/mattgaidica/Documents/Data/ChoiceTask/sideOutAnalysis/_export';
+else
+    localSideOutPath = 'C:\Users\Administrator\Documents\Data\ChoiceTask\sideOutAnalysis';
+%     localExportPath = 'C:\Users\Administrator\Documents\Data\ChoiceTask\sideOutAnalysis\_export';
+    localExportPath = 'C:\Users\Administrator\Documents\Data\ChoiceTask\sideOutAnalysis\_exportndir';
+end
 % % localExportPath = '/Users/mattgaidica/Documents/Data/ChoiceTask/sideOutAnalysis/_exportndir';
 excludeSessions = {'R0117_20160504a','R0142_20161207a','R0117_20160508a','R0117_20160510a'}; % corrupt video
 [sessionNames,IA] = unique(analysisConf.sessionNames);
@@ -15,15 +21,15 @@ si_noseOut = [];
 si_sideOut = [];
 minTrials = 3;
 % analyzeRange = 10:30; % t = 0 - 0.5s
-requireSpikes = 3; % per bin
+requireSpikes = 1; % per bin
 
-binMs = 50;
+binMs = 20;
 binS = binMs / 1000;
 % 0.5 seconds after event
-analyzeRange_noseOut = (tWindow / binS) : (tWindow / binS) + (0.5 / binS);
+analyzeRange_noseOut = (tWindow / binS) : (tWindow / binS) + (0.25 / binS);
 analyzeRange_sideOut = (tWindow / binS) : (tWindow / binS) + (0.5 / binS);
 nBins_tWindow = [-tWindow:binS:tWindow];
-nSmooth = 1;
+nSmooth = 3;
 
 % si_noseOut = zeros(numel(analysisConf.neurons),1);
 % si_sideOut = zeros(numel(analysisConf.neurons),1);
@@ -36,13 +42,13 @@ for iNeuron = 1:numel(analysisConf.neurons)
         continue;
     end
     % dirSel units
-    if ~dirSelNeurons(iNeuron)
+%     if ~dirSelNeurons(iNeuron)
+%         continue;
+%     end
+%     ~dirSel units
+    if dirSelNeurons(iNeuron)
         continue;
     end
-%     ~dirSel units
-% %     if dirSelNeurons_p95(iNeuron)
-% %         continue;
-% %     end
     
     CSVpath = fullfile(localSideOutPath,[sessionConf.sessions__name,'_sideOutAnalysis.csv']);
     M = csvread(CSVpath);
@@ -56,6 +62,7 @@ for iNeuron = 1:numel(analysisConf.neurons)
 % %     end
     
     neuronCount = neuronCount + 1;
+    disp([num2str(neuronCount),': u',num2str(iNeuron)]);
 % %     trials = all_trials{IA(iSession)};
 % %     trialIdInfo = organizeTrialsById(trials);
     
@@ -94,7 +101,8 @@ for iNeuron = 1:numel(analysisConf.neurons)
     noseOut_ipsi_score = smooth(noseOut_hCounts ./ numel(noseOut_useTrials),nSmooth);
     
 %     si_noseOut(neuronCount,:) = max((contra_zscore - ipsi_zscore) ./ (contra_zscore + ipsi_zscore));
-    si_noseOut_score = (noseOut_contra_zscore - noseOut_ipsi_zscore) / (abs(maxmag(noseOut_contra_zscore(analyzeRange_noseOut))) + abs(maxmag(noseOut_ipsi_zscore(analyzeRange_noseOut))));
+%     si_noseOut_score = (noseOut_contra_zscore - noseOut_ipsi_zscore) / (abs(maxmag(noseOut_contra_zscore(analyzeRange_noseOut))) + abs(maxmag(noseOut_ipsi_zscore(analyzeRange_noseOut))));
+    si_noseOut_score = (noseOut_contra_score - noseOut_ipsi_score) ./ (noseOut_contra_score + noseOut_ipsi_score);
     si_noseOut_score_range = si_noseOut_score(analyzeRange_noseOut);
     noseOutMax = maxmag(si_noseOut_score_range);
 %     noseOutMax = mean(si_noseOut_score_range);
@@ -119,7 +127,8 @@ for iNeuron = 1:numel(analysisConf.neurons)
     sideOut_ipsi_score = smooth(sideOut_hCounts ./ numel(sideOut_useTrials),nSmooth);
     
 %     si_sideOut(neuronCount,:) = max((contra_zscore - ipsi_zscore) ./ (contra_zscore + ipsi_zscore));
-    si_sideOut_score = (sideOut_contra_zscore - sideOut_ipsi_zscore) / (abs(maxmag(sideOut_contra_zscore(analyzeRange_sideOut))) + abs(maxmag(sideOut_ipsi_zscore(analyzeRange_sideOut))));
+%     si_sideOut_score = (sideOut_contra_zscore - sideOut_ipsi_zscore) / (abs(maxmag(sideOut_contra_zscore(analyzeRange_sideOut))) + abs(maxmag(sideOut_ipsi_zscore(analyzeRange_sideOut))));
+    si_sideOut_score = (sideOut_contra_score - sideOut_ipsi_score) ./ (sideOut_contra_score + sideOut_ipsi_score);
     si_sideOut_score_range = si_sideOut_score(analyzeRange_sideOut);
     sideOutMax = maxmag(si_sideOut_score_range);
 %     sideOutMax = mean(si_sideOut_score_range);
@@ -240,7 +249,7 @@ title(analysisTitle)
 setFig;
 
 subplot(212);
-labels = {'NO & SO > 0','NO > 0 & SO < 0','NO < 0 & SO > 0','NO & SO < 0'};
+labels = {'Contra/Contra','Contra/Ipsi','Ipsi/Contra','Ipsi/Ipsi'};
 si_quadrants = histcounts(si_categories,4);
 explode = [1 1 1 1];
 p = pie(si_quadrants,explode,labels);

@@ -5,8 +5,13 @@ binMs = 20;
 binS = binMs / 1000;
 tWindow = 1;
 binEdges = -tWindow:binS:tWindow;
-savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/permutationFigures';
-sessionsPath = '/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions';
+if ismac
+    savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/permutationFigures';
+    sessionsPath = '/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions';
+else
+    savePath = 'C:\Users\Administrator\Documents\Data\ChoiceTask\permutationFigures';
+    sessionsPath = 'C:\Users\Administrator\Documents\MATLAB\Development\ChoiceTask\temp\uSessions';
+end
 doBursts = false;
 % for figure
 binInc = 0.02;
@@ -40,10 +45,10 @@ LRTHMT = false;
 HRTLMT = false;
 LRTLMT = false;
 HRTHMT = false;
-unitTypes = {'dirSel','~dirSel'};
+unitTypes = {'dirSel'}; % ,'~dirSel'
 % unitTypes = {'dirSel'};
 timingFields = {'RT','MT'};
-movementDirs = {'all'};
+movementDirs = {'contra','ipsi','all'};
     
 for ii_events = 1:numel(events)
     useEvent = events(ii_events);
@@ -145,7 +150,7 @@ for ii_events = 1:numel(events)
                     subjectName = analysisConf.sessionConfs{iNeuron}.subjects__name;
 
                     if filterBy_dirSel
-                        if (dirSel && ~dirSelNeurons(iNeuron)) || (~dirSel && dirSelNeurons_p90(iNeuron))
+                        if (dirSel && ~dirSelNeuronsNO(iNeuron)) || (~dirSel && dirSelNeurons_p90(iNeuron))
                             continue;
                         end
                     end

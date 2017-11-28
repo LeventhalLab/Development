@@ -1,5 +1,11 @@
 function RTMT_corrMatrix()
-    savePath = '/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp';
+    if ismac
+        savePath = '/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp';
+        uSessionsPath = '/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions';
+    else
+        savePath = 'C:\Users\Administrator\Documents\MATLAB\Development\ChoiceTask\temp';
+        uSessionsPath = 'C:\Users\Administrator\Documents\MATLAB\Development\ChoiceTask\temp\uSessions';
+    end
     doSave = true;
     
     % Nose Out event, secondary
@@ -27,11 +33,10 @@ function RTMT_corrMatrix()
 % %     dirMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n72_movDirall_byMT_bins10_binMs20ORD20171031.mat');
 
     % nose out event, primary only
-    ndirRT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_un~dirSel_n48_movDirall_byRT_bins10_binMs20ORD20171030.mat');
-    ndirMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_un~dirSel_n48_movDirall_byMT_bins10_binMs20ORD20171030.mat');
-    dirRT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n34_movDirall_byRT_bins10_binMs20ORD20171030.mat');
-    dirMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n34_movDirall_byMT_bins10_binMs20ORD20171030.mat');
-
+    ndirRT = load(fullfile(uSessionsPath,'evNose Out_undirSel_n35_movDirall_byRT_bins10_binMs20ORD20171127.mat'));
+    ndirMT = load(fullfile(uSessionsPath,'evNose Out_undirSel_n35_movDirall_byMT_bins10_binMs20ORD20171127.mat'));
+    dirRT = load(fullfile(uSessionsPath,'evNose Out_un~dirSel_n47_movDirall_byRT_bins10_binMs20ORD20171127.mat'));
+    dirMT = load(fullfile(uSessionsPath,'evNose Out_un~dirSel_n47_movDirall_byMT_bins10_binMs20ORD20171127.mat'));
     
     % setup
     grayColor = [.8 .8 .8];
