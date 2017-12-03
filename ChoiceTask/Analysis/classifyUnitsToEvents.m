@@ -65,7 +65,7 @@ for iNeuron = 1:numel(analysisConf.neurons)
         end
     end
     all_zscores(iNeuron,:,:) = zscore;
-    [max_z,max_bins] = max(zscore_filt');
+    [max_z,max_bins] = max(abs(zscore_filt)');
     % leave these values in event order (e.g. 1-7)
     unitEvents{iNeuron}.maxz = max_z;
     unitEvents{iNeuron}.maxbin = max_bins;

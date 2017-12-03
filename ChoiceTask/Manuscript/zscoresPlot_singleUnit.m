@@ -12,7 +12,7 @@ session15_mt = all_mt_c{15};
 
 % run together
 % % [unitEvents,all_zscores,unitClass] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents,useTiming);
-% % primSec = primSecClass(unitEvents,0.5);
+% % primSec = primSecClass(unitEvents,1);
 
 rows = 2;
 cols = 7;
@@ -22,6 +22,7 @@ lineWidth = 3;
 set_ylims = [-1 3];
 ylabelloc = 2.5;
 useNeuron = 188% (R142_1209_7b), 103, 147, 201 (R142_1210_36a)
+useNeuron = 133
 
 figuree(1200,350);
 lns = [];
@@ -50,10 +51,14 @@ for iEvent = 1:numel(eventFieldnames)
                 title({['unit ',num2str(useNeuron)],[eventFieldnames{iEvent}]});
             end
         else
+            yticklabels({'',''});
             if doTitle
                 title({'',[eventFieldlabels{iEvent}]});
             end
         end
+        xticks([0]);
+        xticklabels({''});
+        grid on;
     end
     
     if rows > 1
@@ -88,13 +93,16 @@ for iEvent = 1:numel(eventFieldnames)
     xticks([1 size(all_zscores,3)/2 size(all_zscores,3)]);
     xticklabels({'-1','0','1'});
     ylim(set_ylims);
-    yticks([set_ylims(1) 0 set_ylims(2)]);
     
     if doTitle
         title({'',[eventFieldlabels{iEvent}]});
     end
     if iEvent == 1
         ylabel('Z score');
+        yticks([set_ylims(1) 0 set_ylims(2)]);
+    else
+        yticks([set_ylims(1) 0 set_ylims(2)]);
+        yticklabels({'','',''});
     end
     if iEvent == 4
         xlabel('Time (s)');

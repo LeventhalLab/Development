@@ -1,9 +1,10 @@
+onlyPrimary = false;
 show_primFate = false; % false = show_secOrigin
 plotOpt = 2; % 1 = both sides of x-axis, 2 = mosaic
 showMosaic = false;
 plotTitle = 'Unit Classes';
 
-doSetup = true;
+doSetup = false;
 if doSetup
     tWindow = 1;
     binMs = 20;
@@ -20,7 +21,7 @@ end
 primSec_wNC = primSec;
 primSec_wNC(isnan(primSec_wNC)) = 8;
 
-figuree(500,300);
+figuree(500,500);
 % cols = 7;
 colors = parula(8);
 % colors = colors(1:end,:);
@@ -31,9 +32,11 @@ secBars = histcounts(primSec_wNC(:,2),0.5:8.5);
 
 lns = [];
 for iBar = 1:numel(secBars)
-    lns(2) = bar(iBar,primBars(iBar) + secBars(iBar),'FaceColor',colors(iBar,:),'FaceAlpha',0.2,'EdgeColor','w','lineWidth',2);
-    hold on;
+    if ~onlyPrimary
+        lns(2) = bar(iBar,primBars(iBar) + secBars(iBar),'FaceColor',colors(iBar,:),'FaceAlpha',0.2,'EdgeColor','w','lineWidth',2);
+    end
     lns(1) = bar(iBar,primBars(iBar),'FaceColor',colors(iBar,:),'EdgeColor','w','lineWidth',2);
+    hold on;
 end
 
 if plotOpt == 1
@@ -67,12 +70,18 @@ if showMosaic
         end
     end
 end
-legend(lns,{'Primary','Secondary'});
+if onlyPrimary
+    legend(lns,{'Primary Class'});
+else
+    legend(lns,{'Primary Class','Secondary Class'});
+end
 % formatting
 
 for iText = 1:numel(primBars)
     text(iText,primBars(iText),num2str(primBars(iText)),'VerticalAlignment','bottom','HorizontalAlignment','center');
-    text(iText,primBars(iText)+secBars(iText),num2str(secBars(iText)),'VerticalAlignment','bottom','HorizontalAlignment','center');
+    if ~onlyPrimary
+        text(iText,primBars(iText)+secBars(iText),num2str(secBars(iText)),'VerticalAlignment','bottom','HorizontalAlignment','center');
+    end
 end
 
 set(gca,'fontsize',16);

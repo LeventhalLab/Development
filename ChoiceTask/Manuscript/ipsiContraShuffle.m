@@ -15,7 +15,7 @@ end
 excludeSessions = {'R0117_20160504a','R0142_20161207a','R0117_20160508a','R0117_20160510a'}; % corrupt video
 [sessionNames,IA] = unique(analysisConf.sessionNames);
 
-if true
+if false
     useEvents = 1:7;
     trialTypes = {'correct'};
     
@@ -31,19 +31,19 @@ if true
         dirSelNeuronsNO = false(numel(analysisConf.neurons),1);
         dirSelNeuronsNO_contra = false(numel(analysisConf.neurons),1);
         dirSelNeuronsNO_ipsi = false(numel(analysisConf.neurons),1);
+        dirSelNeuronsNO_count = 0;
     else
         dirSelNeuronsSO = false(numel(analysisConf.neurons),1);
         dirSelNeuronsSO_contra = false(numel(analysisConf.neurons),1);
         dirSelNeuronsSO_ipsi = false(numel(analysisConf.neurons),1);
+        dirSelNeuronsSO_count = 0;
     end
 
     for iNeuron = 1:numel(analysisConf.neurons)
         sessionConf = analysisConf.sessionConfs{iNeuron};
         neuronName = analysisConf.neurons{iNeuron};
         disp(neuronName);
-        if ismember(sessionConf.sessions__name,excludeSessions)
-            continue;
-        end
+        
         curTrials = all_trials{iNeuron};
         
         if strcmp(dirSelType,'NO')
@@ -51,6 +51,9 @@ if true
             contraTrials = [trialIdInfo.correctContra];
             ipsiTrials = [trialIdInfo.correctIpsi];
         else
+            if ismember(sessionConf.sessions__name,excludeSessions)
+                continue;
+            end
             CSVpath = fullfile(localSideOutPath,[sessionConf.sessions__name,'_sideOutAnalysis.csv']);
             M = csvread(CSVpath);
             contraTrials = find(M == 1)';
@@ -97,16 +100,38 @@ if true
                 pEventDiff_neg(iEvent,iBin) = numel(find(matrixDiff(iBin) < curMDS)) / nShuffle;
             end
             if iEvent == 4 && strcmp(dirSelType,'NO')
-                % see: http://gaidi.ca/weblog/finding-consecutive-numbers-that-exceed-a-threshold-in-matlab
-                dirSelNeuronsNO_contra(iNeuron) = any(movsum(pEventDiff(iEvent,analyzeRange) > pVal,[0 pVal_minBins-1]) == pVal_minBins);
-                dirSelNeuronsNO_ipsi(iNeuron) = any(movsum(pEventDiff_neg(iEvent,analyzeRange) > pVal,[0 pVal_minBins-1]) == pVal_minBins);
+                dirSelNeuronsNO_contra_ntpIdx = movsum(pEventDiff(iEvent,analyzeRange) > pVal,[0 pVal_minBins-1]) == pVal_minBins;
+                dirSelNeuronsNO_ipsi_ntpIdx = movsum(pEventDiff_neg(iEvent,analyzeRange) > pVal,[0 pVal_minBins-1]) == pVal_minBins;
+                if any(dirSelNeuronsNO_contra_ntpIdx) && any(dirSelNeuronsNO_ipsi_ntpIdx)
+                    if mean(pEventDiff(iEvent,analyzeRange)) > mean(pEventDiff_neg(iEvent,analyzeRange))
+                        dirSelNeuronsNO_contra(iNeuron) = 1;
+                    else
+                        dirSelNeuronsNO_ipsi(iNeuron) = 1;
+                    end
+                else
+                    dirSelNeuronsNO_contra(iNeuron) = any(dirSelNeuronsNO_contra_ntpIdx);
+                    dirSelNeuronsNO_ipsi(iNeuron) = any(dirSelNeuronsNO_ipsi_ntpIdx);
+                end
                 dirSelNeuronsNO(iNeuron) = dirSelNeuronsNO_contra(iNeuron) | dirSelNeuronsNO_ipsi(iNeuron);
+                dirSelNeuronsNO_count = dirSelNeuronsNO_count + 1;
             end
             if iEvent == 6 && strcmp(dirSelType,'SO')
                 % see: http://gaidi.ca/weblog/finding-consecutive-numbers-that-exceed-a-threshold-in-matlab
-                dirSelNeuronsSO_contra(iNeuron) = any(movsum(pEventDiff(iEvent,analyzeRange) > pVal,[0 pVal_minBins-1]) == pVal_minBins);
-                dirSelNeuronsSO_ipsi(iNeuron) = any(movsum(pEventDiff_neg(iEvent,analyzeRange) > pVal,[0 pVal_minBins-1]) == pVal_minBins);
+                % mutually exclusive
+                dirSelNeuronsSO_contra_ntpIdx = movsum(pEventDiff(iEvent,analyzeRange) > pVal,[0 pVal_minBins-1]) == pVal_minBins;
+                dirSelNeuronsSO_ipsi_ntpIdx = movsum(pEventDiff_neg(iEvent,analyzeRange) > pVal,[0 pVal_minBins-1]) == pVal_minBins;
+                if any(dirSelNeuronsSO_contra_ntpIdx) && any(dirSelNeuronsSO_ipsi_ntpIdx)
+                    if mean(pEventDiff(iEvent,analyzeRange)) > mean(pEventDiff_neg(iEvent,analyzeRange))
+                        dirSelNeuronsSO_contra(iNeuron) = 1;
+                    else
+                        dirSelNeuronsSO_ipsi(iNeuron) = 1;
+                    end
+                else
+                    dirSelNeuronsSO_contra(iNeuron) = any(dirSelNeuronsSO_contra_ntpIdx);
+                    dirSelNeuronsSO_ipsi(iNeuron) = any(dirSelNeuronsSO_ipsi_ntpIdx);
+                end
                 dirSelNeuronsSO(iNeuron) = dirSelNeuronsSO_contra(iNeuron) | dirSelNeuronsSO_ipsi(iNeuron);
+                dirSelNeuronsSO_count = dirSelNeuronsSO_count + 1;
             end
         end
         pNeuronDiff(iNeuron,:,:) = pEventDiff;
@@ -165,7 +190,7 @@ for iEvent = 1:numel(useEvents)
             curBins_neg = squeeze(pNeuronDiff_neg(iNeuron,curEvent,:));
             eventBins = eventBins + (curBins > pVal)';
             eventBins_neg = eventBins_neg + (curBins_neg > pVal)';
-            showUnitClass = [4,6];
+            showUnitClass = [1:7];
             for curUnitClass = showUnitClass
                 if curUnitClass == primSec(iNeuron,1)
                     eventBins_class(curUnitClass,:) = eventBins_class(curUnitClass,:) + (curBins > pVal)';
@@ -181,18 +206,18 @@ for iEvent = 1:numel(useEvents)
     bar(1:size(pNeuronDiff_neg,3),-eventBins_neg/size(pNeuronDiff_neg,1),'FaceColor',colors(2,:),'EdgeColor',colors(2,:)); % POSITIVE
     ylim([-.15 .15]);
     
-%     yyaxis right;
-    class_colors = jet(8);
-%     class_colors(3,:) = [1 1 0];
-%     class_colors(4,:) = [0 1 0];
-    class_lns = [];
-    class_lns_ii = 1;
-    for iClass = 1:7
-        class_lns(class_lns_ii) = plot(1:size(pNeuronDiff,3),eventBins_class(iClass,:)/size(pNeuronDiff,1),'-','color',class_colors(iClass,:),'lineWidth',2);
-        plot(1:size(pNeuronDiff,3),-eventBins_neg_class(iClass,:)/size(pNeuronDiff,1),'-','color',class_colors(iClass,:),'lineWidth',2);
-        class_lns_ii = class_lns_ii + 1;
-    end
-%     ylim([-1 1]);
+% % % %     yyaxis right;
+% % %     class_colors = jet(8);
+% % % %     class_colors(3,:) = [1 1 0];
+% % % %     class_colors(4,:) = [0 1 0];
+% % %     class_lns = [];
+% % %     class_lns_ii = 1;
+% % %     for iClass = 1:7
+% % %         class_lns(class_lns_ii) = plot(1:size(pNeuronDiff,3),eventBins_class(iClass,:)/size(pNeuronDiff,1),'-','color',class_colors(iClass,:),'lineWidth',2);
+% % %         plot(1:size(pNeuronDiff,3),-eventBins_neg_class(iClass,:)/size(pNeuronDiff,1),'-','color',class_colors(iClass,:),'lineWidth',2);
+% % %         class_lns_ii = class_lns_ii + 1;
+% % %     end
+% % % %     ylim([-1 1]);
     
     xlim([1 size(pNeuronDiff,3)]);
     xticks([1 round(size(pNeuronDiff,3)/2) size(pNeuronDiff,3)]);

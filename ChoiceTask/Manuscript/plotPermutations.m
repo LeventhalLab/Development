@@ -33,11 +33,11 @@ clear all_z_raw;
 % % plotTypes = {'raster','bracketed','high/low'};
 % % burstCriterias = {'none','Poisson','LTS'};
 
-events = [4];
-unitTypes = {'dirSel'}; % ,'~dirSel'
+events = [3,4];
+unitTypes = {'dirSel','~dirSel'}; % ,'~dirSel'
 dirSelType = 'NO'; % NO or SO
 % unitTypes = {'dirSel'};
-timingFields = {'RT','MT'};
+timingFields = {'RT'};
 movementDirs = {'all'};
 
 % --- END CONFIG
@@ -127,7 +127,7 @@ for ii_events = 1:numel(events)
                     subjectName = analysisConf.sessionConfs{iNeuron}.subjects__name;
 
                     if filterBy_dirSel
-                        if (dirSel && ~use_dirSelNeurons(iNeuron)) || (~dirSel && dirSelNeurons_p90(iNeuron))
+                        if (dirSel && ~use_dirSelNeurons(iNeuron)) || (~dirSel && dirSelNeurons(iNeuron))
                             continue;
                         end
                     end
