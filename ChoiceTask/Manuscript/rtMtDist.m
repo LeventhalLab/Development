@@ -70,6 +70,17 @@ end
 % % 
 % % figure;
 % % plot(MTcounts','lineWidth',2);
+useMeanColors = true;
+grayColor = [.8 .8 .8];
+% work in progress...
+% % RT_intercepts = ezReciprobit(all_rt,10);
+% % MT_intercepts = ezReciprobit(all_mt,10);
+% % sorter_all_rt = sort(all_rt);
+% % rtc1 = find(sorter_all_rt > RT_intercepts(2),1,'first');
+
+% rt_meanColors = [grayColor;cool(numel(ndirRT.auc_max)-2);grayColor];
+rt_meanColors = [repmat(grayColor,5,1);cool(40);repmat(grayColor,90,1)];
+mt_meanColors = [summer(60);repmat(grayColor,90,1)];
 
 nSmooth = 5;
 lineWidth = 4;
@@ -79,17 +90,25 @@ h = figuree(600,300);
 [mt_counts,mt_centers] = hist(all_mt,[xlimVals(1):histInt:xlimVals(2)]+histInt);
 x = interp(rt_centers,nSmooth);
 y = abs(interp(rt_counts,nSmooth));
-% % lns_rt = colormapline(x,y,[],cool(1000));
-% % set(lns_rt,'lineWidth',lineWidth);
-plot(x,y,'k','lineWidth',lineWidth);
+if useMeanColors
+    lns_rt = colormapline(x,y,[],rt_meanColors);
+else
+    lns_rt = colormapline(x,y,[],cool(1000));
+end
+set(lns_rt,'lineWidth',lineWidth);
+% % plot(x,y,'k','lineWidth',lineWidth);
 hold on;
 [v,k] = max(y);
 text(x(k),v + adjLabel,'RT','fontSize',16,'HorizontalAlignment','Center');
 x = interp(mt_centers,nSmooth);
 y = abs(interp(mt_counts,nSmooth));
-% % lns_mt = colormapline(x,y,[],summer(1000));
-% % set(lns_mt,'lineWidth',lineWidth);
-lns = plot(x,y,'k','lineWidth',lineWidth);
+if useMeanColors
+    lns_mt = colormapline(x,y,[],mt_meanColors);
+else
+    lns_mt = colormapline(x,y,[],summer(1000));
+end
+set(lns_mt,'lineWidth',lineWidth);
+% % lns = plot(x,y,'k','lineWidth',lineWidth);
 [v,k] = max(y);
 text(x(k),v + adjLabel,'MT','fontSize',16,'HorizontalAlignment','Center');
 ylim([0 220]);
