@@ -1,85 +1,55 @@
-trialTypes = {'correctContra','correctIpsi','incorrectContra','incorrectIpsi'};
-myColorMap = lines(4);
-lns = [];
-useEvents = 1:7;
-binMs = 50;
+doSetup = false;
+colors = lines(2);
+colors(3,:) = colors(1,:) * .5;
+colors(4,:) = colors(2,:) * .5;
+lineWidths = [2 2 1 1];
 
-if false % 4 rows
-    figuree(1200,800);
-    for iTrialType = 1:2
-        [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,{trialTypes{iTrialType}},useEvents,{});
-        for iEvent = 1:numel(eventFieldnames)
-            sorted_neuronIds = [];
-            for iNeuron = 1:numel(unitEvents)
-                if isempty(unitEvents{iNeuron}.class)
-                    continue;
-                end
-                if unitEvents{iNeuron}.class(1) == iEvent && max(abs(squeeze(all_zscores(iNeuron,iEvent,:)))) > 2
-                    sorted_neuronIds = [sorted_neuronIds iNeuron];
-                end
-            end
-            subplot(4,numel(eventFieldnames),iEvent+(numel(eventFieldnames)*(iTrialType-1)));
-            lns(iTrialType) = plot(smooth(nanmean(squeeze(all_zscores(sorted_neuronIds,iEvent,:))),3),'LineWidth',3,'Color',myColorMap(iTrialType,:));
-    % %         shadedErrorBar([],smooth(nanmean(squeeze(all_zscores(sorted_neuronIds,iEvent,:))),3),...
-    % %             smooth(nanstd(squeeze(all_zscores(sorted_neuronIds,iEvent,:))),3),...
-    % %             {'LineWidth',3,'Color',myColorMap(iTrialType,:)});
-            xlim([1 40]);
-            xticks([1 20 40]);
-            xticklabels({'-1','0','1'});
-            ylim([-3 8]);
-            colormap jet;
-            title([eventFieldnames{iEvent},' (',num2str(numel(sorted_neuronIds)),')']);
-            hold on;
-        end
-    end
-    legend(lns,trialTypes);
+savePath = 'C:\Users\Administrator\Documents\Data\ChoiceTask\ipsiContraWithIncorrect';
+
+if false
+    tWindow = 1;
+    binMs = 20;
+    useEvents = 1:7;
+    useTiming = {};
+    % moved contra on contra tone
+    trialTypes = {'correctContra'};
+    [~,all_zscores_correctContra,~] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents,useTiming);
+    % moved ipsi on ipsi tone
+    trialTypes = {'correctIpsi'};
+    [~,all_zscores_correctIpsi,~] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents,useTiming);
+    % moved contra on ipsi tone
+    trialTypes = {'incorrectContra'};
+    [~,all_zscores_incorrectContra,~] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents,useTiming);
+    % moved ipsi on contra tone
+    trialTypes = {'incorrectIpsi'};
+    [~,all_zscores_incorrectIpsi,~] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents,useTiming);
+    
+% %     minZ = 1;
+% %     [primSec,fractions] = primSecClass(unitEvents,minZ);
 end
 
-if true % 1 row
-    figuree(1200,400);
-    for iTrialType = 1:4
-        [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,{trialTypes{iTrialType}},useEvents,{});
-        for iEvent = 1:numel(eventFieldnames)
-            subplot(1,7,iEvent);
-            lns(iTrialType) = plot(smooth(nanmean(squeeze(all_zscores(:,iEvent,:))),3),'LineWidth',3,'Color',myColorMap(iTrialType,:));
-            xlim([1 40]);
-            xticks([1 20 40]);
+zscores_types = {all_zscores_correctContra all_zscores_correctIpsi all_zscores_incorrectContra all_zscores_incorrectIpsi};
+nSmooth = 5;
+
+lns = [];
+for iNeuron = 1:numel(analysisConf.neurons)
+    h = figuree(1500,400);
+    for iEvent = 1:numel(eventFieldnames)
+        subplot(1,7,iEvent);
+        for ii_zscores = 1:numel(zscores_types)
+            cur_all_zscores = zscores_types{ii_zscores};
+            lns(ii_zscores) = plot(smooth(squeeze(cur_all_zscores(iNeuron,iEvent,:)),nSmooth),'LineWidth',lineWidths(ii_zscores),'Color',colors(ii_zscores,:));
+            xlim([1 size(all_zscores_incorrectIpsi,3)]);
+            xticks([1 round(size(all_zscores_incorrectIpsi,3)/2) size(all_zscores_incorrectIpsi,3)]);
             xticklabels({'-1','0','1'});
             ylim([-1 3]);
             grid on;
-            title([eventFieldnames{iEvent}]);
+            title([eventFieldlabels{iEvent}]);
             hold on;
         end
     end
-    legend(lns,trialTypes);
-end
-
-if false % 1 row
-    useSubjects = [88,117,142,154];
-    figuree(1200,800);
-    for iSubject = 1:numel(useSubjects)
-        for iTrialType = 1:4
-            [unitEvents,all_zscores] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,{trialTypes{iTrialType}},useEvents,{});
-            for iEvent = 1:numel(eventFieldnames)
-                useNeurons = [];
-                for iNeuron = 1:numel(unitEvents)
-                    sessionConf = analysisConf.sessionConfs{iNeuron};
-                    if sessionConf.subjects__id == useSubjects(iSubject)
-                        useNeurons = [useNeurons iNeuron];
-                    end
-                end
-                subplot(numel(useSubjects),7,((7*iSubject)-7) + iEvent);
-                lns(iTrialType) = plot(smooth(nanmean(squeeze(all_zscores(useNeurons,iEvent,:))),3),'LineWidth',3,'Color',myColorMap(iTrialType,:));
-                hold on;
-                xlim([1 40]);
-                xticks([1 20 40]);
-                xticklabels({'-1','0','1'});
-                ylim([-1 3]);
-                grid on;
-                title([num2str(useSubjects(iSubject)),' - ',eventFieldnames{iEvent}]);
-                hold on;
-            end
-        end
-    end
-    legend(lns,trialTypes);
+    legend(lns,{'+contra','+ipsi','-contra','-ipsi'});
+    addNote(h,['unit: ',num2str(iNeuron)]);
+    saveas(h,fullfile(savePath,['unit_',num2str(iNeuron,'%03d'),'.png']));
+    close(h);
 end

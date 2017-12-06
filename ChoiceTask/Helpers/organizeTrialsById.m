@@ -20,7 +20,8 @@ for trialId = find([trials.falseStart] == 1)
 end
 
 trialIdInfo.correct = find([trials.correct] == 1);
-trialIdInfo.incorrect = find([trials.correct] == 0);
+trialIdInfo.fail = find([trials.correct] == 0);
+trialIdInfo.incorrect = [trialIdInfo.incorrectContra trialIdInfo.incorrectIpsi];
 
 trialIdInfo.movementTooLong = find([trials.movementTooLong] == 1);
 trialIdInfo.holdTooLong = find([trials.holdTooLong] == 1);

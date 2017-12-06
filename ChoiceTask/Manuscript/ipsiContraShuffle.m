@@ -5,6 +5,7 @@ pVal_minBins = 2;
 colors = lines(2);
 analyzeRange = (tWindow / binS) : (tWindow / binS) + (0.25 / binS);
 dirSelType = 'NO'; % NO or SO
+useIncorrect = false;
 
 if ismac
     localSideOutPath = '/Users/mattgaidica/Documents/Data/ChoiceTask/sideOutAnalysis';
@@ -15,9 +16,8 @@ end
 excludeSessions = {'R0117_20160504a','R0142_20161207a','R0117_20160508a','R0117_20160510a'}; % corrupt video
 [sessionNames,IA] = unique(analysisConf.sessionNames);
 
-if false
+if true
     useEvents = 1:7;
-    trialTypes = {'correct'};
     
     binMs = 20;
     binS = binMs / 1000;
@@ -28,6 +28,7 @@ if false
     pNeuronDiff_neg = [];
 
     if strcmp(dirSelType,'NO')
+        dirSelNeuronsNO_type = zeros(numel(analysisConf.neurons),1);
         dirSelNeuronsNO = false(numel(analysisConf.neurons),1);
         dirSelNeuronsNO_contra = false(numel(analysisConf.neurons),1);
         dirSelNeuronsNO_ipsi = false(numel(analysisConf.neurons),1);
@@ -39,6 +40,10 @@ if false
         dirSelNeuronsSO_count = 0;
     end
 
+    dirSelUsedNeurons = [];
+    if useIncorrect
+        dirSelUsedNeurons_incorrect = [];
+    end
     for iNeuron = 1:numel(analysisConf.neurons)
         sessionConf = analysisConf.sessionConfs{iNeuron};
         neuronName = analysisConf.neurons{iNeuron};
@@ -48,8 +53,13 @@ if false
         
         if strcmp(dirSelType,'NO')
             trialIdInfo = organizeTrialsById(curTrials);
-            contraTrials = [trialIdInfo.correctContra];
-            ipsiTrials = [trialIdInfo.correctIpsi];
+            if useIncorrect
+                contraTrials = [trialIdInfo.incorrectContra];
+                ipsiTrials = [trialIdInfo.incorrectIpsi];
+            else
+                contraTrials = [trialIdInfo.correctContra];
+                ipsiTrials = [trialIdInfo.correctIpsi];
+            end
         else
             if ismember(sessionConf.sessions__name,excludeSessions)
                 continue;
@@ -64,6 +74,11 @@ if false
             disp([num2str(iNeuron),' not enough trials']);
             continue;
         end
+        
+        if useIncorrect
+            dirSelUsedNeurons_incorrect = [dirSelUsedNeurons_incorrect iNeuron];
+        end
+        dirSelUsedNeurons = [dirSelUsedNeurons iNeuron];
 
         useTrials = [contraTrials ipsiTrials];
         trialClass = zeros(numel(useTrials),1);
@@ -113,11 +128,19 @@ if false
                     dirSelNeuronsNO_ipsi(iNeuron) = any(dirSelNeuronsNO_ipsi_ntpIdx);
                 end
                 dirSelNeuronsNO(iNeuron) = dirSelNeuronsNO_contra(iNeuron) | dirSelNeuronsNO_ipsi(iNeuron);
-                dirSelNeuronsNO_count = dirSelNeuronsNO_count + 1;
+                if dirSelNeuronsNO_contra(iNeuron)
+                    dirSelNeuronsNO_type(iNeuron) = 1;
+                    dirSelNeuronsNO_count = dirSelNeuronsNO_count + 1;
+                end
+                if dirSelNeuronsNO_ipsi(iNeuron)
+                    dirSelNeuronsNO_type(iNeuron) = 2;
+                    dirSelNeuronsNO_count = dirSelNeuronsNO_count + 1;
+                end
+
             end
             if iEvent == 6 && strcmp(dirSelType,'SO')
                 % see: http://gaidi.ca/weblog/finding-consecutive-numbers-that-exceed-a-threshold-in-matlab
-                % mutually exclusive
+                % currently mutually exclusive
                 dirSelNeuronsSO_contra_ntpIdx = movsum(pEventDiff(iEvent,analyzeRange) > pVal,[0 pVal_minBins-1]) == pVal_minBins;
                 dirSelNeuronsSO_ipsi_ntpIdx = movsum(pEventDiff_neg(iEvent,analyzeRange) > pVal,[0 pVal_minBins-1]) == pVal_minBins;
                 if any(dirSelNeuronsSO_contra_ntpIdx) && any(dirSelNeuronsSO_ipsi_ntpIdx)
@@ -185,7 +208,7 @@ for iEvent = 1:numel(useEvents)
     eventBins_neg = zeros(1,size(pNeuronDiff_neg,3));
     eventBins_neg_class = zeros(8,size(pNeuronDiff_neg,3));
     for iNeuron = 1:size(pNeuronDiff,1)
-        if ~isempty(unitEvents{iNeuron}.class)%% && unitEvents{iNeuron}.class(1) == 3 % tone
+% %         if ~isempty(unitEvents{iNeuron}.class)%% && unitEvents{iNeuron}.class(1) == 3 % tone
             curBins = squeeze(pNeuronDiff(iNeuron,curEvent,:));
             curBins_neg = squeeze(pNeuronDiff_neg(iNeuron,curEvent,:));
             eventBins = eventBins + (curBins > pVal)';
@@ -197,14 +220,14 @@ for iEvent = 1:numel(useEvents)
                     eventBins_neg_class(curUnitClass,:) = eventBins_neg_class(curUnitClass,:) + (curBins_neg > pVal)';
                 end
             end
-        end
+% %         end
     end
     
 %     yyaxis left;
-    bar(1:size(pNeuronDiff,3),eventBins/size(pNeuronDiff,1),'FaceColor',colors(1,:),'EdgeColor',colors(1,:)); % POSITIVE
+    bar(1:size(pNeuronDiff,3),eventBins/numel(dirSelUsedNeurons),'FaceColor',colors(1,:),'EdgeColor',colors(1,:)); % POSITIVE
     hold on;
-    bar(1:size(pNeuronDiff_neg,3),-eventBins_neg/size(pNeuronDiff_neg,1),'FaceColor',colors(2,:),'EdgeColor',colors(2,:)); % POSITIVE
-    ylim([-.15 .15]);
+    bar(1:size(pNeuronDiff_neg,3),-eventBins_neg/numel(dirSelUsedNeurons),'FaceColor',colors(2,:),'EdgeColor',colors(2,:)); % POSITIVE
+    ylim([-.25 .25]);
     
 % % % %     yyaxis right;
 % % %     class_colors = jet(8);
@@ -225,7 +248,7 @@ for iEvent = 1:numel(useEvents)
     plot([round(size(pNeuronDiff,3)/2) round(size(pNeuronDiff,3)/2)],ylim,'k--');
     
     % Given pVal, what fraction is due to chance?
-    X = binoinv(pVal,size(pNeuronDiff,1),1-pVal) / size(pNeuronDiff,1);
+    X = binoinv(pVal,numel(dirSelUsedNeurons),1-pVal) / size(pNeuronDiff,1);
     plot(xlim,[X X],'r');
     plot(xlim,[-X -X],'r');
     
@@ -243,6 +266,6 @@ for iEvent = 1:numel(useEvents)
     box off;
 end
 
-legend(class_lns,eventFieldlabels)
+% % % % legend(class_lns,eventFieldlabels)
 set(gcf,'color','w');
 tightfig;
