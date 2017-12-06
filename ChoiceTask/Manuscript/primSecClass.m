@@ -8,9 +8,9 @@ primSec = NaN(numel(unitEvents),2);
 
 for iNeuron = 1:numel(unitEvents)
     if ~isempty(unitEvents{iNeuron}.class)
-        if unitEvents{iNeuron}.maxz(unitEvents{iNeuron}.class(1)) > minZ
+        if unitEvents{iNeuron}.maxzABS(unitEvents{iNeuron}.class(1)) > minZ
             primSec(iNeuron,1) = unitEvents{iNeuron}.class(1);
-            if (unitEvents{iNeuron}.maxz(unitEvents{iNeuron}.class(2)) > unitEvents{iNeuron}.maxz(unitEvents{iNeuron}.class(1)) / 2) || unitEvents{iNeuron}.maxz(unitEvents{iNeuron}.class(2)) > minZ
+            if (unitEvents{iNeuron}.maxzABS(unitEvents{iNeuron}.class(2)) > unitEvents{iNeuron}.maxzABS(unitEvents{iNeuron}.class(1)) / 2) || unitEvents{iNeuron}.maxzABS(unitEvents{iNeuron}.class(2)) > minZ
                 primSec(iNeuron,2) = unitEvents{iNeuron}.class(2);
             end
         end
