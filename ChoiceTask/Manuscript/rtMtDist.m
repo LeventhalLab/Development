@@ -72,15 +72,6 @@ end
 % % plot(MTcounts','lineWidth',2);
 useMeanColors = true;
 grayColor = [.8 .8 .8];
-% work in progress...
-% % RT_intercepts = ezReciprobit(all_rt,10);
-% % MT_intercepts = ezReciprobit(all_mt,10);
-% % sorter_all_rt = sort(all_rt);
-% % rtc1 = find(sorter_all_rt > RT_intercepts(2),1,'first');
-
-% rt_meanColors = [grayColor;cool(numel(ndirRT.auc_max)-2);grayColor];
-rt_meanColors = [repmat(grayColor,5,1);cool(40);repmat(grayColor,90,1)];
-mt_meanColors = [summer(60);repmat(grayColor,90,1)];
 
 nSmooth = 5;
 lineWidth = 4;
@@ -91,6 +82,10 @@ h = figuree(600,300);
 x = interp(rt_centers,nSmooth);
 y = abs(interp(rt_counts,nSmooth));
 if useMeanColors
+    % run plotPermutations.m
+    rtc1 = find(x > RT_meanBinsSeconds(2),1,'first');
+    rtc2 = find(x > RT_meanBinsSeconds(10),1,'first');
+    rt_meanColors = [repmat(grayColor,rtc1,1);cool(rtc2-rtc1);repmat(grayColor,numel(x)-rtc2,1)];
     lns_rt = colormapline(x,y,[],rt_meanColors);
 else
     lns_rt = colormapline(x,y,[],cool(1000));
@@ -103,6 +98,10 @@ text(x(k),v + adjLabel,'RT','fontSize',16,'HorizontalAlignment','Center');
 x = interp(mt_centers,nSmooth);
 y = abs(interp(mt_counts,nSmooth));
 if useMeanColors
+    % run plotPermutations.m
+    rtc1 = find(x > MT_meanBinsSeconds(2),1,'first');
+    rtc2 = find(x > MT_meanBinsSeconds(10),1,'first');
+    mt_meanColors = [repmat(grayColor,rtc1,1);summer(rtc2-rtc1);repmat(grayColor,numel(x)-rtc2,1)];
     lns_mt = colormapline(x,y,[],mt_meanColors);
 else
     lns_mt = colormapline(x,y,[],summer(1000));

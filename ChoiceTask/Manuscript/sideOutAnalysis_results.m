@@ -1,6 +1,6 @@
 function sideOutAnalysis_results(analysisConf,all_trials)
 
-excludeSessions = {'R0142_20161207a','R0117_20160508a','R0117_20160510a'}; % corrupt video
+excludeSessions = {'R0117_20160504a','R0142_20161207a','R0117_20160508a','R0117_20160510a'}; % corrupt video
 [sessionNames,IA] = unique(analysisConf.sessionNames);
 sessionCount = 0;
 
@@ -11,6 +11,7 @@ ipsiAgreementTrials = 0;
 
 for iSession = 1:numel(sessionNames)
     sessionConf = analysisConf.sessionConfs{IA(iSession)};
+    sessionConf = updateNasPath(sessionConf);
     if ismember(sessionConf.sessions__name,excludeSessions)
         continue;
     end
@@ -31,7 +32,8 @@ y = [contraAgreementTrials,totalContraTrials-contraAgreementTrials;ipsiAgreement
 figure;
 bar(y,'stacked');
 xticklabels({'contra','ipsi'});
-title('Trial Type vs. Side Out Agreement');
+meanAgreement = mean([contraAgreementTrials/totalContraTrials ipsiAgreementTrials/totalIpsiTrials]);
+title(['Trial Type vs. Side Out Agreement (',num2str(meanAgreement*100,'%2.2f'),'%)']);
 ylabel('trials');
 text(1,totalContraTrials+10,num2str(100*contraAgreementTrials/totalContraTrials,'%2.2f'));
 text(2,totalIpsiTrials+10,num2str(100*ipsiAgreementTrials/totalIpsiTrials,'%2.2f'))

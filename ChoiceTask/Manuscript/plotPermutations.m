@@ -25,19 +25,19 @@ lineWidth = 2;
 % % minZ = 1;
 % % primSec = primSecClass(unitEvents,minZ);
 
-% RT_intercepts = ezReciprobit(all_rt,10);
-% MT_intercepts = ezReciprobit(all_mt,10);
+RT_intercepts = ezReciprobit(all_rt,10);
+MT_intercepts = ezReciprobit(all_mt,10);
 
 clear all_z_raw;
 
 % % plotTypes = {'raster','bracketed','high/low'};
 % % burstCriterias = {'none','Poisson','LTS'};
 
-events = [3,4];
+events = [4];
 unitTypes = {'dirSel','~dirSel'}; % ,'~dirSel'
 dirSelType = 'NO'; % NO or SO
 % unitTypes = {'dirSel'};
-timingFields = {'RT'};
+timingFields = {'RT','MT'};
 movementDirs = {'all'};
 
 % --- END CONFIG
@@ -344,20 +344,18 @@ for ii_events = 1:numel(events)
                          legend(toneLine,timingField);
                     end
                 end
-                
+                % quantiles
+                meanBins = floor(linspace(1,numel(allTrial_tsPeths),nMeanBins+1));
+                meanBinsSeconds = all_useTime_sorted(meanBins);
                 % make mean z-score bins
                 grayColor = [.8 .8 .8];
                 switch timingField
                     case 'RT'
-%                         meanBinsSeconds = [median(all_rt)-std(all_rt):binInc:median(all_rt)+std(all_rt)];
-%                         meanBinsSeconds = [min(all_rt):binInc:max(all_rt)];
-                        meanBinsSeconds = [min(all_rt),.12:binInc:.45,max(all_rt)];
                         meanColors = [grayColor;cool(numel(ndirRT.auc_max)-2);grayColor];
-%                         meanBinsSeconds = [min(all_rt):binInc:max(all_rt)];
+                        RT_meanBinsSeconds = meanBinsSeconds; % save
                     case 'MT'
-%                         meanBinsSeconds = [median(all_mt)-std(all_mt):binInc:median(all_mt)+std(all_mt)];
-                        meanBinsSeconds = [min(all_mt):binInc:max(all_mt)];
                         meanColors = [summer(numel(ndirMT.auc_max)-1);grayColor];
+                        MT_meanBinsSeconds = meanBinsSeconds; % save
                     case 'RTMT'
                         meanBinsSeconds = [0.3:binInc:max(all_rt+all_mt)];
                     case 'pretone'
@@ -365,10 +363,6 @@ for ii_events = 1:numel(events)
                     otherwise
                         meanBinsSeconds = 0:binInc:max(all_useTime_sorted);
                 end
-                
-                % quantiles
-                meanBins = floor(linspace(1,numel(allTrial_tsPeths),nMeanBins+1));
-                meanBinsSeconds = all_useTime_sorted(meanBins);
                 
                 % linearly spaced
 % %                 meanBinSeconds = linspace(all_useTime_sorted(1),all_useTime_sorted(end),nMeanBins+1);
@@ -469,16 +463,16 @@ for ii_events = 1:numel(events)
                 grid on;
                 
                 % legend
-                subplot(rows,cols,3);
-                lns = plot(mean_z');
-                set(lns,{'color'},num2cell(meanColors,2));
-                ylim([100 101]);
-                xlim([100 101]);
-                yticks([]);
-                xticks([]);
-                columnlegend(2,bracketLegendText,'location','east');
-                set(gca,'Visible','off')
-                set(gca,'fontsize',8);
+% %                 subplot(rows,cols,3);
+% %                 lns = plot(mean_z');
+% %                 set(lns,{'color'},num2cell(meanColors,2));
+% %                 ylim([100 101]);
+% %                 xlim([100 101]);
+% %                 yticks([]);
+% %                 xticks([]);
+% %                 columnlegend(2,bracketLegendText,'location','east');
+% %                 set(gca,'Visible','off')
+% %                 set(gca,'fontsize',8);
 
                 % min Z
                 subplot_tight(rows,cols,4,plotMargins);
@@ -610,7 +604,7 @@ for ii_events = 1:numel(events)
                 set(h,'PaperUnits','normalized');
                 set(h,'PaperPosition', [0 0 1 1]);
                 if doSave
-                    export_fig(gcf,'-dpdf', fullfile(savePath,[saveFile,'.pdf']));
+                    export_fig(gcf,'-pdf', fullfile(savePath,[saveFile,'.pdf']));
                     save(fullfile(sessionsPath,[saveFile,datestr(now,'yyyymmdd')]),'doRasters','z_raw','meanBinsSeconds','mean_z',...
                         'auc_min','auc_max','auc_max_t','auc_min_z','auc_max_z','all_useTime_sorted');
                 end

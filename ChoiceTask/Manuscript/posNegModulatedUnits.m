@@ -31,6 +31,7 @@ subplot(3,7,[1:7]);
 bar(posMod','stacked');
 legend('Primary','Secondary');
 ylabel('(neg) <-- Modulation Coding --> (pos)');
+title('Are Z scores pos/neg modulated for units of a class?')
 xticklabels(eventFieldlabels);
 hold on;
 bar(negMod'*-1,'stacked');
@@ -41,7 +42,7 @@ for ii_primSec = 1:2
         subplot(3,7,iSubplot);
         totalUnits = posMod(ii_primSec,iEvent) + negMod(ii_primSec,iEvent);
         pie([posMod(ii_primSec,iEvent)/totalUnits negMod(ii_primSec,iEvent)/totalUnits]);
-        title([eventFieldlabels{iEvent},' (',num2str(posMod(ii_primSec,iEvent)),'/',num2str(totalUnits),')']);
+        title({eventFieldlabels{iEvent},[' (',num2str(posMod(ii_primSec,iEvent)),'/',num2str(totalUnits),')']});
         iSubplot = iSubplot + 1;
     end
 end
