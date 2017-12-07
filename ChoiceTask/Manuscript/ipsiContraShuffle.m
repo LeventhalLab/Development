@@ -5,7 +5,8 @@ pVal_minBins = 2;
 colors = lines(2);
 analyzeRange = (tWindow / binS) : (tWindow / binS) + (0.25 / binS);
 dirSelType = 'NO'; % NO or SO
-useIncorrect = false;
+useIncorrect = true;
+nSmooth = 5;
 
 if ismac
     localSideOutPath = '/Users/mattgaidica/Documents/Data/ChoiceTask/sideOutAnalysis';
@@ -96,8 +97,8 @@ if true
                 eventMatrix(iTrial,:) = histcounts(curPeths{iTrial},binEdges);
             end
 
-            contraMean = mean(eventMatrix(trialClass == 1,:));
-            ipsiMean = mean(eventMatrix(trialClass == 0,:));
+            contraMean = smooth(mean(eventMatrix(trialClass == 1,:)),nSmooth);
+            ipsiMean = smooth(mean(eventMatrix(trialClass == 0,:)),nSmooth);
             matrixDiff = contraMean - ipsiMean;
 % %             matrixDiff = abs(contraMean - ipsiMean);
             matrixDiffShuffle = [];
@@ -136,7 +137,6 @@ if true
                     dirSelNeuronsNO_type(iNeuron) = 2;
                     dirSelNeuronsNO_count = dirSelNeuronsNO_count + 1;
                 end
-
             end
             if iEvent == 6 && strcmp(dirSelType,'SO')
                 % see: http://gaidi.ca/weblog/finding-consecutive-numbers-that-exceed-a-threshold-in-matlab
@@ -248,7 +248,7 @@ for iEvent = 1:numel(useEvents)
     plot([round(size(pNeuronDiff,3)/2) round(size(pNeuronDiff,3)/2)],ylim,'k--');
     
     % Given pVal, what fraction is due to chance?
-    X = binoinv(pVal,numel(dirSelUsedNeurons),1-pVal) / size(pNeuronDiff,1);
+    X = binoinv(pVal,numel(dirSelUsedNeurons),1-pVal) / numel(dirSelUsedNeurons);
     plot(xlim,[X X],'r');
     plot(xlim,[-X -X],'r');
     
