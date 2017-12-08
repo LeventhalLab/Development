@@ -3,8 +3,8 @@ nMeanBins = 10;
 binMs = 20;
 
 if ismac
-    savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/permutationFigures';
-    sessionsPath = '/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions';
+    savePath = [userDir,'/Documents/Data/ChoiceTask/permutationFigures'];
+    sessionsPath = [userDir,'/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions'];
 else
     savePath = 'C:\Users\Administrator\Documents\Data\ChoiceTask\permutationFigures';
     sessionsPath = 'C:\Users\Administrator\Documents\MATLAB\Development\ChoiceTask\temp\uSessions';
@@ -25,8 +25,8 @@ lineWidth = 2;
 % % minZ = 1;
 % % primSec = primSecClass(unitEvents,minZ);
 
-RT_intercepts = ezReciprobit(all_rt,10);
-MT_intercepts = ezReciprobit(all_mt,10);
+% RT_intercepts = ezReciprobit(all_rt,10);
+% MT_intercepts = ezReciprobit(all_mt,10);
 
 clear all_z_raw;
 
