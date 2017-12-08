@@ -44,6 +44,8 @@ if true
     dirSelUsedNeurons = [];
     if useIncorrect
         dirSelUsedNeurons_incorrect = [];
+    else
+        dirSelUsedNeurons_correct = [];
     end
     for iNeuron = 1:numel(analysisConf.neurons)
         sessionConf = analysisConf.sessionConfs{iNeuron};
@@ -78,6 +80,8 @@ if true
         
         if useIncorrect
             dirSelUsedNeurons_incorrect = [dirSelUsedNeurons_incorrect iNeuron];
+        else
+            dirSelUsedNeurons_correct = [dirSelUsedNeurons_correct iNeuron];
         end
         dirSelUsedNeurons = [dirSelUsedNeurons iNeuron];
 
@@ -224,9 +228,9 @@ for iEvent = 1:numel(useEvents)
     end
     
 %     yyaxis left;
-    bar(1:size(pNeuronDiff,3),eventBins/numel(dirSelUsedNeurons),'FaceColor',colors(1,:),'EdgeColor',colors(1,:)); % POSITIVE
+    bar(1:size(pNeuronDiff,3),eventBins/numel(dirSelUsedNeurons_correct),'FaceColor',colors(1,:),'EdgeColor',colors(1,:)); % POSITIVE
     hold on;
-    bar(1:size(pNeuronDiff_neg,3),-eventBins_neg/numel(dirSelUsedNeurons),'FaceColor',colors(2,:),'EdgeColor',colors(2,:)); % POSITIVE
+    bar(1:size(pNeuronDiff_neg,3),-eventBins_neg/numel(dirSelUsedNeurons_correct),'FaceColor',colors(2,:),'EdgeColor',colors(2,:)); % POSITIVE
     ylim([-.25 .25]);
     
 % % % %     yyaxis right;
@@ -248,7 +252,7 @@ for iEvent = 1:numel(useEvents)
     plot([round(size(pNeuronDiff,3)/2) round(size(pNeuronDiff,3)/2)],ylim,'k--');
     
     % Given pVal, what fraction is due to chance?
-    X = binoinv(pVal,numel(dirSelUsedNeurons),1-pVal) / numel(dirSelUsedNeurons);
+    X = binoinv(pVal,numel(dirSelUsedNeurons_correct),1-pVal) / numel(dirSelUsedNeurons_correct);
     plot(xlim,[X X],'r');
     plot(xlim,[-X -X],'r');
     
