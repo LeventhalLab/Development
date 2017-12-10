@@ -6,7 +6,7 @@ plotTitle = 'Unit Classes';
 
 doSetup = false;
 if doSetup
-    tWindow = 1;
+    tWindow = 0.2;
     binMs = 20;
     trialTypes = {'correct'};
     useEvent = 1:7;
@@ -71,10 +71,11 @@ if showMosaic
     end
 end
 if onlyPrimary
-    legend(lns,{'Primary Class'});
+    legend(lns,{'Primary Class'},'location','northwest');
 else
-    legend(lns,{'Primary Class','Secondary Class'});
+    legend(lns,{'Primary Class','Secondary Class'},'location','northwest');
 end
+
 % formatting
 
 for iText = 1:numel(primBars)
@@ -109,48 +110,25 @@ set(gcf,'color','w');
 
 
 % pie charts
-useEvent = 4;
-figuree(500,300);
-
 pieData = primFate;
-subplot(121);
-p = pie(pieData(useEvent,:)+.001,{eventFieldlabels{1},eventFieldlabels{2},'','','',eventFieldlabels{6},eventFieldlabels{7},'',});
-for ii = 2:2:numel(p)
-    t = p(ii);
-    t.FontSize = 16;
-end
-colormap(colors);
-title({'Primary Fate',''});
-setFig;
+useEvents = [3,4]; % limit 2
+figuree(500,500);
 
-pieData = secOrigin(:,2:end);
-subplot(122);
-p = pie(pieData(useEvent,:)+.001,{eventFieldlabels{1},eventFieldlabels{2},'','','',eventFieldlabels{6},eventFieldlabels{7},'',});
-for ii = 2:2:numel(p)
-    t = p(ii);
-    t.FontSize = 16;
+for iEvent = 1:2
+    subplot(1,2,iEvent);
+% %     p = pie(pieData(useEvent,:)+.001,{eventFieldlabels{:},'NR'});
+    p = pie(pieData(useEvents(iEvent),:)+.001);
+    legend({eventFieldlabels{:},'NR'},'location','southoutside');
+    for ii = 2:2:numel(p)
+% %         t = p(ii);
+% %         t.FontSize = 16;
+        p(ii).String = '';
+    end
+    title({eventFieldlabels{useEvents(iEvent)},'Primary Fate'});
+% %     setFig;
+    colormap(colors);
 end
-colormap(colors);
-title({'Secondary Origin',''});
-setFig;
+set(gcf,'color','w');
 
-if show_primFate
-    pieData = primFate;
-else
-    pieData = secOrigin(:,2:end);
-end
-
-% % figuree(1200,400);
-% % for iEvent = 1:8
-% %     subplot(1,8,iEvent);
-% %     p = pie(pieData(iEvent,:)+.001,{'','','','','','','','',});
-% %     colormap(colors);
-% %     if iEvent == 1
-% %         title({plotTitle,eventFieldlabels{iEvent}});
-% %     elseif iEvent == 8
-% %         title('N.R.');
-% %     else
-% %         title(eventFieldlabels{iEvent});
-% %     end
-% % end
-% % set(gcf,'color','w');
+% then redo that for secOrigin if you want...
+% % pieData = secOrigin(:,2:end);

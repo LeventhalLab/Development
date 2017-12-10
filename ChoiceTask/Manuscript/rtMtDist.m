@@ -70,7 +70,7 @@ end
 % % 
 % % figure;
 % % plot(MTcounts','lineWidth',2);
-useMeanColors = true;
+useMeanColors = false;
 grayColor = [.8 .8 .8];
 
 nSmooth = 5;
@@ -88,7 +88,7 @@ if useMeanColors
     rt_meanColors = [repmat(grayColor,rtc1,1);cool(rtc2-rtc1);repmat(grayColor,numel(x)-rtc2,1)];
     lns_rt = colormapline(x,y,[],rt_meanColors);
 else
-    lns_rt = colormapline(x,y,[],cool(1000));
+    lns_rt = plot(x,y,'k');
 end
 set(lns_rt,'lineWidth',lineWidth);
 % % plot(x,y,'k','lineWidth',lineWidth);
@@ -104,7 +104,7 @@ if useMeanColors
     mt_meanColors = [repmat(grayColor,rtc1,1);summer(rtc2-rtc1);repmat(grayColor,numel(x)-rtc2,1)];
     lns_mt = colormapline(x,y,[],mt_meanColors);
 else
-    lns_mt = colormapline(x,y,[],summer(1000));
+    lns_mt = plot(x,y,'k');
 end
 set(lns_mt,'lineWidth',lineWidth);
 % % lns = plot(x,y,'k','lineWidth',lineWidth);

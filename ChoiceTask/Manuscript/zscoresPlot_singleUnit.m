@@ -35,7 +35,7 @@ for iEvent = 1:numel(eventFieldnames)
 
         curTrials = all_trials{useNeuron};
         trialIdInfo = organizeTrialsById(curTrials);
-        tsPeths = eventsPeth(curTrials(trialIdInfo.incorrect),all_ts{useNeuron},tWindow,eventFieldnames);
+        tsPeths = eventsPeth(curTrials(trialIdInfo.correct),all_ts{useNeuron},tWindow,eventFieldnames);
         rasterData = tsPeths(:,useEvents(iEvent));
         for iTrial = 1:numel(rasterData)
             if isempty(rasterData{iTrial})

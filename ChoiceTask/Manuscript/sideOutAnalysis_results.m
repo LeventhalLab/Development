@@ -33,7 +33,8 @@ figure;
 bar(y,'stacked');
 xticklabels({'contra','ipsi'});
 meanAgreement = mean([contraAgreementTrials/totalContraTrials ipsiAgreementTrials/totalIpsiTrials]);
-title(['Trial Type vs. Side Out Agreement (',num2str(meanAgreement*100,'%2.2f'),'%)']);
+title(['Nose Out vs. Side Out Movement Agreement (',num2str(meanAgreement*100,'%2.2f'),'%)']);
 ylabel('trials');
 text(1,totalContraTrials+10,num2str(100*contraAgreementTrials/totalContraTrials,'%2.2f'));
 text(2,totalIpsiTrials+10,num2str(100*ipsiAgreementTrials/totalIpsiTrials,'%2.2f'))
+legend('Agree','Disagree')

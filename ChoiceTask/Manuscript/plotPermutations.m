@@ -125,7 +125,9 @@ for ii_events = 1:numel(events)
                     neuronName = analysisConf.neurons{iNeuron};
                     sessionName = analysisConf.sessionConfs{iNeuron}.sessions__name;
                     subjectName = analysisConf.sessionConfs{iNeuron}.subjects__name;
-
+                    
+                    % dirSel units = NO, ~dirsel units = all units that never show dirSel
+                    % (NO&SO)
                     if filterBy_dirSel
                         if (dirSel && ~use_dirSelNeurons(iNeuron)) || (~dirSel && dirSelNeurons(iNeuron))
                             continue;

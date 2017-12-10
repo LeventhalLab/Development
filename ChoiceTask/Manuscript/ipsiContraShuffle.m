@@ -5,7 +5,7 @@ pVal_minBins = 2;
 colors = lines(2);
 analyzeRange = (tWindow / binS) : (tWindow / binS) + (0.25 / binS);
 dirSelType = 'NO'; % NO or SO
-useIncorrect = true;
+useIncorrect = false;
 nSmooth = 5;
 
 if ismac
@@ -183,6 +183,9 @@ contra_contra = sum(dirSelNeuronsNO_contra & dirSelNeuronsSO_contra)
 contra_ipsi = sum(dirSelNeuronsNO_contra & dirSelNeuronsSO_ipsi)
 ipsi_contra = sum(dirSelNeuronsNO_ipsi & dirSelNeuronsSO_contra)
 ipsi_ipsi = sum(dirSelNeuronsNO_ipsi & dirSelNeuronsSO_ipsi)
+
+disp(['Codes SAME dir: ',num2str(contra_contra+ipsi_ipsi)]);
+disp(['Codes DIFF dir: ',num2str(contra_ipsi+ipsi_contra)]);
 
 contra_NR = contra_x - (contra_contra + ipsi_contra)
 ipsi_NR = ipsi_x - (ipsi_ipsi + contra_ipsi)

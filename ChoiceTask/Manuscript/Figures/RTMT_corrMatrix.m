@@ -7,6 +7,8 @@ function RTMT_corrMatrix()
         uSessionsPath = 'C:\Users\Administrator\Documents\MATLAB\Development\ChoiceTask\temp\uSessions';
     end
     doSave = true;
+    saveImage = true;
+    imageExt = '.png';
     
     % Nose Out event, secondary
 % %     ndirRT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_un~dirSel_n45_movDirall_byRT_bins10_binMs20ORD20171031.mat');
@@ -33,10 +35,10 @@ function RTMT_corrMatrix()
 % %     dirMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n72_movDirall_byMT_bins10_binMs20ORD20171031.mat');
 
     % nose out event, primary only
-    ndirRT = load(fullfile(uSessionsPath,'evNose Out_undirSel_n35_movDirall_byRT_bins10_binMs20ORD20171127.mat'));
-    ndirMT = load(fullfile(uSessionsPath,'evNose Out_undirSel_n35_movDirall_byMT_bins10_binMs20ORD20171127.mat'));
-    dirRT = load(fullfile(uSessionsPath,'evNose Out_un~dirSel_n47_movDirall_byRT_bins10_binMs20ORD20171127.mat'));
-    dirMT = load(fullfile(uSessionsPath,'evNose Out_un~dirSel_n47_movDirall_byMT_bins10_binMs20ORD20171127.mat'));
+    ndirRT = load(fullfile(uSessionsPath,'evNose Out_un~dirSel_n64_movDirall_byRT_bins10_binMs20_NO20171208.mat'));
+    ndirMT = load(fullfile(uSessionsPath,'evNose Out_un~dirSel_n64_movDirall_byMT_bins10_binMs20_NO20171208.mat'));
+    dirRT = load(fullfile(uSessionsPath,'evNose Out_undirSel_n36_movDirall_byRT_bins10_binMs20_NO20171208.mat'));
+    dirMT = load(fullfile(uSessionsPath,'evNose Out_undirSel_n36_movDirall_byMT_bins10_binMs20_NO20171208.mat'));
     
     % setup
     grayColor = [.8 .8 .8];
@@ -108,6 +110,9 @@ function RTMT_corrMatrix()
         h = plot_type1(ndirRT,rt_meanColors,timingField);
         if doSave
             print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'.eps']));
+            if saveImage
+                saveas(h,fullfile(savePath,[dirLabel,timingField,imageExt]));
+            end
             close(h);
         end
 
@@ -118,6 +123,9 @@ function RTMT_corrMatrix()
         h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,ndirRT.meanBinsSeconds,rt_meanColors,timingField);
         if doSave
             print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
+            if saveImage
+                saveas(h,fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,imageExt]));
+            end
             close(h);
         end
 
@@ -127,7 +135,10 @@ function RTMT_corrMatrix()
         ylimVals = [0 2];
         h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,ndirRT.meanBinsSeconds,rt_meanColors,timingField);
         if doSave
-            print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,timingField,'.eps']));
+            print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
+            if saveImage
+                saveas(h,fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,imageExt]));
+            end
             close(h);
         end
 
@@ -136,6 +147,9 @@ function RTMT_corrMatrix()
         h = plot_type1(ndirMT,mt_meanColors,timingField);
         if doSave
             print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'.eps']));
+            if saveImage
+                saveas(h,fullfile(savePath,[dirLabel,timingField,imageExt]));
+            end
             close(h);
         end
         
@@ -146,6 +160,9 @@ function RTMT_corrMatrix()
         h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,ndirMT.meanBinsSeconds,mt_meanColors,timingField);
         if doSave
             print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
+            if saveImage
+                saveas(h,fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,imageExt]));
+            end
             close(h);
         end
 
@@ -156,6 +173,9 @@ function RTMT_corrMatrix()
         h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,ndirMT.meanBinsSeconds,mt_meanColors,timingField);
         if doSave
             print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
+            if saveImage
+                saveas(h,fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,imageExt]));
+            end
             close(h);
         end
 
@@ -165,6 +185,9 @@ function RTMT_corrMatrix()
         h = plot_type1(dirRT,rt_meanColors,timingField);
         if doSave
             print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'.eps']));
+            if saveImage
+                saveas(h,fullfile(savePath,[dirLabel,timingField,imageExt]));
+            end
             close(h);
         end
 
@@ -175,6 +198,9 @@ function RTMT_corrMatrix()
         h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,dirRT.meanBinsSeconds,rt_meanColors,timingField);
         if doSave
             print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
+            if saveImage
+                saveas(h,fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,imageExt]));
+            end
             close(h);
         end
 
@@ -185,6 +211,9 @@ function RTMT_corrMatrix()
         h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,dirRT.meanBinsSeconds,rt_meanColors,timingField);
         if doSave
             print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
+            if saveImage
+                saveas(h,fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,imageExt]));
+            end
             close(h);
         end
 
@@ -194,6 +223,9 @@ function RTMT_corrMatrix()
         h = plot_type1(dirMT,mt_meanColors,timingField);
         if doSave
             print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'.eps']));
+            if saveImage
+                saveas(h,fullfile(savePath,[dirLabel,timingField,imageExt]));
+            end
             close(h);
         end
 
@@ -204,6 +236,9 @@ function RTMT_corrMatrix()
         h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,dirMT.meanBinsSeconds,mt_meanColors,timingField);
         if doSave
             print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
+            if saveImage
+                saveas(h,fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,imageExt]));
+            end
             close(h);
         end
 
@@ -214,6 +249,9 @@ function RTMT_corrMatrix()
         h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,dirMT.meanBinsSeconds,mt_meanColors,timingField);
         if doSave
             print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
+            if saveImage
+                saveas(h,fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,imageExt]));
+            end
             close(h);
         end
     end
