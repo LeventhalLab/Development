@@ -1,9 +1,33 @@
-saveDir = '/Users/mattgaidica/Documents/Data/ChoiceTask/spikeRasterWithIncorrect';
-doLegend = true;
-doSave = false;
+saveDir = 'C:\Users\Administrator\Documents\Data\ChoiceTask\ipsiContraWithIncorrectRaster';
+saveExt = '.png';
+doLegend = false;
+doSave = true;
 useEvents = [1:7];
 % units: 113, 188, 201
-for iNeuron = 188%1:numel(analysisConf.neurons)
+for iNeuron =  1:numel(analysisConf.neurons) % 188
+    note_dirSel = '-';
+    note_dirSelNO = '-';
+    note_dirSelSO = '-';
+    if dirSelNeurons(iNeuron)
+        note_dirSel = 'YES';
+        if dirSelNeuronsNO(iNeuron)
+            if dirSelNeuronsNO_contra
+                note_dirSelNO = 'contra';
+            else
+                note_dirSelNO = 'ipsi';
+            end
+        else
+            if dirSelNeuronsSO_contra
+                note_dirSelSO = 'contra';
+            else
+                note_dirSelSO = 'ipsi';
+            end
+        end
+    else
+        disp(['Skipping neuron ',num2str(iNeuron)]);
+        continue;
+    end
+    
     neuronName = analysisConf.neurons{iNeuron};
     curTrials = all_trials{iNeuron};
     trialIdInfo = organizeTrialsById(curTrials);
@@ -89,23 +113,23 @@ for iNeuron = 188%1:numel(analysisConf.neurons)
         if iEvent == 4
             xlabel('time (s)');
         end
-        if iEvent == 6 && iNeuron == 188 % !!! special case
-            cur_xlim = xlim;
-            for iTrial = 1:numel(trialIds)
-                sideOutDir = R0142_1209_sideOutDir(trialIds(iTrial));
-                marker = '>';
-                if sideOutDir == 2
-                    marker = '<';
-                end
-                plot(cur_xlim(sideOutDir),iTrial,marker,'MarkerFaceColor',colors(sideOutDir,:),'MarkerEdgeColor','none','markerSize',5);
-            end
-            contraTrials = [trialIdInfo.correctContra trialIdInfo.incorrectContra];
-            contraSideOuts = R0142_1209_sideOutDir(contraTrials);
-            ipsiTrials = [trialIdInfo.correctIpsi trialIdInfo.incorrectIpsi];
-            ipsiSideOuts = R0142_1209_sideOutDir(ipsiTrials);
-            disp([num2str(100*sum(contraSideOuts == 1)/numel(contraSideOuts),'%2.2f'),'% contra Nose Out/Side Out agreement']);
-            disp([num2str(100*sum(ipsiSideOuts == 2)/numel(ipsiSideOuts),'%2.2f'),'% ipsi Nose Out/Side Out agreement']);
-        end
+% %         if iEvent == 6 && iNeuron == 188 % !!! special case
+% %             cur_xlim = xlim;
+% %             for iTrial = 1:numel(trialIds)
+% %                 sideOutDir = R0142_1209_sideOutDir(trialIds(iTrial));
+% %                 marker = '>';
+% %                 if sideOutDir == 2
+% %                     marker = '<';
+% %                 end
+% %                 plot(cur_xlim(sideOutDir),iTrial,marker,'MarkerFaceColor',colors(sideOutDir,:),'MarkerEdgeColor','none','markerSize',5);
+% %             end
+% %             contraTrials = [trialIdInfo.correctContra trialIdInfo.incorrectContra];
+% %             contraSideOuts = R0142_1209_sideOutDir(contraTrials);
+% %             ipsiTrials = [trialIdInfo.correctIpsi trialIdInfo.incorrectIpsi];
+% %             ipsiSideOuts = R0142_1209_sideOutDir(ipsiTrials);
+% %             disp([num2str(100*sum(contraSideOuts == 1)/numel(contraSideOuts),'%2.2f'),'% contra Nose Out/Side Out agreement']);
+% %             disp([num2str(100*sum(ipsiSideOuts == 2)/numel(ipsiSideOuts),'%2.2f'),'% ipsi Nose Out/Side Out agreement']);
+% %         end
         
         plot([0 0],ylim,'k--'); % zero line
         title(eventFieldlabels{iEvent});
@@ -113,7 +137,11 @@ for iNeuron = 188%1:numel(analysisConf.neurons)
         box off;
     end
     set(gcf,'color','w');
-    tightfig;
+
+    noteText = {['dirSel? ',note_dirSel],['at NO? ',note_dirSelNO],['at SO? ',note_dirSelSO]};
+    addNote(h,noteText);
+    
+% %     tightfig;
     
     if doLegend
         th = figure;
@@ -127,7 +155,7 @@ for iNeuron = 188%1:numel(analysisConf.neurons)
         set(gcf,'color','w');
     end
     if doSave
-        saveas(h,fullfile(saveDir,['ipsiContraRaster_allEvents_',neuronName,'.fig']));
+        saveas(h,fullfile(saveDir,['ipsiContraRaster_',neuronName,'_NO-',note_dirSelNO,'_SO-',note_dirSelSO,saveExt]));
         close(h);
     end
 end

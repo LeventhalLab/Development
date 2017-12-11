@@ -1,6 +1,13 @@
 doSave = true;
-nMeanBins = 10;
+nMeanBins = 12;
 binMs = 20;
+
+expressRT = 0.05;
+ordinaryRT = 0.30;
+ordinaryMT = 0.43;
+
+all_RTfromPermutations = [];
+all_MTfromPermutations = [];
 
 if ismac
     savePath = [userDir,'/Documents/Data/ChoiceTask/permutationFigures'];
@@ -346,18 +353,25 @@ for ii_events = 1:numel(events)
                          legend(toneLine,timingField);
                     end
                 end
-                % quantiles
-                meanBins = floor(linspace(1,numel(allTrial_tsPeths),nMeanBins+1));
-                meanBinsSeconds = all_useTime_sorted(meanBins);
+
                 % make mean z-score bins
                 grayColor = [.8 .8 .8];
                 switch timingField
                     case 'RT'
-                        meanColors = [grayColor;cool(numel(ndirRT.auc_max)-2);grayColor];
+                        expressRTIdx = find(all_useTime_sorted > expressRT,1,'first');
+                        ordinaryRTIdx = find(all_useTime_sorted < ordinaryRT,1,'last');
+                        meanBins = [1 round(linspace(expressRTIdx,ordinaryRTIdx,nMeanBins-1)) numel(all_useTime_sorted)];
+                        meanBinsSeconds = all_useTime_sorted(meanBins);
+                        meanColors = [grayColor;cool(nMeanBins-2);grayColor];
                         RT_meanBinsSeconds = meanBinsSeconds; % save
+                        all_RTfromPermutations = [all_RTfromPermutations all_useTime_sorted];
                     case 'MT'
-                        meanColors = [summer(numel(ndirMT.auc_max)-1);grayColor];
+                        ordinaryMTIdx = find(all_useTime_sorted < ordinaryMT,1,'last');
+                        meanBins = [round(linspace(1,ordinaryMTIdx,nMeanBins)) numel(all_useTime_sorted)];
+                        meanBinsSeconds = all_useTime_sorted(meanBins);
+                        meanColors = [summer(nMeanBins-1);grayColor];
                         MT_meanBinsSeconds = meanBinsSeconds; % save
+                        all_MTfromPermutations = [all_MTfromPermutations all_useTime_sorted];
                     case 'RTMT'
                         meanBinsSeconds = [0.3:binInc:max(all_rt+all_mt)];
                     case 'pretone'
@@ -365,14 +379,6 @@ for ii_events = 1:numel(events)
                     otherwise
                         meanBinsSeconds = 0:binInc:max(all_useTime_sorted);
                 end
-                
-                % linearly spaced
-% %                 meanBinSeconds = linspace(all_useTime_sorted(1),all_useTime_sorted(end),nMeanBins+1);
-% %                 meanBins = [];
-% %                 for iBinSeconds = 1:numel(meanBinsSeconds)
-% %                     [idx, val] = closest(all_useTime_sorted,meanBinsSeconds(iBinSeconds));
-% %                     meanBins(iBinSeconds) = idx;
-% %                 end
 
                 mean_z = [];
                 z_raw = [];

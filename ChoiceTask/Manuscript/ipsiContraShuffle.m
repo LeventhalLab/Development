@@ -1,12 +1,14 @@
 % the fraction of units whose activity is significantly different between
 % ipsi/contra trials
+dodebug = true;
+debugPath = 'C:\Users\Administrator\Documents\Data\ChoiceTask\ipsiContraShuffleDebug';
 pVal = 0.95;
 pVal_minBins = 2;
 colors = lines(2);
 analyzeRange = (tWindow / binS) : (tWindow / binS) + (0.25 / binS);
 dirSelType = 'NO'; % NO or SO
 useIncorrect = false;
-nSmooth = 5;
+nSmooth = 3;
 
 if ismac
     localSideOutPath = '/Users/mattgaidica/Documents/Data/ChoiceTask/sideOutAnalysis';
@@ -19,27 +21,20 @@ excludeSessions = {'R0117_20160504a','R0142_20161207a','R0117_20160508a','R0117_
 
 if true
     useEvents = 1:7;
-    
-    binMs = 20;
+    binMs = 50;
     binS = binMs / 1000;
     binEdges = -tWindow:binS:tWindow;
-    requireTrials = 2;
+    requireTrials = 5;
     nShuffle = 1000;
-    pNeuronDiff = [];
+    % init to p = 0.5 (N.S.)
+    pNeuronDiff = ones(numel(analysisConf.neurons),numel(useEvents),numel(binEdges)-1) * 0.5;
     pNeuronDiff_neg = [];
 
-    if strcmp(dirSelType,'NO')
-        dirSelNeuronsNO_type = zeros(numel(analysisConf.neurons),1);
-        dirSelNeuronsNO = false(numel(analysisConf.neurons),1);
-        dirSelNeuronsNO_contra = false(numel(analysisConf.neurons),1);
-        dirSelNeuronsNO_ipsi = false(numel(analysisConf.neurons),1);
-        dirSelNeuronsNO_count = 0;
-    else
-        dirSelNeuronsSO = false(numel(analysisConf.neurons),1);
-        dirSelNeuronsSO_contra = false(numel(analysisConf.neurons),1);
-        dirSelNeuronsSO_ipsi = false(numel(analysisConf.neurons),1);
-        dirSelNeuronsSO_count = 0;
-    end
+    dirSelNeurons_type = zeros(numel(analysisConf.neurons),1);
+    dirSelNeurons = false(numel(analysisConf.neurons),1);
+    dirSelNeurons_contra = false(numel(analysisConf.neurons),1);
+    dirSelNeurons_ipsi = false(numel(analysisConf.neurons),1);
+    dirSelNeurons_count = 0;
 
     dirSelUsedNeurons = [];
     if useIncorrect
@@ -77,6 +72,18 @@ if true
             disp([num2str(iNeuron),' not enough trials']);
             continue;
         end
+
+        useTrials = [contraTrials ipsiTrials];
+        trialClass = zeros(numel(useTrials),1);
+        trialClass(1:numel(contraTrials)) = ones(numel(contraTrials),1); % contras are 1s
+
+        % (ordered according to useTrials)
+        tsPeths = eventsPeth(curTrials(useTrials),all_ts{iNeuron},tWindow,eventFieldnames);
+        FR = numel([tsPeths{:}]) / size(tsPeths,1) / size(tsPeths,2) / (tWindow * 2);
+        if FR < 1
+            disp([num2str(iNeuron),' FR too low']);
+            continue;
+        end
         
         if useIncorrect
             dirSelUsedNeurons_incorrect = [dirSelUsedNeurons_incorrect iNeuron];
@@ -85,15 +92,8 @@ if true
         end
         dirSelUsedNeurons = [dirSelUsedNeurons iNeuron];
 
-        useTrials = [contraTrials ipsiTrials];
-        trialClass = zeros(numel(useTrials),1);
-        trialClass(1:numel(contraTrials)) = ones(numel(contraTrials),1);
-
-        % (ordered according to useTrials)
-        tsPeths = eventsPeth(curTrials(useTrials),all_ts{iNeuron},tWindow,eventFieldnames);
-
         pEventDiff = [];
-        pEventDiff_neg = [];
+% %         pEventDiff_neg = [];
         for iEvent = 1:numel(useEvents)
             curPeths = tsPeths(:,iEvent);
             eventMatrix = [];
@@ -117,52 +117,107 @@ if true
             for iBin = 1:numel(matrixDiff)
                 curMDS = matrixDiffShuffle(:,iBin);
                 pEventDiff(iEvent,iBin) = numel(find(matrixDiff(iBin) > curMDS)) / nShuffle;
-                pEventDiff_neg(iEvent,iBin) = numel(find(matrixDiff(iBin) < curMDS)) / nShuffle;
+% %                 pEventDiff_neg(iEvent,iBin) = numel(find(matrixDiff(iBin) < curMDS)) / nShuffle;
             end
-            if iEvent == 4 && strcmp(dirSelType,'NO')
-                dirSelNeuronsNO_contra_ntpIdx = movsum(pEventDiff(iEvent,analyzeRange) > pVal,[0 pVal_minBins-1]) == pVal_minBins;
-                dirSelNeuronsNO_ipsi_ntpIdx = movsum(pEventDiff_neg(iEvent,analyzeRange) > pVal,[0 pVal_minBins-1]) == pVal_minBins;
-                if any(dirSelNeuronsNO_contra_ntpIdx) && any(dirSelNeuronsNO_ipsi_ntpIdx)
-                    if mean(pEventDiff(iEvent,analyzeRange)) > mean(pEventDiff_neg(iEvent,analyzeRange))
-                        dirSelNeuronsNO_contra(iNeuron) = 1;
+            
+            
+            if (iEvent == 4 && strcmp(dirSelType,'NO')) || (iEvent == 6 && strcmp(dirSelType,'SO'))
+                dirSelNeurons_contra_ntpIdx = movsum(pEventDiff(iEvent,analyzeRange) > pVal,[0 pVal_minBins-1]) == pVal_minBins;
+                dirSelNeurons_ipsi_ntpIdx = movsum(pEventDiff(iEvent,analyzeRange) < 1-pVal,[0 pVal_minBins-1]) == pVal_minBins;
+                
+                % designate contra or ipsi
+                unitType = 0; % 0:none, 1:contra, 2:ipsi
+                if any(dirSelNeurons_contra_ntpIdx)
+                    if any(dirSelNeurons_ipsi_ntpIdx)
+                        fcidx = find(dirSelNeurons_contra_ntpIdx == 1,1,'first');
+                        fiidx = find(dirSelNeurons_ipsi_ntpIdx == 1,1,'first');
+                        if fcidx < fiidx
+                            unitType = 1; % contra unit!
+                        else
+                            unitType = 2; % ipsi unit!
+                        end
                     else
-                        dirSelNeuronsNO_ipsi(iNeuron) = 1;
+                        unitType = 1; % contra unit!
                     end
-                else
-                    dirSelNeuronsNO_contra(iNeuron) = any(dirSelNeuronsNO_contra_ntpIdx);
-                    dirSelNeuronsNO_ipsi(iNeuron) = any(dirSelNeuronsNO_ipsi_ntpIdx);
+                elseif any(dirSelNeurons_ipsi_ntpIdx)
+                    unitType = 2; % ipsi unit!
                 end
-                dirSelNeuronsNO(iNeuron) = dirSelNeuronsNO_contra(iNeuron) | dirSelNeuronsNO_ipsi(iNeuron);
-                if dirSelNeuronsNO_contra(iNeuron)
-                    dirSelNeuronsNO_type(iNeuron) = 1;
-                    dirSelNeuronsNO_count = dirSelNeuronsNO_count + 1;
+                
+                unitTypeLabel = 'none';
+                dirSelNeurons_type(iNeuron) = unitType;
+                switch unitType
+                    case 1
+                        dirSelNeurons_contra(iNeuron) = 1;
+                        dirSelNeurons_count = dirSelNeurons_count + 1;
+                        unitTypeLabel = 'contra';
+                    case 2
+                        dirSelNeurons_ipsi(iNeuron) = 1;
+                        dirSelNeurons_count = dirSelNeurons_count + 1;
+                        unitTypeLabel = 'ipsi';
                 end
-                if dirSelNeuronsNO_ipsi(iNeuron)
-                    dirSelNeuronsNO_type(iNeuron) = 2;
-                    dirSelNeuronsNO_count = dirSelNeuronsNO_count + 1;
+
+                if dodebug
+                    lns = [];
+                    debugColors = lines(3);
+                    evDiff = pEventDiff(4,:);
+                    contraIdx = find(evDiff > pVal);
+                    ipsiIdx = find(evDiff < 1-pVal);
+                    h = figuree(400,600);
+                    subplot(211);
+                    lns(1) = plot(contraMean,'lineWidth',2,'color',debugColors(1,:)); hold on;
+                    lns(2) = plot(ipsiMean,'lineWidth',2,'color',debugColors(2,:));
+                    lns(3) = plot(matrixDiff,'lineWidth',2,'color',debugColors(3,:));
+                    
+                    plot([analyzeRange(1) analyzeRange(1)],ylim,'r--');
+                    plot([analyzeRange(end) analyzeRange(end)],ylim,'r--');
+                    xlim([1 numel(binEdges)-1]);
+                    ylabel('spikes/bin');
+                    legend(lns,'contra','ipsi','diff');
+                    title({['Unit ',num2str(iNeuron)],['dir: ',unitTypeLabel]});
+                    
+                    subplot(212);
+                    plot(evDiff,'k','lineWidth',2); hold on;
+                    plot(contraIdx,evDiff(contraIdx),'*','color',debugColors(1,:));
+                    plot(ipsiIdx,evDiff(ipsiIdx),'*','color',debugColors(2,:));
+                    plot(analyzeRange(dirSelNeurons_contra_ntpIdx),evDiff(analyzeRange(dirSelNeurons_contra_ntpIdx)),'o','color',debugColors(1,:),'markerSize',15);
+                    plot(analyzeRange(dirSelNeurons_ipsi_ntpIdx),evDiff(analyzeRange(dirSelNeurons_ipsi_ntpIdx)),'o','color',debugColors(2,:),'markerSize',15);
+                    
+                    xlim([1 numel(binEdges)-1]);
+                    xlabel('time');
+                    ylim([-0.2 1.2]);
+                    yticks([0 1]);
+                    ylabel('p');
+                    plot([analyzeRange(1) analyzeRange(1)],ylim,'r--');
+                    plot([analyzeRange(end) analyzeRange(end)],ylim,'r--');
+                    plot(xlim,[0 0],'k-');
+                    plot(xlim,[1 1],'k-');
+                    plot(xlim,[pVal pVal],'k--');
+                    plot(xlim,[1-pVal 1-pVal],'k--');
+                    
+                    title({['*p < ',num2str(1-pVal)],'circled meets detection'});
+                    set(gcf,'color','w');
+                    saveFile = ['debug',dirSelType,'_u',num2str(iNeuron,'%03d'),'_dir-',unitTypeLabel,'.png'];
+                    saveas(h,fullfile(debugPath,saveFile));
+                    close(h);
                 end
-            end
-            if iEvent == 6 && strcmp(dirSelType,'SO')
-                % see: http://gaidi.ca/weblog/finding-consecutive-numbers-that-exceed-a-threshold-in-matlab
-                % currently mutually exclusive
-                dirSelNeuronsSO_contra_ntpIdx = movsum(pEventDiff(iEvent,analyzeRange) > pVal,[0 pVal_minBins-1]) == pVal_minBins;
-                dirSelNeuronsSO_ipsi_ntpIdx = movsum(pEventDiff_neg(iEvent,analyzeRange) > pVal,[0 pVal_minBins-1]) == pVal_minBins;
-                if any(dirSelNeuronsSO_contra_ntpIdx) && any(dirSelNeuronsSO_ipsi_ntpIdx)
-                    if mean(pEventDiff(iEvent,analyzeRange)) > mean(pEventDiff_neg(iEvent,analyzeRange))
-                        dirSelNeuronsSO_contra(iNeuron) = 1;
-                    else
-                        dirSelNeuronsSO_ipsi(iNeuron) = 1;
-                    end
-                else
-                    dirSelNeuronsSO_contra(iNeuron) = any(dirSelNeuronsSO_contra_ntpIdx);
-                    dirSelNeuronsSO_ipsi(iNeuron) = any(dirSelNeuronsSO_ipsi_ntpIdx);
-                end
-                dirSelNeuronsSO(iNeuron) = dirSelNeuronsSO_contra(iNeuron) | dirSelNeuronsSO_ipsi(iNeuron);
-                dirSelNeuronsSO_count = dirSelNeuronsSO_count + 1;
             end
         end
         pNeuronDiff(iNeuron,:,:) = pEventDiff;
-        pNeuronDiff_neg(iNeuron,:,:) = pEventDiff_neg;
+% %         pNeuronDiff_neg(iNeuron,:,:) = pEventDiff_neg;
+    end
+    if strcmp(dirSelType,'NO')
+        dirSelNeuronsNO = dirSelNeurons_contra & dirSelNeurons_ipsi;
+        dirSelNeuronsNO_contra = dirSelNeurons_contra;
+        dirSelNeuronsNO_ipsi = dirSelNeurons_ipsi;
+        dirSelNeuronsNO_type = dirSelNeurons_type;
+        dirSelNeuronsNO_count = dirSelNeurons_count;
+
+    else
+        dirSelNeuronsSO = dirSelNeurons_contra & dirSelNeurons_ipsi;
+        dirSelNeuronsSO_contra = dirSelNeurons_contra;
+        dirSelNeuronsSO_ipsi = dirSelNeurons_ipsi;
+        dirSelNeuronsSO_type = dirSelNeurons_type;
+        dirSelNeuronsSO_count = dirSelNeurons_count;
     end
 end
 
@@ -171,21 +226,32 @@ dirSelNO = sum(dirSelNeuronsNO)
 dirSelSO = sum(dirSelNeuronsSO)
 dirSelNOSO = sum(dirSelNeurons)
 
-contra_x = sum(dirSelNeuronsNO_contra)
+contra_x = sum(dirSelNeurons_contra)
 x_contra = sum(dirSelNeuronsSO_contra)
-ipsi_x = sum(dirSelNeuronsNO_ipsi)
+ipsi_x = sum(dirSelNeurons_ipsi)
 x_ipsi = sum(dirSelNeuronsSO_ipsi)
 
-contraIpsi_x = sum(dirSelNeuronsNO_contra & dirSelNeuronsNO_ipsi)
+contraIpsi_x = sum(dirSelNeurons_contra & dirSelNeurons_ipsi)
 x_contraIpsi = sum(dirSelNeuronsSO_contra & dirSelNeuronsSO_ipsi)
 
-contra_contra = sum(dirSelNeuronsNO_contra & dirSelNeuronsSO_contra)
-contra_ipsi = sum(dirSelNeuronsNO_contra & dirSelNeuronsSO_ipsi)
-ipsi_contra = sum(dirSelNeuronsNO_ipsi & dirSelNeuronsSO_contra)
-ipsi_ipsi = sum(dirSelNeuronsNO_ipsi & dirSelNeuronsSO_ipsi)
+contra_contra = sum(dirSelNeurons_contra & dirSelNeuronsSO_contra)
+contra_ipsi = sum(dirSelNeurons_contra & dirSelNeuronsSO_ipsi)
+ipsi_contra = sum(dirSelNeurons_ipsi & dirSelNeuronsSO_contra)
+ipsi_ipsi = sum(dirSelNeurons_ipsi & dirSelNeuronsSO_ipsi)
 
 disp(['Codes SAME dir: ',num2str(contra_contra+ipsi_ipsi)]);
 disp(['Codes DIFF dir: ',num2str(contra_ipsi+ipsi_contra)]);
+
+figure;
+pie([contra_contra+ipsi_ipsi contra_ipsi+ipsi_contra]);
+legend('SAME','DIFF');
+a = contra_contra+ipsi_ipsi;
+b = contra_ipsi+ipsi_contra;
+c = (a + b) / 2;
+d = c;
+[x2,p] = chiSquare(a,b,c,d);
+title({'Coding between NO & SO',['p = ',num2str(1-p)]});
+set(gcf,'color','w')
 
 contra_NR = contra_x - (contra_contra + ipsi_contra)
 ipsi_NR = ipsi_x - (ipsi_ipsi + contra_ipsi)
@@ -195,6 +261,19 @@ NR_contra = sum(~dirSelNeuronsNO & dirSelNeuronsSO_contra)
 NRNO = sum(~dirSelNeuronsNO)
 NRSO = sum(~dirSelNeuronsSO)
 NR_NOSO = sum(~dirSelNeurons)
+
+figure;
+pie([sum(dirSelNeurons_contra) sum(dirSelNeurons_ipsi)]);
+colormap(lines(2));
+a = sum(dirSelNeurons_contra);
+b = sum(dirSelNeurons_ipsi);
+c = (a + b) / 2;
+d = c;
+[x2,p] = chiSquare(a,b,c,d);
+title({'NO dirSel Unit Count',['p = ',num2str(1-p)]});
+legend('Contra','Ipsi');
+set(gcf,'color','w');
+
 
 % see ipsiContraShuffle.m
 % % useEvents = [4,6];
@@ -211,30 +290,31 @@ for iEvent = 1:numel(useEvents)
     curEvent = useEvents(iEvent);
     subplot(1,numel(useEvents),iEvent)
     eventBins = zeros(1,size(pNeuronDiff,3));
-    eventBins_class = zeros(8,size(pNeuronDiff_neg,3));
-    eventBins_neg = zeros(1,size(pNeuronDiff_neg,3));
-    eventBins_neg_class = zeros(8,size(pNeuronDiff_neg,3));
+    eventBins_neg = zeros(1,size(pNeuronDiff,3));
+% % % %     eventBins_class = zeros(8,size(pNeuronDiff_neg,3));
+% % % %     eventBins_neg_class = zeros(8,size(pNeuronDiff_neg,3));
     for iNeuron = 1:size(pNeuronDiff,1)
 % %         if ~isempty(unitEvents{iNeuron}.class)%% && unitEvents{iNeuron}.class(1) == 3 % tone
             curBins = squeeze(pNeuronDiff(iNeuron,curEvent,:));
-            curBins_neg = squeeze(pNeuronDiff_neg(iNeuron,curEvent,:));
+% % % %             curBins_neg = squeeze(pNeuronDiff_neg(iNeuron,curEvent,:));
             eventBins = eventBins + (curBins > pVal)';
-            eventBins_neg = eventBins_neg + (curBins_neg > pVal)';
-            showUnitClass = [1:7];
-            for curUnitClass = showUnitClass
-                if curUnitClass == primSec(iNeuron,1)
-                    eventBins_class(curUnitClass,:) = eventBins_class(curUnitClass,:) + (curBins > pVal)';
-                    eventBins_neg_class(curUnitClass,:) = eventBins_neg_class(curUnitClass,:) + (curBins_neg > pVal)';
-                end
-            end
+            eventBins_neg = eventBins_neg + (curBins < 1-pVal)';
+
+% % % %             showUnitClass = [1:7];
+% % % %             for curUnitClass = showUnitClass
+% % % %                 if curUnitClass == primSec(iNeuron,1)
+% % % %                     eventBins_class(curUnitClass,:) = eventBins_class(curUnitClass,:) + (curBins > pVal)';
+% % % %                     eventBins_neg_class(curUnitClass,:) = eventBins_neg_class(curUnitClass,:) + (curBins_neg > pVal)';
+% % % %                 end
+% % % %             end
 % %         end
     end
     
 %     yyaxis left;
-    bar(1:size(pNeuronDiff,3),eventBins/numel(dirSelUsedNeurons_correct),'FaceColor',colors(1,:),'EdgeColor',colors(1,:)); % POSITIVE
+    bar(1:size(pNeuronDiff,3),eventBins/numel(dirSelUsedNeurons_correct),'FaceColor',colors(1,:),'EdgeColor',colors(1,:)); % contra
     hold on;
-    bar(1:size(pNeuronDiff_neg,3),-eventBins_neg/numel(dirSelUsedNeurons_correct),'FaceColor',colors(2,:),'EdgeColor',colors(2,:)); % POSITIVE
-    ylim([-.25 .25]);
+    bar(1:size(pNeuronDiff,3),-eventBins_neg/numel(dirSelUsedNeurons_correct),'FaceColor',colors(2,:),'EdgeColor',colors(2,:)); % ipsi
+    ylim([-.3 .3]);
     
 % % % %     yyaxis right;
 % % %     class_colors = jet(8);
