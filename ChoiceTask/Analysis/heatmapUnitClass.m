@@ -1,34 +1,38 @@
 % % unitEvents = corr_unitEvents;
 % % all_zscores = corr_all_zscores;
 specialUnit = 133;
-
-runMap = 2;
-switch runMap
-    case 1 % dirSel
-        use_dirSelNeurons = dirSelNeuronsNO;
-        useUnits = (ismember(primSec(:,1),[3,4]) == 1) & use_dirSelNeurons;
-        plotSpecialArrows = false;
-    case 2 % ~dirSel
-        use_dirSelNeurons = ~dirSelNeurons;
-        useUnits = (ismember(primSec(:,1),[3,4]) == 1) & use_dirSelNeurons;
-        plotSpecialArrows = false;
-    case 3 % all non-NAN
-        useUnits = ~isnan(primSec(:,1));
-        plotSpecialArrows = true;
-end
-
+doLegend = true;
 doSetup = false;
+% use primSec_plot.m to set primSec (unit classes)
 if doSetup
     tWindow = 1;
     binMs = 20;
     trialTypes = {'correct'};
     useEvents = 1:7;
     useTiming = {};
-    [unitEvents,all_zscores,unitClass] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents,useTiming);
+    [~,all_zscores,~] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents,useTiming);
 % %     minZ = 1;
 % %     [primSec,fractions] = primSecClass(unitEvents,minZ);
 end
-doLegend = true;
+
+runMap = 1;
+switch runMap
+    case 1 % dirSel
+        use_dirSelNeurons = dirSelNeuronsNO;
+        useUnits = (ismember(primSec(:,1),[3,4]) == 1) & use_dirSelNeurons;
+        plotSpecialArrows = false;
+        noteText = 'dirSel units';
+    case 2 % ~dirSel
+        use_dirSelNeurons = ~dirSelNeurons;
+        useUnits = (ismember(primSec(:,1),[3,4]) == 1) & use_dirSelNeurons;
+        plotSpecialArrows = false;
+        noteText = '~dirSel units';
+    case 3 % all non-NAN
+        useUnits = ~isnan(primSec(:,1));
+        plotSpecialArrows = true;
+        noteText = 'all ~NaN units';
+end
+
 imsc = [];
 % % useSubjects = [88,117,142,154,182];
 
@@ -116,6 +120,7 @@ if plotSpecialArrows
     end
 end
 
+addNote(h,noteText);
 set(gcf,'color','w');
 tightfig;
 

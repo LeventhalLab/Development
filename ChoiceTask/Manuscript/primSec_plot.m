@@ -4,7 +4,7 @@ plotOpt = 2; % 1 = both sides of x-axis, 2 = mosaic
 showMosaic = false;
 plotTitle = 'Unit Classes';
 
-doSetup = false;
+doSetup = true;
 if doSetup
     tWindow = 0.2;
     binMs = 20;
@@ -12,7 +12,7 @@ if doSetup
     useEvent = 1:7;
     useTiming = {};
 
-    [unitEvents,all_zscores,unitClass] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvent,useTiming);
+    [unitEvents,~,unitClass] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvent,useTiming);
     
     minZ = 1;
     [primSec,fractions] = primSecClass(unitEvents,minZ);

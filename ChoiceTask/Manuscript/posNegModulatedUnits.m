@@ -1,15 +1,4 @@
-if false
-    tWindow = 1;
-    binMs = 20;
-    useEvents = 1:7;
-    useTiming = {};
-    % moved contra on contra tone
-    trialTypes = {'correct'};
-    [unitEvents,all_zscores,unitClass] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents,useTiming);
-    
-    minZ = 1;
-    [primSec,fractions] = primSecClass(unitEvents,minZ);
-end
+% use primSec_plot.m to set primSec (unit classes)
 
 posMod = zeros(2,7);
 negMod = zeros(2,7);

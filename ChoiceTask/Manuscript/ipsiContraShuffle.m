@@ -5,7 +5,7 @@ debugPath = 'C:\Users\Administrator\Documents\Data\ChoiceTask\ipsiContraShuffleD
 pVal = 0.95;
 pVal_minBins = 2;
 colors = lines(2);
-dirSelType = 'NO'; % NO or SO
+dirSelType = 'SO'; % NO or SO
 useIncorrect = false;
 nSmooth = 3;
 
@@ -20,7 +20,8 @@ excludeSessions = {'R0117_20160504a','R0142_20161207a','R0117_20160508a','R0117_
 
 if true
     useEvents = 1:7;
-    binMs = 50;
+    tWindow = 1;
+    binMs = 20;
     binS = binMs / 1000;
     binEdges = -tWindow:binS:tWindow;
     analyzeRange = (tWindow / binS) : (tWindow / binS) + (0.25 / binS);
@@ -234,7 +235,7 @@ dirSelNO = sum(dirSelNeuronsNO)
 dirSelSO = sum(dirSelNeuronsSO)
 dirSelNOSO = sum(dirSelNeurons)
 
-percentDirNeurons = 100 * (dirSelNO + dirSelSO) / (dirSelUsedNeuronsNO_correct + dirSelUsedNeuronsSO_correct);
+percentDirNeurons = 100 * (dirSelNO + dirSelSO) / (numel(dirSelUsedNeuronsNO_correct) + numel(dirSelUsedNeuronsSO_correct));
 
 contra_x = sum(dirSelNeuronsNO_contra)
 x_contra = sum(dirSelNeuronsSO_contra)
@@ -284,6 +285,18 @@ title({'NO dirSel Unit Count',['p = ',num2str(1-p)]});
 legend('Contra','Ipsi');
 set(gcf,'color','w');
 
+figure;
+pie([sum(dirSelNeuronsSO_contra) sum(dirSelNeuronsSO_ipsi)]);
+colormap(lines(2));
+a = sum(dirSelNeuronsSO_contra);
+b = sum(dirSelNeuronsSO_ipsi);
+c = (a + b) / 2;
+d = c;
+[x2,p] = chiSquare(a,b,c,d);
+title({'SO dirSel Unit Count',['p = ',num2str(1-p)]});
+legend('Contra','Ipsi');
+set(gcf,'color','w');
+
 
 % see ipsiContraShuffle.m
 % % useEvents = [4,6];
@@ -324,7 +337,7 @@ for iEvent = 1:numel(useEvents)
     bar(1:size(pNeuronDiff,3),eventBins/numel(dirSelUsedNeuronsNO_correct),'FaceColor',colors(1,:),'EdgeColor',colors(1,:)); % contra
     hold on;
     bar(1:size(pNeuronDiff,3),-eventBins_neg/numel(dirSelUsedNeuronsNO_correct),'FaceColor',colors(2,:),'EdgeColor',colors(2,:)); % ipsi
-    ylim([-.3 .3]);
+    ylim([-.25 .25]);
     
 % % % %     yyaxis right;
 % % %     class_colors = jet(8);

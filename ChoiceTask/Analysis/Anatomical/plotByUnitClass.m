@@ -5,7 +5,11 @@ dirColors = [1 0 0;.5 .5 .5];
 dotSize_mm = .04;
 atlas_ims = [];
 useEvents = [1:7];
-local_nasPath = '/Users/mattgaidica/Documents/Data/ChoiceTask';
+if ismac
+    local_nasPath = '/Users/mattgaidica/Documents/Data/ChoiceTask';
+else
+    local_nasPath = '\\172.20.138.142\RecordingsLeventhal2\ChoiceTask';
+end
 
 a1_hist = cell(numel(useEvents),1);
 a2_hist = cell(2,1);
@@ -26,17 +30,17 @@ for iNeuron = 1:size(analysisConf.neurons,1)
     actualDV = channelData{1,'dv'};
     DV = actualDV + wiggle;
     
+    neuronClass = primSec(iNeuron,1);
     switch doAnalysis
         case 1
-            if ~isempty(unitEvents{iNeuron}.class)
-                neuronClass = unitEvents{iNeuron}.class(1);
+            if ~isnan(neuronClass)
                 dotColor = colors(neuronClass,:);
                 a1_hist{neuronClass} = [a1_hist{neuronClass} actualDV];
             else
                 continue;
             end
         case 2
-            if ~isempty(unitEvents{iNeuron}.class) && any(ismember(unitEvents{iNeuron}.class(1:2),4))
+            if ~isnan(neuronClass) && ismember(neuronClass,[3,4])
                 if dirSelNeurons(iNeuron)
                     dotColor = dirColors(1,:);
                     a2_hist{1} = [a2_hist{1} actualDV];
@@ -91,7 +95,8 @@ switch doAnalysis
             figuree(200,500);
             for ii = 1:numel(useEvents)
                 counts = histcounts(a1_hist{ii},binEdges);
-                plot(smooth(interp(counts,nSmooth),nSmooth),interp(binEdges(2:end),nSmooth),'lineWidth',lineWidth,'color',colors(ii,:));
+                countsPrct = counts ./ sum(counts);
+                plot(smooth(interp(countsPrct,nSmooth),nSmooth),interp(binEdges(2:end),nSmooth),'lineWidth',lineWidth,'color',colors(ii,:));
                 hold on;
             end
             ylim([5.9 7.9]);
@@ -104,7 +109,8 @@ switch doAnalysis
             figuree(200,500);
             for ii = 1:2
                 counts = histcounts(a2_hist{ii},binEdges);
-                plot(smooth(interp(counts,nSmooth),nSmooth),interp(binEdges(2:end),nSmooth),'lineWidth',lineWidth,'color',dirColors(ii,:));
+                countsPrct = counts ./ sum(counts);
+                plot(smooth(interp(countsPrct,nSmooth),nSmooth),interp(binEdges(2:end),nSmooth),'lineWidth',lineWidth,'color',dirColors(ii,:));
                 hold on;
             end
             ylim([5.9 7.9]);
@@ -112,6 +118,6 @@ end
 
 ylabel('DV');
 ylabel('DV');
-xlabel('Units');
+xlabel('% of Total');
 set(gca,'YDir','reverse');
 set(gcf,'color','w');

@@ -35,10 +35,10 @@ function RTMT_corrMatrix()
 % %     dirMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n72_movDirall_byMT_bins10_binMs20ORD20171031.mat');
 
     % nose out event, primary only
-    ndirRT = load(fullfile(uSessionsPath,'evNose Out_un~dirSel_n79_movDirall_byRT_bins12_binMs20_NO20171211.mat'));
-    ndirMT = load(fullfile(uSessionsPath,'evNose Out_un~dirSel_n79_movDirall_byMT_bins12_binMs20_NO20171211.mat'));
-    dirRT = load(fullfile(uSessionsPath,'evNose Out_undirSel_n44_movDirall_byRT_bins12_binMs20_NO20171211.mat'));
-    dirMT = load(fullfile(uSessionsPath,'evNose Out_undirSel_n44_movDirall_byMT_bins12_binMs20_NO20171211.mat'));
+    ndirRT = load(fullfile(uSessionsPath,'evNose Out_un~dirSel_n63_movDirall_byRT_bins12_binMs20_NO20171212.mat'));
+    ndirMT = load(fullfile(uSessionsPath,'evNose Out_un~dirSel_n63_movDirall_byMT_bins12_binMs20_NO20171212.mat'));
+    dirRT = load(fullfile(uSessionsPath,'evNose Out_undirSel_n56_movDirall_byRT_bins12_binMs20_NO20171212.mat'));
+    dirMT = load(fullfile(uSessionsPath,'evNose Out_undirSel_n56_movDirall_byMT_bins12_binMs20_NO20171212.mat'));
     
     % setup
     grayColor = [.8 .8 .8];
@@ -78,25 +78,37 @@ function RTMT_corrMatrix()
 % %     end
     
     % RASTERS
-% %     timingField = 'RT';
-% %     h = plot_typeRaster(ndirRT,timingField,rt_meanColors);
-% %     print(h,'-painters','-depsc',fullfile(savePath,['ndir',timingField,'_raster','.eps']));
-% %     close(h);
-% %     
-% %     timingField = 'MT';
-% %     h = plot_typeRaster(ndirMT,timingField,mt_meanColors);
-% %     print(h,'-painters','-depsc',fullfile(savePath,['ndir',timingField,'_raster','.eps']));
-% %     close(h);
-% %     
-% %     timingField = 'RT';
-% %     h = plot_typeRaster(dirRT,timingField,rt_meanColors);
-% %     print(h,'-painters','-depsc',fullfile(savePath,['dir',timingField,'_raster','.eps']));
-% %     close(h);
-% %     
-% %     timingField = 'MT';
-% %     h = plot_typeRaster(dirMT,timingField,mt_meanColors);
-% %     print(h,'-painters','-depsc',fullfile(savePath,['dir',timingField,'_raster','.eps']));
-% %     close(h);
+    timingField = 'RT';
+    h = plot_typeRaster(ndirRT,timingField,rt_meanColors);
+    print(h,'-painters','-depsc',fullfile(savePath,['ndir',timingField,'_raster','.eps']));
+    if saveImage
+        saveas(h,fullfile(savePath,['ndir',timingField,'_raster',imageExt]));
+    end
+    close(h);
+    
+    timingField = 'MT';
+    h = plot_typeRaster(ndirMT,timingField,mt_meanColors);
+    print(h,'-painters','-depsc',fullfile(savePath,['ndir',timingField,'_raster','.eps']));
+    if saveImage
+        saveas(h,fullfile(savePath,['ndir',timingField,'_raster',imageExt]));
+    end
+    close(h);
+    
+    timingField = 'RT';
+    h = plot_typeRaster(dirRT,timingField,rt_meanColors);
+    print(h,'-painters','-depsc',fullfile(savePath,['dir',timingField,'_raster','.eps']));
+    if saveImage
+        saveas(h,fullfile(savePath,['dir',timingField,'_raster',imageExt]));
+    end
+    close(h);
+    
+    timingField = 'MT';
+    h = plot_typeRaster(dirMT,timingField,mt_meanColors);
+    print(h,'-painters','-depsc',fullfile(savePath,['dir',timingField,'_raster','.eps']));
+    if saveImage
+        saveas(h,fullfile(savePath,['dir',timingField,'_raster',imageExt]));
+    end
+    close(h);
     
     if true
         all_loadData = {ndirRT,ndirMT,dirRT,dirMT};

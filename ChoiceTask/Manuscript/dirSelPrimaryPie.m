@@ -1,15 +1,4 @@
-doSetup = false;
-if doSetup
-    tWindow = 1;
-    binMs = 20;
-    trialTypes = {'correct'};
-    useEvents = 1:7;
-    useTiming = {};
-
-    [unitEvents,all_zscores,unitClass] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents,useTiming);
-    minZ = 1;
-    [primSec,fractions] = primSecClass(unitEvents,minZ);
-end
+% use primSec_plot.m to set primSec (unit classes)
 
 colors = parula(8);
 rows = 2;

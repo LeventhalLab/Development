@@ -2,9 +2,9 @@ doSave = true;
 nMeanBins = 12;
 binMs = 20;
 
-expressRT = 0.05;
-ordinaryRT = 0.30;
-ordinaryMT = 0.43;
+expressRT = 0.050;
+ordinaryRT = 0.300;
+ordinaryMT = 0.400;
 
 all_RTfromPermutations = [];
 all_MTfromPermutations = [];

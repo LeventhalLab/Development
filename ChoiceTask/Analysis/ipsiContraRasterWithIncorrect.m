@@ -11,27 +11,35 @@ for iNeuron =  1:numel(analysisConf.neurons) % 188
     if dirSelNeurons(iNeuron)
         note_dirSel = 'YES';
         if dirSelNeuronsNO(iNeuron)
-            if dirSelNeuronsNO_contra
+            if dirSelNeuronsNO_contra(iNeuron)
                 note_dirSelNO = 'contra';
             else
                 note_dirSelNO = 'ipsi';
             end
         else
-            if dirSelNeuronsSO_contra
+            if dirSelNeuronsSO_contra(iNeuron)
                 note_dirSelSO = 'contra';
             else
                 note_dirSelSO = 'ipsi';
             end
         end
     else
-        disp(['Skipping neuron ',num2str(iNeuron)]);
-        continue;
+% %         disp(['Skipping neuron ',num2str(iNeuron)]);
+% %         continue;
     end
     
     neuronName = analysisConf.neurons{iNeuron};
     curTrials = all_trials{iNeuron};
     trialIdInfo = organizeTrialsById(curTrials);
+
     trialIds_conds = {trialIdInfo.correctContra trialIdInfo.correctIpsi trialIdInfo.incorrectContra trialIdInfo.incorrectIpsi};
+    
+    % skip if any rasters are empty, generates error below
+    if any(cellfun(@isempty,trialIds_conds))
+        disp(['Contra/ipsi trials missing: ',num2str(iNeuron)]);
+        continue;
+    end
+    
     trialIds = [];
     for iCond = 1:numel(trialIds_conds)
         trialIds_cond = trialIds_conds{iCond};
@@ -138,7 +146,7 @@ for iNeuron =  1:numel(analysisConf.neurons) % 188
     end
     set(gcf,'color','w');
 
-    noteText = {['dirSel? ',note_dirSel],['at NO? ',note_dirSelNO],['at SO? ',note_dirSelSO]};
+    noteText = {['Unit: ',num2str(iNeuron)],['dirSel? ',note_dirSel],['at NO? ',note_dirSelNO],['at SO? ',note_dirSelSO]};
     addNote(h,noteText);
     
 % %     tightfig;
@@ -155,7 +163,7 @@ for iNeuron =  1:numel(analysisConf.neurons) % 188
         set(gcf,'color','w');
     end
     if doSave
-        saveas(h,fullfile(saveDir,['ipsiContraRaster_',neuronName,'_NO-',note_dirSelNO,'_SO-',note_dirSelSO,saveExt]));
+        saveas(h,fullfile(saveDir,['ipsiContraRaster_u',num2str(iNeuron,'%03d'),'_NO-',note_dirSelNO,'_SO-',note_dirSelSO,saveExt]));
         close(h);
     end
 end
