@@ -1,10 +1,13 @@
 saveDir = 'C:\Users\Administrator\Documents\Data\ChoiceTask\ipsiContraWithIncorrectRaster';
 saveExt = '.png';
+doLabels = true;
+doSave = false;
 doLegend = false;
-doSave = true;
+savePNG = false;
+doNote = false;
 useEvents = [1:7];
 % units: 113, 188, 201
-for iNeuron =  1:numel(analysisConf.neurons) % 188
+for iNeuron = 188 %1:numel(analysisConf.neurons)
     note_dirSel = '-';
     note_dirSelNO = '-';
     note_dirSelSO = '-';
@@ -60,7 +63,7 @@ for iNeuron =  1:numel(analysisConf.neurons) % 188
 % %     h = figuree(150*numel(useEvents)+300,200);
     h = figuree(1200,250);
     for iEvent = 1:numel(useEvents)
-        ax = subplot(1,numel(useEvents),iEvent);
+        ax = subplot_tight(1,numel(useEvents),iEvent,subplotMargins);
         rasterData = tsPeths(:,useEvents(iEvent));
 %         rasterData = rasterData(~cellfun('isempty',rasterData)); % remove empty rows (no spikes)
         for iTrial = 1:numel(rasterData)
@@ -109,17 +112,24 @@ for iNeuron =  1:numel(analysisConf.neurons) % 188
         end
         yticks(ytickVals);
 % %         title(eventFieldnames{useEvents(iEvent)});
-        if iEvent == 1
-%             title(['unit',num2str(iNeuron),' - ',neuronName],'interpreter','none');
-%             yticklabels({'Tone Contra, Move Contra','Tone Ipsi, Move Ipsi','Tone Ipsi, Move Contra','Tone Contra, Move Ipsi'});
-            yticklabels({'1','','',num2str(numel(trialIds))});
-            ytickangle(0);
-            ylabel('Trials');
+        if doLabels
+            if iEvent == 1
+    %             title(['unit',num2str(iNeuron),' - ',neuronName],'interpreter','none');
+    %             yticklabels({'Tone Contra, Move Contra','Tone Ipsi, Move Ipsi','Tone Ipsi, Move Contra','Tone Contra, Move Ipsi'});
+                yticklabels({'1','','',num2str(numel(trialIds))});
+                ytickangle(0);
+                ylabel('Trials');
+            else
+                yticklabels({'','','',''});
+            end
+            if iEvent == 4
+                xlabel('time (s)');
+            end
+            title(eventFieldlabels{iEvent});
         else
             yticklabels({'','','',''});
-        end
-        if iEvent == 4
-            xlabel('time (s)');
+            xticks(0);
+            xticklabels([]);
         end
 % %         if iEvent == 6 && iNeuron == 188 % !!! special case
 % %             cur_xlim = xlim;
@@ -139,17 +149,22 @@ for iNeuron =  1:numel(analysisConf.neurons) % 188
 % %             disp([num2str(100*sum(ipsiSideOuts == 2)/numel(ipsiSideOuts),'%2.2f'),'% ipsi Nose Out/Side Out agreement']);
 % %         end
         
-        plot([0 0],ylim,'k--'); % zero line
-        title(eventFieldlabels{iEvent});
-        set(gca,'fontSize',16);
+% %         plot([0 0],ylim,'k--'); % zero line
+        
         box off;
+        grid on;
     end
-    set(gcf,'color','w');
-
-    noteText = {['Unit: ',num2str(iNeuron)],['dirSel? ',note_dirSel],['at NO? ',note_dirSelNO],['at SO? ',note_dirSelSO]};
-    addNote(h,noteText);
     
-% %     tightfig;
+    if doNote
+        noteText = {['Unit: ',num2str(iNeuron)],['dirSel? ',note_dirSel],['at NO? ',note_dirSelNO],['at SO? ',note_dirSelSO]};
+        addNote(h,noteText);
+    end
+
+    tightfig;
+    setFig('','',[2 1]);
+    if doSave
+        print(gcf,'-painters','-depsc',fullfile(figPath,'ipsiContraWithIncorrect.eps'));
+    end
     
     if doLegend
         th = figure;
@@ -162,7 +177,8 @@ for iNeuron =  1:numel(analysisConf.neurons) % 188
         set(gca,'fontSize',16);
         set(gcf,'color','w');
     end
-    if doSave
+    
+    if savePNG
         saveas(h,fullfile(saveDir,['ipsiContraRaster_u',num2str(iNeuron,'%03d'),'_NO-',note_dirSelNO,'_SO-',note_dirSelSO,saveExt]));
         close(h);
     end

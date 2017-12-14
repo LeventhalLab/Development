@@ -1,13 +1,18 @@
 % the fraction of units whose activity is significantly different between
 % ipsi/contra trials
+doSave = true;
+doLabels = false;
 dodebug = false;
-debugPath = 'C:\Users\Administrator\Documents\Data\ChoiceTask\ipsiContraShuffleDebug';
-pVal = 0.95;
+debugPath = '/Users/mattgaidica/Documents/Data/ChoiceTask/ipsiContraShuffleDebug';
+pVal = 0.99;
 pVal_minBins = 2;
 colors = lines(2);
-dirSelType = 'SO'; % NO or SO
+dirSelType = 'NO'; % NO or SO
 useIncorrect = false;
 nSmooth = 3;
+requireTrials = 10;
+minFR = 5;
+nShuffle = 1000;
 
 if ismac
     localSideOutPath = '/Users/mattgaidica/Documents/Data/ChoiceTask/sideOutAnalysis';
@@ -18,17 +23,15 @@ end
 excludeSessions = {'R0117_20160504a','R0142_20161207a','R0117_20160508a','R0117_20160510a'}; % corrupt video
 [sessionNames,IA] = unique(analysisConf.sessionNames);
 
-if true
+if false
     useEvents = 1:7;
     tWindow = 1;
     binMs = 20;
     binS = binMs / 1000;
     binEdges = -tWindow:binS:tWindow;
     analyzeRange = (tWindow / binS) : (tWindow / binS) + (0.25 / binS);
-    requireTrials = 5;
-    nShuffle = 1000;
     % init to p = 0.5 (N.S.)
-    pNeuronDiff = ones(numel(analysisConf.neurons),numel(useEvents),numel(binEdges)-1) * 0.5;
+    pNeuronDiff = nan(numel(analysisConf.neurons),numel(useEvents),numel(binEdges)-1);
     pNeuronDiff_neg = [];
 
     dirSelNeurons_type = zeros(numel(analysisConf.neurons),1);
@@ -85,7 +88,7 @@ if true
         % (ordered according to useTrials)
         tsPeths = eventsPeth(curTrials(useTrials),all_ts{iNeuron},tWindow,eventFieldnames);
         FR = numel([tsPeths{:}]) / size(tsPeths,1) / size(tsPeths,2) / (tWindow * 2);
-        if FR < 1
+        if FR < minFR
             disp([num2str(iNeuron),' FR too low']);
             continue;
         end
@@ -117,8 +120,8 @@ if true
             matrixDiffShuffle = [];
             for iShuffle = 1:nShuffle
                 shuffledTrialTypes = trialClass(randperm(numel(trialClass)));
-                contraMeanShuffled = mean(eventMatrix(shuffledTrialTypes == 1,:));
-                ipsiMeanShuffled = mean(eventMatrix(shuffledTrialTypes == 0,:));
+                contraMeanShuffled = smooth(mean(eventMatrix(shuffledTrialTypes == 1,:)),nSmooth);
+                ipsiMeanShuffled = smooth(mean(eventMatrix(shuffledTrialTypes == 0,:)),nSmooth);
                 matrixDiffShuffle(iShuffle,:) = contraMeanShuffled - ipsiMeanShuffled;
 % %                 matrixDiffShuffle(iShuffle,:) = abs(contraMeanShuffled - ipsiMeanShuffled);
             end
@@ -263,6 +266,9 @@ d = c;
 [x2,p] = chiSquare(a,b,c,d);
 title({'Coding between NO & SO',['p = ',num2str(1-p)]});
 set(gcf,'color','w');
+if doSave
+    print(gcf,'-painters','-depsc',fullfile(figPath,'ipsiContraShuffle_codingNOSO.eps'));
+end
 
 contra_NR = contra_x - (contra_contra + ipsi_contra)
 ipsi_NR = ipsi_x - (ipsi_ipsi + contra_ipsi)
@@ -274,28 +280,35 @@ NRSO = sum(~dirSelNeuronsSO)
 NR_NOSO = sum(~dirSelNeurons)
 
 figure;
+subplot_tight(1,2,1,subplotMargins);
 pie([sum(dirSelNeuronsNO_contra) sum(dirSelNeuronsNO_ipsi)]);
 colormap(lines(2));
 a = sum(dirSelNeuronsNO_contra);
 b = sum(dirSelNeuronsNO_ipsi);
 c = (a + b) / 2;
 d = c;
-[x2,p] = chiSquare(a,b,c,d);
-title({'NO dirSel Unit Count',['p = ',num2str(1-p)]});
-legend('Contra','Ipsi');
-set(gcf,'color','w');
+[x2,p] = chiSquare(a,b,c,d)
+if doLabels
+    title({'NO dirSel Unit Count',['p = ',num2str(1-p)]});
+end
 
-figure;
+subplot_tight(1,2,2,subplotMargins);
 pie([sum(dirSelNeuronsSO_contra) sum(dirSelNeuronsSO_ipsi)]);
 colormap(lines(2));
 a = sum(dirSelNeuronsSO_contra);
 b = sum(dirSelNeuronsSO_ipsi);
 c = (a + b) / 2;
 d = c;
-[x2,p] = chiSquare(a,b,c,d);
-title({'SO dirSel Unit Count',['p = ',num2str(1-p)]});
-legend('Contra','Ipsi');
-set(gcf,'color','w');
+[x2,p] = chiSquare(a,b,c,d)
+if doLabels
+    title({'SO dirSel Unit Count',['p = ',num2str(1-p)]});
+end
+
+setFig('','',[1 0]);
+
+if doSave
+    print(gcf,'-painters','-depsc',fullfile(figPath,'ipsiContraShuffle_NOSO-count.eps'));
+end
 
 
 % see ipsiContraShuffle.m
@@ -311,14 +324,17 @@ figuree(1200,400);
 all_eventBins = [];
 for iEvent = 1:numel(useEvents)
     curEvent = useEvents(iEvent);
-    subplot(1,numel(useEvents),iEvent)
+    subplot_tight(1,numel(useEvents),iEvent,subplotMargins)
     eventBins = zeros(1,size(pNeuronDiff,3));
     eventBins_neg = zeros(1,size(pNeuronDiff,3));
 % % % %     eventBins_class = zeros(8,size(pNeuronDiff_neg,3));
 % % % %     eventBins_neg_class = zeros(8,size(pNeuronDiff_neg,3));
-    for iNeuron = 1:size(pNeuronDiff,1)
+    for iNeuron = dirSelUsedNeurons
 % %         if ~isempty(unitEvents{iNeuron}.class)%% && unitEvents{iNeuron}.class(1) == 3 % tone
             curBins = squeeze(pNeuronDiff(iNeuron,curEvent,:));
+            if sum(curBins) == 50
+                disp('here');
+            end
 % % % %             curBins_neg = squeeze(pNeuronDiff_neg(iNeuron,curEvent,:));
             eventBins = eventBins + (curBins > pVal)';
             eventBins_neg = eventBins_neg + (curBins < 1-pVal)';
@@ -354,8 +370,23 @@ for iEvent = 1:numel(useEvents)
     
     xlim([1 size(pNeuronDiff,3)]);
     xticks([1 round(size(pNeuronDiff,3)/2) size(pNeuronDiff,3)]);
-    xticklabels({'-1','0','1'});
-    plot([round(size(pNeuronDiff,3)/2) round(size(pNeuronDiff,3)/2)],ylim,'k--');
+    if doLabels
+        xticklabels({'-1','0','1'});
+        if iEvent == 1
+            ylabel(['Fraction of DirSel units p < ',num2str(1-pVal,'%1.2f')]);
+            yticks(ylim);
+        else
+            yticks([]);
+        end
+        if iEvent == 4
+            xlabel('Time (s)');
+        end
+    else
+        xticklabels([]);
+        yticks(sort([ylim 0]));
+        yticklabels([]);
+    end
+% %     plot([round(size(pNeuronDiff,3)/2) round(size(pNeuronDiff,3)/2)],ylim,'k--');
     
     % Given pVal, what fraction is due to chance?
     X = binoinv(pVal,numel(dirSelUsedNeuronsNO_correct),1-pVal) / numel(dirSelUsedNeuronsNO_correct);
@@ -363,19 +394,15 @@ for iEvent = 1:numel(useEvents)
     plot(xlim,[-X -X],'r');
     
 % %     title(eventFieldnames{iEvent});
-    if iEvent == 1
-        ylabel(['Fraction of DirSel units p < ',num2str(1-pVal,'%1.2f')]);
-        yticks(ylim);
-    else
-        yticks([]);
-    end
-    if iEvent == 4
-        xlabel('Time (s)');
-    end
-    set(gca,'fontSize',16);
+    
     box off;
+    grid on;
 end
 
 % % % % legend(class_lns,eventFieldlabels)
-set(gcf,'color','w');
 tightfig;
+setFig('','',[2,1]);
+
+if doSave
+    print(gcf,'-painters','-depsc',fullfile(figPath,'ipsiContraShuffle.eps'));
+end

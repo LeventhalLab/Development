@@ -1,4 +1,9 @@
-doTitle = false;
+subplotMargins = [.05,.02];
+figPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Thalamus_behavior_2017/Figures/MATLAB';
+
+doLabels = true;
+doTitle = true;
+doSave = false;
 % use primary + secondary classes
 tWindow = 1;
 binMs = 20;
@@ -16,7 +21,7 @@ cols = 7;
 nSmooth = 3;
 colors = zeros(2,3);
 lineWidth = 3;
-set_ylims = [-1 3];
+set_ylims = [-1 4];
 ylabelloc = 2.5;
 % useNeuron = 188% (R142_1209_7b), 103, 147, 201 (R142_1210_36a)
 useNeuron = 133;
@@ -32,7 +37,7 @@ for iEvent = 1:numel(eventFieldnames)
 % %     hold on;
 
     if rows > 1
-        subplot(rows,cols,iEvent);
+        subplot_tight(rows,cols,iEvent,subplotMargins);
 
         curTrials = all_trials{useNeuron};
         trialIdInfo = organizeTrialsById(curTrials);
@@ -45,27 +50,29 @@ for iEvent = 1:numel(eventFieldnames)
         end
         plotSpikeRaster(rasterData,'PlotType','scatter','AutoLabel',false);
         yticks(ylim);
-        set(gca,'fontSize',16);
-        if iEvent == 1
-            ylabel('Trials');
-            if doTitle
-                title({['unit ',num2str(useNeuron)],[eventFieldnames{iEvent}]});
+        setFig;
+        if doLabels
+            title(eventFieldlabels{iEvent});
+            if iEvent == 1
+                ylabel('Trials');
+            else
+                yticklabels([]);
             end
         else
-            yticklabels({'',''});
-            if doTitle
-                title({'',[eventFieldlabels{iEvent}]});
-            end
+            yticklabels([]);
         end
         xticks([0]);
         xticklabels({''});
         grid on;
+        if doTitle
+            title([eventFieldlabels{iEvent}],'interpreter','none');
+        end
     end
     
     if rows > 1
-        subplot(rows,cols,iEvent+cols);
+        subplot_tight(rows,cols,iEvent+cols,subplotMargins);
     else
-        subplot(rows,cols,iEvent);
+        subplot_tight(rows,cols,iEvent,subplotMargins);
     end
     
     if iEvent == 3
@@ -75,7 +82,7 @@ for iEvent = 1:numel(eventFieldnames)
         medRT = median(session_rt);
         medRT_x = (size(all_zscores,3) / 2) + (medRT / binS);
         plot([medRT_x medRT_x],[-5 5],'k--');
-        tx = text(medRT_x,ylabelloc,'RT','fontSize',16,'HorizontalAlignment','center','VerticalAlignment','top');
+        tx = text(medRT_x,ylabelloc,'RT','fontSize',14,'HorizontalAlignment','center','VerticalAlignment','top');
         set(tx,'Rotation',90);
     elseif iEvent == 4
         lns(iEvent) = plot(smooth(squeeze(all_zscores(useNeuron,iEvent,:)),nSmooth),'LineWidth',lineWidth,'Color',colors(2,:));
@@ -84,33 +91,41 @@ for iEvent = 1:numel(eventFieldnames)
         medMT = median(session_mt);
         medMT_x = (size(all_zscores,3) / 2) + (medMT / binS);
         plot([medMT_x medMT_x],[-5 5],'k--');
-        tx = text(medMT_x,ylabelloc,'MT','fontSize',16,'HorizontalAlignment','center','VerticalAlignment','top');
+        tx = text(medMT_x,ylabelloc,'MT','fontSize',14,'HorizontalAlignment','center','VerticalAlignment','top');
         set(tx,'Rotation',90);
     else
         lns(iEvent) = plot(smooth(squeeze(all_zscores(useNeuron,iEvent,:)),nSmooth),'LineWidth',lineWidth,'Color','k');
     end
   
     xlim([1 size(all_zscores,3)]);
-    xticks([1 size(all_zscores,3)/2 size(all_zscores,3)]);
-    xticklabels({'-1','0','1'});
-    ylim(set_ylims);
-    
-    if doTitle
-        title({'',[eventFieldlabels{iEvent}]});
-    end
-    if iEvent == 1
-        ylabel('Z score');
-        yticks([set_ylims(1) 0 set_ylims(2)]);
+    if doLabels
+        xticks([1 size(all_zscores,3)/2 size(all_zscores,3)]);
+        xticklabels({'-1','0','1'});
+        if iEvent == 1
+            ylabel('Z score');
+            yticks([set_ylims(1) 0 set_ylims(2)]);
+        else
+            yticks([set_ylims(1) 0 set_ylims(2)]);
+            yticklabels([]);
+        end
+        if iEvent == 4
+            xlabel('Time (s)');
+        end
     else
+        xticks(size(all_zscores,3)/2);
+        xticklabels([]);
         yticks([set_ylims(1) 0 set_ylims(2)]);
-        yticklabels({'','',''});
+        yticklabels([]);
     end
-    if iEvent == 4
-        xlabel('Time (s)');
-    end
-    set(gca,'fontSize',16);
+    ylim(set_ylims);
+
+    setFig;
     grid on;
 end
-set(gcf,'color','white');
 
 tightfig;
+setFig('','',[2,1]);
+
+if doSave
+    print(gcf,'-painters','-depsc',fullfile(figPath,'zscoresPlot_singleUnit.eps'));
+end

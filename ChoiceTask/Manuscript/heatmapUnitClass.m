@@ -2,6 +2,9 @@
 % % all_zscores = corr_all_zscores;
 specialUnit = 133;
 doLegend = true;
+doLabels = true;
+doSave = false;
+
 doSetup = false;
 % use primSec_plot.m to set primSec (unit classes)
 if doSetup
@@ -15,7 +18,7 @@ if doSetup
 % %     [primSec,fractions] = primSecClass(unitEvents,minZ);
 end
 
-runMap = 1;
+runMap = 3;
 switch runMap
     case 1 % dirSel
         use_dirSelNeurons = dirSelNeuronsNO;
@@ -30,7 +33,6 @@ switch runMap
     case 3 % all non-NAN
         useUnits = ~isnan(primSec(:,1));
         plotSpecialArrows = true;
-        noteText = 'all ~NaN units';
 end
 
 imsc = [];
@@ -75,38 +77,45 @@ end
 
 caxisVals = [-0.5 2];
 h = figuree(1200,400);
+hs = [];
 for iEvent = 1:numel(eventFieldnames)
-    subplot(1,numel(eventFieldnames),iEvent);
+    hs(iEvent) = subplot_tight(1,numel(eventFieldnames),iEvent,subplotMargins);
     imagesc(squeeze(all_zscores(sorted_neuronIds,iEvent,:)));
     hold on;
-    plot([round(size(all_zscores,3)/2) round(size(all_zscores,3)/2)],[1 numel(analysisConf.neurons)],'k--'); % t=0
+% % % %     plot([round(size(all_zscores,3)/2) round(size(all_zscores,3)/2)],[1 numel(analysisConf.neurons)],'k--'); % t=0
 %     imagesc(squeeze(all_zscores(:,iEvent,:))); % in session order
     caxis(caxisVals);
     xlim([1 size(all_zscores,3)]);
-    xticks([1 round(size(all_zscores,3)/2) size(all_zscores,3)]);
-    xticklabels({'-1','0','1'});
-    yticks([1 numel(analysisConf.neurons)]);
-    colormap jet;
-    title([eventFieldlabels{iEvent}],'interpreter','none');
-%     markerRange = markerLocs(iEvent)+1:markerLocs(iEvent+1);
-%     plot(ones(numel(markerRange),1),markerRange,'k.','MarkerSize',20);
-    if iEvent ~= 1
-        yticklabels({'',''});
+    if doLabels
+        xticks([1 round(size(all_zscores,3)/2) size(all_zscores,3)]);
+        xticklabels({'-1','0','1'});
+        if iEvent ~= 1
+            yticklabels({'',''});
+        else
+            ylabel('Units');
+        end
+        if iEvent == 4
+            if doTitle
+                xlabel('Time (s)');
+            end
+        end
+        yticks([1 numel(sorted_neuronIds)]);
     else
-        ylabel('Units');
+        xticks(round(size(all_zscores,3)/2));
+        xticklabels([]);
+        yticks([1 numel(sorted_neuronIds)]);
+        yticklabels([]);
     end
-    if iEvent == 4
-        xlabel('Time (s)');
-    end
-
-    set(gca,'fontSize',16);
+    colormap jet;
+    grid on;
+    set(gca,'fontSize',14);
 end
 for iNeuron = 1:numel(sorted_neuronIds)
     if ~isempty(unitEvents{sorted_neuronIds(iNeuron)}.class)
-        subplot(1,numel(eventFieldnames),unitEvents{sorted_neuronIds(iNeuron)}.class(1));
-        plot(3,iNeuron,'>','MarkerFaceColor','k','MarkerEdgeColor','none','markerSize',5); % class 1
+        subplot(hs(unitEvents{sorted_neuronIds(iNeuron)}.class(1)));
+        plot(4,iNeuron,'>','MarkerFaceColor','k','MarkerEdgeColor','none','markerSize',5); % class 1
         if ~isempty(unitEvents{sorted_neuronIds(iNeuron)}.class(2))
-            subplot(1,numel(eventFieldnames),unitEvents{sorted_neuronIds(iNeuron)}.class(2));
+            subplot(hs(unitEvents{sorted_neuronIds(iNeuron)}.class(2)));
             plot(size(all_zscores,3)-1,iNeuron,'<','MarkerFaceColor',repmat(1,1,3),'MarkerEdgeColor','none','markerSize',5); % class 1
         end
     end
@@ -114,30 +123,42 @@ end
 if plotSpecialArrows
     for iEvent = 1:7
         % special unit
-        subplot(1,numel(eventFieldnames),iEvent);
-        plot(4,find(sorted_neuronIds == specialUnit),'>','MarkerFaceColor','g','MarkerEdgeColor','w','markerSize',10);
+        subplot(hs(iEvent));
+        plot(7,find(sorted_neuronIds == specialUnit),'>','MarkerFaceColor','g','MarkerEdgeColor','none','markerSize',10);
 %         plot(4,find(sorted_neuronIds == 113),'>','MarkerFaceColor','r','MarkerEdgeColor','w','markerSize',10);
     end
 end
 
-addNote(h,noteText);
-set(gcf,'color','w');
+if ismember(runMap,[1,2])
+    addNote(h,noteText);
+end
+
 tightfig;
+setFig('','',[2,1]);
+box on;
+
+if doSave
+    print(gcf,'-painters','-depsc',fullfile(figPath,'heatmapUnitClass.eps'));
+end
 
 if doLegend
     figuree(300,400);
     set(gca,'Visible','Off')
     xticks([]);
-    cb = colorbar('location','south','Orientation','vertical');
+    cb = colorbar('location','south','Orientation','horizontal');
+%     cb = colorbar('location','east','Orientation','vertical');
     colormap(jet);
     caxis(caxisVals);
-    title(cb,'Z score');
     set(cb,'XTick',[caxisVals(1),0,caxisVals(2)]);
-    set(gcf,'color','w');
-    set(gca,'fontSize',16);
+    if doLabels
+        title(cb,'Z score');
+    end
+    setFig('','',1);
 end
 
-
+if doSave
+    print(gcf,'-painters','-depsc',fullfile(figPath,'heatmapUnitClass_legend.eps'));
+end
     
 
 % % if false

@@ -1,6 +1,6 @@
 function RTMT_corrMatrix()
     if ismac
-        savePath = '/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp';
+        savePath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Thalamus_behavior_2017/Figures/MATLAB/RTMT';
         uSessionsPath = '/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions';
     else
         savePath = 'C:\Users\Administrator\Documents\MATLAB\Development\ChoiceTask\temp';
@@ -9,6 +9,7 @@ function RTMT_corrMatrix()
     doSave = true;
     saveImage = true;
     imageExt = '.png';
+    doLabels = false;
     
     % Nose Out event, secondary
 % %     ndirRT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_un~dirSel_n45_movDirall_byRT_bins10_binMs20ORD20171031.mat');
@@ -35,10 +36,10 @@ function RTMT_corrMatrix()
 % %     dirMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n72_movDirall_byMT_bins10_binMs20ORD20171031.mat');
 
     % nose out event, primary only
-    ndirRT = load(fullfile(uSessionsPath,'evNose Out_un~dirSel_n63_movDirall_byRT_bins12_binMs20_NO20171212.mat'));
-    ndirMT = load(fullfile(uSessionsPath,'evNose Out_un~dirSel_n63_movDirall_byMT_bins12_binMs20_NO20171212.mat'));
-    dirRT = load(fullfile(uSessionsPath,'evNose Out_undirSel_n56_movDirall_byRT_bins12_binMs20_NO20171212.mat'));
-    dirMT = load(fullfile(uSessionsPath,'evNose Out_undirSel_n56_movDirall_byMT_bins12_binMs20_NO20171212.mat'));
+    ndirRT = load(fullfile(uSessionsPath,'evNose Out_un~dirSel_n60_movDirall_byRT_bins10_binMs20_NO20171214.mat'));
+    ndirMT = load(fullfile(uSessionsPath,'evNose Out_un~dirSel_n60_movDirall_byMT_bins10_binMs20_NO20171214.mat'));
+    dirRT = load(fullfile(uSessionsPath,'evNose Out_undirSel_n57_movDirall_byRT_bins10_binMs20_NO20171214.mat'));
+    dirMT = load(fullfile(uSessionsPath,'evNose Out_undirSel_n57_movDirall_byMT_bins10_binMs20_NO20171214.mat'));
     
     % setup
     grayColor = [.8 .8 .8];
@@ -78,37 +79,67 @@ function RTMT_corrMatrix()
 % %     end
     
     % RASTERS
-    timingField = 'RT';
-    h = plot_typeRaster(ndirRT,timingField,rt_meanColors);
-    print(h,'-painters','-depsc',fullfile(savePath,['ndir',timingField,'_raster','.eps']));
-    if saveImage
-        saveas(h,fullfile(savePath,['ndir',timingField,'_raster',imageExt]));
+    if true
+        timingField = 'RT';
+        h = plot_typeRaster(ndirRT,timingField,rt_meanColors);
+        if doSave
+            if saveImage
+                saveas(h,fullfile(savePath,['ndir',timingField,'_raster',imageExt]));
+            end
+            if ~doLabels
+                cleanPlot;
+                tightfig;
+                setFig('','',[1,2]);
+            end
+            print(h,'-painters','-depsc',fullfile(savePath,['ndir',timingField,'_raster','.eps']));
+            close(h);
+        end
+
+        timingField = 'MT';
+        h = plot_typeRaster(ndirMT,timingField,mt_meanColors);
+        if doSave
+            if saveImage
+                saveas(h,fullfile(savePath,['ndir',timingField,'_raster',imageExt]));
+            end
+            if ~doLabels
+                cleanPlot;
+                tightfig;
+                setFig('','',[1,2]);
+            end
+            print(h,'-painters','-depsc',fullfile(savePath,['ndir',timingField,'_raster','.eps']));
+            close(h);
+        end
+
+        timingField = 'RT';
+        h = plot_typeRaster(dirRT,timingField,rt_meanColors);
+        if doSave
+            if saveImage
+                saveas(h,fullfile(savePath,['dir',timingField,'_raster',imageExt]));
+            end
+            if ~doLabels
+                cleanPlot;
+                tightfig;
+                setFig('','',[1,2]);
+            end
+            print(h,'-painters','-depsc',fullfile(savePath,['dir',timingField,'_raster','.eps']));
+            close(h);
+        end
+
+        timingField = 'MT';
+        h = plot_typeRaster(dirMT,timingField,mt_meanColors);
+        if doSave
+            if saveImage
+                saveas(h,fullfile(savePath,['dir',timingField,'_raster',imageExt]));
+            end
+            if ~doLabels
+                cleanPlot;
+                tightfig;
+                setFig('','',[1,2]);
+            end
+            print(h,'-painters','-depsc',fullfile(savePath,['dir',timingField,'_raster','.eps']));
+            close(h);
+        end
     end
-    close(h);
-    
-    timingField = 'MT';
-    h = plot_typeRaster(ndirMT,timingField,mt_meanColors);
-    print(h,'-painters','-depsc',fullfile(savePath,['ndir',timingField,'_raster','.eps']));
-    if saveImage
-        saveas(h,fullfile(savePath,['ndir',timingField,'_raster',imageExt]));
-    end
-    close(h);
-    
-    timingField = 'RT';
-    h = plot_typeRaster(dirRT,timingField,rt_meanColors);
-    print(h,'-painters','-depsc',fullfile(savePath,['dir',timingField,'_raster','.eps']));
-    if saveImage
-        saveas(h,fullfile(savePath,['dir',timingField,'_raster',imageExt]));
-    end
-    close(h);
-    
-    timingField = 'MT';
-    h = plot_typeRaster(dirMT,timingField,mt_meanColors);
-    print(h,'-painters','-depsc',fullfile(savePath,['dir',timingField,'_raster','.eps']));
-    if saveImage
-        saveas(h,fullfile(savePath,['dir',timingField,'_raster',imageExt]));
-    end
-    close(h);
     
     if true
         all_loadData = {ndirRT,ndirMT,dirRT,dirMT};
@@ -121,10 +152,15 @@ function RTMT_corrMatrix()
         timingField = 'RT';
         h = plot_type1(ndirRT,rt_meanColors,timingField);
         if doSave
-            print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'.eps']));
             if saveImage
                 saveas(h,fullfile(savePath,[dirLabel,timingField,imageExt]));
             end
+            if ~doLabels
+                cleanPlot;
+                tightfig;
+                setFig('','',[1,2]);
+            end
+            print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'.eps']));
             close(h);
         end
 
@@ -134,10 +170,15 @@ function RTMT_corrMatrix()
         ylimVals = [-0.5 0.5];
         h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,ndirRT.meanBinsSeconds,rt_meanColors,timingField);
         if doSave
-            print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
             if saveImage
                 saveas(h,fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,imageExt]));
             end
+            if ~doLabels
+                cleanPlot;
+                tightfig;
+                setFig('','',[0.5,1.5]);
+            end
+            print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
             close(h);
         end
 
@@ -147,10 +188,15 @@ function RTMT_corrMatrix()
         ylimVals = [0 2];
         h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,ndirRT.meanBinsSeconds,rt_meanColors,timingField);
         if doSave
-            print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
             if saveImage
                 saveas(h,fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,imageExt]));
             end
+            if ~doLabels
+                cleanPlot;
+                tightfig;
+                setFig('','',[0.5,1.5]);
+            end
+            print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
             close(h);
         end
 
@@ -158,10 +204,15 @@ function RTMT_corrMatrix()
         timingField = 'MT';
         h = plot_type1(ndirMT,mt_meanColors,timingField);
         if doSave
-            print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'.eps']));
             if saveImage
                 saveas(h,fullfile(savePath,[dirLabel,timingField,imageExt]));
             end
+            if ~doLabels
+                cleanPlot;
+                tightfig;
+                setFig('','',[1,2]);
+            end
+            print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'.eps']));
             close(h);
         end
         
@@ -171,10 +222,15 @@ function RTMT_corrMatrix()
         ylimVals = [-0.5 0.5];
         h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,ndirMT.meanBinsSeconds,mt_meanColors,timingField);
         if doSave
-            print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
             if saveImage
                 saveas(h,fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,imageExt]));
             end
+            if ~doLabels
+                cleanPlot;
+                tightfig;
+                setFig('','',[0.5,1.5]);
+            end
+            print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
             close(h);
         end
 
@@ -184,10 +240,15 @@ function RTMT_corrMatrix()
         ylimVals = [0 2];
         h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,ndirMT.meanBinsSeconds,mt_meanColors,timingField);
         if doSave
-            print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
             if saveImage
                 saveas(h,fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,imageExt]));
             end
+            if ~doLabels
+                cleanPlot;
+                tightfig;
+                setFig('','',[0.5,1.5]);
+            end
+            print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
             close(h);
         end
 
@@ -196,10 +257,15 @@ function RTMT_corrMatrix()
         timingField = 'RT';
         h = plot_type1(dirRT,rt_meanColors,timingField);
         if doSave
-            print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'.eps']));
             if saveImage
                 saveas(h,fullfile(savePath,[dirLabel,timingField,imageExt]));
             end
+            if ~doLabels
+                cleanPlot;
+                tightfig;
+                setFig('','',[1,2]);
+            end
+            print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'.eps']));
             close(h);
         end
 
@@ -209,10 +275,15 @@ function RTMT_corrMatrix()
         ylimVals = [-0.5 0.5];
         h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,dirRT.meanBinsSeconds,rt_meanColors,timingField);
         if doSave
-            print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
             if saveImage
                 saveas(h,fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,imageExt]));
             end
+            if ~doLabels
+                cleanPlot;
+                tightfig;
+                setFig('','',[0.5,1.5]);
+            end
+            print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
             close(h);
         end
 
@@ -222,10 +293,15 @@ function RTMT_corrMatrix()
         ylimVals = [0 2];
         h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,dirRT.meanBinsSeconds,rt_meanColors,timingField);
         if doSave
-            print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
             if saveImage
                 saveas(h,fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,imageExt]));
             end
+            if ~doLabels
+                cleanPlot;
+                tightfig;
+                setFig('','',[0.5,1.5]);
+            end
+            print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
             close(h);
         end
 
@@ -234,10 +310,15 @@ function RTMT_corrMatrix()
         dirLabel = 'dir';
         h = plot_type1(dirMT,mt_meanColors,timingField);
         if doSave
-            print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'.eps']));
             if saveImage
                 saveas(h,fullfile(savePath,[dirLabel,timingField,imageExt]));
             end
+            if ~doLabels
+                cleanPlot;
+                tightfig;
+                setFig('','',[1,2]);
+            end
+            print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'.eps']));
             close(h);
         end
 
@@ -247,10 +328,15 @@ function RTMT_corrMatrix()
         ylimVals = [-0.5 0.5];
         h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,dirMT.meanBinsSeconds,mt_meanColors,timingField);
         if doSave
-            print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
             if saveImage
                 saveas(h,fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,imageExt]));
             end
+            if ~doLabels
+                cleanPlot;
+                tightfig;
+                setFig('','',[0.5,1.5]);
+            end
+            print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
             close(h);
         end
 
@@ -260,10 +346,15 @@ function RTMT_corrMatrix()
         ylimVals = [0 2];
         h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,dirMT.meanBinsSeconds,mt_meanColors,timingField);
         if doSave
-            print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
             if saveImage
                 saveas(h,fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,imageExt]));
             end
+            if ~doLabels
+                cleanPlot;
+                tightfig;
+                setFig('','',[0.5,1.5]);
+            end
+            print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
             close(h);
         end
     end
@@ -346,7 +437,7 @@ function h = plot_typeRaster(loadData,timingField,meanColors)
     lineWidth = 4;
     
     curRaster = loadData.doRasters{1};
-    n_rasterReadable = round(100000 / numel(curRaster));
+    n_rasterReadable = round(50000 / numel(curRaster));
     curRaster_sorted_readable = makeRasterReadable(curRaster',n_rasterReadable);
     plotSpikeRaster(curRaster_sorted_readable,'PlotType','scatter','AutoLabel',false);
     hold on;
@@ -359,11 +450,11 @@ function h = plot_typeRaster(loadData,timingField,meanColors)
     
     if strcmp(timingField,'RT')
         toneLine = colormapline(-loadData.all_useTime_sorted,1:numel(loadData.all_useTime_sorted),[],meanColors);
-        legend(toneLine,timingField);
+% %         legend(toneLine,timingField);
         set(toneLine,'linewidth',lineWidth);
     elseif strcmp(timingField,'MT')
         toneLine = colormapline(loadData.all_useTime_sorted,1:numel(loadData.all_useTime_sorted),[],meanColors);
-        legend(toneLine,timingField);
+% %         legend(toneLine,timingField);
         set(toneLine,'linewidth',lineWidth);
     end
 
@@ -373,7 +464,7 @@ end
 
 function h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,meanBinsSeconds,meanColors,timingField)
     h = figuree(450,250);
-    markerSize = 100;
+    markerSize = 15;
     
     scatter(x,y,markerSize,meanColors,'filled');
 % %     xlim([min(x) max(x)]);
@@ -435,12 +526,11 @@ function h = plot_type1(loadData,meanColors,timingField)
     binS = 2 / z_xlimVals(2);
     
     % annotate min/max correlation
-    ys = repmat(1.75,1,2);
-    xs = [round(.2 / binS) round(.7 / binS)];
-    
-    annotation('doublearrow',x_to_norm_v2(xs(1),xs(2)),y_to_norm_v2(ys(1),ys(2)),'color',annotateColor);
-    xs = [round(.75 / binS) round(1.25 / binS)];
-    annotation('doublearrow',x_to_norm_v2(xs(1),xs(2)),y_to_norm_v2(ys(1),ys(2)),'color',annotateColor);
+% %     ys = repmat(1.75,1,2);
+% %     xs = [round(.2 / binS) round(.7 / binS)];
+% %     annotation('doublearrow',x_to_norm_v2(xs(1),xs(2)),y_to_norm_v2(ys(1),ys(2)),'color',annotateColor);
+% %     xs = [round(.75 / binS) round(1.25 / binS)];
+% %     annotation('doublearrow',x_to_norm_v2(xs(1),xs(2)),y_to_norm_v2(ys(1),ys(2)),'color',annotateColor);
     
     grid on;
     setFig;

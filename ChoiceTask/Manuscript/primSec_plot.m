@@ -3,8 +3,10 @@ show_primFate = false; % false = show_secOrigin
 plotOpt = 2; % 1 = both sides of x-axis, 2 = mosaic
 showMosaic = false;
 plotTitle = 'Unit Classes';
+doLabels = false;
+doSave = true;
 
-doSetup = true;
+doSetup = false;
 if doSetup
     tWindow = 0.2;
     binMs = 20;
@@ -25,7 +27,7 @@ figuree(500,500);
 % cols = 7;
 colors = parula(8);
 % colors = colors(1:end,:);
-colors(8,:) = [.8 .8 .8];
+colors(8,:) = [.7 .7 .7];
 
 primBars = histcounts(primSec_wNC(:,1),0.5:8.5);
 secBars = histcounts(primSec_wNC(:,2),0.5:8.5);
@@ -33,7 +35,8 @@ secBars = histcounts(primSec_wNC(:,2),0.5:8.5);
 lns = [];
 for iBar = 1:numel(secBars)
     if ~onlyPrimary
-        lns(2) = bar(iBar,primBars(iBar) + secBars(iBar),'FaceColor',colors(iBar,:),'FaceAlpha',0.2,'EdgeColor','w','lineWidth',2);
+        lns(2) = bar(iBar,primBars(iBar) + secBars(iBar),'FaceColor',colors(iBar,:),'FaceAlpha',0.25,'EdgeColor','w','lineWidth',2);
+        hold on;
     end
     lns(1) = bar(iBar,primBars(iBar),'FaceColor',colors(iBar,:),'EdgeColor','w','lineWidth',2);
     hold on;
@@ -71,27 +74,20 @@ if showMosaic
     end
 end
 if onlyPrimary
-    legend(lns,{'Primary Class'},'location','northwest');
+    legend(lns,{'Primary Class'},'location','northoutside');
+    legend boxoff;
 else
-    legend(lns,{'Primary Class','Secondary Class'},'location','northwest');
+    legend(lns,{'Primary Class','Secondary Class'},'location','northoutside');
+    legend boxoff;
 end
 
 % formatting
 
-for iText = 1:numel(primBars)
-    text(iText,primBars(iText),num2str(primBars(iText)),'VerticalAlignment','bottom','HorizontalAlignment','center');
-    if ~onlyPrimary
-        text(iText,primBars(iText)+secBars(iText),num2str(secBars(iText)),'VerticalAlignment','bottom','HorizontalAlignment','center');
-    end
-end
-
-set(gca,'fontsize',16);
-
 xticks(1:8);
 xticklabels({eventFieldlabels{:},'N.R.'});
 ax = gca;
-ax.XAxis.FontSize = 12;
-xtickangle(45);
+ax.XAxis.FontSize = 14;
+xtickangle(90);
 
 if plotOpt == 1
     ylimVals = [-150 200];
@@ -103,32 +99,52 @@ else
     ylim(ylimVals);
     yticks(ylimVals);
 end
-ylabel('Units');
-title(plotTitle);
-box off;
-set(gcf,'color','w');
+if doLabels
+    ylabel('Units');
+    title(plotTitle);
+else
+    yticklabels([]);
+end
+setFig('','',[1,1]);
+for iText = 1:numel(primBars)
+    text(iText,primBars(iText),num2str(primBars(iText)),'VerticalAlignment','bottom','HorizontalAlignment','center','fontSize',10);
+    if ~onlyPrimary
+        text(iText,primBars(iText)+secBars(iText),num2str(secBars(iText)),'VerticalAlignment','bottom','HorizontalAlignment','center','fontSize',10);
+    end
+end
+
+if doSave
+    print(gcf,'-painters','-depsc',fullfile(figPath,'primSec_plot_unitClasses.eps'));
+end
 
 
 % pie charts
 pieData = primFate;
 useEvents = [3,4]; % limit 2
-figuree(500,500);
+figuree(500,400);
 
 for iEvent = 1:2
     subplot(1,2,iEvent);
 % %     p = pie(pieData(useEvent,:)+.001,{eventFieldlabels{:},'NR'});
     p = pie(pieData(useEvents(iEvent),:)+.001);
-    legend({eventFieldlabels{:},'NR'},'location','southoutside');
     for ii = 2:2:numel(p)
 % %         t = p(ii);
 % %         t.FontSize = 16;
         p(ii).String = '';
     end
-    title({eventFieldlabels{useEvents(iEvent)},'Primary Fate'});
+    if doLabels
+        title(eventFieldlabels{useEvents(iEvent)});
+        legend({eventFieldlabels{:},'NR'},'location','southoutside');
+    end
 % %     setFig;
     colormap(colors);
 end
-set(gcf,'color','w');
+tightfig;
+setFig('','',[1,0.5]);
+
+if doSave
+    print(gcf,'-painters','-depsc',fullfile(figPath,'primSec_plot_primaryFate.eps'));
+end
 
 % then redo that for secOrigin if you want...
 % % pieData = secOrigin(:,2:end);

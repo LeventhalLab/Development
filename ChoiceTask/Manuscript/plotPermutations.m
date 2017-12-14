@@ -1,8 +1,8 @@
 doSave = true;
-nMeanBins = 12;
+nMeanBins = 10;
 binMs = 20;
 
-expressRT = 0.050;
+expressRT = 0.100;
 ordinaryRT = 0.300;
 ordinaryMT = 0.400;
 
@@ -149,7 +149,7 @@ for ii_events = 1:numel(events)
                         continue;
                     end
 
-                    disp(['Using unit ',num2str(iNeuron),' (class=',num2str(unitClasses(iNeuron)),', maxz=',num2str(unitEvents{iNeuron}.maxz(unitClasses(iNeuron))),') ',neuronName]);
+                    disp(['Using unit ',num2str(iNeuron),' (class=',num2str(primSec(iNeuron,1)),', maxz=',num2str(unitEvents{iNeuron}.maxz(primSec(iNeuron,1))),') ',neuronName]);
                     unitCount = unitCount + 1;
                     
                     curTrials = all_trials{iNeuron};
