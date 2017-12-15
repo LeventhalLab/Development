@@ -4,13 +4,13 @@ doSave = true;
 doLabels = false;
 dodebug = false;
 debugPath = '/Users/mattgaidica/Documents/Data/ChoiceTask/ipsiContraShuffleDebug';
-pVal = 0.99;
+pVal = 0.95;
 pVal_minBins = 2;
 colors = lines(2);
-dirSelType = 'NO'; % NO or SO
+dirSelType = 'SO'; % NO or SO
 useIncorrect = false;
-nSmooth = 3;
-requireTrials = 10;
+nSmooth = 1;
+requireTrials = 5;
 minFR = 5;
 nShuffle = 1000;
 
@@ -23,7 +23,7 @@ end
 excludeSessions = {'R0117_20160504a','R0142_20161207a','R0117_20160508a','R0117_20160510a'}; % corrupt video
 [sessionNames,IA] = unique(analysisConf.sessionNames);
 
-if false
+if true
     useEvents = 1:7;
     tWindow = 1;
     binMs = 20;

@@ -1,9 +1,9 @@
 doSave = true;
-nMeanBins = 10;
+nMeanBins = 10; % corr bins; with gray = n+2 for RT, n+1 for MT
 binMs = 20;
 
 expressRT = 0.100;
-ordinaryRT = 0.300;
+ordinaryRT = 0.350;
 ordinaryMT = 0.400;
 
 all_RTfromPermutations = [];
@@ -22,7 +22,7 @@ doBursts = false;
 binInc = 0.02;
 z_smooth = 3;
 auc_smooth = 3;
-lineWidth = 2;
+lineWidth = 3;
 
 % % trialTypes = {'correct'};
 % % useEvents = 1:7;
@@ -41,10 +41,10 @@ clear all_z_raw;
 % % burstCriterias = {'none','Poisson','LTS'};
 
 events = [4];
-unitTypes = {'dirSel','~dirSel'}; % ,'~dirSel'
+unitTypes = {'~dirSel','dirSel'}; % ,'dirSel'
 dirSelType = 'NO'; % NO or SO
 % unitTypes = {'dirSel'};
-timingFields = {'RT','MT'};
+timingFields = {'RT','MT'}; % ,'MT'
 movementDirs = {'all'};
 
 % --- END CONFIG
@@ -360,16 +360,16 @@ for ii_events = 1:numel(events)
                     case 'RT'
                         expressRTIdx = find(all_useTime_sorted > expressRT,1,'first');
                         ordinaryRTIdx = find(all_useTime_sorted < ordinaryRT,1,'last');
-                        meanBins = [1 round(linspace(expressRTIdx,ordinaryRTIdx,nMeanBins-1)) numel(all_useTime_sorted)];
+                        meanBins = [1 round(linspace(expressRTIdx,ordinaryRTIdx,nMeanBins+1)) numel(all_useTime_sorted)];
                         meanBinsSeconds = all_useTime_sorted(meanBins);
-                        meanColors = [grayColor;cool(nMeanBins-2);grayColor];
+                        meanColors = [grayColor;cool(nMeanBins);grayColor];
                         RT_meanBinsSeconds = meanBinsSeconds; % save
                         all_RTfromPermutations = [all_RTfromPermutations all_useTime_sorted];
                     case 'MT'
                         ordinaryMTIdx = find(all_useTime_sorted < ordinaryMT,1,'last');
-                        meanBins = [round(linspace(1,ordinaryMTIdx,nMeanBins)) numel(all_useTime_sorted)];
+                        meanBins = [round(linspace(1,ordinaryMTIdx,nMeanBins+1)) numel(all_useTime_sorted)];
                         meanBinsSeconds = all_useTime_sorted(meanBins);
-                        meanColors = [summer(nMeanBins-1);grayColor];
+                        meanColors = [summer(nMeanBins);grayColor];
                         MT_meanBinsSeconds = meanBinsSeconds; % save
                         all_MTfromPermutations = [all_MTfromPermutations all_useTime_sorted];
                     case 'RTMT'
@@ -611,17 +611,19 @@ for ii_events = 1:numel(events)
                 set(h,'PaperOrientation','landscape');
                 set(h,'PaperUnits','normalized');
                 set(h,'PaperPosition', [0 0 1 1]);
+                drawnow;
                 if doSave
                     export_fig(gcf,'-pdf', fullfile(savePath,[saveFile,'.pdf']));
                     save(fullfile(sessionsPath,[saveFile,datestr(now,'yyyymmdd')]),'doRasters','z_raw','meanBinsSeconds','mean_z',...
                         'auc_min','auc_max','auc_max_t','auc_min_z','auc_max_z','all_useTime_sorted');
+                    close(h);
                 end
-                close(h);
             end
         end
     end
 end
 
+% END ANALYSIS !!!
 return;
 
 % figure;

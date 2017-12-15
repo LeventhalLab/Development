@@ -1,9 +1,9 @@
-subplotMargins = [.05,.02];
+subplotMargins = [.00,.02];
 figPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Thalamus_behavior_2017/Figures/MATLAB';
 
-doLabels = true;
-doTitle = true;
-doSave = false;
+doLabels = false;
+doTitle = false;
+doSave = true;
 % use primary + secondary classes
 tWindow = 1;
 binMs = 20;
@@ -30,7 +30,7 @@ sessionId = find(strcmp(sessionNames,analysisConf.sessionNames{useNeuron}) == 1,
 session_rt = all_rt_c{sessionId};
 session_mt = all_mt_c{sessionId};
 
-figuree(1200,350);
+h = figuree(1200,300);
 lns = [];
 for iEvent = 1:numel(eventFieldnames)
 % %     plot(squeeze(all_zscores(useNeurons,iEvent,:))','LineWidth',0.5,'Color',repmat(.1,1,4));
@@ -128,4 +128,6 @@ setFig('','',[2,1]);
 
 if doSave
     print(gcf,'-painters','-depsc',fullfile(figPath,'zscoresPlot_singleUnit.eps'));
+    close(h);
 end
+subplotMargins = [.05,.02];

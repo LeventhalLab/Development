@@ -1,9 +1,11 @@
 % % unitEvents = corr_unitEvents;
 % % all_zscores = corr_all_zscores;
 specialUnit = 133;
-doLegend = true;
-doLabels = true;
-doSave = false;
+doLegend = false;
+doLabels = false;
+doSave = true;
+doPrimSecArrows = true;
+caxisVals = [-0.5 2];
 
 doSetup = false;
 % use primSec_plot.m to set primSec (unit classes)
@@ -16,9 +18,11 @@ if doSetup
     [~,all_zscores,~] = classifyUnitsToEvents(analysisConf,all_trials,all_ts,eventFieldnames,tWindow,binMs,trialTypes,useEvents,useTiming);
 % %     minZ = 1;
 % %     [primSec,fractions] = primSecClass(unitEvents,minZ);
+% %     minZ = 0;
+% %     [primSec_minZ0,~] = primSecClass(unitEvents,minZ);
 end
 
-runMap = 3;
+runMap = 4;
 switch runMap
     case 1 % dirSel
         use_dirSelNeurons = dirSelNeuronsNO;
@@ -33,6 +37,9 @@ switch runMap
     case 3 % all non-NAN
         useUnits = ~isnan(primSec(:,1));
         plotSpecialArrows = true;
+    case 4 % all NAN
+        useUnits = isnan(primSec(:,1));
+        plotSpecialArrows = false;
 end
 
 imsc = [];
@@ -75,8 +82,7 @@ for iEvent = 1:numel(eventFieldnames)
 % %     markerLocs = [markerLocs numel(sorted_neuronIds)];
 end
 
-caxisVals = [-0.5 2];
-h = figuree(1200,400);
+h = figuree(1200,numel(sorted_neuronIds)/.75);
 hs = [];
 for iEvent = 1:numel(eventFieldnames)
     hs(iEvent) = subplot_tight(1,numel(eventFieldnames),iEvent,subplotMargins);
@@ -110,13 +116,15 @@ for iEvent = 1:numel(eventFieldnames)
     grid on;
     set(gca,'fontSize',14);
 end
-for iNeuron = 1:numel(sorted_neuronIds)
-    if ~isempty(unitEvents{sorted_neuronIds(iNeuron)}.class)
-        subplot(hs(unitEvents{sorted_neuronIds(iNeuron)}.class(1)));
-        plot(4,iNeuron,'>','MarkerFaceColor','k','MarkerEdgeColor','none','markerSize',5); % class 1
-        if ~isempty(unitEvents{sorted_neuronIds(iNeuron)}.class(2))
-            subplot(hs(unitEvents{sorted_neuronIds(iNeuron)}.class(2)));
-            plot(size(all_zscores,3)-1,iNeuron,'<','MarkerFaceColor',repmat(1,1,3),'MarkerEdgeColor','none','markerSize',5); % class 1
+if doPrimSecArrows
+    for iNeuron = 1:numel(sorted_neuronIds)
+        if ~isempty(unitEvents{sorted_neuronIds(iNeuron)}.class)
+            subplot(hs(unitEvents{sorted_neuronIds(iNeuron)}.class(1)));
+            plot(4,iNeuron,'>','MarkerFaceColor','k','MarkerEdgeColor','none','markerSize',5); % class 1
+            if ~isempty(unitEvents{sorted_neuronIds(iNeuron)}.class(2))
+                subplot(hs(unitEvents{sorted_neuronIds(iNeuron)}.class(2)));
+                plot(size(all_zscores,3)-1,iNeuron,'<','MarkerFaceColor',repmat(1,1,3),'MarkerEdgeColor','none','markerSize',5); % class 1
+            end
         end
     end
 end
@@ -138,11 +146,12 @@ setFig('','',[2,1]);
 box on;
 
 if doSave
-    print(gcf,'-painters','-depsc',fullfile(figPath,'heatmapUnitClass.eps'));
+    print(gcf,'-painters','-depsc',fullfile(figPath,['heatmapUnitClass_',num2str(runMap),'.eps']));
+    close(h);
 end
 
 if doLegend
-    figuree(300,400);
+    h = figuree(300,400);
     set(gca,'Visible','Off')
     xticks([]);
     cb = colorbar('location','south','Orientation','horizontal');
@@ -154,51 +163,8 @@ if doLegend
         title(cb,'Z score');
     end
     setFig('','',1);
+    if doSave
+        print(gcf,'-painters','-depsc',fullfile(figPath,'heatmapUnitClass_legend.eps'));
+        close(h);
+    end
 end
-
-if doSave
-    print(gcf,'-painters','-depsc',fullfile(figPath,'heatmapUnitClass_legend.eps'));
-end
-    
-
-% % if false
-% %     % incorrect 
-% %     figuree(1200,800);
-% %     for iEvent = 1:numel(eventFieldnames)
-% %         subplot(1,numel(eventFieldnames),iEvent);
-% %         imagesc(squeeze(incorr_all_zscores(sorted_neuronIds,iEvent,:)));
-% %         caxis([-3 8]);
-% %         xlim([1 40]);
-% %         xticks([1 20 40]);
-% %         xticklabels({'-1','0','1'});
-% %         yticks([1 numel(analysisConf.neurons)]);
-% %         colormap jet;
-% %         title(['incorr_',eventFieldnames{iEvent}],'interpreter','none');
-% %         hold on;
-% %         plot([20 20],[1 numel(analysisConf.neurons)],'k--');
-% %         markerRange = markerLocs(iEvent)+1:markerLocs(iEvent+1);
-% %         plot(ones(numel(markerRange),1),markerRange,'k.','MarkerSize',20);
-% %     %     markerRange = markerLocs(iEvent)+1:markerLocs(iEvent+1);
-% %     %     plot(ones(numel(markerRange),1),markerRange,'r.','MarkerSize',10);
-% %     end
-% % 
-% %     % correct - incorrect 
-% %     figuree(1200,800);
-% %     for iEvent = 1:numel(eventFieldnames)
-% %         subplot(1,numel(eventFieldnames),iEvent);
-% %         imagesc(squeeze(all_zscores(sorted_neuronIds,iEvent,:)) - squeeze(incorr_all_zscores(sorted_neuronIds,iEvent,:)));
-% %         caxis([-3 8]);
-% %         xlim([1 40]);
-% %         xticks([1 20 40]);
-% %         xticklabels({'-1','0','1'});
-% %         yticks([1 numel(analysisConf.neurons)]);
-% %         colormap jet;
-% %         title(['diff_',eventFieldnames{iEvent}],'interpreter','none');
-% %         hold on;
-% %         plot([20 20],[1 numel(analysisConf.neurons)],'k--');
-% %         markerRange = markerLocs(iEvent)+1:markerLocs(iEvent+1);
-% %         plot(ones(numel(markerRange),1),markerRange,'k.','MarkerSize',20);
-% %     %     markerRange = markerLocs(iEvent)+1:markerLocs(iEvent+1);
-% %     %     plot(ones(numel(markerRange),1),markerRange,'r.','MarkerSize',10);
-% %     end
-% % end

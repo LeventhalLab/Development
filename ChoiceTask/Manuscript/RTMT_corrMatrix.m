@@ -36,10 +36,10 @@ function RTMT_corrMatrix()
 % %     dirMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n72_movDirall_byMT_bins10_binMs20ORD20171031.mat');
 
     % nose out event, primary only
-    ndirRT = load(fullfile(uSessionsPath,'evNose Out_un~dirSel_n60_movDirall_byRT_bins10_binMs20_NO20171214.mat'));
-    ndirMT = load(fullfile(uSessionsPath,'evNose Out_un~dirSel_n60_movDirall_byMT_bins10_binMs20_NO20171214.mat'));
-    dirRT = load(fullfile(uSessionsPath,'evNose Out_undirSel_n57_movDirall_byRT_bins10_binMs20_NO20171214.mat'));
-    dirMT = load(fullfile(uSessionsPath,'evNose Out_undirSel_n57_movDirall_byMT_bins10_binMs20_NO20171214.mat'));
+    ndirRT = load(fullfile(uSessionsPath,'evNose Out_un~dirSel_n62_movDirall_byRT_bins10_binMs20_NO20171215.mat'));
+    ndirMT = load(fullfile(uSessionsPath,'evNose Out_un~dirSel_n62_movDirall_byMT_bins10_binMs20_NO20171215.mat'));
+    dirRT = load(fullfile(uSessionsPath,'evNose Out_undirSel_n54_movDirall_byRT_bins10_binMs20_NO20171215.mat'));
+    dirMT = load(fullfile(uSessionsPath,'evNose Out_undirSel_n54_movDirall_byMT_bins10_binMs20_NO20171215.mat'));
     
     % setup
     grayColor = [.8 .8 .8];

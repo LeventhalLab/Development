@@ -1,4 +1,7 @@
 % function rtMtDist(analysisConf)
+doLabels = true;
+doSave = false;
+
 if false
     all_rt = [];
     all_rt_c = {};
@@ -74,7 +77,7 @@ useMeanColors = false;
 grayColor = [.8 .8 .8];
 
 nSmooth = 5;
-lineWidth = 4;
+lineWidth = 2;
 adjLabel = 15;
 h = figuree(600,300);
 [rt_counts,rt_centers] = hist(all_rt,[xlimVals(1):histInt:xlimVals(2)]+histInt);
@@ -94,7 +97,7 @@ set(lns_rt,'lineWidth',lineWidth);
 % % plot(x,y,'k','lineWidth',lineWidth);
 hold on;
 [v,k] = max(y);
-text(x(k),v + adjLabel,'RT','fontSize',16,'HorizontalAlignment','Center');
+text(x(k),v + adjLabel,'RT','fontSize',14,'HorizontalAlignment','Center');
 x = interp(mt_centers,nSmooth);
 y = abs(interp(mt_counts,nSmooth));
 if useMeanColors
@@ -109,88 +112,99 @@ end
 set(lns_mt,'lineWidth',lineWidth);
 % % lns = plot(x,y,'k','lineWidth',lineWidth);
 [v,k] = max(y);
-text(x(k),v + adjLabel,'MT','fontSize',16,'HorizontalAlignment','Center');
+text(x(k),v + adjLabel,'MT','fontSize',14,'HorizontalAlignment','Center');
 ylim([0 220]);
 yticks(ylim);
 xlim([0 1]);
 xticks(xlim);
 setFig('Time (s)','Trials');
 
-exportEPS(h,figPath,'RTMT_distribution');
-
-figuree(1200,250);
-cols = 3;
-
-histInt = .01;
-xlimVals = [0 1];
-subplot(1,cols,1);
-[counts,centers] = hist(all_rt,[xlimVals(1):histInt:xlimVals(2)]+histInt);
-bar(centers,counts,'faceColor','k','edgeColor','k');
-xlabel('RT (s)');
-xlim(xlimVals);
-xticks(xlimVals);
-ylim([0 200]);
-yticks(ylim);
-ylabel('trials');
-set(gca,'fontSize',16);
-% title(['RT Distribution, ',num2str(numel(all_rt)),' trials, ',num2str(histInt*1000),' ms bins']);
-
-[counts,centers] = hist(all_mt,[xlimVals(1):histInt:xlimVals(2)]+histInt);
-subplot(1,cols,2);
-bar(centers,counts,'faceColor','k','edgeColor','k');
-xlabel('MT (s)');
-xlim(xlimVals);
-xticks(xlimVals);
-ylim([0 200]);
-yticks(ylim);
-ylabel('trials');
-set(gca,'fontSize',16);
-% title(['MT Distribution, ',num2str(numel(all_mt)),' trials, ',num2str(histInt*1000),' ms bins']);
-
-subplot(1,cols,3);
-subjects__ids = unique(all_subjects__id);
-colors = lines(numel(subjects__ids));
-curSubject = all_subjects__id(1);
-curColor = 1;
-lns = [];
-for iSession = 1:numel(all_subjects__id)
-    if curSubject ~= all_subjects__id(iSession)
-        curColor = curColor + 1;
-        curSubject = all_subjects__id(iSession);
+if doSave
+    if ~doLabels
+        cleanPlot;
+        tightfig;
+        setFig('','',[1,1]);
     end
-    plot(all_rt_c{iSession},all_mt_c{iSession},'.','color',colors(curColor,:),'MarkerSize',10);
-    hold on;
+    exportEPS(h,figPath,'RTMT_distribution');
+    close(h);
 end
-for iSubject = 1:numel(subjects__ids)
-    lns(iSubject) = plot(-1,-1,'.','color',colors(iSubject,:),'MarkerSize',40);
-end
-xlim(xlimVals);
-xticks(xlimVals);
-ylim([0 1]);
-yticks(ylim);
-xlabel('RT (s)');
-ylabel('MT (s)');
-% title(['by subject, n = ',num2str(numel(subjects__ids))]);
-% % legend(lns,num2str(subjects__ids(:)));
-% % legend boxoff;
-set(gca,'fontSize',16);
 
-if cols > 3
-    % RT-MT correlation
-    subplot(1,cols,4);
-    colors = jet(numel(all_mt_c));
-    for iSession = 1:numel(all_rt_c)
-        plot(all_rt_c{iSession},all_mt_c{iSession},'.','color',colors(iSession,:),'MarkerSize',10);
+% per session/subject distributions
+if false
+    figuree(1200,250);
+    cols = 3;
+
+    histInt = .01;
+    xlimVals = [0 1];
+    subplot(1,cols,1);
+    [counts,centers] = hist(all_rt,[xlimVals(1):histInt:xlimVals(2)]+histInt);
+    bar(centers,counts,'faceColor','k','edgeColor','k');
+    xlabel('RT (s)');
+    xlim(xlimVals);
+    xticks(xlimVals);
+    ylim([0 200]);
+    yticks(ylim);
+    ylabel('trials');
+    set(gca,'fontSize',16);
+    % title(['RT Distribution, ',num2str(numel(all_rt)),' trials, ',num2str(histInt*1000),' ms bins']);
+
+    [counts,centers] = hist(all_mt,[xlimVals(1):histInt:xlimVals(2)]+histInt);
+    subplot(1,cols,2);
+    bar(centers,counts,'faceColor','k','edgeColor','k');
+    xlabel('MT (s)');
+    xlim(xlimVals);
+    xticks(xlimVals);
+    ylim([0 200]);
+    yticks(ylim);
+    ylabel('trials');
+    set(gca,'fontSize',16);
+    % title(['MT Distribution, ',num2str(numel(all_mt)),' trials, ',num2str(histInt*1000),' ms bins']);
+
+    subplot(1,cols,3);
+    subjects__ids = unique(all_subjects__id);
+    colors = lines(numel(subjects__ids));
+    curSubject = all_subjects__id(1);
+    curColor = 1;
+    lns = [];
+    for iSession = 1:numel(all_subjects__id)
+        if curSubject ~= all_subjects__id(iSession)
+            curColor = curColor + 1;
+            curSubject = all_subjects__id(iSession);
+        end
+        plot(all_rt_c{iSession},all_mt_c{iSession},'.','color',colors(curColor,:),'MarkerSize',10);
         hold on;
     end
-    grid on;
+    for iSubject = 1:numel(subjects__ids)
+        lns(iSubject) = plot(-1,-1,'.','color',colors(iSubject,:),'MarkerSize',40);
+    end
     xlim(xlimVals);
+    xticks(xlimVals);
     ylim([0 1]);
+    yticks(ylim);
     xlabel('RT (s)');
     ylabel('MT (s)');
-    title(['by session, N = ',num2str(numel(all_mt_c))]);
+    % title(['by subject, n = ',num2str(numel(subjects__ids))]);
+    % % legend(lns,num2str(subjects__ids(:)));
+    % % legend boxoff;
     set(gca,'fontSize',16);
-end
 
-set(gcf,'color','w');
-tightfig;
+    if cols > 3
+        % RT-MT correlation
+        subplot(1,cols,4);
+        colors = jet(numel(all_mt_c));
+        for iSession = 1:numel(all_rt_c)
+            plot(all_rt_c{iSession},all_mt_c{iSession},'.','color',colors(iSession,:),'MarkerSize',10);
+            hold on;
+        end
+        grid on;
+        xlim(xlimVals);
+        ylim([0 1]);
+        xlabel('RT (s)');
+        ylabel('MT (s)');
+        title(['by session, N = ',num2str(numel(all_mt_c))]);
+        set(gca,'fontSize',16);
+    end
+
+    set(gcf,'color','w');
+    tightfig;
+end
