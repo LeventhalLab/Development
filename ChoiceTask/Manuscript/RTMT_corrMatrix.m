@@ -36,10 +36,10 @@ function RTMT_corrMatrix()
 % %     dirMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n72_movDirall_byMT_bins10_binMs20ORD20171031.mat');
 
     % nose out event, primary only
-    ndirRT = load(fullfile(uSessionsPath,'evNose Out_un~dirSel_n62_movDirall_byRT_bins10_binMs20_NO20171215.mat'));
-    ndirMT = load(fullfile(uSessionsPath,'evNose Out_un~dirSel_n62_movDirall_byMT_bins10_binMs20_NO20171215.mat'));
-    dirRT = load(fullfile(uSessionsPath,'evNose Out_undirSel_n54_movDirall_byRT_bins10_binMs20_NO20171215.mat'));
-    dirMT = load(fullfile(uSessionsPath,'evNose Out_undirSel_n54_movDirall_byMT_bins10_binMs20_NO20171215.mat'));
+    ndirRT = load(fullfile(uSessionsPath,'evNose Out_un~dirSel_n42_movDirall_byRT_bins10_binMs20_NO20171218.mat'));
+    ndirMT = load(fullfile(uSessionsPath,'evNose Out_un~dirSel_n42_movDirall_byMT_bins10_binMs20_NO20171218.mat'));
+    dirRT = load(fullfile(uSessionsPath,'evNose Out_undirSel_n68_movDirall_byRT_bins10_binMs20_NO20171218.mat'));
+    dirMT = load(fullfile(uSessionsPath,'evNose Out_undirSel_n68_movDirall_byMT_bins10_binMs20_NO20171218.mat'));
     
     % setup
     grayColor = [.8 .8 .8];
@@ -79,7 +79,7 @@ function RTMT_corrMatrix()
 % %     end
     
     % RASTERS
-    if true
+    if false
         timingField = 'RT';
         h = plot_typeRaster(ndirRT,timingField,rt_meanColors);
         if doSave
@@ -89,7 +89,7 @@ function RTMT_corrMatrix()
             if ~doLabels
                 cleanPlot;
                 tightfig;
-                setFig('','',[1,2]);
+                setFig('','',[1,1]);
             end
             print(h,'-painters','-depsc',fullfile(savePath,['ndir',timingField,'_raster','.eps']));
             close(h);
@@ -104,7 +104,7 @@ function RTMT_corrMatrix()
             if ~doLabels
                 cleanPlot;
                 tightfig;
-                setFig('','',[1,2]);
+                setFig('','',[1,1]);
             end
             print(h,'-painters','-depsc',fullfile(savePath,['ndir',timingField,'_raster','.eps']));
             close(h);
@@ -119,7 +119,7 @@ function RTMT_corrMatrix()
             if ~doLabels
                 cleanPlot;
                 tightfig;
-                setFig('','',[1,2]);
+                setFig('','',[1,1]);
             end
             print(h,'-painters','-depsc',fullfile(savePath,['dir',timingField,'_raster','.eps']));
             close(h);
@@ -134,7 +134,7 @@ function RTMT_corrMatrix()
             if ~doLabels
                 cleanPlot;
                 tightfig;
-                setFig('','',[1,2]);
+                setFig('','',[1,1]);
             end
             print(h,'-painters','-depsc',fullfile(savePath,['dir',timingField,'_raster','.eps']));
             close(h);
@@ -158,7 +158,7 @@ function RTMT_corrMatrix()
             if ~doLabels
                 cleanPlot;
                 tightfig;
-                setFig('','',[1,2]);
+                setFig('','',[1,1]);
             end
             print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'.eps']));
             close(h);
@@ -176,7 +176,7 @@ function RTMT_corrMatrix()
             if ~doLabels
                 cleanPlot;
                 tightfig;
-                setFig('','',[0.5,1.5]);
+                setFig('','',[0.5,.75]);
             end
             print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
             close(h);
@@ -194,7 +194,7 @@ function RTMT_corrMatrix()
             if ~doLabels
                 cleanPlot;
                 tightfig;
-                setFig('','',[0.5,1.5]);
+                setFig('','',[0.5,.75]);
             end
             print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
             close(h);
@@ -210,7 +210,7 @@ function RTMT_corrMatrix()
             if ~doLabels
                 cleanPlot;
                 tightfig;
-                setFig('','',[1,2]);
+                setFig('','',[1,1]);
             end
             print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'.eps']));
             close(h);
@@ -228,7 +228,7 @@ function RTMT_corrMatrix()
             if ~doLabels
                 cleanPlot;
                 tightfig;
-                setFig('','',[0.5,1.5]);
+                setFig('','',[0.5,.75]);
             end
             print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
             close(h);
@@ -246,7 +246,7 @@ function RTMT_corrMatrix()
             if ~doLabels
                 cleanPlot;
                 tightfig;
-                setFig('','',[0.5,1.5]);
+                setFig('','',[0.5,.75]);
             end
             print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
             close(h);
@@ -263,7 +263,7 @@ function RTMT_corrMatrix()
             if ~doLabels
                 cleanPlot;
                 tightfig;
-                setFig('','',[1,2]);
+                setFig('','',[1,1]);
             end
             print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'.eps']));
             close(h);
@@ -281,7 +281,7 @@ function RTMT_corrMatrix()
             if ~doLabels
                 cleanPlot;
                 tightfig;
-                setFig('','',[0.5,1.5]);
+                setFig('','',[0.5,.75]);
             end
             print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
             close(h);
@@ -299,7 +299,7 @@ function RTMT_corrMatrix()
             if ~doLabels
                 cleanPlot;
                 tightfig;
-                setFig('','',[0.5,1.5]);
+                setFig('','',[0.5,.75]);
             end
             print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
             close(h);
@@ -316,7 +316,7 @@ function RTMT_corrMatrix()
             if ~doLabels
                 cleanPlot;
                 tightfig;
-                setFig('','',[1,2]);
+                setFig('','',[1,1]);
             end
             print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'.eps']));
             close(h);
@@ -334,7 +334,7 @@ function RTMT_corrMatrix()
             if ~doLabels
                 cleanPlot;
                 tightfig;
-                setFig('','',[0.5,1.5]);
+                setFig('','',[0.5,.75]);
             end
             print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
             close(h);
@@ -352,7 +352,7 @@ function RTMT_corrMatrix()
             if ~doLabels
                 cleanPlot;
                 tightfig;
-                setFig('','',[0.5,1.5]);
+                setFig('','',[0.5,.75]);
             end
             print(h,'-painters','-depsc',fullfile(savePath,[dirLabel,timingField,'_corr_',ylabelText,'.eps']));
             close(h);
@@ -437,7 +437,7 @@ function h = plot_typeRaster(loadData,timingField,meanColors)
     lineWidth = 4;
     
     curRaster = loadData.doRasters{1};
-    n_rasterReadable = round(50000 / numel(curRaster));
+    n_rasterReadable = round(40000 / numel(curRaster));
     curRaster_sorted_readable = makeRasterReadable(curRaster',n_rasterReadable);
     plotSpikeRaster(curRaster_sorted_readable,'PlotType','scatter','AutoLabel',false);
     hold on;

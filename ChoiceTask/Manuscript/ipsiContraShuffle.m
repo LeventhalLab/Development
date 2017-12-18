@@ -1,18 +1,23 @@
 % the fraction of units whose activity is significantly different between
 % ipsi/contra trials
-doSave = true;
+doSetup = true;
+doSave = false;
 doLabels = false;
 dodebug = false;
-debugPath = '/Users/mattgaidica/Documents/Data/ChoiceTask/ipsiContraShuffleDebug';
-pVal = 0.95;
+doPies = false;
+debugPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Thalamus_behavior_2017/Figures/Misc/ipsiContraShuffleDebug';
+pVal = 0.99;
 pVal_minBins = 2;
 colors = lines(2);
-dirSelType = 'SO'; % NO or SO
+dirSelType = 'NO'; % NO or SO
 useIncorrect = false;
-nSmooth = 1;
+nSmooth = 3;
 requireTrials = 5;
 minFR = 5;
-nShuffle = 1000;
+nShuffle = 100;
+subplotMargins = [.05 .02];
+tWindow = 1;
+binMs = 20;
 
 if ismac
     localSideOutPath = '/Users/mattgaidica/Documents/Data/ChoiceTask/sideOutAnalysis';
@@ -23,13 +28,12 @@ end
 excludeSessions = {'R0117_20160504a','R0142_20161207a','R0117_20160508a','R0117_20160510a'}; % corrupt video
 [sessionNames,IA] = unique(analysisConf.sessionNames);
 
-if true
+if doSetup
     useEvents = 1:7;
-    tWindow = 1;
-    binMs = 20;
     binS = binMs / 1000;
     binEdges = -tWindow:binS:tWindow;
-    analyzeRange = (tWindow / binS) : (tWindow / binS) + (0.25 / binS);
+%     analyzeRange = (tWindow / binS) : (tWindow / binS) + (0.25 / binS);
+    analyzeRange = (tWindow / binS) - (0.2 / binS) : (tWindow / binS) + (0.4 / binS);
     % init to p = 0.5 (N.S.)
     pNeuronDiff = nan(numel(analysisConf.neurons),numel(useEvents),numel(binEdges)-1);
     pNeuronDiff_neg = [];
@@ -106,6 +110,9 @@ if true
 
         pEventDiff = [];
 % %         pEventDiff_neg = [];
+        if dodebug
+            h = figuree(1200,800);
+        end
         for iEvent = 1:numel(useEvents)
             curPeths = tsPeths(:,iEvent);
             eventMatrix = [];
@@ -132,11 +139,13 @@ if true
 % %                 pEventDiff_neg(iEvent,iBin) = numel(find(matrixDiff(iBin) < curMDS)) / nShuffle;
             end
             
-            
+            doingSel = false;
             if (iEvent == 4 && strcmp(dirSelType,'NO')) || (iEvent == 6 && strcmp(dirSelType,'SO'))
+                doingSel = true;
+            
                 dirSelNeurons_contra_ntpIdx = movsum(pEventDiff(iEvent,analyzeRange) > pVal,[0 pVal_minBins-1]) == pVal_minBins;
                 dirSelNeurons_ipsi_ntpIdx = movsum(pEventDiff(iEvent,analyzeRange) < 1-pVal,[0 pVal_minBins-1]) == pVal_minBins;
-                
+
                 % designate contra or ipsi
                 unitType = 0; % 0:none, 1:contra, 2:ipsi
                 if any(dirSelNeurons_contra_ntpIdx)
@@ -154,7 +163,7 @@ if true
                 elseif any(dirSelNeurons_ipsi_ntpIdx)
                     unitType = 2; % ipsi unit!
                 end
-                
+
                 unitTypeLabel = 'none';
                 dirSelNeurons_type(iNeuron) = unitType;
                 switch unitType
@@ -167,52 +176,97 @@ if true
                         dirSelNeurons_count = dirSelNeurons_count + 1;
                         unitTypeLabel = 'ipsi';
                 end
+            end
 
-                if dodebug
-                    lns = [];
-                    debugColors = lines(3);
-                    evDiff = pEventDiff(iEvent,:);
-                    contraIdx = find(evDiff > pVal);
-                    ipsiIdx = find(evDiff < 1-pVal);
-                    h = figuree(400,600);
-                    subplot(211);
-                    lns(1) = plot(contraMean,'lineWidth',2,'color',debugColors(1,:)); hold on;
-                    lns(2) = plot(ipsiMean,'lineWidth',2,'color',debugColors(2,:));
-                    lns(3) = plot(matrixDiff,'lineWidth',2,'color',debugColors(3,:));
-                    
+            if dodebug
+                rows = 6;
+                cols = 8;
+                lns = [];
+                debugColors = lines(3);
+                evDiff = pEventDiff(iEvent,:);
+                contraIdx = find(evDiff > pVal);
+                ipsiIdx = find(evDiff < 1-pVal);
+                
+                % row 1 ---
+                subplot_tight(rows,cols,iEvent,subplotMargins);
+                lns(1) = plot(contraMean,'lineWidth',2,'color',debugColors(1,:)); hold on;
+                lns(2) = plot(ipsiMean,'lineWidth',2,'color',debugColors(2,:));
+                lns(3) = plot(matrixDiff,'lineWidth',2,'color',debugColors(3,:));
+                
+                curUnitClass = primSec(iNeuron,1);
+                if isnan(curUnitClass)
+                    curUnitClass = 8;
+                end
+                if doingSel
                     plot([analyzeRange(1) analyzeRange(1)],ylim,'r--');
                     plot([analyzeRange(end) analyzeRange(end)],ylim,'r--');
-                    xlim([1 numel(binEdges)-1]);
-                    ylabel('spikes/bin');
-                    legend(lns,'contra','ipsi','diff');
-                    title({['Unit ',num2str(iNeuron)],['dir: ',unitTypeLabel],['--',eventFieldlabels{iEvent},'--']});
-                    
-                    subplot(212);
-                    plot(evDiff,'k','lineWidth',2); hold on;
-                    plot(contraIdx,evDiff(contraIdx),'*','color',debugColors(1,:));
-                    plot(ipsiIdx,evDiff(ipsiIdx),'*','color',debugColors(2,:));
+                    title({['class: ',eventFieldlabelsNR{curUnitClass}],['dir: ',unitTypeLabel],eventFieldlabels{iEvent}});
+                end
+                
+                if iEvent == 1
+                    legend(lns,{'contra','ipsi','diff'},'location','northwest');
+                    legend boxoff;
+                    title({['Unit ',num2str(iNeuron)],eventFieldlabels{iEvent}});
+                    ylabel('avg. spikes/bin');
+                    use_ylims = ylim;
+                    use_yticks = yticks;
+                elseif ~doingSel
+                    title({'',eventFieldlabels{iEvent}});
+                end
+                if iEvent ~= 1
+                    ylim(use_ylims);
+                    yticks(use_yticks);
+                end
+                xlim([1 numel(binEdges)-1]);
+                xticks([1 round(numel(evDiff)/2) numel(evDiff)]);
+                xticklabels({'-1','0','1'});
+                grid on;
+                
+                % row 2 ---
+                subplot_tight(rows,cols,iEvent+cols,subplotMargins);
+                plot(evDiff,'k','lineWidth',2); hold on;
+                plot(contraIdx,evDiff(contraIdx),'*','color',debugColors(1,:));
+                plot(ipsiIdx,evDiff(ipsiIdx),'*','color',debugColors(2,:));
+                
+                if doingSel
                     plot(analyzeRange(dirSelNeurons_contra_ntpIdx),evDiff(analyzeRange(dirSelNeurons_contra_ntpIdx)),'o','color',debugColors(1,:),'markerSize',15);
                     plot(analyzeRange(dirSelNeurons_ipsi_ntpIdx),evDiff(analyzeRange(dirSelNeurons_ipsi_ntpIdx)),'o','color',debugColors(2,:),'markerSize',15);
-                    
-                    xlim([1 numel(binEdges)-1]);
-                    xlabel('time');
-                    ylim([-0.2 1.2]);
-                    yticks([0 1]);
-                    ylabel('p');
                     plot([analyzeRange(1) analyzeRange(1)],ylim,'r--');
                     plot([analyzeRange(end) analyzeRange(end)],ylim,'r--');
-                    plot(xlim,[0 0],'k-');
-                    plot(xlim,[1 1],'k-');
-                    plot(xlim,[pVal pVal],'k--');
-                    plot(xlim,[1-pVal 1-pVal],'k--');
-                    
                     title({['*p < ',num2str(1-pVal)],'circled meets detection'});
-                    set(gcf,'color','w');
-                    saveFile = ['debug',dirSelType,'_u',num2str(iNeuron,'%03d'),'_dir-',unitTypeLabel,'.png'];
-                    saveas(h,fullfile(debugPath,saveFile));
-                    close(h);
                 end
+                
+                if iEvent == 1
+                    ylabel('p');
+                end
+                xlim([1 numel(binEdges)-1]);
+                xticks([1 round(numel(evDiff)/2) numel(evDiff)]);
+                xticklabels({'-1','0','1'});
+                ylim([-0.2 1.2]);
+                yticks([0 1]);
+                plot(xlim,[0 0],'k-');
+                plot(xlim,[1 1],'k-');
+                plot(xlim,[pVal pVal],'k--');
+                plot(xlim,[1-pVal 1-pVal],'k--');
+                grid on;
             end
+        end
+        if dodebug
+            iSubplot = 17;
+            iSubplot = plotTimingRaster(analysisConf,all_trials,all_ts,tWindow,eventFieldnames,iNeuron,iSubplot,rows,cols,subplotMargins);
+
+            tightfig;
+            set(h,'color','w');
+
+            noteText = {['pVal: ',num2str(pVal)],['nSmooth: ',num2str(nSmooth)],['requireTrials: ',num2str(requireTrials)],...
+                ['nShuffle: ',num2str(nShuffle)],['binMs: ',num2str(binMs)]};
+            addNote(h,noteText);
+
+            saveFile = ['debug',dirSelType,'_u',num2str(iNeuron,'%03d'),'_class-',eventFieldlabelsNR{curUnitClass},'_dir-',unitTypeLabel,'.pdf'];
+            if doSave
+                print(h,'-painters','-dpdf',fullfile(debugPath,saveFile));
+            end
+            close(h);
         end
         pNeuronDiff(iNeuron,:,:) = pEventDiff;
 % %         pNeuronDiff_neg(iNeuron,:,:) = pEventDiff_neg;
@@ -256,20 +310,6 @@ ipsi_ipsi = sum(dirSelNeuronsNO_ipsi & dirSelNeuronsSO_ipsi)
 disp(['Codes SAME dir: ',num2str(contra_contra+ipsi_ipsi)]);
 disp(['Codes DIFF dir: ',num2str(contra_ipsi+ipsi_contra)]);
 
-figure;
-pie([contra_contra+ipsi_ipsi contra_ipsi+ipsi_contra]);
-legend('SAME','DIFF');
-a = contra_contra+ipsi_ipsi;
-b = contra_ipsi+ipsi_contra;
-c = (a + b) / 2;
-d = c;
-[x2,p] = chiSquare(a,b,c,d);
-title({'Coding between NO & SO',['p = ',num2str(1-p)]});
-set(gcf,'color','w');
-if doSave
-    print(gcf,'-painters','-depsc',fullfile(figPath,'ipsiContraShuffle_codingNOSO.eps'));
-end
-
 contra_NR = contra_x - (contra_contra + ipsi_contra)
 ipsi_NR = ipsi_x - (ipsi_ipsi + contra_ipsi)
 NR_ipsi = sum(~dirSelNeuronsNO & dirSelNeuronsSO_ipsi)
@@ -279,37 +319,51 @@ NRNO = sum(~dirSelNeuronsNO)
 NRSO = sum(~dirSelNeuronsSO)
 NR_NOSO = sum(~dirSelNeurons)
 
-figure;
-subplot_tight(1,2,1,subplotMargins);
-pie([sum(dirSelNeuronsNO_contra) sum(dirSelNeuronsNO_ipsi)]);
-colormap(lines(2));
-a = sum(dirSelNeuronsNO_contra);
-b = sum(dirSelNeuronsNO_ipsi);
-c = (a + b) / 2;
-d = c;
-[x2,p] = chiSquare(a,b,c,d)
-if doLabels
-    title({'NO dirSel Unit Count',['p = ',num2str(1-p)]});
+if doPies
+    figure;
+    pie([contra_contra+ipsi_ipsi contra_ipsi+ipsi_contra]);
+    legend('SAME','DIFF');
+    a = contra_contra+ipsi_ipsi;
+    b = contra_ipsi+ipsi_contra;
+    c = (a + b) / 2;
+    d = c;
+    [x2,p] = chiSquare(a,b,c,d);
+    title({'Coding between NO & SO',['p = ',num2str(1-p)]});
+    set(gcf,'color','w');
+    if doSave
+        print(gcf,'-painters','-depsc',fullfile(figPath,'ipsiContraShuffle_codingNOSO.eps'));
+    end
+
+    figure;
+    subplot_tight(1,2,1,subplotMargins);
+    pie([sum(dirSelNeuronsNO_contra) sum(dirSelNeuronsNO_ipsi)]);
+    colormap(lines(2));
+    a = sum(dirSelNeuronsNO_contra);
+    b = sum(dirSelNeuronsNO_ipsi);
+    c = (a + b) / 2;
+    d = c;
+    [x2,p] = chiSquare(a,b,c,d)
+    if doLabels
+        title({'NO dirSel Unit Count',['p = ',num2str(1-p)]});
+    end
+
+    subplot_tight(1,2,2,subplotMargins);
+    pie([sum(dirSelNeuronsSO_contra) sum(dirSelNeuronsSO_ipsi)]);
+    colormap(lines(2));
+    a = sum(dirSelNeuronsSO_contra);
+    b = sum(dirSelNeuronsSO_ipsi);
+    c = (a + b) / 2;
+    d = c;
+    [x2,p] = chiSquare(a,b,c,d)
+    if doLabels
+        title({'SO dirSel Unit Count',['p = ',num2str(1-p)]});
+    end
+    setFig('','',[1 0]);
+
+    if doSave
+        print(gcf,'-painters','-depsc',fullfile(figPath,'ipsiContraShuffle_NOSO-count.eps'));
+    end
 end
-
-subplot_tight(1,2,2,subplotMargins);
-pie([sum(dirSelNeuronsSO_contra) sum(dirSelNeuronsSO_ipsi)]);
-colormap(lines(2));
-a = sum(dirSelNeuronsSO_contra);
-b = sum(dirSelNeuronsSO_ipsi);
-c = (a + b) / 2;
-d = c;
-[x2,p] = chiSquare(a,b,c,d)
-if doLabels
-    title({'SO dirSel Unit Count',['p = ',num2str(1-p)]});
-end
-
-setFig('','',[1 0]);
-
-if doSave
-    print(gcf,'-painters','-depsc',fullfile(figPath,'ipsiContraShuffle_NOSO-count.eps'));
-end
-
 
 % see ipsiContraShuffle.m
 % % useEvents = [4,6];
@@ -322,6 +376,7 @@ end
 useEvents = 1:7;
 figuree(1200,400);
 all_eventBins = [];
+neuron_eventBins = zeros(size(pNeuronDiff,1),1);
 for iEvent = 1:numel(useEvents)
     curEvent = useEvents(iEvent);
     subplot_tight(1,numel(useEvents),iEvent,subplotMargins)
@@ -330,23 +385,18 @@ for iEvent = 1:numel(useEvents)
 % % % %     eventBins_class = zeros(8,size(pNeuronDiff_neg,3));
 % % % %     eventBins_neg_class = zeros(8,size(pNeuronDiff_neg,3));
     for iNeuron = dirSelUsedNeurons
-% %         if ~isempty(unitEvents{iNeuron}.class)%% && unitEvents{iNeuron}.class(1) == 3 % tone
-            curBins = squeeze(pNeuronDiff(iNeuron,curEvent,:));
-            if sum(curBins) == 50
-                disp('here');
-            end
-% % % %             curBins_neg = squeeze(pNeuronDiff_neg(iNeuron,curEvent,:));
-            eventBins = eventBins + (curBins > pVal)';
-            eventBins_neg = eventBins_neg + (curBins < 1-pVal)';
+        curBins = squeeze(pNeuronDiff(iNeuron,curEvent,:));
 
-% % % %             showUnitClass = [1:7];
-% % % %             for curUnitClass = showUnitClass
-% % % %                 if curUnitClass == primSec(iNeuron,1)
-% % % %                     eventBins_class(curUnitClass,:) = eventBins_class(curUnitClass,:) + (curBins > pVal)';
-% % % %                     eventBins_neg_class(curUnitClass,:) = eventBins_neg_class(curUnitClass,:) + (curBins_neg > pVal)';
-% % % %                 end
-% % % %             end
-% %         end
+        neuronSigEvent = (curBins > pVal)';
+        eventBins = eventBins + neuronSigEvent; % this adds per-bin
+        neuronSigEvent_neg = (curBins < 1-pVal)';
+        eventBins_neg = eventBins_neg + neuronSigEvent_neg;
+
+        if ismember(iEvent,[4])
+            dirSelNeurons_contra_ntpIdx = movsum(curBins(analyzeRange) > pVal,[0 pVal_minBins-1]) == pVal_minBins;
+            dirSelNeurons_ipsi_ntpIdx = movsum(curBins(analyzeRange) < 1-pVal,[0 pVal_minBins-1]) == pVal_minBins;
+            neuron_eventBins(iNeuron) = neuron_eventBins(iNeuron) + sum(dirSelNeurons_contra_ntpIdx) + sum(dirSelNeurons_ipsi_ntpIdx);
+        end
     end
     
 %     yyaxis left;
@@ -405,4 +455,26 @@ setFig('','',[2,1]);
 
 if doSave
     print(gcf,'-painters','-depsc',fullfile(figPath,'ipsiContraShuffle.eps'));
+end
+
+[sortedDirNeurons_vals,k] = sort(neuron_eventBins(dirSelUsedNeurons)); % low to high dirSel
+sortDirNeurons_keys = dirSelUsedNeurons(k);
+
+figuree(900,300);
+for iEvent = 1:8
+    eventArr = [];
+    curPrimSec = iEvent;
+    if iEvent == 8
+        curPrimSec = NaN;
+    end
+    for ii = 1:numel(sortDirNeurons_keys)
+        iNeuron = sortDirNeurons_keys(ii);
+        if primSec(iNeuron,1) == curPrimSec || (iEvent == 8 && isnan(curPrimSec))
+            eventArr = [eventArr sortedDirNeurons_vals(ii)];
+        end
+    end
+    subplot(1,8,iEvent);
+    plotSpread(eventArr','showMM',5);
+    xlabel(eventFieldlabelsNR{iEvent});
+    ylim([0 100]);
 end

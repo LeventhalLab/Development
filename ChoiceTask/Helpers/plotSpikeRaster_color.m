@@ -1,9 +1,9 @@
 function plotSpikeRaster_color(xPoints,yPoints,groups,colors,figPos,markerSize)
 
-if numel(xPoints) ~= numel(yPoints) || numel(unique(yPoints)) ~= numel(groups) ||...
-        numel(unique(groups)) ~= size(colors,1)
-    error('check input dimensions');
-end
+% % if numel(xPoints) ~= numel(yPoints) || numel(unique(yPoints)) ~= numel(groups) ||...
+% %         numel(unique(groups)) ~= size(colors,1)
+% %     error('check input dimensions');
+% % end
 
 yPoints_unique = unique(yPoints);
 

@@ -35,13 +35,13 @@ lineWidth = 3;
 % RT_intercepts = ezReciprobit(all_rt,10);
 % MT_intercepts = ezReciprobit(all_mt,10);
 
-clear all_z_raw;
+all_z_raw;
 
 % % plotTypes = {'raster','bracketed','high/low'};
 % % burstCriterias = {'none','Poisson','LTS'};
 
 events = [4];
-unitTypes = {'~dirSel','dirSel'}; % ,'dirSel'
+unitTypes = {'dirSel'}; % ,'dirSel'
 dirSelType = 'NO'; % NO or SO
 % unitTypes = {'dirSel'};
 timingFields = {'RT','MT'}; % ,'MT'
@@ -56,6 +56,10 @@ if strcmp(dirSelType,'NO')
 else
     use_dirSelNeurons = dirSelNeuronsSO;
 end
+
+np = 1;
+% mostDirUnits = sortDirNeurons_keys(find(sortedDirNeurons_vals >= np+6));
+% leastDirUnits = sortDirNeurons_keys(find(sortedDirNeurons_vals < np));
 
 for ii_events = 1:numel(events)
     useEvent = events(ii_events);
@@ -87,7 +91,7 @@ for ii_events = 1:numel(events)
                 dirSel = false;
             case 'dirSel'
                 % must have first or second class of Tone or Nose Out
-                excludeUnits = find(ismember(primSec(:,1),[3,4]) == 0); % only primary
+                excludeUnits = find(ismember(primSec(:,1),[1:7]) == 0); % only primary
 % %                 excludeUnits = find(any(ismember(primSec,[3,4]),2) == 0);
 
                 useNeuronClass = [1:7];
@@ -135,8 +139,14 @@ for ii_events = 1:numel(events)
                     
                     % dirSel units = NO, ~dirsel units = all units that never show dirSel
                     % (NO&SO)
+% % % %                     if filterBy_dirSel
+% % % %                         if (dirSel && ~ismember(iNeuron,mostDirUnits)) || (~dirSel && ~ismember(iNeuron,leastDirUnits))
+% % % %                             continue;
+% % % %                         end
+% % % %                     end
+                    
                     if filterBy_dirSel
-                        if (dirSel && ~use_dirSelNeurons(iNeuron)) || (~dirSel && dirSelNeurons(iNeuron))
+                        if (dirSel && ~plotPermDirNeurons(iNeuron)) || (~dirSel && dirSelNeuronsNO_05(iNeuron))
                             continue;
                         end
                     end
@@ -602,11 +612,10 @@ for ii_events = 1:numel(events)
                     ['move: ',movementDir],['sortBy: ',timingField],['bins: ',num2str(nMeanBins)],['binMs: ',num2str(binMs)],['dirType: ',dirSelType]};
                 addNote(h,noteText);
                 
-                saveFile = ['ev',eventFieldlabels{useEvent},'_un',unitTypes{ii_unitTypes},'_n',num2str(unitCount),...
+                saveFile = ['iipVal',num2str(ii_pVal,'%02d'),'_ev',eventFieldlabels{useEvent},'_un',unitTypes{ii_unitTypes},'_n',num2str(unitCount),...
                     '_movDir',movementDir,'_by',timingField,'_bins',num2str(nMeanBins),'_binMs',num2str(binMs),'_',dirSelType];
 
-                all_z_raw.(genvarname(strrep(saveFile,' ',''))) = z_raw;
-                all_allTrial_z_sorted.(genvarname(strrep(saveFile,' ',''))) = allTrial_z_sorted;
+% % % %                 all_allTrial_z_sorted.(genvarname(strrep(saveFile,' ',''))) = allTrial_z_sorted;
                 
                 set(h,'PaperOrientation','landscape');
                 set(h,'PaperUnits','normalized');

@@ -1,9 +1,9 @@
 subplotMargins = [.00,.02];
 figPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Thalamus_behavior_2017/Figures/MATLAB';
 
-doLabels = false;
-doTitle = false;
-doSave = true;
+doLabels = true;
+doTitle = true;
+doSave = false;
 % use primary + secondary classes
 tWindow = 1;
 binMs = 20;
