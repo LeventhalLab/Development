@@ -15,3 +15,5 @@ for iiprimSec = 1:2
         setFig;
     end
 end
+
+dirSelNeuronsNO_01

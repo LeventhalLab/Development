@@ -2,9 +2,9 @@ doSave = true;
 nMeanBins = 10; % corr bins; with gray = n+2 for RT, n+1 for MT
 binMs = 20;
 
-expressRT = 0.100;
+expressRT = 0.050;
 ordinaryRT = 0.350;
-ordinaryMT = 0.400;
+ordinaryMT = 0.450;
 
 all_RTfromPermutations = [];
 all_MTfromPermutations = [];
@@ -20,8 +20,8 @@ end
 doBursts = false;
 % for figure
 binInc = 0.02;
-z_smooth = 1;
-auc_smooth = 1;
+z_smooth = 3;
+auc_smooth = 3;
 lineWidth = 3;
 
 % % trialTypes = {'correct'};
@@ -612,8 +612,8 @@ for ii_events = 1:numel(events)
                     ['move: ',movementDir],['sortBy: ',timingField],['bins: ',num2str(nMeanBins)],['binMs: ',num2str(binMs)],['dirType: ',dirSelType]};
                 addNote(h,noteText);
                 
-                saveFile = ['ev',eventFieldlabels{useEvent},'_un',unitTypes{ii_unitTypes},'_n',num2str(unitCount),...
-                    '_movDir',movementDir,'_by',timingField,'_bins',num2str(nMeanBins),'_binMs',num2str(binMs),'_',dirSelType];
+                saveFile = [eventFieldlabels{useEvent},'_',unitTypes{ii_unitTypes},'_n',num2str(unitCount),...
+                    '_movDir',movementDir,'_',timingField,'_',num2str(nMeanBins),'bins_',num2str(binMs),'_ms',dirSelType];
 
 % % % %                 all_allTrial_z_sorted.(genvarname(strrep(saveFile,' ',''))) = allTrial_z_sorted;
                 

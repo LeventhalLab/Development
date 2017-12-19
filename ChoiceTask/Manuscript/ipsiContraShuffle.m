@@ -1,9 +1,9 @@
 % the fraction of units whose activity is significantly different between
 % ipsi/contra trials
-doSetup = false;
-doSave = false;
-doLabels = true;
-dodebug = false;
+doSetup = true;
+doSave = true;
+doLabels = false;
+dodebug = true;
 doPies = true;
 debugPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Thalamus_behavior_2017/Figures/Misc/ipsiContraShuffleDebug';
 pVal = 0.99;

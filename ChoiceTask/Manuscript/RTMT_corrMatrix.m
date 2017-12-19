@@ -36,10 +36,10 @@ function RTMT_corrMatrix()
 % %     dirMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n72_movDirall_byMT_bins10_binMs20ORD20171031.mat');
 
     % nose out event, primary only
-    ndirRT = load(fullfile(uSessionsPath,'evNose Out_un~dirSel_n89_movDirall_byRT_bins10_binMs20_NO20171218.mat'));
-    ndirMT = load(fullfile(uSessionsPath,'evNose Out_un~dirSel_n89_movDirall_byMT_bins10_binMs20_NO20171218.mat'));
-    dirRT = load(fullfile(uSessionsPath,'evNose Out_undirSel_n116_movDirall_byRT_bins10_binMs20_NO20171218.mat'));
-    dirMT = load(fullfile(uSessionsPath,'evNose Out_undirSel_n116_movDirall_byMT_bins10_binMs20_NO20171218.mat'));
+    ndirRT = load(fullfile(uSessionsPath,'evNose Out_un~dirSel_n89_movDirall_byRT_bins10_binMs20_NO20171219.mat'));
+    ndirMT = load(fullfile(uSessionsPath,'evNose Out_un~dirSel_n89_movDirall_byMT_bins10_binMs20_NO20171219.mat'));
+    dirRT = load(fullfile(uSessionsPath,'evNose Out_undirSel_n116_movDirall_byRT_bins10_binMs20_NO20171219.mat'));
+    dirMT = load(fullfile(uSessionsPath,'evNose Out_undirSel_n116_movDirall_byMT_bins10_binMs20_NO20171219.mat'));
     
     % setup
     grayColor = [.8 .8 .8];
@@ -437,7 +437,7 @@ function h = plot_typeRaster(loadData,timingField,meanColors)
     lineWidth = 4;
     
     curRaster = loadData.doRasters{1};
-    n_rasterReadable = round(40000 / numel(curRaster));
+    n_rasterReadable = round(35000 / numel(curRaster));
     curRaster_sorted_readable = makeRasterReadable(curRaster',n_rasterReadable);
     plotSpikeRaster(curRaster_sorted_readable,'PlotType','scatter','AutoLabel',false);
     hold on;
