@@ -20,8 +20,8 @@ end
 doBursts = false;
 % for figure
 binInc = 0.02;
-z_smooth = 3;
-auc_smooth = 3;
+z_smooth = 1;
+auc_smooth = 1;
 lineWidth = 3;
 
 % % trialTypes = {'correct'};
@@ -41,7 +41,7 @@ all_z_raw;
 % % burstCriterias = {'none','Poisson','LTS'};
 
 events = [4];
-unitTypes = {'dirSel'}; % ,'dirSel'
+unitTypes = {'~dirSel','dirSel'}; % ,'dirSel'
 dirSelType = 'NO'; % NO or SO
 % unitTypes = {'dirSel'};
 timingFields = {'RT','MT'}; % ,'MT'
@@ -91,15 +91,15 @@ for ii_events = 1:numel(events)
                 dirSel = false;
             case 'dirSel'
                 % must have first or second class of Tone or Nose Out
-                excludeUnits = find(ismember(primSec(:,1),[1:7]) == 0); % only primary
-% %                 excludeUnits = find(any(ismember(primSec,[3,4]),2) == 0);
+%                 excludeUnits = find(ismember(primSec(:,2),[3,4]) == 0); % only primary
+                excludeUnits = find(any(ismember(primSec,[3,4]),2) == 0);
 
                 useNeuronClass = [1:7];
                 filterBy_dirSel = true;
                 dirSel = true;
             case '~dirSel'
-                excludeUnits = find(ismember(primSec(:,1),[3,4]) == 0); % only primary
-% %                 excludeUnits = find(any(ismember(primSec,[3,4]),2) == 0);
+%                 excludeUnits = find(ismember(primSec(:,2),[3,4]) == 0); % only primary
+                excludeUnits = find(any(ismember(primSec,[3,4]),2) == 0);
 
                 useNeuronClass = [1:7];
                 filterBy_dirSel = true;
@@ -146,7 +146,7 @@ for ii_events = 1:numel(events)
 % % % %                     end
                     
                     if filterBy_dirSel
-                        if (dirSel && ~plotPermDirNeurons(iNeuron)) || (~dirSel && dirSelNeuronsNO_05(iNeuron))
+                        if (dirSel && ~dirSelNeuronsNO_01(iNeuron)) || (~dirSel && dirSelNeuronsNO_01(iNeuron))
                             continue;
                         end
                     end
@@ -612,7 +612,7 @@ for ii_events = 1:numel(events)
                     ['move: ',movementDir],['sortBy: ',timingField],['bins: ',num2str(nMeanBins)],['binMs: ',num2str(binMs)],['dirType: ',dirSelType]};
                 addNote(h,noteText);
                 
-                saveFile = ['iipVal',num2str(ii_pVal,'%02d'),'_ev',eventFieldlabels{useEvent},'_un',unitTypes{ii_unitTypes},'_n',num2str(unitCount),...
+                saveFile = ['ev',eventFieldlabels{useEvent},'_un',unitTypes{ii_unitTypes},'_n',num2str(unitCount),...
                     '_movDir',movementDir,'_by',timingField,'_bins',num2str(nMeanBins),'_binMs',num2str(binMs),'_',dirSelType];
 
 % % % %                 all_allTrial_z_sorted.(genvarname(strrep(saveFile,' ',''))) = allTrial_z_sorted;

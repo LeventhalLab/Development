@@ -1,10 +1,10 @@
 % the fraction of units whose activity is significantly different between
 % ipsi/contra trials
-doSetup = true;
+doSetup = false;
 doSave = false;
-doLabels = false;
+doLabels = true;
 dodebug = false;
-doPies = false;
+doPies = true;
 debugPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Thalamus_behavior_2017/Figures/Misc/ipsiContraShuffleDebug';
 pVal = 0.99;
 pVal_minBins = 2;
@@ -14,7 +14,7 @@ useIncorrect = false;
 nSmooth = 3;
 requireTrials = 5;
 minFR = 5;
-nShuffle = 100;
+nShuffle = 1000;
 subplotMargins = [.05 .02];
 tWindow = 1;
 binMs = 20;

@@ -36,10 +36,10 @@ function RTMT_corrMatrix()
 % %     dirMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n72_movDirall_byMT_bins10_binMs20ORD20171031.mat');
 
     % nose out event, primary only
-    ndirRT = load(fullfile(uSessionsPath,'evNose Out_un~dirSel_n42_movDirall_byRT_bins10_binMs20_NO20171218.mat'));
-    ndirMT = load(fullfile(uSessionsPath,'evNose Out_un~dirSel_n42_movDirall_byMT_bins10_binMs20_NO20171218.mat'));
-    dirRT = load(fullfile(uSessionsPath,'evNose Out_undirSel_n68_movDirall_byRT_bins10_binMs20_NO20171218.mat'));
-    dirMT = load(fullfile(uSessionsPath,'evNose Out_undirSel_n68_movDirall_byMT_bins10_binMs20_NO20171218.mat'));
+    ndirRT = load(fullfile(uSessionsPath,'evNose Out_un~dirSel_n89_movDirall_byRT_bins10_binMs20_NO20171218.mat'));
+    ndirMT = load(fullfile(uSessionsPath,'evNose Out_un~dirSel_n89_movDirall_byMT_bins10_binMs20_NO20171218.mat'));
+    dirRT = load(fullfile(uSessionsPath,'evNose Out_undirSel_n116_movDirall_byRT_bins10_binMs20_NO20171218.mat'));
+    dirMT = load(fullfile(uSessionsPath,'evNose Out_undirSel_n116_movDirall_byMT_bins10_binMs20_NO20171218.mat'));
     
     % setup
     grayColor = [.8 .8 .8];
@@ -79,7 +79,7 @@ function RTMT_corrMatrix()
 % %     end
     
     % RASTERS
-    if false
+    if true
         timingField = 'RT';
         h = plot_typeRaster(ndirRT,timingField,rt_meanColors);
         if doSave
@@ -185,7 +185,7 @@ function RTMT_corrMatrix()
         x = [ndirRT.meanBinsSeconds(1:end-1) + diff(ndirRT.meanBinsSeconds)/2]';
         y = ndirRT.auc_max_z';
         ylabelText = 'max Z';
-        ylimVals = [0 2];
+        ylimVals = [0 1];
         h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,ndirRT.meanBinsSeconds,rt_meanColors,timingField);
         if doSave
             if saveImage
@@ -237,7 +237,7 @@ function RTMT_corrMatrix()
         x = [ndirMT.meanBinsSeconds(1:end-1) + diff(ndirMT.meanBinsSeconds)/2]';
         y = ndirMT.auc_max_z';
         ylabelText = 'max Z';
-        ylimVals = [0 2];
+        ylimVals = [0 1];
         h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,ndirMT.meanBinsSeconds,mt_meanColors,timingField);
         if doSave
             if saveImage
@@ -290,7 +290,7 @@ function RTMT_corrMatrix()
         x = [dirRT.meanBinsSeconds(1:end-1) + diff(dirRT.meanBinsSeconds)/2]';
         y = dirRT.auc_max_z';
         ylabelText = 'max Z';
-        ylimVals = [0 2];
+        ylimVals = [0 1];
         h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,dirRT.meanBinsSeconds,rt_meanColors,timingField);
         if doSave
             if saveImage
@@ -343,7 +343,7 @@ function RTMT_corrMatrix()
         x = [dirMT.meanBinsSeconds(1:end-1) + diff(dirMT.meanBinsSeconds)/2]';
         y = dirMT.auc_max_z';
         ylabelText = 'max Z';
-        ylimVals = [0 2];
+        ylimVals = [0 1];
         h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,dirMT.meanBinsSeconds,mt_meanColors,timingField);
         if doSave
             if saveImage
@@ -370,7 +370,7 @@ function RTMT_corrMatrix()
 
 function plot_stackedRTCorrs(all_loadData,rt_meanColors,mt_meanColors)
 	markerSize = 100;
-    ylimVals = [-0.5 2];
+    ylimVals = [-0.5 1];
     
     figuree(600,600);
     lns = [];
@@ -501,11 +501,11 @@ function h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,meanBinsSeconds,meanCo
 end
 
 function h = plot_type1(loadData,meanColors,timingField)
-    z_yLims = [-.5 2];
+    z_yLims = [-.5 1];
     z_xlimVals = [1 size(loadData.z_raw,2)];
     z_xtickVals = [1 floor(size(loadData.z_raw,2)/2) size(loadData.z_raw,2)];
     z_xticklabelText = {'-1','0','1'};
-    scatter_maxZ_ylimVals = [0 2];
+    scatter_maxZ_ylimVals = [0 1];
     scatter_minZ_ylimVals = [-0.5 0.5];
     upperRightPos = [.65 .7 .3 .3];
     upperLeftPos = [.2 .7 .2 .2];

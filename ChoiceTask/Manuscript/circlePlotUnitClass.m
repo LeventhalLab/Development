@@ -12,7 +12,7 @@ for iNeuron = 1:numel(unitEvents)
         continue;
     end
     compiledEvents(unitEvents{iNeuron}.class(1),1) = compiledEvents(unitEvents{iNeuron}.class(1)) + 1;
-    if dirSelNeurons(iNeuron)
+    if dirSelNeuronsNO(iNeuron)
         dirSelByEvent(unitEvents{iNeuron}.class(1),1) = dirSelByEvent(unitEvents{iNeuron}.class(1),1) + 1;
     end
 end
