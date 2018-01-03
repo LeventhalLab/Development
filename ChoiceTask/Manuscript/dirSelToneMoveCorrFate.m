@@ -1,3 +1,4 @@
+% you have to run ipsiContraShuffle.m then set these, annoying
 % dirSelNeuronsNO_type_correct
 % dirSelNeuronsNO_type_incorrect
 
@@ -5,6 +6,38 @@ corr_contra_ids = find(dirSelNeuronsNO_type_correct == 1);
 corr_ipsi_ids = find(dirSelNeuronsNO_type_correct == 2);
 corr_contra_fate = dirSelNeuronsNO_type_incorrect(corr_contra_ids);
 corr_ipsi_fate = dirSelNeuronsNO_type_incorrect(corr_ipsi_ids);
+
+corr_contra_fateIds = find(dirSelNeuronsNO_type_correct == 1 & dirSelNeuronsNO_type_incorrect == 1)
+incorr_contra_fateIds = find(dirSelNeuronsNO_type_correct == 1 & dirSelNeuronsNO_type_incorrect == 2)
+corr_ipsi_fateIds = find(dirSelNeuronsNO_type_correct == 2 & dirSelNeuronsNO_type_incorrect == 2)
+incorr_ipsi_fateIds = find(dirSelNeuronsNO_type_correct == 2 & dirSelNeuronsNO_type_incorrect == 1)
+
+% archive: as of 20171219
+% % corr_contra_fateIds =
+% %     67
+% %    102
+% %    103
+% %    338
+% %    340
+% % incorr_contra_fateIds =
+% %     60
+% %    318
+% %    319
+% %    332
+% % corr_ipsi_fateIds =
+% %     71
+% %    107
+% %    110
+% %    261
+% %    264
+% %    311
+% %    326
+% %    328
+% %    334
+% % incorr_ipsi_fateIds =
+% %     63
+% %    310
+% %    313
 
 contra_fate_counts = histcounts(corr_contra_fate,[-.5:2.5])
 ipsi_fate_counts = histcounts(corr_ipsi_fate,[-.5:2.5])

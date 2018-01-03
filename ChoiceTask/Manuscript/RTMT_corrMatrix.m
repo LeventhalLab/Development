@@ -40,14 +40,26 @@ function RTMT_corrMatrix()
     ndirMT = load(fullfile(uSessionsPath,'evNose Out_un~dirSel_n89_movDirall_byMT_bins10_binMs20_NO20171219.mat'));
     dirRT = load(fullfile(uSessionsPath,'evNose Out_undirSel_n116_movDirall_byRT_bins10_binMs20_NO20171219.mat'));
     dirMT = load(fullfile(uSessionsPath,'evNose Out_undirSel_n116_movDirall_byMT_bins10_binMs20_NO20171219.mat'));
+
+    % !!! these are now saved in ndirMT structs, delete these once
+    % plotPermutations.m is ran again
+    expressRT = 0.050;
+    ordinaryRT = 0.350;
+    ordinaryMT = 0.450;
     
     % setup
     grayColor = [.8 .8 .8];
-    rt_meanColors = [grayColor;cool(numel(ndirRT.auc_max)-2);grayColor];
-    mt_meanColors = [summer(numel(ndirMT.auc_max)-1);grayColor];
-%     rt_meanColors = cool(numel(ndirRT.auc_max));
-%     mt_meanColors = summer(numel(ndirMT.auc_max));
+% %     rt_meanColors = [grayColor;cool(numel(ndirRT.auc_max)-2);grayColor];
+% %     mt_meanColors = [summer(numel(ndirMT.auc_max)-1);grayColor];
     
+    n_downsample = 20;
+    rt1 = closest(dirRT.all_useTime_sorted,expressRT);
+    rt2 = closest(dirRT.all_useTime_sorted,ordinaryRT);
+    rt_meanColors = downsample([repmat(grayColor,[rt1 1]); cool(rt2-rt1); repmat(grayColor,[numel(dirRT.all_useTime_sorted)-rt2 1])],n_downsample);
+    
+    mt2 = closest(dirMT.all_useTime_sorted,ordinaryMT);
+    mt_meanColors = downsample([summer(mt2); repmat(grayColor,[numel(dirMT.all_useTime_sorted)-mt2 1])],n_downsample);
+
     
     % plots
 % %     timingField = 'RT';
@@ -141,7 +153,7 @@ function RTMT_corrMatrix()
         end
     end
     
-    if true
+    if false
         all_loadData = {ndirRT,ndirMT,dirRT,dirMT};
         legendText = {'ndirRT','ndirMT','dirRT','dirMT'};
 
@@ -493,7 +505,7 @@ function h = plot_type1_upperCorr(x,y,ylabelText,ylimVals,meanBinsSeconds,meanCo
     yticks(ylim);
     curxlim = xlim;
     curylim = ylim;
-    text(curxlim(2),curylim(2),{['r^2 = ',num2str(gof.rsquare,'%0.5f')],['p = ',num2str(PVAL,'%0.5f')]},'HorizontalAlignment','right',...
+    text(curxlim(2),curylim(2),{['r^2 = ',num2str(gof.rsquare,3)],['p = ',num2str(PVAL,3)]},'HorizontalAlignment','right',...
         'VerticalAlignment','top','fontSize',16);
     
     set(gca,'fontSize',16);

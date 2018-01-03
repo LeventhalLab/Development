@@ -624,7 +624,7 @@ for ii_events = 1:numel(events)
                 if doSave
                     export_fig(gcf,'-pdf', fullfile(savePath,[saveFile,'.pdf']));
                     save(fullfile(sessionsPath,[saveFile,datestr(now,'yyyymmdd')]),'doRasters','z_raw','meanBinsSeconds','mean_z',...
-                        'auc_min','auc_max','auc_max_t','auc_min_z','auc_max_z','all_useTime_sorted');
+                        'auc_min','auc_max','auc_max_t','auc_min_z','auc_max_z','all_useTime_sorted','expressRT','ordinaryRT','ordinaryMT');
                     close(h);
                 end
             end

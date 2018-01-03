@@ -1,9 +1,9 @@
 subplotMargins = [.00,.02];
 figPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Thalamus_behavior_2017/Figures/MATLAB';
 
-doLabels = true;
-doTitle = true;
-doSave = false;
+doLabels = false;
+doTitle = false;
+doSave = true;
 % use primary + secondary classes
 tWindow = 1;
 binMs = 20;
@@ -20,9 +20,9 @@ rows = 2;
 cols = 7;
 nSmooth = 3;
 colors = zeros(2,3);
-lineWidth = 3;
+lineWidth = 2;
 set_ylims = [-1 4];
-ylabelloc = 2.5;
+ylabelloc = 2.75;
 % useNeuron = 188% (R142_1209_7b), 103, 147, 201 (R142_1210_36a)
 useNeuron = 133;
 sessionNames = unique(analysisConf.sessionNames);
@@ -82,8 +82,10 @@ for iEvent = 1:numel(eventFieldnames)
         medRT = median(session_rt);
         medRT_x = (size(all_zscores,3) / 2) + (medRT / binS);
         plot([medRT_x medRT_x],[-5 5],'k--');
-        tx = text(medRT_x,ylabelloc,'RT','fontSize',14,'HorizontalAlignment','center','VerticalAlignment','top');
-        set(tx,'Rotation',90);
+        if doLabels
+            tx = text(medRT_x,ylabelloc,'RT','fontSize',10,'HorizontalAlignment','center','VerticalAlignment','top');
+            set(tx,'Rotation',90);
+        end
     elseif iEvent == 4
         lns(iEvent) = plot(smooth(squeeze(all_zscores(useNeuron,iEvent,:)),nSmooth),'LineWidth',lineWidth,'Color',colors(2,:));
         hold on;
@@ -91,8 +93,10 @@ for iEvent = 1:numel(eventFieldnames)
         medMT = median(session_mt);
         medMT_x = (size(all_zscores,3) / 2) + (medMT / binS);
         plot([medMT_x medMT_x],[-5 5],'k--');
-        tx = text(medMT_x,ylabelloc,'MT','fontSize',14,'HorizontalAlignment','center','VerticalAlignment','top');
-        set(tx,'Rotation',90);
+        if doLabels
+            tx = text(medMT_x,ylabelloc,'MT','fontSize',10,'HorizontalAlignment','center','VerticalAlignment','top');
+            set(tx,'Rotation',90);
+        end
     else
         lns(iEvent) = plot(smooth(squeeze(all_zscores(useNeuron,iEvent,:)),nSmooth),'LineWidth',lineWidth,'Color','k');
     end

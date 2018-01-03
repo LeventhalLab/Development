@@ -1,34 +1,23 @@
-saveDir = 'C:\Users\Administrator\Documents\Data\ChoiceTask\ipsiContraWithIncorrectRaster';
+saveDir = '/Users/mattgaidica/Documents/Data/ChoiceTask/ipsiContraWithIncorrectRaster';
 saveExt = '.png';
 doLabels = true;
-doSave = false;
+doSave = true;
 doLegend = false;
-savePNG = false;
-doNote = false;
+saveFig = true;
+doNote = true;
 useEvents = [1:7];
 % units: 113, 188, 201
-for iNeuron = 188 %1:numel(analysisConf.neurons)
+for iNeuron = incorr_ipsi_fateIds' %188 %1:numel(analysisConf.neurons)
     note_dirSel = '-';
     note_dirSelNO = '-';
-    note_dirSelSO = '-';
-    if dirSelNeurons(iNeuron)
+
+    if dirSelNeuronsNO_01(iNeuron)
         note_dirSel = 'YES';
-        if dirSelNeuronsNO(iNeuron)
-            if dirSelNeuronsNO_contra(iNeuron)
-                note_dirSelNO = 'contra';
-            else
-                note_dirSelNO = 'ipsi';
-            end
+        if dirSelNeuronsNO_type_correct(iNeuron)
+            note_dirSelNO = 'contra';
         else
-            if dirSelNeuronsSO_contra(iNeuron)
-                note_dirSelSO = 'contra';
-            else
-                note_dirSelSO = 'ipsi';
-            end
+            note_dirSelNO = 'ipsi';
         end
-    else
-% %         disp(['Skipping neuron ',num2str(iNeuron)]);
-% %         continue;
     end
     
     neuronName = analysisConf.neurons{iNeuron};
@@ -156,7 +145,7 @@ for iNeuron = 188 %1:numel(analysisConf.neurons)
     end
     
     if doNote
-        noteText = {['Unit: ',num2str(iNeuron)],['dirSel? ',note_dirSel],['at NO? ',note_dirSelNO],['at SO? ',note_dirSelSO]};
+        noteText = {['Unit: ',num2str(iNeuron)],['dirSel? ',note_dirSel],['at NO? ',note_dirSelNO]};
         addNote(h,noteText);
     end
 
@@ -178,8 +167,13 @@ for iNeuron = 188 %1:numel(analysisConf.neurons)
         set(gcf,'color','w');
     end
     
-    if savePNG
-        saveas(h,fullfile(saveDir,['ipsiContraRaster_u',num2str(iNeuron,'%03d'),'_NO-',note_dirSelNO,'_SO-',note_dirSelSO,saveExt]));
+    if saveFig
+        saveas(h,fullfile(saveDir,['ipsiContraRaster_u',num2str(iNeuron,'%03d'),'_NO-',note_dirSelNO,'.fig']));
         close(h);
     end
+    
+% % % %     if savePNG
+% % % %         saveas(h,fullfile(saveDir,['ipsiContraRaster_u',num2str(iNeuron,'%03d'),'_NO-',note_dirSelNO,saveExt]));
+% % % %         close(h);
+% % % %     end
 end

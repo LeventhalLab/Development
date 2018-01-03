@@ -40,6 +40,7 @@ switch runMap
     case 4 % all NAN
         useUnits = isnan(primSec(:,1));
         plotSpecialArrows = false;
+        doPrimSecArrows = false;
 end
 
 imsc = [];

@@ -1,11 +1,11 @@
 % the fraction of units whose activity is significantly different between
 % ipsi/contra trials
-doSetup = true;
+doSetup = false;
 doSave = true;
 doLabels = false;
-dodebug = true;
-doPies = true;
-debugPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Thalamus_behavior_2017/Figures/Misc/ipsiContraShuffleDebug';
+dodebug = false;
+doPies = false;
+debugPath = '/Users/mattgaidica/Documents/Data/ChoiceTask/ipsiContraShuffleDebug';
 pVal = 0.99;
 pVal_minBins = 2;
 colors = lines(2);
@@ -398,7 +398,6 @@ for iEvent = 1:numel(useEvents)
             neuron_eventBins(iNeuron) = neuron_eventBins(iNeuron) + sum(dirSelNeurons_contra_ntpIdx) + sum(dirSelNeurons_ipsi_ntpIdx);
         end
     end
-    
 %     yyaxis left;
     bar(1:size(pNeuronDiff,3),eventBins/numel(dirSelUsedNeuronsNO_correct),'FaceColor',colors(1,:),'EdgeColor',colors(1,:)); % contra
     hold on;
@@ -419,7 +418,8 @@ for iEvent = 1:numel(useEvents)
 % % % %     ylim([-1 1]);
     
     xlim([1 size(pNeuronDiff,3)]);
-    xticks([1 round(size(pNeuronDiff,3)/2) size(pNeuronDiff,3)]);
+    middleBin = round(size(pNeuronDiff,3)/2) + 0.5;
+    xticks([1 middleBin size(pNeuronDiff,3)]);
     if doLabels
         xticklabels({'-1','0','1'});
         if iEvent == 1
@@ -436,17 +436,23 @@ for iEvent = 1:numel(useEvents)
         yticks(sort([ylim 0]));
         yticklabels([]);
     end
-% %     plot([round(size(pNeuronDiff,3)/2) round(size(pNeuronDiff,3)/2)],ylim,'k--');
     
     % Given pVal, what fraction is due to chance?
     X = binoinv(pVal,numel(dirSelUsedNeuronsNO_correct),1-pVal) / numel(dirSelUsedNeuronsNO_correct);
     plot(xlim,[X X],'r');
     plot(xlim,[-X -X],'r');
     
-% %     title(eventFieldnames{iEvent});
-    
     box off;
     grid on;
+    
+    % info
+    disp(num2str(iEvent));
+    contraPrct = eventBins/numel(dirSelUsedNeuronsNO_correct);
+    contraExChance = find(contraPrct >= X,1,'first');
+    disp(['exceeds chance at: ',num2str((contraExChance - round(size(pNeuronDiff,3)/2)) * binMs),' ms']);
+    [v,k] = max(contraPrct);
+    disp(['reaches max at: ',num2str((k - round(size(pNeuronDiff,3)/2)) * binMs),' ms']);
+    disp(['max contra prct: ',num2str(v)]);
 end
 
 % % % % legend(class_lns,eventFieldlabels)
@@ -457,24 +463,24 @@ if doSave
     print(gcf,'-painters','-depsc',fullfile(figPath,'ipsiContraShuffle.eps'));
 end
 
-[sortedDirNeurons_vals,k] = sort(neuron_eventBins(dirSelUsedNeurons)); % low to high dirSel
-sortDirNeurons_keys = dirSelUsedNeurons(k);
-
-figuree(900,300);
-for iEvent = 1:8
-    eventArr = [];
-    curPrimSec = iEvent;
-    if iEvent == 8
-        curPrimSec = NaN;
-    end
-    for ii = 1:numel(sortDirNeurons_keys)
-        iNeuron = sortDirNeurons_keys(ii);
-        if primSec(iNeuron,1) == curPrimSec || (iEvent == 8 && isnan(curPrimSec))
-            eventArr = [eventArr sortedDirNeurons_vals(ii)];
-        end
-    end
-    subplot(1,8,iEvent);
-    plotSpread(eventArr','showMM',5);
-    xlabel(eventFieldlabelsNR{iEvent});
-    ylim([0 100]);
-end
+% % % % [sortedDirNeurons_vals,k] = sort(neuron_eventBins(dirSelUsedNeurons)); % low to high dirSel
+% % % % sortDirNeurons_keys = dirSelUsedNeurons(k);
+% % % % 
+% % % % figuree(900,300);
+% % % % for iEvent = 1:8
+% % % %     eventArr = [];
+% % % %     curPrimSec = iEvent;
+% % % %     if iEvent == 8
+% % % %         curPrimSec = NaN;
+% % % %     end
+% % % %     for ii = 1:numel(sortDirNeurons_keys)
+% % % %         iNeuron = sortDirNeurons_keys(ii);
+% % % %         if primSec(iNeuron,1) == curPrimSec || (iEvent == 8 && isnan(curPrimSec))
+% % % %             eventArr = [eventArr sortedDirNeurons_vals(ii)];
+% % % %         end
+% % % %     end
+% % % %     subplot(1,8,iEvent);
+% % % %     plotSpread(eventArr','showMM',5);
+% % % %     xlabel(eventFieldlabelsNR{iEvent});
+% % % %     ylim([0 100]);
+% % % % end

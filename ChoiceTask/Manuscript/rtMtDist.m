@@ -47,6 +47,11 @@ if false
     end
 end
 
+
+rtDataPrct = numel(find(all_rt > expressRT & all_rt < ordinaryRT)) / numel(all_rt);
+mtDataPrct = numel(find(all_mt < ordinaryMT)) / numel(all_mt);
+rtmtDataPrct = mean([rtDataPrct mtDataPrct])
+
 % let's try per-subject RT/MT line histograms
 RTcounts = [];
 histInt = .01;

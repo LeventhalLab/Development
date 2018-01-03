@@ -43,5 +43,5 @@ if exist('cols','var')
     set(gcf, 'PaperPosition',[0 0 figwidth figheight]);
 end
 
-set(findall(gcf,'-property','FontSize'),'FontSize',14);
+set(findall(gcf,'-property','FontSize'),'FontSize',10);
 box off;
