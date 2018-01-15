@@ -5,6 +5,7 @@ showMosaic = false;
 plotTitle = 'Unit Classes';
 doLabels = false;
 doSave = true;
+fontSize = 8;
 
 doSetup = false;
 if doSetup
@@ -23,7 +24,7 @@ end
 primSec_wNC = primSec;
 primSec_wNC(isnan(primSec_wNC)) = 8;
 
-figuree(500,500);
+h = figuree(600,500);
 % cols = 7;
 colors = parula(8);
 % colors = colors(1:end,:);
@@ -74,10 +75,10 @@ if showMosaic
     end
 end
 if onlyPrimary
-    legend(lns,{'Primary Class'},'location','northoutside');
+    legend(lns,{'Primary Class'},'location','northwest');
     legend boxoff;
 else
-    legend(lns,{'Primary Class','Secondary Class'},'location','northoutside');
+    legend(lns,{'Primary Class','Secondary Class'},'location','northwest');
     legend boxoff;
 end
 
@@ -86,8 +87,8 @@ end
 xticks(1:8);
 xticklabels({eventFieldlabels{:},'N.R.'});
 ax = gca;
-ax.XAxis.FontSize = 14;
-xtickangle(90);
+ax.XAxis.FontSize = 8;
+xtickangle(45);
 
 if plotOpt == 1
     ylimVals = [-150 200];
@@ -105,36 +106,47 @@ if doLabels
 else
     yticklabels([]);
 end
-setFig('','',[1,1]);
+
+set(findall(gcf,'-property','FontSize'),'FontSize',26); % trick to get tightfig to work
+tightfig;
+setFig('','',[1,0.5]);
 for iText = 1:numel(primBars)
-    text(iText,primBars(iText),num2str(primBars(iText)),'VerticalAlignment','bottom','HorizontalAlignment','center','fontSize',10);
+    text(iText,primBars(iText),num2str(primBars(iText)),'VerticalAlignment','bottom','HorizontalAlignment','center','fontSize',fontSize);
     if ~onlyPrimary
-        text(iText,primBars(iText)+secBars(iText),num2str(secBars(iText)),'VerticalAlignment','bottom','HorizontalAlignment','center','fontSize',10);
+        text(iText,primBars(iText)+secBars(iText),num2str(secBars(iText)),'VerticalAlignment','bottom','HorizontalAlignment','center','fontSize',fontSize);
     end
 end
 
 if doSave
     print(gcf,'-painters','-depsc',fullfile(figPath,'primSec_plot_unitClasses.eps'));
+    close(h);
 end
 
 
 % pie charts
 pieData = primFate;
 useEvents = [3,4]; % limit 2
-figuree(500,400);
+h = figuree(500,400);
 
 for iEvent = 1:2
     subplot(1,2,iEvent);
 % %     p = pie(pieData(useEvent,:)+.001,{eventFieldlabels{:},'NR'});
     p = pie(pieData(useEvents(iEvent),:)+.001);
-    for ii = 2:2:numel(p)
-% %         t = p(ii);
-% %         t.FontSize = 16;
-        p(ii).String = '';
-    end
+    hText = findobj(h,'Type','text'); % text object handles
+    percentValues = get(hText,'String'); % percent values
+    oldExtents_cell = get(hText,'Extent'); % cell array
+    oldExtents = cell2mat(oldExtents_cell); % numeric array
+    disp('Counter-clockwise values left -> right subplot');
+    disp(flip(percentValues));
+    
+    % labels are a pain in MATLAB, do them in illustrator
     if doLabels
         title(eventFieldlabels{useEvents(iEvent)});
         legend({eventFieldlabels{:},'NR'},'location','southoutside');
+    else
+        for ii = 2:2:numel(p)
+            p(ii).String = '';
+        end
     end
 % %     setFig;
     colormap(colors);
@@ -144,6 +156,7 @@ setFig('','',[1,0.5]);
 
 if doSave
     print(gcf,'-painters','-depsc',fullfile(figPath,'primSec_plot_primaryFate.eps'));
+    close(h);
 end
 
 % then redo that for secOrigin if you want...

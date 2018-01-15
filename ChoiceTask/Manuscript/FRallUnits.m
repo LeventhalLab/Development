@@ -1,54 +1,61 @@
+doSetup = false;
 doClasses = false;
 doDirSel = true;
 doAllUnits = false;
+doLabels = false;
+doSave = true;
+savePath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Thalamus_behavior_2017/Figures/MATLAB';
 
 eventFieldlabelsNR = {eventFieldlabels{:} 'NR'};
-fontSize = 12;
-
-FRs = [];
-CVs = [];
-FRs_classes = cell(8,1);
-FRs_dirSel = cell(3,1);
-CVs_dirSel = cell(3,1);
-groupCount = 0;
-g = {};
+fontSize = 8;
 gLabels = {'All Units','Dir Sel','Not Dir Sel'};
-for iNeuron = 1:numel(all_ts)
-    curTs = all_ts{iNeuron};
-    curFR = numel(curTs) / curTs(end);
-    curCV = coeffVar(curTs);
-    FRs = [FRs curFR];
-    CVs = [CVs curCV];
-    
-    % by class
-    curClass = primSec(iNeuron,1);
-    if ~isnan(curClass)
-        FRs_classes{curClass} = [FRs_classes{curClass} curFR];
-    else
-        FRs_classes{8} = [FRs_classes{8} curFR];
-    end
-    
-    % by dirSel
-    if any(ismember(primSec(iNeuron,:),[3,4])) % primary and secondary
-        groupCount = groupCount + 1;
-        g{groupCount} = gLabels{1};
-        FRs_dirSel{1} = [FRs_dirSel{1} curFR];
-        CVs_dirSel{1} = [CVs_dirSel{1} curCV];
-        
-        groupCount = groupCount + 1;
-        if dirSelNeuronsNO_01(iNeuron)
-            g{groupCount} = gLabels{2};
-            FRs_dirSel{2} = [FRs_dirSel{2} curFR];
-            CVs_dirSel{2} = [CVs_dirSel{2} curCV];
+
+if doSetup
+    FRs = [];
+    CVs = [];
+    FRs_classes = cell(8,1);
+    FRs_dirSel = cell(3,1);
+    CVs_dirSel = cell(3,1);
+    groupCount = 0;
+    g = {};
+    for iNeuron = 1:numel(all_ts)
+        curTs = all_ts{iNeuron};
+        curFR = numel(curTs) / curTs(end);
+        curCV = coeffVar(curTs);
+        FRs = [FRs curFR];
+        CVs = [CVs curCV];
+
+        % by class
+        curClass = primSec(iNeuron,1);
+        if ~isnan(curClass)
+            FRs_classes{curClass} = [FRs_classes{curClass} curFR];
         else
-            g{groupCount} = gLabels{3};
-            FRs_dirSel{3} = [FRs_dirSel{3} curFR];
-            CVs_dirSel{3} = [CVs_dirSel{3} curCV];
+            FRs_classes{8} = [FRs_classes{8} curFR];
+        end
+
+        % by dirSel
+        if any(ismember(primSec(iNeuron,:),[3,4])) % primary and secondary
+            groupCount = groupCount + 1;
+            g{groupCount} = gLabels{1};
+            FRs_dirSel{1} = [FRs_dirSel{1} curFR];
+            CVs_dirSel{1} = [CVs_dirSel{1} curCV];
+
+            groupCount = groupCount + 1;
+            if dirSelNeuronsNO_01(iNeuron)
+                g{groupCount} = gLabels{2};
+                FRs_dirSel{2} = [FRs_dirSel{2} curFR];
+                CVs_dirSel{2} = [CVs_dirSel{2} curCV];
+            else
+                g{groupCount} = gLabels{3};
+                FRs_dirSel{3} = [FRs_dirSel{3} curFR];
+                CVs_dirSel{3} = [CVs_dirSel{3} curCV];
+            end
         end
     end
 end
 
 if doDirSel
+    gColors = [0 0 0;1 0 0;.5 .5 .5];
     % get 10/90th whiskers: https://www.mathworks.com/matlabcentral/answers/171414-how-to-show-95-quanile-in-a-boxplot
     q3 = norminv(.75);
     q9 = norminv(0.9);
@@ -56,30 +63,55 @@ if doDirSel
     
     h = figuree(600,200);
     subplot(121);
-    hb = boxplot([FRs_dirSel{1},FRs_dirSel{2},FRs_dirSel{3}],g,'Symbol','','Whisker',w9);
-    xticklabels(gLabels);
-    ylabel('Firing Rate (spikes/sec)');
+    hb = boxplot([FRs_dirSel{1},FRs_dirSel{2},FRs_dirSel{3}],g,'Symbol','','Whisker',w9,'Boxstyle','filled','medianStyle','target','Colors',gColors);
     FR_ylims = [0 60];
     ylim(FR_ylims);
-    yticks(FR_ylims(1):10:FR_ylims(2));
+% %     yticks(FR_ylims(1):10:FR_ylims(2));
+    yticks(FR_ylims);
     yText = 55;
-    text(1,yText,['n = ',num2str(numel(FRs_dirSel{1}))],'horizontalAlignment','center');
-    text(2,yText,['n = ',num2str(numel(FRs_dirSel{2}))],'horizontalAlignment','center');
-    text(3,yText,['n = ',num2str(numel(FRs_dirSel{3}))],'horizontalAlignment','center');
+    
+    if doLabels
+        xticklabels(gLabels);
+        ylabel('Firing Rate (spikes/sec)');
+        text(1,yText,[num2str(numel(CVs_dirSel{1}))],'horizontalAlignment','center','fontSize',fontSize);
+        text(2,yText,[num2str(numel(CVs_dirSel{2}))],'horizontalAlignment','center','fontSize',fontSize);
+        text(3,yText,[num2str(numel(CVs_dirSel{3}))],'horizontalAlignment','center','fontSize',fontSize);
+%         cleanPlot;
+    else
+        yticklabels({});
+        xticklabels({});
+    end
+    box off;
     
     subplot(122);
-    boxplot([CVs_dirSel{1},CVs_dirSel{2},CVs_dirSel{3}],g,'Symbol','','Whisker',w9);
-    xticklabels(gLabels);
-    ylabel('Firing Regularity (CV)');
+    hb = boxplot([CVs_dirSel{1},CVs_dirSel{2},CVs_dirSel{3}],g,'Symbol','','Whisker',w9,'Boxstyle','filled','medianStyle','target','Colors',gColors);
+    hold on;
     CV_ylims = [0 2.5];
     ylim(CV_ylims);
-    yticks([CV_ylims(1):0.5:CV_ylims(2)]);
-    yText = 2.3;
-    text(1,yText,['n = ',num2str(numel(CVs_dirSel{1}))],'horizontalAlignment','center');
-    text(2,yText,['n = ',num2str(numel(CVs_dirSel{2}))],'horizontalAlignment','center');
-    text(3,yText,['n = ',num2str(numel(CVs_dirSel{3}))],'horizontalAlignment','center');
+% %     yticks([CV_ylims(1):0.5:CV_ylims(2)]);
+    yticks(sort([1 CV_ylims]));
+    cvLine = plot(xlim,[1 1],'-','color',repmat(.8,1,3));
+    uistack(cvLine,'bottom');
     
-    set(gcf,'color','w');
+    yText = 2.3;
+    if doLabels
+        ylabel('Firing Regularity (CV)');
+        xticklabels(gLabels);
+        text(1,yText,[num2str(numel(FRs_dirSel{1}))],'horizontalAlignment','center','fontSize',fontSize);
+        text(2,yText,[num2str(numel(FRs_dirSel{2}))],'horizontalAlignment','center','fontSize',fontSize);
+        text(3,yText,[num2str(numel(FRs_dirSel{3}))],'horizontalAlignment','center','fontSize',fontSize);
+    else
+        yticklabels({});
+        xticklabels({});
+    end
+    
+    tightfig;
+    setFig('','',[1,.7]);
+    if doSave
+        saveName = 'FRallUnits_dirSel';
+        print(h,'-painters','-depsc',fullfile(savePath,[saveName,'.eps']));
+        close(h);
+    end
 end
 
 if doClasses

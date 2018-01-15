@@ -19,7 +19,8 @@ end
 set(gcf, 'PaperUnits','centimeters');
 
 if exist('cols','var')
-    curPaperSize = get(gcf, 'PaperSize');
+    pixelposition = getpixelposition(gcf);
+    curPaperSize = get(gcf,'PaperSize'); % this is always 8.5x11
     minusCm = 0;
     if numel(cols) > 1
         minusCm = cols(2);
@@ -37,7 +38,8 @@ if exist('cols','var')
         figwidth = cols - minusCm; % manual
     end
     % scale height
-    figheight = (figwidth / curPaperSize(1)) * curPaperSize(2);
+% %     figheight = (figwidth / curPaperSize(1)) * curPaperSize(2);
+    figheight = (figwidth / pixelposition(3)) * pixelposition(4);
     set(gcf, 'PaperSize', [figwidth, figheight]);
     set(gcf, 'PaperPositionMode', 'manual');
     set(gcf, 'PaperPosition',[0 0 figwidth figheight]);
