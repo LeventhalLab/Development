@@ -1,6 +1,6 @@
 % function rtMtDist(analysisConf)
-doLabels = true;
-doSave = false;
+doLabels = false;
+doSave = true;
 
 if false
     all_rt = [];
@@ -112,7 +112,8 @@ if useMeanColors
     mt_meanColors = [repmat(grayColor,rtc1,1);summer(rtc2-rtc1);repmat(grayColor,numel(x)-rtc2,1)];
     lns_mt = colormapline(x,y,[],mt_meanColors);
 else
-    lns_mt = plot(x,y,'k');
+    lns_mt = plot(x,y,'-','color',repmat(.65,[1,3]));
+    plot(x,y,'k:');
 end
 set(lns_mt,'lineWidth',lineWidth);
 % % lns = plot(x,y,'k','lineWidth',lineWidth);

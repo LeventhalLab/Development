@@ -20,7 +20,7 @@ rows = 2;
 cols = 7;
 nSmooth = 3;
 colors = zeros(2,3);
-lineWidth = 2;
+lineWidth = 1;
 set_ylims = [-1 4];
 ylabelloc = 2.75;
 % useNeuron = 188% (R142_1209_7b), 103, 147, 201 (R142_1210_36a)
@@ -81,9 +81,9 @@ for iEvent = 1:numel(eventFieldnames)
         lns(iEvent) = plot(smooth(squeeze(all_zscores(useNeuron,iEvent,:)),nSmooth),'LineWidth',lineWidth,'Color',colors(2,:));
         medRT = median(session_rt);
         medRT_x = (size(all_zscores,3) / 2) + (medRT / binS);
-        plot([medRT_x medRT_x],[-5 5],'k--');
+        plot([medRT_x medRT_x],[-5 5],'k:','lineWidth',0.5);
         if doLabels
-            tx = text(medRT_x,ylabelloc,'RT','fontSize',10,'HorizontalAlignment','center','VerticalAlignment','top');
+            tx = text(medRT_x,ylabelloc,'RT','fontSize',8,'HorizontalAlignment','center','VerticalAlignment','top');
             set(tx,'Rotation',90);
         end
     elseif iEvent == 4
@@ -92,9 +92,9 @@ for iEvent = 1:numel(eventFieldnames)
         lns(iEvent) = plot(smooth(squeeze(all_zscores(useNeuron,iEvent,:)),nSmooth),'LineWidth',lineWidth,'Color',colors(1,:));
         medMT = median(session_mt);
         medMT_x = (size(all_zscores,3) / 2) + (medMT / binS);
-        plot([medMT_x medMT_x],[-5 5],'k--');
+        plot([medMT_x medMT_x],[-5 5],'k:','lineWidth',0.5);
         if doLabels
-            tx = text(medMT_x,ylabelloc,'MT','fontSize',10,'HorizontalAlignment','center','VerticalAlignment','top');
+            tx = text(medMT_x,ylabelloc,'MT','fontSize',8,'HorizontalAlignment','center','VerticalAlignment','top');
             set(tx,'Rotation',90);
         end
     else

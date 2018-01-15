@@ -49,8 +49,6 @@ function RTMT_corrMatrix()
     
     % setup
     grayColor = [.8 .8 .8];
-% %     rt_meanColors = [grayColor;cool(numel(ndirRT.auc_max)-2);grayColor];
-% %     mt_meanColors = [summer(numel(ndirMT.auc_max)-1);grayColor];
     
     n_downsample = 20;
     rt1 = closest(dirRT.all_useTime_sorted,expressRT);
@@ -91,7 +89,7 @@ function RTMT_corrMatrix()
 % %     end
     
     % RASTERS
-    if true
+    if false
         timingField = 'RT';
         h = plot_typeRaster(ndirRT,timingField,rt_meanColors);
         if doSave
@@ -153,7 +151,9 @@ function RTMT_corrMatrix()
         end
     end
     
-    if false
+    if true
+        rt_meanColors = [grayColor;cool(numel(ndirRT.auc_max)-2);grayColor];
+        mt_meanColors = [summer(numel(ndirMT.auc_max)-1);grayColor];
         all_loadData = {ndirRT,ndirMT,dirRT,dirMT};
         legendText = {'ndirRT','ndirMT','dirRT','dirMT'};
 
@@ -444,7 +444,7 @@ function plot_stackedRTCorrs(all_loadData,rt_meanColors,mt_meanColors)
 end
 
 function h = plot_typeRaster(loadData,timingField,meanColors)
-    h = figuree(450,250);
+    h = figuree(450,200);
     xlimVals = [-1 1];
     lineWidth = 4;
     
@@ -525,7 +525,7 @@ function h = plot_type1(loadData,meanColors,timingField)
     lineWidth = 1.5;
     annotateColor = repmat(.75,1,3);
     
-    h = figuree(450,250);
+    h = figuree(450,200);
     lns = plot(loadData.mean_z','lineWidth',lineWidth);
     set(lns,{'color'},num2cell(meanColors,2));
     xlabel('Time (s)');

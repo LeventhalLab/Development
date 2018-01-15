@@ -126,7 +126,7 @@ end
 % pie charts
 pieData = primFate;
 useEvents = [3,4]; % limit 2
-h = figuree(500,400);
+h = figuree(500,200);
 
 for iEvent = 1:2
     subplot(1,2,iEvent);
