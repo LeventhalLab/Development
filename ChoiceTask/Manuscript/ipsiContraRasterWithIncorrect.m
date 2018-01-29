@@ -1,13 +1,13 @@
 saveDir = '/Users/mattgaidica/Documents/Data/ChoiceTask/ipsiContraWithIncorrectRaster';
 saveExt = '.png';
-doLabels = true;
+doLabels = false;
 doSave = true;
 doLegend = false;
 saveFig = true;
-doNote = true;
+doNote = false;
 useEvents = [1:7];
 % units: 113, 188, 201
-for iNeuron = incorr_ipsi_fateIds' %188 %1:numel(analysisConf.neurons)
+for iNeuron = 188 %1:numel(analysisConf.neurons)
     note_dirSel = '-';
     note_dirSelNO = '-';
 
@@ -120,23 +120,23 @@ for iNeuron = incorr_ipsi_fateIds' %188 %1:numel(analysisConf.neurons)
             xticks(0);
             xticklabels([]);
         end
-% %         if iEvent == 6 && iNeuron == 188 % !!! special case
-% %             cur_xlim = xlim;
-% %             for iTrial = 1:numel(trialIds)
-% %                 sideOutDir = R0142_1209_sideOutDir(trialIds(iTrial));
-% %                 marker = '>';
-% %                 if sideOutDir == 2
-% %                     marker = '<';
-% %                 end
-% %                 plot(cur_xlim(sideOutDir),iTrial,marker,'MarkerFaceColor',colors(sideOutDir,:),'MarkerEdgeColor','none','markerSize',5);
-% %             end
-% %             contraTrials = [trialIdInfo.correctContra trialIdInfo.incorrectContra];
-% %             contraSideOuts = R0142_1209_sideOutDir(contraTrials);
-% %             ipsiTrials = [trialIdInfo.correctIpsi trialIdInfo.incorrectIpsi];
-% %             ipsiSideOuts = R0142_1209_sideOutDir(ipsiTrials);
-% %             disp([num2str(100*sum(contraSideOuts == 1)/numel(contraSideOuts),'%2.2f'),'% contra Nose Out/Side Out agreement']);
-% %             disp([num2str(100*sum(ipsiSideOuts == 2)/numel(ipsiSideOuts),'%2.2f'),'% ipsi Nose Out/Side Out agreement']);
-% %         end
+        if iEvent == 6 && iNeuron == 188 % !!! special case
+            cur_xlim = xlim;
+            for iTrial = 1:numel(trialIds)
+                sideOutDir = R0142_1209_sideOutDir(trialIds(iTrial));
+                marker = '>';
+                if sideOutDir == 2
+                    marker = '<';
+                end
+                plot(cur_xlim(sideOutDir),iTrial,marker,'MarkerFaceColor',colors(sideOutDir,:),'MarkerEdgeColor','none','markerSize',5);
+            end
+            contraTrials = [trialIdInfo.correctContra trialIdInfo.incorrectContra];
+            contraSideOuts = R0142_1209_sideOutDir(contraTrials);
+            ipsiTrials = [trialIdInfo.correctIpsi trialIdInfo.incorrectIpsi];
+            ipsiSideOuts = R0142_1209_sideOutDir(ipsiTrials);
+            disp([num2str(100*sum(contraSideOuts == 1)/numel(contraSideOuts),'%2.2f'),'% contra Nose Out/Side Out agreement']);
+            disp([num2str(100*sum(ipsiSideOuts == 2)/numel(ipsiSideOuts),'%2.2f'),'% ipsi Nose Out/Side Out agreement']);
+        end
         
 % %         plot([0 0],ylim,'k--'); % zero line
         
