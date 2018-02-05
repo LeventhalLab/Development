@@ -1,6 +1,7 @@
 % you have to run ipsiContraShuffle.m then set these, annoying
 % dirSelNeuronsNO_type_correct
 % dirSelNeuronsNO_type_incorrect
+doSave = true;
 
 corr_contra_ids = find(dirSelNeuronsNO_type_correct == 1);
 corr_ipsi_ids = find(dirSelNeuronsNO_type_correct == 2);
@@ -43,7 +44,7 @@ contra_fate_counts = histcounts(corr_contra_fate,[-.5:2.5])
 ipsi_fate_counts = histcounts(corr_ipsi_fate,[-.5:2.5])
 
 colors = [0 0 0;0 1 0;.5 .5 .5;];
-legendText = {'NR','SAME','DIFF'};
+legendText = {'Not Enough Trials','Coded Same Direction','Coded Different Direction'};
 h = figuree(800,400);
 subplot(121);
 pie(contra_fate_counts); % *different order than below for colormap
@@ -56,5 +57,11 @@ title('Correct Ipsi Fate');
 legend(legendText,'location','southoutside');
 
 colormap(colors);
+tightfig;
+setFig('','',[1,0.5]);
 
-addNote(h,{'When the tone is opposite','is the directional selectivity','the SAME or DIFF?'});
+if doSave
+    print(gcf,'-painters','-depsc',fullfile(figPath,'dirSelToneMoveCorrFate.eps'));
+else
+    addNote(h,{'When the tone is opposite','is the directional selectivity','the SAME or DIFF?'});
+end

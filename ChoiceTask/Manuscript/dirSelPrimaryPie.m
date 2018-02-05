@@ -1,7 +1,7 @@
 % use primSec_plot.m to set primSec (unit classes)
-
+doSave = true;
 % primary + secondary
-figuree(900,400);
+h = figuree(900,400);
 rows = 1;
 for iEvent = 1:7
     subplot(rows,7,iEvent);
@@ -19,13 +19,20 @@ for iEvent = 1:7
 % %     posRatio = primSecUnitsDirAtEvent / totalPrimSecUnitsForEvent;
     pie([posRatio 1-posRatio]);
     colormap([1 0 0;repmat(0.2,1,3)]);
-    title([eventFieldlabels{iEvent}]);
-    legend('dir','~dir','location','southoutside');
-    setFig;
+    if ~doSave
+        title([eventFieldlabels{iEvent}]);
+        legend('dir','~dir','location','southoutside');
+    end
 end
+% uses z text
+[z,y] = cat_zTest(a,c,sum(dirSelNeuronsNO_01),sum(dirSelNeuronsNO_01));
 
-[x2,p] = chiSquare(a,c,sum(dirSelNeuronsNO_01),sum(dirSelNeuronsNO_01))
-
+if doSave
+    tightfig;
+    setFig('','',[2,0.5]);
+    print(gcf,'-painters','-depsc',fullfile(figPath,'dirSelPie_supplemental.eps'));
+    close(h);
+end
 
 % % colors = parula(8);
 % % rows = 2;

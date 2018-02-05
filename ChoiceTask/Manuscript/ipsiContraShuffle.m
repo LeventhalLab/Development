@@ -1,7 +1,7 @@
 % the fraction of units whose activity is significantly different between
 % ipsi/contra trials
-doSetup = false;
-doSave = true;
+doSetup = true;
+doSave = false;
 doLabels = false;
 dodebug = false;
 doPies = false;
