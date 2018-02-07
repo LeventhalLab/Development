@@ -40,28 +40,39 @@ incorr_ipsi_fateIds = find(dirSelNeuronsNO_type_correct == 2 & dirSelNeuronsNO_t
 % %    310
 % %    313
 
-contra_fate_counts = histcounts(corr_contra_fate,[-.5:2.5])
-ipsi_fate_counts = histcounts(corr_ipsi_fate,[-.5:2.5])
+if false
+    contra_fate_counts = histcounts(corr_contra_fate,[-.5:2.5])
+    ipsi_fate_counts = histcounts(corr_ipsi_fate,[-.5:2.5])
 
-colors = [0 0 0;0 1 0;.5 .5 .5;];
-legendText = {'Not Enough Trials','Coded Same Direction','Coded Different Direction'};
-h = figuree(800,400);
+    colors = [0 0 0;0 1 0;.5 .5 .5;];
+    legendText = {'Not Enough Trials','Coded Same Direction','Coded Different Direction'};
+    h = figuree(800,400);
+    subplot(121);
+    pie(contra_fate_counts); % *different order than below for colormap
+    title('Correct Contra Fate');
+    legend(legendText,'location','southoutside');
+
+    subplot(122);
+    pie([ipsi_fate_counts(1) ipsi_fate_counts(3) ipsi_fate_counts(2)]);
+    title('Correct Ipsi Fate');
+    legend(legendText,'location','southoutside');
+
+    colormap(colors);
+    tightfig;
+    setFig('','',[1,0.5]);
+end
+% just hard coding this figure
+h = figuree(400,300);
 subplot(121);
-pie(contra_fate_counts); % *different order than below for colormap
-title('Correct Contra Fate');
-legend(legendText,'location','southoutside');
-
+pie([5,4]);
 subplot(122);
-pie([ipsi_fate_counts(1) ipsi_fate_counts(3) ipsi_fate_counts(2)]);
-title('Correct Ipsi Fate');
-legend(legendText,'location','southoutside');
-
-colormap(colors);
+pie([9,3]);
 tightfig;
 setFig('','',[1,0.5]);
 
 if doSave
     print(gcf,'-painters','-depsc',fullfile(figPath,'dirSelToneMoveCorrFate.eps'));
+    close(h);
 else
     addNote(h,{'When the tone is opposite','is the directional selectivity','the SAME or DIFF?'});
 end
