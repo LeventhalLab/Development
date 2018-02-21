@@ -17,7 +17,11 @@ for iEvent = 1:7
     end
     posRatio = primSecUnitsDirAtEvent / sum(dirSelNeuronsNO_01);
 % %     posRatio = primSecUnitsDirAtEvent / totalPrimSecUnitsForEvent;
-    pie([posRatio 1-posRatio]);
+    p = pie([posRatio 1-posRatio]);
+    hText = findobj(h,'Type','text'); % text object handles
+    percentValues = get(hText,'String'); % percent values
+    hText(1).String = '';
+    
     colormap([1 0 0;repmat(0.2,1,3)]);
     if ~doSave
         title([eventFieldlabels{iEvent}]);
@@ -25,7 +29,7 @@ for iEvent = 1:7
     end
 end
 % uses z text
-[z,y] = cat_zTest(a,c,sum(dirSelNeuronsNO_01),sum(dirSelNeuronsNO_01));
+[z,y,y2] = cat_zTest(a,c,sum(dirSelNeuronsNO_01),sum(dirSelNeuronsNO_01));
 
 if doSave
     tightfig;
