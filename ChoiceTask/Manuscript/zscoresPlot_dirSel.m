@@ -15,60 +15,45 @@ nSmooth = 3;
 colors = [1 0 0;0 0 1];
 plotAllClasses = false;
 lineWidth = 3;
-set_ylims = [-0.5 2];
+set_ylims = [-.25 1];
 ylabelloc = 1.5;
 
 figuree(1200,400);
 lns = [];
+iSubplot = 1;
 for iEvent = 1:numel(eventFieldnames)
-    subplot(1,7,iEvent);
+    subplot(1,7,iSubplot);
 % %     useNeurons = logical(sum(primSec(1,:) == iEvent,2));
 % %     plot(squeeze(all_zscores(useNeurons,iEvent,:))','LineWidth',0.5,'Color',repmat(.1,1,4));
 % %     hold on;
 
 % %     if iEvent == 3
-        if onlyPrimary
-            useNeurons = logical(primSec(:,1) == 4);
-        else
-            useNeurons = logical(sum(primSec == 4,2)); % prim + sec
-        end
-        lns(2) = plot(smooth(mean(squeeze(all_zscores(useNeurons,iEvent,:))),nSmooth),'LineWidth',lineWidth,'Color',colors(1,:));
+        useNeurons = ~dirSelNeuronsNO_01;
+        lns(1) = plot(smooth(mean(squeeze(all_zscores(useNeurons,iEvent,:))),nSmooth),'LineWidth',lineWidth,'Color',colors(1,:));
         hold on;
-        if onlyPrimary
-            useNeurons = logical(primSec(:,1) == 3);
-        else
-            useNeurons = logical(sum(primSec == 3,2)); % prim + sec
-        end
-        lns(1) = plot(smooth(mean(squeeze(all_zscores(useNeurons,iEvent,:))),nSmooth),'LineWidth',lineWidth,'Color',colors(2,:));
+        useNeurons = dirSelNeuronsNO_01;
+        lns(2) = plot(smooth(mean(squeeze(all_zscores(useNeurons,iEvent,:))),nSmooth),'LineWidth',lineWidth,'Color',colors(2,:));
         medRT = median(all_rt);
         medRT_x = (size(all_zscores,3) / 2) + (medRT / binS);
 % %         plot([medRT_x medRT_x],[-5 5],'k--');
 % %         tx = text(medRT_x,ylabelloc,'median RT','fontSize',16,'HorizontalAlignment','center','VerticalAlignment','top');
 % %         set(tx,'Rotation',90);
-        legend(lns,{'Tone','Nose Out'},'location','south');
+        legend(lns,{'~dir','dir'},'location','south');
 % %     elseif iEvent == 4
-% %         if onlyPrimary
-% %             useNeurons = logical(primSec(:,1) == 3);
-% %         else
-% %             useNeurons = logical(sum(primSec == 3,2)); % prim + sec
-% %         end
-% %         lns(1) = plot(smooth(mean(squeeze(all_zscores(useNeurons,iEvent,:))),nSmooth),'LineWidth',lineWidth,'Color',colors(2,:));
+% %         useNeurons = dirSelNeuronsNO_01;
+% %         lns(2) = plot(smooth(mean(squeeze(all_zscores(useNeurons,iEvent,:))),nSmooth),'LineWidth',lineWidth,'Color',colors(2,:));
 % %         hold on;
-% %         if onlyPrimary
-% %             useNeurons = logical(primSec(:,1) == 4);
-% %         else
-% %             useNeurons = logical(sum(primSec == 4,2)); % prim + sec
-% %         end
-% %         lns(2) = plot(smooth(mean(squeeze(all_zscores(useNeurons,iEvent,:))),nSmooth),'LineWidth',lineWidth,'Color',colors(1,:));
+% %         useNeurons = ~dirSelNeuronsNO_01;
+% %         lns(1) = plot(smooth(mean(squeeze(all_zscores(useNeurons,iEvent,:))),nSmooth),'LineWidth',lineWidth,'Color',colors(1,:));
 % %         medMT = median(all_mt);
 % %         medMT_x = (size(all_zscores,3) / 2) + (medMT / binS);
 % %         plot([medMT_x medMT_x],[-5 5],'k--');
 % %         tx = text(medMT_x,ylabelloc,'median MT','fontSize',16,'HorizontalAlignment','center','VerticalAlignment','top');
 % %         set(tx,'Rotation',90);
-% %         legend(lns,{'Tone','Nose Out'},'location','south');
+% %         legend(lns,{'~dir','dir'},'location','south');
 % %     else
 % % % %         useNeurons = logical(primSec(:,1) == iEvent);
-% %         useNeurons = logical(sum(primSec == iEvent,2));
+% %         useNeurons = true(366,1);
 % %         lns(iEvent) = plot(smooth(mean(squeeze(all_zscores(useNeurons,iEvent,:))),nSmooth),'LineWidth',lineWidth,'Color','k');
 % %     end
   
@@ -88,5 +73,8 @@ for iEvent = 1:numel(eventFieldnames)
     
     set(gca,'fontSize',16);
     grid on;
+    
+    iSubplot = iSubplot + 1;
 end
 set(gcf,'color','white');
+tightfig;

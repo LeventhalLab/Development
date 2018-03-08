@@ -6,16 +6,18 @@ if doSetup
 end
 
 iNeuron = 1;
+useEvents = 1:7;
 % % lfpChannel = 93;
-fpass = [13 30];
+fpass = [10 40];
 nTicks = 1;
-nFreqs = 30;
+nFreqs = 50;
 freqList = logFreqList(fpass,nFreqs);
 decimateFactor = 10;%round(header.Fs / (fpass(2) * 10)); % 10x max filter freq
 timingField = 'RT';
 tWindow = 1;
 t = linspace(-tWindow,tWindow,nFreqs);
 eventFieldnames = {'cueOn';'centerIn';'tone';'centerOut';'sideIn';'sideOut';'foodRetrieval'};
+fontSize = 6;
 % --- END INIT
 
 
@@ -36,11 +38,13 @@ logFile = getLogPath(sessionConf.leventhalPaths.rawdata);
 logData = readLogData(logFile);
 trials = createTrialsStruct_simpleChoice(logData,nexStruct);
 [trialIds,allTimes] = sortTrialsBy(trials,timingField); % forces to be 'correct'
+% trialIds = sort(trialIds);
+% trialIds = find([trials.falseStart] == 1);
 
 % this is really not perfect yet, needs LFP channel in DB I think
-rows = sessionConf.session_electrodes.channel == electrodeChannels;
-channels = sessionConf.session_electrodes.channel(any(rows')');
-lfpChannel = channels(1);
+% % rows = sessionConf.session_electrodes.channel == electrodeChannels;
+% % channels = sessionConf.session_electrodes.channel(any(rows')');
+% % lfpChannel = channels(1);
 if ~exist('sevFile','var') || ~strcmp(sevFile,sessionConf.sevFiles{lfpChannel})
     sevFile = sessionConf.sevFiles{lfpChannel};
     [sev,header] = read_tdt_sev(sevFile);
@@ -49,20 +53,19 @@ if ~exist('sevFile','var') || ~strcmp(sevFile,sessionConf.sevFiles{lfpChannel})
 end
 % --- END LOAD SESSION
 
-
+% caxisVals = [3.2129    7.1162];
+caxisVals = [4 6];
 if true
-    [eventScalograms,allLfpData] = eventsScalo(trials(trialIds),sevFilt,tWindow,Fs,freqList,eventFieldnames);
+    [eventScalograms,allLfpData] = eventsScalo(trials(trialIds),sevFilt,tWindow,Fs,freqList,{eventFieldnames{useEvents}});
     rows = 1;
-    cols = numel(eventFieldnames);
-    figuree(800,200);
+    cols = size(eventScalograms,1);
+    figuree(120*cols,200);
     iSubplot = 1;
-    for iEvent = 1:numel(eventFieldnames)
+    for iEvent = 1:size(eventScalograms,1)
         ax = subplot(rows,cols,iSubplot);
         scaloData = log(squeeze(eventScalograms(iEvent,:,:)));
         imagesc(t,freqList,scaloData);
-        if iTrial == 1
-            title(eventFieldnames{iEvent});
-        end
+        title(eventFieldnames{iEvent});
 
         if iEvent == 1
             ylabel('Freq (Hz)');
@@ -76,32 +79,36 @@ if true
         end
 
         set(ax,'YDir','normal');
-        xlim([-1 1]);
-        xticks([]);
+        xlim([-tWindow tWindow]);
+        xticks([-tWindow 0 tWindow]);
 
         set(ax,'TickDir','out');
         set(ax,'FontSize',fontSize);
         colormap(jet);
-    % %     caxis(caxisVals);
+%         caxis(caxisVals);
 
         iSubplot = iSubplot + 1;
     end
 end
 
-h = figuree(900,700);
-rows = numel(allTimes);
-cols = numel(eventFieldnames);
-caxisVals = [-5 8];
-fontSize = 6;
+cols = numel(useEvents);
+rows = 50;%numel(allTimes);
+h = figuree(120*cols,700);
+caxisVals = [4 7];
 iSubplot = 1;
 noseOutVals = [];
 
 for iTrial = 1:numel(trialIds)
     curTrialId = trialIds(iTrial);
     curTrial = trials(curTrialId);
-    [eventScalograms,allLfpData] = eventsScalo(curTrial,sevFilt,tWindow,Fs,freqList,eventFieldnames);
+    [eventScalograms,allLfpData] = eventsScalo(curTrial,sevFilt,tWindow,Fs,freqList,{eventFieldnames{useEvents}});
     
-    for iEvent = 1:numel(eventFieldnames)
+    if mod(iTrial,rows) == 0
+        h = figuree(120*cols,700);
+        iSubplot = 1;
+    end
+
+    for iEvent = 1:numel(useEvents)
         ax = subplot(rows,cols,iSubplot);
         scaloData = log(squeeze(eventScalograms(iEvent,:,:)));
         imagesc(t,freqList,scaloData);
@@ -123,8 +130,8 @@ for iTrial = 1:numel(trialIds)
         noseOutVals(iEvent,iTrial) = mean(mean(scaloData(:,(size(scaloData,2)/2)-qtrSec:(size(scaloData,2)/2)+qtrSec)));
         
         set(ax,'YDir','normal');
-        xlim([-1 1]);
-        xticks([]);
+        xlim([-tWindow tWindow]);
+        xticks([-tWindow 0 tWindow]);
 
         set(ax,'TickDir','out');
         set(ax,'FontSize',fontSize);
@@ -134,12 +141,14 @@ for iTrial = 1:numel(trialIds)
         iSubplot = iSubplot + 1;
     end
 end
+% tightfig;
 
-figuree(800,300);
-for iEvent = 1:numel(eventFieldnames)
-    subplot(1,7,iEvent);
-    plot(allTimes,noseOutVals(iEvent,:),'k.','markerSize',20);
-    [rho,pval] = corr(allTimes',noseOutVals(iEvent,:)');
-    title({['rho: ',num2str(rho,3)],['pval: ',num2str(pval)]});
+if false
+    figuree(800,300);
+    for iEvent = 1:numel(eventFieldnames)
+        subplot(1,7,iEvent);
+        plot(allTimes,noseOutVals(iEvent,:),'k.','markerSize',20);
+        [rho,pval] = corr(allTimes',noseOutVals(iEvent,:)');
+        title({['rho: ',num2str(rho,3)],['pval: ',num2str(pval)]});
+    end
 end
-    
