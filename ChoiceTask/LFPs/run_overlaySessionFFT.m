@@ -18,7 +18,7 @@ subject__nexFiles = {'/Users/mattgaidica/Documents/Data/ChoiceTask/R0088/R0088-p
     '/Users/mattgaidica/Documents/Data/ChoiceTask/R0182/R0182-processed/R0182_20170723a/R0182_20170723a_finished/R0182_20170723a.nex.mat'};
 
 showFFT = true;
-showLFP = false;
+showLFP = true;
 
 if showFFT
     all_A = [];
@@ -51,9 +51,9 @@ if showFFT
 end
 
 if showLFP
-    fpass = [1 80];
+    useEvents = 1:7;
+    fpass = [10 60];
     nFreqs = 30;
-    tWindow_vis = 1;
     freqList = logFreqList(fpass,nFreqs);
     decimateFactor = 10;
     timingField = 'RT';
@@ -92,6 +92,7 @@ if showLFP
         end
         
         figure(h1);
+        tWindow_vis = 1;
         for iEvent = 1:numel(eventFieldnames)
             ax = subplot(numel(subject__names),numel(useEvents),iSubplot_h1);
             imagesc(t,1:nFreqs,squeeze(scaloData(iEvent,:,:)));
@@ -116,6 +117,7 @@ if showLFP
         end
         
         figure(h2);
+        tWindow_vis = 0.1;
         for iEvent = 1:numel(eventFieldnames)
             ax = subplot(numel(subject__names),numel(useEvents),iSubplot_h2);
             imagesc(t,1:nFreqs,squeeze(phaseData(iEvent,:,:)));
