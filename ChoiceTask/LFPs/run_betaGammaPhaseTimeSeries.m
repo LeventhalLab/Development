@@ -19,9 +19,8 @@ subject__nexFiles = {'/Users/mattgaidica/Documents/Data/ChoiceTask/R0088/R0088-p
 
 % setup
 doSetup = true;
-doVideo = true;
 
-for iSubject = 5
+for iSubject = 2:5
     if doSetup
         fpass = [10 60];
         nFreqs = 30;
@@ -49,93 +48,63 @@ for iSubject = 5
         t = linspace(-tWindow,tWindow,size(allW,2));
     end
 
-    iEvent = 3;
     betaIdx = closest(freqList,20);
     gammaIdx = closest(freqList,50);
     bandIdxs = [gammaIdx betaIdx];
-
-    vis_tWindow = 0.2;
-    t1Idx = closest(t,-vis_tWindow);
-    t2Idx = closest(t,vis_tWindow);
-    h = figuree(800,400);
-    fontSize = 12;
     pLim = 0.01;
 
-    if doVideo
-        savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/betaGammaVideo';
-        newVideo = VideoWriter(fullfile(savePath,[subject__names{iSubject},'_',datestr(now,'yyyymmdd-HHMMSS') '_betaGammaPhase']),'Motion JPEG AVI');
-        newVideo.Quality = 100;
-        open(newVideo);
-    end
-
-    Z = {};
-    Zmean = {};
+    vis_tWindow = 0.1;
+    t1Idx = closest(t,-vis_tWindow);
+    t2Idx = closest(t,vis_tWindow);
+    t_vis = linspace(-vis_tWindow,vis_tWindow,numel(t1Idx:t2Idx));
+    
     rows = 2;
     cols = 7;
-    iFrame = 1;
-    for itx = t1Idx:t2Idx
-        iSubplot = 1;
-        for iEvent = 1:cols
-            for iBand = 1:rows
-                U = [];
-                V = [];
-                all_angles = [];
-                for iTrial = 1:size(allW,3)
-                    cur_angle = angle(allW(iEvent,itx,iTrial,bandIdxs(iBand)));
-                    all_angles(iTrial) = cur_angle;
-                    [U(iTrial), V(iTrial)] = pol2cart(cur_angle,1);
-                end
-
-                subplot(rows,cols,((cols*iBand)-cols)+iEvent);
-
-                Z{iSubplot} = compass(U,V);
-                thetaticks([0 90 180 270])
-                thetaticklabels({'0','\pi/2','\pi','3\pi2'})
-                modZ = Z{iSubplot};
-                
-                filename = '/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/LFPs/utils/stoplight.jpg';
-                colors = mycmap(filename,length(modZ));
-                for ii=1:length(modZ)
-                    modZ(ii).Color = colors(ii,:);
-                    modZ(ii).LineWidth = 0.5;
-                end
-                hold on;
-
-                Zmean{iSubplot} = compass(mean(U),mean(V));
-                modZmean = Zmean{iSubplot};
-                modZmean(1).Color = 'k';
-                modZmean(1).LineWidth = 2;
-
-                p = circ_rtest(all_angles);
-                fontColor = 'k';
-                if p < pLim
-                    fontColor = 'r';
-                end
-                if iBand == 1
-                    title({num2str(t(itx),'%1.3f'),eventFieldnames{iEvent},['\gamma p=',num2str(p,'%1.3f')]},'FontSize',fontSize,'color',fontColor);
-                else
-                    title({['\beta p=',num2str(p,'%1.3f')]},'FontSize',fontSize,'color',fontColor);
-                end
-
-                iSubplot = iSubplot + 1;
+    nSmooth = 50;
+    figuree(1200,350);
+    fontSize = 14;
+    for iEvent = 1:cols
+        for iBand = 1:rows
+            all_angles = squeeze(angle(allW(iEvent,t1Idx:t2Idx,:,bandIdxs(iBand))));
+            all_ps = [];
+            for ti = 1:size(all_angles,1)
+                 p = circ_rtest(all_angles(ti,:));
+                all_ps(ti) = p;
             end
-        end
-        set(gcf,'color','w');
-
-        if doVideo
-            F = getframe(h);
-            disp(['Writing frame ',num2str(iFrame),'/',num2str(numel(t1Idx:t2Idx))]);
-            iFrame = iFrame + 1;
-            writeVideo(newVideo,F);
-        end
-
-        for ii=1:length(Z)
-            delete(Z{ii});
-            delete(Zmean{ii});
+            subplot(rows,cols,((cols*iBand)-cols)+iEvent);
+            
+            yyaxis left;
+            colors = lines(1);
+            shadedErrorBar(t_vis,circ_mean(all_angles'),circ_std(all_angles'),{'--','color',colors(1,:)});
+            if iEvent == 1
+                ylabel({subject__names{iSubject},'phase (rad)'});
+            else
+                ylabel('phase (rad)');
+            end
+            ylimVals = [-5 5];
+            ylim(ylimVals);
+            yticks(sort([ylimVals 0]));
+            hold on;
+            
+            yyaxis right;
+            plot(t_vis,all_ps,'lineWidth',0.75);
+            ylabel('p (r-test)');
+            ylimVals = [0 1];
+            ylim(ylimVals);
+            yticks(ylimVals);
+            
+            xlim([-vis_tWindow vis_tWindow]);
+            xlabel('time (s)');
+            plot(xlim,[pLim pLim],'r--');
+            
+            if iBand == 1
+                title({eventFieldnames{iEvent},'\gamma'},'fontSize',fontSize);
+            else
+                title({'\beta'},'fontSize',fontSize);
+            end
+            
+            set(gcf,'color','w');
         end
     end
-    if doVideo
-        close(h);
-        close(newVideo);
-    end
+
 end
