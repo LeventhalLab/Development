@@ -20,7 +20,7 @@ for iFreq = 12%:numel(freqList)
     figuree(1200,400);
 
     curData = squeeze(allW(:,:,:,iFreq));
-    curPower = abs(curData).^2;
+    curPower = abs(curData);
     curPhase = angle(curData);
 
     % POWER
@@ -50,9 +50,9 @@ for iFreq = 12%:numel(freqList)
         end
         plot(t,all_rs);
         ylabel('MRL');
-        ylimVals = [-1 1];
+        ylimVals = [0 1];
         ylim(ylimVals);
-        yticks(sort([ylimVals 0]));
+        yticks(ylimVals);
         
         grid on;
         
@@ -93,5 +93,20 @@ for iFreq = 12%:numel(freqList)
         yticks(ylimVals);
         grid on;
     end
+    
+    % PHASE-AMPLITUDE COUPLING
+    lowFreqIdx = 1;
+    [SI_mag,SI_phase] = synchronizationIndex(allW,t,vis_tWindow,iEvent,lowFreqIdx);
+    
+    figure;
+    imagesc(t_vis,1:numel(freqList),SI_mag);
+    yticks(1:numel(freqList));
+    yticklabels(freqList);
+    set(gca,'Ydir','normal');
+    colormap(jet);
+    colorbar;
+    caxis([0 1]);
+    xlabel('time (s)');
+    ylabel('freq (Hz)');
     
 end
