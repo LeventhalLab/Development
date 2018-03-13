@@ -7,12 +7,11 @@ endIdx = closest(t,tWindow);
 SI_mag = [];
 SI_phase = [];
 iFreq = 1;
-for highFreqIdx = lowFreqIdx + 1 : size(allW,4)
+for highFreqIdx = lowFreqIdx+1 : size(allW,4)
     disp(['Using highFreqIdx: ',num2str(highFreqIdx),' of ',num2str(size(allW,4))]);
     trialSI_mag = [];
     trialSI_phase = [];
     for iTrial = 1:size(allW,3)
-        disp(num2str(iTrial));
         % sweep thru time
         insideSI_mag = [];
         insideSI_phase = [];

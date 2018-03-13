@@ -1,4 +1,4 @@
-iSubject = 5;
+% % iSubject = 5;
 
 subject__names = {'R0088','R0117','R0142','R0154','R0182'};
 subject__files = {'/Users/mattgaidica/Documents/Data/ChoiceTask/R0088/R0088-rawdata/R0088_20151102a/R0088_20151102a/R0088_20151102_R0088_20151102-1_data_ch42.sev',...
