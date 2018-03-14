@@ -1,4 +1,5 @@
 function [SI_mag,SI_phase] = synchronizationIndex(allW,t,tWindow,iEvent,lowFreqIdx)
+% based on /Users/mattgaidica/Dropbox/Science/Mthal LFPs/Literature/1-s2.0-S0165027007005237-main.pdf
 % size(allW) = (7,9766,94,18)
 tSweep = .5; % seconds, 2 cycles of minimum freq (4 Hz)
 sweep_window = ceil(numel(t) / (range(t) / tSweep) / 2); % samples
