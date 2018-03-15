@@ -46,4 +46,18 @@ if doSetup
     % compute
     allW = eventsLFP(trials(trialIds),sevFilt,tWindow,Fs,freqList,eventFieldnames);
     t = linspace(-tWindow,tWindow,size(allW,2));
+    
+    if false
+        allW_allTrials = mean(pow(allW),3);
+        allW_allTrials = squeeze(squeeze(allW_allTrials(4,:,:,:)));
+        figure;
+        imagesc(t,1:numel(freqList),allW_allTrials');
+        xlim([-tWindow tWindow]);
+        xticks([-tWindow 0 tWindow]);
+        yticks(1:numel(freqList));
+        yticklabels(freqList);
+        set(gca,'YDir','normal');
+        colormap(jet);
+        grid on;
+    end
 end
