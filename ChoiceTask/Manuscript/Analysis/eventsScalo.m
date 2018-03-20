@@ -1,4 +1,7 @@
 function [allScalograms,allLfpData] = eventsScalo(trials,sevFilt,tWindow,Fs,freqList,eventFieldnames)
+% see eventsLFP.m for a similar function that returns the complex scalogram
+
+
 % need better lfp thresh algorithm
 lfpThresh = 2000; % diff of lfp in uV
 

@@ -21,10 +21,10 @@ subject__nexFiles = {'/Users/mattgaidica/Documents/Data/ChoiceTask/R0088/R0088-p
 
 doSetup = true;
 if doSetup
-% %     fpass = [4 60];
-% %     nFreqs = 30;
-% %     freqList = logFreqList(fpass,nFreqs);
-    freqList = [4:12 13 15 20 25 30 40 50 80 100];
+    fpass = [3.5 80];
+    nFreqs = 30;
+    freqList = logFreqList(fpass,nFreqs);
+% %     freqList = [4:12 13 15 20 25 30 40 50 80 100];
     decimateFactor = 10;
     timingField = 'RT';
     tWindow = 2;

@@ -1,8 +1,8 @@
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/PACreports';
 doSave = true;
-for iSubject = 2:5
+for iSubject = 5
     % setup (load one data set)
-    if true
+    if false
         run_loadData; % size(allW) = (7,9766,94,18)
     end
 
@@ -14,11 +14,12 @@ for iSubject = 2:5
     t2Idx = closest(t,vis_tWindow);
     t_vis = linspace(-vis_tWindow,vis_tWindow,numel(t1Idx:t2Idx));
     colors = lines(2);
+    nSkipLabels = 4;
 
     h = figuree(1200,rows*200);
     
     for iEvent = 1:7
-        cur_power = squeeze(mean(abs(squeeze(allW(iEvent,t1Idx:t2Idx,:,:))),2))'; % power -> mean all trials
+        cur_power = squeeze(mean(abs(squeeze(allW(iEvent,t1Idx:t2Idx,:,:))).^2,2))'; % power -> mean all trials
         cur_phase = squeeze(circ_mean(angle(squeeze(allW(iEvent,:,:,:))),[],2))';
         
         % POWER
@@ -27,8 +28,8 @@ for iSubject = 2:5
         imagesc(t_vis,1:numel(freqList),cur_power);
         xlim([-vis_tWindow vis_tWindow]);
         xticks([-vis_tWindow 0 vis_tWindow]);
-        yticks(1:numel(freqList));
-        yticklabels(freqList);
+        yticks(1:nSkipLabels:numel(freqList));
+        yticklabels(round(freqList(1:nSkipLabels:end)));
         set(ax,'YDir','normal');
         colormap(ax,jet);
         grid on;
@@ -68,8 +69,8 @@ for iSubject = 2:5
         imagesc(t_vis,1:numel(freqList),cur_phase);
         xlim([-vis_tWindow vis_tWindow]);
         xticks([-vis_tWindow 0 vis_tWindow]);
-        yticks(1:numel(freqList));
-        yticklabels(freqList);
+        yticks(1:nSkipLabels:numel(freqList));
+        yticklabels(round(freqList(1:nSkipLabels:end)));
         set(ax,'YDir','normal');
         cmocean('phase');
         grid on;
@@ -101,8 +102,8 @@ for iSubject = 2:5
         imagesc(t_vis,1:numel(freqList),all_rs);
         xlim([-vis_tWindow vis_tWindow]);
         xticks([-vis_tWindow 0 vis_tWindow]);
-        yticks(1:numel(freqList));
-        yticklabels(freqList);
+        yticks(1:nSkipLabels:numel(freqList));
+        yticklabels(round(freqList(1:nSkipLabels:end)));
         set(ax,'YDir','normal');
         colormap(ax,hot);
         caxis([0 0.6]);
@@ -126,8 +127,8 @@ for iSubject = 2:5
         imagesc(t_vis,1:numel(freqList),all_rs_pVal);
         xlim([-vis_tWindow vis_tWindow]);
         xticks([-vis_tWindow 0 vis_tWindow]);
-        yticks(1:numel(freqList));
-        yticklabels(freqList);
+        yticks(1:nSkipLabels:numel(freqList));
+        yticklabels(round(freqList(1:nSkipLabels:end)));
         set(ax,'YDir','normal');
         colormap(ax,hot);
         caxis([0 0.6]);
@@ -149,8 +150,8 @@ for iSubject = 2:5
         imagesc(t_vis,1:numel(freqList),all_ps);
         xlim([-vis_tWindow vis_tWindow]);
         xticks([-vis_tWindow 0 vis_tWindow]);
-        yticks(1:numel(freqList));
-        yticklabels(freqList);
+        yticks(1:nSkipLabels:numel(freqList));
+        yticklabels(round(freqList(1:nSkipLabels:end)));
         set(ax,'YDir','normal');
         colormap(ax,cool);
         caxis([0 1]);

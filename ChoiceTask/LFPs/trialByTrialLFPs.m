@@ -39,8 +39,8 @@ if false
 end
 
 cols = numel(useEvents);
-rows = 20;%numel(allTimes);
-h = figuree(120*cols,700);
+rows = 8;%numel(allTimes);
+h = figuree(120*cols,900);
 caxisVals = [0 400];
 iSubplot = 1;
 noseOutVals = [];
@@ -50,26 +50,24 @@ for iTrial = 1:numel(trialIds)
     curTrial = trials(curTrialId);
     [eventScalograms,allLfpData] = eventsScalo(curTrial,sevFilt,tWindow,Fs,freqList,{eventFieldnames{useEvents}});
     
-    if mod(iTrial,rows) == 0
+    if mod(iTrial,rows*cols+1) == 0
         h = figuree(120*cols,700);
         iSubplot = 1;
     end
 
-    for iEvent = 1:numel(useEvents)
+    for iEvent = 4
         ax = subplot(rows,cols,iSubplot);
         scaloData = squeeze(eventScalograms(iEvent,:,t1Idx:t2Idx));
         imagesc(t_vis,freqList,scaloData);
-        if iTrial == 1
-            title(eventFieldnames{iEvent});
-        end
+        title([num2str(iTrial),', ',eventFieldnames{iEvent}]);
             
-        if iEvent == 1
-            ylabel({'Freq (Hz)',num2str(allTimes(iTrial),3)});
-            yticks(1:numel(freqList));
-            yticklabels(freqList);
-        else
+% %         if iEvent == 1
+% %             ylabel({'Freq (Hz)',num2str(allTimes(iTrial),3)});
+% %             yticks(1:numel(freqList));
+% %             yticklabels(freqList);
+% %         else
             set(ax,'yTickLabel',[]);
-        end
+% %         end
         
 % %         qtrSec = round((size(scaloData,2) / 2) / 4);
 % %         noseOutVals(iEvent,iTrial) = mean(mean(scaloData(:,(size(scaloData,2)/2)-qtrSec:(size(scaloData,2)/2)+qtrSec)));
