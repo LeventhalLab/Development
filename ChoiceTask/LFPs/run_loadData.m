@@ -24,7 +24,7 @@ if doSetup
     fpass = [3.5 80];
     nFreqs = 30;
     freqList = logFreqList(fpass,nFreqs);
-% %     freqList = [4:12 13 15 20 25 30 40 50 80 100];
+    % linscale
     decimateFactor = 10;
     timingField = 'RT';
     tWindow = 2;
@@ -44,7 +44,7 @@ if doSetup
     [trialIds,allTimes] = sortTrialsBy(trials,timingField); % forces to be 'correct'
 
     % compute
-    allW = eventsLFP(trials(trialIds),sevFilt,tWindow,Fs,freqList,eventFieldnames);
+    [allW,allLfp] = eventsLFP(trials(trialIds),sevFilt,tWindow,Fs,freqList,eventFieldnames);
     t = linspace(-tWindow,tWindow,size(allW,2));
     
     if false

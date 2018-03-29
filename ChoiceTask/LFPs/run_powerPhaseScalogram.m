@@ -2,7 +2,7 @@ savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/PACreports';
 doSave = true;
 for iSubject = 5
     % setup (load one data set)
-    if false
+    if true
         run_loadData; % size(allW) = (7,9766,94,18)
     end
 
