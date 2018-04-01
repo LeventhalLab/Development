@@ -8,7 +8,9 @@ imshow(frame);
 pos = getPosition(imrect);
 close(h);
 
-imshow(frame);
+if ~exist(savePath)
+    mkdir(savePath);
+end
 
 for iTrial = 1:size(trialTimes,1)
     saveFile = fullfile(savePath,['trial',num2str(iTrial,'%02d')]);
@@ -28,5 +30,5 @@ for iTrial = 1:size(trialTimes,1)
         end
     end
     close(newVideo);
-    videoFiles{iTrial} = saveFile;
+    videoFiles{iTrial} = [saveFile,'.mp4'];
 end

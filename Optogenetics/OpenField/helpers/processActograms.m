@@ -1,30 +1,48 @@
 function trialActograms = processActograms(savePath,resizePx)
+cmapIM = '/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/Optogenetics/OpenField/helpers/stoplight.jpg';
 doDebug = true;
+doVideo = true;
+if doVideo % force
+    doDebug = true;
+end
 
 trialVideos = dir(fullfile(savePath,'*.mp4'));
 binaryT = 0.5;
 contrastMap = [0.1 0.4];
-SE = strel('disk',5);
+SE5 = strel('disk',5);
+SE7 = strel('disk',7);
 
-for iVideo = 1%:numel(trialVideos)
+if doDebug
+    actogramPath = fullfile(savePath,'actograms');
+    if ~exist(actogramPath)
+        mkdir(actogramPath);
+    end
+end
+
+for iVideo = 1:numel(trialVideos)
     filename = trialVideos(iVideo).name;
     trialNumber = str2double(filename(6:7));
     
     v = VideoReader(fullfile(savePath,filename));
     numFrames = ceil(v.FrameRate * v.Duration);
-    traceColors = cool(numFrames);
+    traceColors = mycmap(cmapIM,numFrames);
     
     iFrame = 0;
-    frameData = [];
     prevFrame = [];
     allCenters = [];
     if doDebug
-        figuree(800,800);
+        h = figuree(400,400);
+        if doVideo
+            saveFile = fullfile(actogramPath,['trial',num2str(iVideo,'%02d'),'_actogram']);
+            newVideo = VideoWriter(saveFile,'MPEG-4');
+            newVideo.Quality = 90;
+            newVideo.FrameRate = v.FrameRate;
+            open(newVideo);
+        end
     end
     
     while hasFrame(v)
         disp(num2str(v.CurrentTime));
-        
         iFrame = iFrame + 1;
         
         frame = readFrame(v);
@@ -33,11 +51,17 @@ for iVideo = 1%:numel(trialVideos)
         frame_contrast = imadjust(frame_gray,contrastMap);
         frame_binary = imbinarize(frame_contrast,binaryT);
         frame_complement = imcomplement(frame_binary);
-        frame_dilate = imdilate(frame_complement,SE);
+        frame_dilate = imdilate(frame_complement,SE5);
+        frame_erode = imerode(frame_dilate,SE7);
         
-        props = regionprops(frame_dilate,'Area','BoundingBox','Centroid');
+        props = regionprops(frame_erode,'Area','BoundingBox','Centroid','Eccentricity','Extent');
         [~,k] = max([props.Area]);
-        allCenters(iFrame,:) = props(k).Centroid;
+        % try to fix if too many pixels are bounded
+        if props(k).Extent < 0.1
+            props(k).Area = 0; % remove
+            [~,k] = max([props.Area]);
+        end
+        allCenters(iFrame,:,:) = props(k).Centroid;
         
         if doDebug
             subplot(221);
@@ -61,12 +85,25 @@ for iVideo = 1%:numel(trialVideos)
             title('contrast');
             
             subplot(224);
-            imshow(frame_dilate);
-            title('diff(prevFrame)');
+            imshow(frame_erode);
+            title('binary');
             set(gcf,'color','w');
+            
             drawnow;
+            
+            if doVideo
+                hFrame = getframe(h);
+                arrayfun(@cla,findall(0,'type','axes'));
+                writeVideo(newVideo,hFrame);
+            end
         end
-        frameData(iFrame,:,:) = frame_binary; % store binary, old: abs(mean2(frame - prevFrame));
+    end
+    
+    if doDebug
+        close(h);
+        if doVideo
+            close(newVideo);
+        end
     end
     
     trialActograms{iVideo,1} = filename;
