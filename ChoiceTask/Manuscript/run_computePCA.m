@@ -1,8 +1,8 @@
 doSetup = false;
 doCompile = true;
-doPlot = false;
+doPlot = true;
 iSession = 18;
-timingField = 'RT';
+timingField = 'MT';
 
 if doSetup
     % let's see how many units per session we have
@@ -88,26 +88,8 @@ end
 for iBin = 1:size(PCA_arr,4)
     for iEvent = 1:size(PCA_arr,3)
         covMatrix = []; % neuron x RT
-        for iTrial = 1:size(PCA_arr,2)
-            trial_sZ = PCA_arr(:,iTrial,iEvent,iBin);
-            trialTime = allTimes(iTrial);
-             (iTrial,:) = trial_sZ;
-            if doPlot
-                subplot(rows,cols,iEvent);
-                plot(repmat(trialTime,[1 numel(trial_sZ)]),trial_sZ,'.','markerSize',5);
-                xlimVals = [0 0.25];
-                xlim(xlimVals);
-                xticks(xlimVals);
-                ylimVals = [-3 8];
-                ylim(ylimVals);
-                yticks(sort([ylimVals 0]));
-                xlabel([timingField,' (s)']);
-                ylabel('SDE Z-score');
-                title({eventFieldnames{iEvent},['t = ',num2str(t_vis(iBin),'%1.3f')]});
-                hold on;
-            end
-        end
-        grid on;
+        trial_sZ = PCA_arr(:,:,iEvent,iBin)'; % all neurons, all trials, THIS event, THIS bin
+        covMatrix = trial_sZ;
         
         % A is a matrix whose columns represent random variables and whose rows represent observations
         % C is the covariance matrix with the corresponding column variances along the diagonal.
@@ -123,6 +105,21 @@ for iBin = 1:size(PCA_arr,4)
         % project the original data set
 % %         signals = PC'*data;
         if doPlot
+            subplot(rows,cols,iEvent);
+            x = repmat(allTimes,[1 size(covMatrix,2)]);
+            y = reshape(covMatrix,[1 numel(covMatrix)]);
+            scatter(x,y,5,'k','filled')
+            xlimVals = [0 0.5];
+            xlim(xlimVals);
+            xticks(xlimVals);
+            ylimVals = [-3 8];
+            ylim(ylimVals);
+            yticks(sort([ylimVals 0]));
+            xlabel([timingField,' (s)']);
+            ylabel('SDE Z-score');
+            title({eventFieldnames{iEvent},['t = ',num2str(t_vis(iBin),'%1.3f')]});
+            grid on;
+            
             subplot(rows,cols,iEvent+cols);
             plot(cumsum((V ./ sum(V))).*100,'lineWidth',2);
             xlabel('Components');
@@ -137,6 +134,7 @@ for iBin = 1:size(PCA_arr,4)
             grid on;
 
             set(gcf,'color','w');
+            drawnow;
         end
         
         all_V(:,iEvent,binCount) = V;

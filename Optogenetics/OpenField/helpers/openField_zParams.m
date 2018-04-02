@@ -1,4 +1,4 @@
-function zParams = openField_zParams(trialActograms,px2mm)
+function of_zParams = openField_zParams(trialActograms,px2mm)
 % values are per-frame
 zParams_mm = {};
 all_means = [];
@@ -12,4 +12,4 @@ for iTrial = 1:size(trialActograms,1)
 end
 zMean_mm = mean(all_means);
 zStd_mm = mean(all_stds);
-zParams = [zMean_mm,zStd_mm];
+of_zParams = [zMean_mm,zStd_mm];
