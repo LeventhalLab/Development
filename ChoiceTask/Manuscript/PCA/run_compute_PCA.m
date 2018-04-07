@@ -1,5 +1,4 @@
 for iSession = 1:numel(sessionPCA)
-
     all_event_coeff = [];
     all_event_explained = [];
 
@@ -28,5 +27,4 @@ for iSession = 1:numel(sessionPCA)
 
     sessionPCA(iSession).coeff = all_event_coeff;
     sessionPCA(iSession).explained = all_event_explained;
-
 end

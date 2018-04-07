@@ -1,13 +1,16 @@
+savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/PCA/perSessionAnalysis';
+doSave = false;
+
 for iSession = 1:numel(sessionPCA)
     t_vis = linspace(-tWindow_vis,tWindow_vis,SDEsamples);
 
-    figuree(1300,800);
+    h = figuree(1300,800);
     rows = 7;
     cols = 7;
     nSmooth = 1;
     for iEvent = 1:cols
         covMatrix = squeeze(sessionPCA(iSession).PCA_arr(iEvent,:,:))';
-        coeff = squeeze(sessionPCA_500ms(iSession).coeff(iEvent,:,:));
+        coeff = squeeze(sessionPCA_500ms(iSession).coeff(iEvent,:,:)); % NOTE COEFF SOURCE
         pca_data = covMatrix * coeff;
         for iPCA = 1:rows
             subplot(rows,cols,prc(cols,[iPCA iEvent]));
@@ -15,7 +18,7 @@ for iSession = 1:numel(sessionPCA)
             reshaped_demixed_data = reshape(demixed_data,[SDEsamples numel(demixed_data)/SDEsamples]);
             plot(t_vis,smooth(mean(reshaped_demixed_data,2),nSmooth),'k-','lineWidth',2);
             xlim([min(t_vis) max(t_vis)]);
-            ylimVals = [-4 4];
+            ylimVals = [-5 5];
             ylim(ylimVals);
             yticks(sort([ylimVals 0]));
             if iPCA == 1
@@ -35,5 +38,13 @@ for iSession = 1:numel(sessionPCA)
             end
             grid on;
         end
+    end
+    
+    set(h,'color','w');
+    saveFile = ['Session',num2str(iSession,'%02d'),'_allData'];
+    
+    if doSave
+        saveas(h,fullfile(savePath,saveFile),'png');
+        close(h);
     end
 end
