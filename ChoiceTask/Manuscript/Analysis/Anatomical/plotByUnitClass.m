@@ -1,5 +1,5 @@
 % eventFieldnames = {'cueOn';'centerIn';'tone';'centerOut';'sideIn';'sideOut';'foodRetrieval'};
-doAnalysis = 1; % 1 = all events, 2 = dirSel
+doAnalysis = 2; % 1 = all events, 2 = dirSel
 colors = jet(7);
 dirColors = [1 0 0;.5 .5 .5];
 dotSize_mm = .04;
@@ -13,7 +13,9 @@ end
 
 a1_hist = cell(numel(useEvents),1);
 a2_hist = cell(2,1);
+all_coords = NaN(size(analysisConf.neurons,1),3);
 all_DV = [];
+
 for iNeuron = 1:size(analysisConf.neurons,1)
     neuronName = analysisConf.neurons{iNeuron};
     sessionConf = analysisConf.sessionConfs{iNeuron};
@@ -22,13 +24,19 @@ for iNeuron = 1:size(analysisConf.neurons,1)
     channelData = sessionConf.session_electrodes(any(rows)',:);
     
     wiggleFactor = 0.3;
+    % AP
     wiggle = (rand(1) - 0.5) * wiggleFactor;
-    AP = channelData{1,'ap'} + wiggle;
-    wiggle = (rand(1) - 0.5) * wiggleFactor;
-    ML = channelData{1,'ml'}; % no wiggle, this controls the image/slice
+    actualAP = channelData{1,'ap'};
+    AP = actualAP + wiggle;
+    % ML
+    actualML = channelData{1,'ml'}; % no wiggle, this controls the image/slice
+    ML = actualML; % consistency in code
+    % DV
     wiggle = (rand(1) - 0.5) * wiggleFactor;
     actualDV = channelData{1,'dv'};
     DV = actualDV + wiggle;
+    
+    all_coords(iNeuron,:) = [actualML,actualAP,actualDV];
     
     neuronClass = primSec(iNeuron,1);
     switch doAnalysis
@@ -41,7 +49,7 @@ for iNeuron = 1:size(analysisConf.neurons,1)
             end
         case 2
             if ~isnan(neuronClass) && ismember(neuronClass,[3,4])
-                if dirSelNeurons(iNeuron)
+                if dirSelNeuronsNO_01(iNeuron)
                     dotColor = dirColors(1,:);
                     a2_hist{1} = [a2_hist{1} actualDV];
                 else

@@ -4,7 +4,7 @@ plotOpt = 2; % 1 = both sides of x-axis, 2 = mosaic
 showMosaic = false;
 plotTitle = 'Unit Classes';
 doLabels = false;
-doSave = true;
+doSave = false;
 fontSize = 8;
 
 doSetup = false;
