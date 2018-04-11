@@ -1,7 +1,10 @@
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/PCA/perSessionAnalysis';
-doSave = false;
+doSave = true;
+coeff_event = 4;
+sessionPCA_coeff = sessionPCA_500ms;
+sessionPCA_covMatrix = sessionPCA_1000ms;
 
-for iSession = 1:numel(sessionPCA)
+for iSession = 1:numel(sessionPCA_coeff)
     t_vis = linspace(-tWindow_vis,tWindow_vis,SDEsamples);
 
     h = figuree(1300,800);
@@ -9,8 +12,8 @@ for iSession = 1:numel(sessionPCA)
     cols = 7;
     nSmooth = 1;
     for iEvent = 1:cols
-        covMatrix = squeeze(sessionPCA(iSession).PCA_arr(iEvent,:,:))';
-        coeff = squeeze(sessionPCA_500ms(iSession).coeff(iEvent,:,:)); % NOTE COEFF SOURCE
+        covMatrix = squeeze(sessionPCA_covMatrix(iSession).PCA_arr(iEvent,:,:))';
+        coeff = squeeze(sessionPCA_coeff(iSession).coeff(coeff_event,:,:)); % NOTE COEFF SOURCE
         pca_data = covMatrix * coeff;
         for iPCA = 1:rows
             subplot(rows,cols,prc(cols,[iPCA iEvent]));
@@ -24,6 +27,8 @@ for iSession = 1:numel(sessionPCA)
             if iPCA == 1
                 if iEvent == 1
                     title({['Session ',num2str(iSession)],eventFieldnames{iEvent},['PCA ',num2str(iPCA)]});
+                elseif iEvent == coeff_event
+                    title({'COEFF EVENT',eventFieldnames{iEvent},['PCA ',num2str(iPCA)]});
                 else
                     title({'',eventFieldnames{iEvent},['PCA ',num2str(iPCA)]});
                 end
@@ -41,7 +46,7 @@ for iSession = 1:numel(sessionPCA)
     end
     
     set(h,'color','w');
-    saveFile = ['Session',num2str(iSession,'%02d'),'_allData'];
+    saveFile = ['Session',num2str(iSession,'%02d'),'_allData_',datestr(now,'yyyymmdd')];
     
     if doSave
         saveas(h,fullfile(savePath,saveFile),'png');

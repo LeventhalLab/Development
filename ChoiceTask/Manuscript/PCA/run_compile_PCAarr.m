@@ -1,6 +1,4 @@
-load('session_20180330_PCAanalysis.mat', 'analysisConf', 'eventFieldnames', 'all_ts');
-
-tWindow = 2;
+tWindow = 3;
 tWindow_vis = 1;
 SDEsamples = tWindow_vis * 2 * 1000;
 

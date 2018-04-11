@@ -1,5 +1,5 @@
 % use primSec_plot.m to set primSec (unit classes)
-doSave = true;
+doSave = false;
 % primary + secondary
 h = figuree(900,400);
 rows = 1;

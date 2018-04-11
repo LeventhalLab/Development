@@ -1,18 +1,21 @@
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/PCA/perSessionAnalysis/perUnit';
-doSave = true;
+doSave = false;
 colors = lines(2);
+coeff_event = 4;
+sessionPCA_coeff = sessionPCA_500ms;
+sessionPCA_covMatrix = sessionPCA_1000ms;
 
 t_vis = linspace(-tWindow_vis,tWindow_vis,SDEsamples);
 
 rows = 8;
 cols = 7;
     
-for iSession = 1:numel(sessionPCA)
+for iSession = 1:numel(sessionPCA_coeff)
     for iNeuron = 1:size(sessionPCA(iSession).PCA_arr,2)
         h = figuree(1300,900);
         for iEvent = 1:cols
-            covMatrix = squeeze(sessionPCA(iSession).PCA_arr(iEvent,:,:))';
-            coeff = squeeze(sessionPCA_500ms(iSession).coeff(iEvent,:,:)); % NOTE COEFF SOURCE
+            covMatrix = squeeze(sessionPCA_covMatrix(iSession).PCA_arr(iEvent,:,:))';
+            coeff = squeeze(sessionPCA_coeff(iSession).coeff(iEvent,:,:)); % NOTE COEFF SOURCE
             su_covMatrixcov = covMatrix(:,iNeuron);
             pca_data = su_covMatrixcov * coeff(iNeuron,:);
             
@@ -28,6 +31,8 @@ for iSession = 1:numel(sessionPCA)
             if iEvent == 1
                 title({['Session ',num2str(iSession),', Unit ',num2str(iNeuron)],eventFieldnames{iEvent},'Mean SDE'});
                 ylabel('Z');
+            elseif iEvent == coeff_event
+                title({'COEFF EVENT',eventFieldnames{iEvent},'Mean SDE'});
             else
                 title({'',eventFieldnames{iEvent},'Mean SDE'});
             end
@@ -53,7 +58,7 @@ for iSession = 1:numel(sessionPCA)
         end
 
         set(h,'color','w');
-        saveFile = ['Session',num2str(iSession,'%02d'),'_Unit',num2str(iNeuron,'%02d')];
+        saveFile = ['Session',num2str(iSession,'%02d'),'_Unit',num2str(iNeuron,'%02d'),'_',datestr(now,'yyyymmdd')];
 
         if doSave
             saveas(h,fullfile(savePath,saveFile),'png');
