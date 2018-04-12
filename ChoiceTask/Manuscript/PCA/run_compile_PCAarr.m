@@ -1,5 +1,14 @@
-tWindow = 3;
-tWindow_vis = 1;
+useDir = ''; % '' or 'ipsi' or 'contra'
+shortPCA = false;
+timingField = 'RT'; % timing assumes useDir = '';
+
+if shortPCA
+    tWindow = 2;
+    tWindow_vis = 0.5;
+else
+    tWindow = 3;
+    tWindow_vis = 1;
+end
 SDEsamples = tWindow_vis * 2 * 1000;
 
 require_nts = 5;
@@ -32,7 +41,6 @@ PCA_arr = [];
 sessionPCA = {};
 sessionCount = 0;
 for iSession = criteriaSessions
-    sessionCount = sessionCount + 1;
     groupNeurons = groupedNeurons{iSession};
     sessionConf = analysisConf.sessionConfs{groupNeurons(1)};
     neuronName = analysisConf.neurons{groupNeurons(1)};
@@ -45,7 +53,22 @@ for iSession = criteriaSessions
         nexStruct = fixMissingEvents(logData,nexStruct);
     end
     trials = createTrialsStruct_simpleChoice(logData,nexStruct);
-    [trialIds,allTimes] = sortTrialsBy(trials,'RT'); % forces to be 'correct'
+    trialIdInfo = organizeTrialsById(trials);
+    if numel(trialIdInfo.correctIpsi) < require_ntrials || numel(trialIdInfo.correctContra) < require_ntrials
+        disp(['Removing session ',num2str(iSession),' for low ipsi/contra trials']);
+        continue;
+    end
+    
+    sessionCount = sessionCount + 1;
+    
+    switch useDir
+        case 'ipsi'
+            trialIds = trialIdInfo.correctIpsi;
+        case 'contra'
+            trialIds = trialIdInfo.correctContra;
+        otherwise
+            [trialIds,allTimes] = sortTrialsBy(trials,timingField); % forces to be 'correct'
+    end
 
     PCA_arr = zeros(7,numel(groupNeurons),SDEsamples*numel(trialIds));
     neuronCount = 0;
@@ -56,6 +79,7 @@ for iSession = criteriaSessions
         % remove low timestamp trials
         tsPeths = tsPeths(~any(cellfun(@numel,tsPeths) < require_nts,2),:);
         if size(tsPeths,1) < require_ntrials
+            disp(['Removing neuron ',num2str(iNeuron),' for low FR']);
             continue;
         end
         neuronCount = neuronCount + 1;
@@ -85,4 +109,12 @@ for iSession = criteriaSessions
 % %     end
     
     sessionPCA(sessionCount).PCA_arr = PCA_arr;
+    if isempty(useDir) % NOT ipsi/contra analysis
+        switch timingField
+            case 'RT'
+                sessionPCA(sessionCount).RT = allTimes;
+            case 'MT'
+                sessionPCA(sessionCount).MT = allTimes;
+        end
+    end
 end

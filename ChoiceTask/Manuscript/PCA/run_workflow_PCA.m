@@ -22,3 +22,16 @@ sessionPCA_1000ms = sessionPCA; % save
 % save the session in case MATLAB crashes
 % !!! why is this >7GB right now?
 save(['session_',datestr(now,'YYYYMMDD'),'_PCA'],'analysisConf','eventFieldnames','all_ts','sessionPCA_500ms','sessionPCA_1000ms','-v7.3');
+
+
+% how to do directional selectivity
+useDir = 'ipsi'; % or '' or 'contra'
+% then
+run_compile_PCAarr.m
+% then
+run_compute_PCA.m
+sessionPCA_500ms_ipsi = sessionPCA; % save
+sessionPCA_500ms_contra = sessionPCA; % save
+
+sessionPCA_1000ms_ipsi = sessionPCA; % save
+sessionPCA_1000ms_contra = sessionPCA; % save

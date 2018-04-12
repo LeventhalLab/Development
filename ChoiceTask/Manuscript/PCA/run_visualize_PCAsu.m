@@ -5,6 +5,8 @@ coeff_event = 4;
 sessionPCA_coeff = sessionPCA_500ms;
 sessionPCA_covMatrix = sessionPCA_1000ms;
 
+tWindow_vis = 1;
+SDEsamples = tWindow_vis * 2 * 1000;
 t_vis = linspace(-tWindow_vis,tWindow_vis,SDEsamples);
 
 rows = 8;
