@@ -1,8 +1,8 @@
 % % unitEvents = corr_unitEvents;
 % % all_zscores = corr_all_zscores;
 doLabels = true;
-doSave = false;
-doPrimSecArrows = false;
+doSave = true;
+doPrimSecArrows = true;
 caxisVals = [-0.5 2];
 
 doSetup = false;
@@ -39,13 +39,25 @@ for iNeuron = 1:numel(analysisConf.neurons)
     end
 end
 
+sessionCount = 0;
+t = {};
+for iSession = 1:numel(sessionNeurons)
+    if numel(sessionNeurons{iSession}) > 1
+        sessionCount = sessionCount + 1;
+        t{sessionCount} = sessionNeurons{iSession};
+    end
+end
+sessionNeurons = t;
+
+
 % % useUnits = ~isnan(primSec(:,1));
 cols = 7;
 rows = numel(sessionNeurons);
-h = figuree(1200,700);
 b = 1;
 ls = []; % lefts
+frameArr = [];
 for iSession = 1:numel(sessionNeurons)
+    h = figuree(1200,700);
     useUnits = sessionNeurons{iSession};
     % compile event classes
     neuronClasses = {};
@@ -86,7 +98,7 @@ for iSession = 1:numel(sessionNeurons)
 
     gcas = [];
     for iEvent = 1:cols
-% %         h = .005 * numel(sorted_neuronIds);
+        gca_h = .005 * numel(sorted_neuronIds);
 % %         if iEvent == 1
 % %             b = b - h - .01;
 % %         end
@@ -99,6 +111,8 @@ for iSession = 1:numel(sessionNeurons)
 % %         end
         gcas(iEvent) = subplot(rows,cols,prc(cols,[iSession,iEvent]));
         imagesc(squeeze(all_zscores(sorted_neuronIds,iEvent,:)));
+        pos = get(gca,'position');
+        set(gca,'position',[pos(1) pos(2) pos(3) gca_h]);
         hold on;
     % % % %     plot([round(size(all_zscores,3)/2) round(size(all_zscores,3)/2)],[1 numel(analysisConf.neurons)],'k--'); % t=0
     %     imagesc(squeeze(all_zscores(:,iEvent,:))); % in session order
@@ -120,10 +134,16 @@ for iSession = 1:numel(sessionNeurons)
 % %         end
 % %         yticks([1 numel(sorted_neuronIds)]);
         yticklabels({});
+        if iEvent == 1
+            title([analysisConf.sessionConfs{useUnits(1)}.subjects__name]);
+        end
+        if iEvent == 2
+            title(['units ',num2str(useUnits(1)),'-',num2str(useUnits(end))]);
+        end
 
         colormap jet;
         grid on;
-        set(gca,'fontSize',14);
+        set(gca,'fontSize',10);
     end
     if doPrimSecArrows
         for iNeuron = 1:numel(sorted_neuronIds)
@@ -139,9 +159,13 @@ for iSession = 1:numel(sessionNeurons)
     end
     
     box off;
+    tightfig;
+    set(gcf,'color','w');
+    hFrame = getframe(h);
+    frameArr = [frameArr;hFrame.cdata];
+    close(h);
 end
 
 if doSave
-    print(gcf,'-painters','-depsc',fullfile(figPath,['heatmapUnitClassBySession_',num2str(runMap),'.eps']));
-    close(h);
+    imwrite(frameArr,fullfile(figPath,['heatmapUnitClassBySession.png']));
 end
