@@ -54,6 +54,8 @@ if doSetup
             dirSelUsedNeuronsSO_correct = [];
         end
     end
+    
+    all_matrixDiff = [];
     for iNeuron = 1:numel(analysisConf.neurons)
         sessionConf = analysisConf.sessionConfs{iNeuron};
         neuronName = analysisConf.neurons{iNeuron};
@@ -123,6 +125,7 @@ if doSetup
             contraMean = smooth(mean(eventMatrix(trialClass == 1,:)),nSmooth);
             ipsiMean = smooth(mean(eventMatrix(trialClass == 0,:)),nSmooth);
             matrixDiff = contraMean - ipsiMean;
+            all_matrixDiff(iNeuron,iEvent,:) = matrixDiff;
 % %             matrixDiff = abs(contraMean - ipsiMean);
             matrixDiffShuffle = [];
             for iShuffle = 1:nShuffle

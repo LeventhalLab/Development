@@ -11,7 +11,7 @@ run_compile_PCAarr.m
 % compute PCs for each session and event
 % e.g., sessionPCA(iSession).coeff & sessionPCA(iSession).explained
 run_compute_PCA.m
-sessionPCA_500ms = sessionPCA; % save
+sessionPCA_500ms_RT = sessionPCA; % save
 
 % re-compile if visualization time window is different (+/-1s)
 % tWindow = 3;

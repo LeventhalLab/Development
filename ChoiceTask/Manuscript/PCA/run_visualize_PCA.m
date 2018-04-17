@@ -9,7 +9,7 @@ t_vis = linspace(-tWindow_vis,tWindow_vis,SDEsamples);
 rows = 7;
 cols = 7;
 
-for iSession = 1:numel(sessionPCA_coeff)
+for iSession = 1:numel(sessionPCA_500ms)
     h = figuree(1300,800);
     for iSource = 1:nSources
         if nSources == 1

@@ -1,5 +1,5 @@
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/PCA/perSessionAnalysis/perUnit';
-doSave = false;
+doSave = true;
 colors = lines(2);
 coeff_event = 4;
 sessionPCA_coeff = sessionPCA_500ms;

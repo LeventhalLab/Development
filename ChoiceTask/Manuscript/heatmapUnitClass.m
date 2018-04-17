@@ -3,7 +3,7 @@
 specialUnit = 133;
 doLegend = false;
 doLabels = false;
-doSave = true;
+doSave = false;
 doPrimSecArrows = true;
 caxisVals = [-0.5 2];
 
@@ -22,7 +22,7 @@ if doSetup
 % %     [primSec_minZ0,~] = primSecClass(unitEvents,minZ);
 end
 
-runMap = 4;
+runMap = 3;
 switch runMap
     case 1 % dirSel
         use_dirSelNeurons = dirSelNeuronsNO;
