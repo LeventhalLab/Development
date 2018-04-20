@@ -56,6 +56,11 @@ if doSetup
     end
     
     all_matrixDiff = [];
+    all_matrixDiffZ = [];
+    all_ntpIdx = NaN(numel(analysisConf.neurons),1);
+    SIcorr_SI = [];
+    SIcorr_RT = [];
+    SIcorr_MT = [];
     for iNeuron = 1:numel(analysisConf.neurons)
         sessionConf = analysisConf.sessionConfs{iNeuron};
         neuronName = analysisConf.neurons{iNeuron};
@@ -124,8 +129,13 @@ if doSetup
 
             contraMean = smooth(mean(eventMatrix(trialClass == 1,:)),nSmooth);
             ipsiMean = smooth(mean(eventMatrix(trialClass == 0,:)),nSmooth);
+            contraZ = smooth((mean(eventMatrix(trialClass == 1,:)) - mean2(eventMatrix)) ./ std(mean(eventMatrix)),nSmooth);
+            ipsiZ = smooth((mean(eventMatrix(trialClass == 0,:)) - mean2(eventMatrix)) ./ std(mean(eventMatrix)),nSmooth);
             matrixDiff = contraMean - ipsiMean;
+            matrixDiffZ = contraZ - ipsiZ;
+            
             all_matrixDiff(iNeuron,iEvent,:) = matrixDiff;
+            all_matrixDiffZ(iNeuron,iEvent,:) = matrixDiffZ;
 % %             matrixDiff = abs(contraMean - ipsiMean);
             matrixDiffShuffle = [];
             for iShuffle = 1:nShuffle
@@ -145,9 +155,14 @@ if doSetup
             doingSel = false;
             if (iEvent == 4 && strcmp(dirSelType,'NO')) || (iEvent == 6 && strcmp(dirSelType,'SO'))
                 doingSel = true;
-            
+                
                 dirSelNeurons_contra_ntpIdx = movsum(pEventDiff(iEvent,analyzeRange) > pVal,[0 pVal_minBins-1]) == pVal_minBins;
                 dirSelNeurons_ipsi_ntpIdx = movsum(pEventDiff(iEvent,analyzeRange) < 1-pVal,[0 pVal_minBins-1]) == pVal_minBins;
+                all_ntpIdx(iNeuron) = sum(dirSelNeurons_contra_ntpIdx) + sum(dirSelNeurons_ipsi_ntpIdx); % event 4
+                % whole window version
+                dirSelNeurons_contra_ntpIdx_whole = movsum(pEventDiff(iEvent,:) > pVal,[0 pVal_minBins-1]) == pVal_minBins;
+                dirSelNeurons_ipsi_ntpIdx_whole = movsum(pEventDiff(iEvent,:) < 1-pVal,[0 pVal_minBins-1]) == pVal_minBins;
+                all_ntpIdx_whole(iNeuron) = sum(dirSelNeurons_contra_ntpIdx_whole) + sum(dirSelNeurons_ipsi_ntpIdx_whole); % event 4
 
                 % designate contra or ipsi
                 unitType = 0; % 0:none, 1:contra, 2:ipsi

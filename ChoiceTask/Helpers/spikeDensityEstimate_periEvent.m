@@ -8,8 +8,7 @@ function [s,counts,kernel,sigma] = spikeDensityEstimate_periEvent(ts,tWindow)
 
 binWidth = .001; % 1ms
 
-sigma = .050; % kernel std, 50ms
-% sigma = mean(diff(ts));% * 2; % !!! variable kernel width ???
+sigma = .020; % kernel std
 
 binEdges = -tWindow:binWidth:tWindow;
 counts = histcounts(ts,binEdges); % bin data

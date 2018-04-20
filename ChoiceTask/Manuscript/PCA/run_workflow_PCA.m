@@ -11,7 +11,8 @@ run_compile_PCAarr.m
 % compute PCs for each session and event
 % e.g., sessionPCA(iSession).coeff & sessionPCA(iSession).explained
 run_compute_PCA.m
-sessionPCA_500ms_RT = sessionPCA; % save
+% save
+sessionPCA_500ms = sessionPCA; % save
 
 % re-compile if visualization time window is different (+/-1s)
 % tWindow = 3;
@@ -29,9 +30,9 @@ useDir = 'ipsi'; % or '' or 'contra'
 % then
 run_compile_PCAarr.m
 % then
-run_compute_PCA.m
-sessionPCA_500ms_ipsi = sessionPCA; % save
-sessionPCA_500ms_contra = sessionPCA; % save
+% % run_compute_PCA.m
+% % sessionPCA_500ms_ipsi = sessionPCA; % save
+% % sessionPCA_500ms_contra = sessionPCA; % save
 
 sessionPCA_1000ms_ipsi = sessionPCA; % save
 sessionPCA_1000ms_contra = sessionPCA; % save

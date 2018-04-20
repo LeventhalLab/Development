@@ -1,6 +1,6 @@
 useDir = ''; % '' or 'ipsi' or 'contra'
-shortPCA = false;
-timingField = 'RT'; % timing assumes useDir = '';
+shortPCA = true;
+timingField = 'MT'; % timing assumes useDir = '';
 
 if shortPCA
     tWindow = 2;
@@ -40,6 +40,7 @@ end
 PCA_arr = [];
 sessionPCA = {};
 sessionCount = 0;
+sessionNames = {};
 for iSession = criteriaSessions
     groupNeurons = groupedNeurons{iSession};
     sessionConf = analysisConf.sessionConfs{groupNeurons(1)};
@@ -60,6 +61,8 @@ for iSession = criteriaSessions
     end
     
     sessionCount = sessionCount + 1;
+    % use for presentation
+    sessionNames{sessionCount} = analysisConf.sessionConfs{groupNeurons(1)}.sessions__name;
     
     switch useDir
         case 'ipsi'
@@ -68,6 +71,7 @@ for iSession = criteriaSessions
             trialIds = trialIdInfo.correctContra;
         otherwise
             [trialIds,allTimes] = sortTrialsBy(trials,timingField); % forces to be 'correct'
+% %             require_ntrials = require_ntrials / 2;
     end
 
     PCA_arr = zeros(7,numel(groupNeurons),SDEsamples*numel(trialIds));
@@ -78,10 +82,10 @@ for iSession = criteriaSessions
         tsPeths = eventsPeth(trials(trialIds),all_ts{iNeuron},tWindow,eventFieldnames);
         % remove low timestamp trials
         tsPeths = tsPeths(~any(cellfun(@numel,tsPeths) < require_nts,2),:);
-        if size(tsPeths,1) < require_ntrials
-            disp(['Removing neuron ',num2str(iNeuron),' for low FR']);
-            continue;
-        end
+% %         if size(tsPeths,1) < require_ntrials
+% %             disp(['Removing neuron ',num2str(iNeuron),' for low FR']);
+% %             continue;
+% %         end
         neuronCount = neuronCount + 1;
         % do z-score
         [meanSDE,stdSDE] = getMeanSDE(tsPeths(:,1),tWindow);

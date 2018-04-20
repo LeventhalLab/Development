@@ -10,15 +10,17 @@ cols = 7;
 figx = 1300;
 figy = 800;
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/PCA/perSessionAnalysis/RTMT';
+coeff_event = 4;
 
 colors = [1 0 0;0 0 1]; % red for RT, blue for MT
 ylimVals = [0 8];
-xlimVals = [0 1];
+xlimVals = [0 0.5];
 
 for iSession = 1:numel(sessionPCA_RT)
     h = figuree(figx,figy);
     nPCAs = size(sessionPCA_RT(iSession).PCA_arr,2);
-    for iPCA = 1:nPCAs
+    nPCAs = 3; % !! manual override
+    for iPCA = 1:nPCAs % !! use explained variance?
         for iEvent = 1:cols
             modnPCAs = mod(iPCA,rows);
             curRow = mod(iPCA-1,rows)+1;
@@ -31,20 +33,27 @@ for iSession = 1:numel(sessionPCA_RT)
                         sessionPCA = sessionPCA_RT;
                         allTimes = sessionPCA(iSession).RT;
                         legendText{iRTMT} = 'RT ';
+                        mainTiming = [.05,.35]; % from our paper
                     case 2
                         sessionPCA = sessionPCA_MT;
                         allTimes = sessionPCA(iSession).MT;
                         legendText{iRTMT} = 'MT ';
+                        mainTiming = [0,.4]; % from our paper
                 end
+                useTrials = find(allTimes >= mainTiming(1) & allTimes < mainTiming(2));
                 covMatrix = squeeze(sessionPCA(iSession).PCA_arr(iEvent,:,:))';
-                coeff = squeeze(sessionPCA(iSession).coeff(iEvent,:,:)); % NOTE COEFF SOURCE
+                if coeff_event == 0
+                    coeff = squeeze(sessionPCA(iSession).coeff(iEvent,:,:)); % NOTE COEFF SOURCE
+                else
+                    coeff = squeeze(sessionPCA(iSession).coeff(coeff_event,:,:));
+                end
                 pca_data = covMatrix * coeff;
                 demixed_data = pca_data(:,iPCA);
                 reshaped_demixed_data = reshape(demixed_data,[SDEsamples numel(demixed_data)/SDEsamples]);
                 event_maxZ = max(reshaped_demixed_data);
                 
-                x = allTimes';
-                y = event_maxZ';
+                x = allTimes(useTrials)';
+                y = event_maxZ(useTrials)';
                 scatter(x,y,5,'filled','MarkerFaceColor',colors(iRTMT,:));
                 hold on;
                 [rho,pval] = corr(x,y);
@@ -62,7 +71,7 @@ for iSession = 1:numel(sessionPCA_RT)
             end
             
             xlabel('trial timing (s)')
-            ylabel('PCA max(Z) +/- 0.5s');
+            ylabel('PCxSDE max(Z)');
             ylim(ylimVals);
             yticks(unique(sort([ylimVals 0])));
             xlim(xlimVals);
@@ -74,15 +83,16 @@ for iSession = 1:numel(sessionPCA_RT)
             titleHeader = {};
             if curRow == 1
                 if iEvent == 1
-                    titleHeader = {['Session ',num2str(iSession)]}; 
+                    titleHeader = {sessionNames{iSession}};
                 end
                 titleHeader = {titleHeader{:} eventFieldlabels{iEvent}};
             end
-            title({titleHeader{:},['PCA',num2str(iPCA)]});
+            title({titleHeader{:},['PC ',num2str(iPCA)]},'interpreter','none');
             set(h,'color','w');
             drawnow;
             
             if (curRow == rows || iPCA == nPCAs) && iPCA > 1 && iEvent == cols
+                tightfig;
                 if doSave
                     saveFile = ['Session',num2str(iSession,'%02d'),'_',datestr(now,'yyyymmdd'),'_PCA',num2str(iPCA-rows+1),'-',num2str(iPCA)];
                     saveas(h,fullfile(savePath,saveFile),'png');

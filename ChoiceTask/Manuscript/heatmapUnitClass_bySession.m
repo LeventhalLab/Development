@@ -4,6 +4,7 @@ doLabels = true;
 doSave = true;
 doPrimSecArrows = true;
 caxisVals = [-0.5 2];
+savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/PCA/heatmaps';
 
 doSetup = false;
 % use primSec_plot.m to set primSec (unit classes)
@@ -135,10 +136,11 @@ for iSession = 1:numel(sessionNeurons)
 % %         yticks([1 numel(sorted_neuronIds)]);
         yticklabels({});
         if iEvent == 1
-            title([analysisConf.sessionConfs{useUnits(1)}.subjects__name]);
-        end
-        if iEvent == 2
-            title(['units ',num2str(useUnits(1)),'-',num2str(useUnits(end))]);
+            title({[analysisConf.sessionConfs{useUnits(1)}.sessions__name],eventFieldlabels{iEvent}},'interpreter','none');
+        elseif iEvent == 2
+            title({['units ',num2str(useUnits(1)),'-',num2str(useUnits(end))],eventFieldlabels{iEvent}});
+        else
+            title({'',eventFieldlabels{iEvent}});
         end
 
         colormap jet;
@@ -162,10 +164,13 @@ for iSession = 1:numel(sessionNeurons)
     tightfig;
     set(gcf,'color','w');
     hFrame = getframe(h);
+    if doSave
+        imwrite(hFrame.cdata,fullfile(savePath,['heatmapUnitClassBySession_',analysisConf.sessionConfs{useUnits(1)}.sessions__name,'.png']));
+    end
     frameArr = [frameArr;hFrame.cdata];
     close(h);
 end
 
 if doSave
-    imwrite(frameArr,fullfile(figPath,['heatmapUnitClassBySession.png']));
+    imwrite(frameArr,fullfile(savePath,['heatmapUnitClassBySession.png']));
 end
