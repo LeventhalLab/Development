@@ -45,13 +45,13 @@ selected_sorted_all_ntpIdx_norm = normalize(selected_sorted_all_ntpIdx);
 % % xticks(1:numel(binEdges));
 % % xticklabels(binEdges);
 
-if false
+if true
     dataZ = {};
     dataBins = {};
     for iEvent = 1:7
         eventIdxs = find(selected_sorted_primSec(:,1) == iEvent);
         eventZs = squeeze(selected_sorted_all_matrixDiffZ(eventIdxs,4,analyzeRange));
-        eventZs_AUC = trapz((eventZs'));
+        eventZs_AUC = trapz(abs(eventZs'));
         dataZ{iEvent} = eventZs_AUC;
         dataBins{iEvent} = selected_sorted_all_ntpIdx_norm(eventIdxs);
     end
