@@ -2,7 +2,7 @@ function [waveforms,sameWire,wireLabels] = extractWaveforms(analysisConf,all_ts)
     % same wire array: [1st wire start; 2nd wire start; ...]
     % All first wire: x = sameWire{2}; -> idxs = z(1):z(2)-1;
     % 366 rows x #
-    
+    doDebug = false;
     waveforms = [];
     sameWire = [];
     
@@ -55,6 +55,24 @@ function [waveforms,sameWire,wireLabels] = extractWaveforms(analysisConf,all_ts)
         else
             waveforms(iNeuron,:) = meanWaveforms;
         end
+    end
+    
+    if doDebug
+        figure;
+        imagesc(sameWire)
+        colormap(bone);
+        ylabel('unit');
+        xlabel('wire');
+        set(gcf,'color','w');
+        
+        figure;
+        for iWaveform = 1:size(waveforms,1)
+            subplot(20,20,iWaveform);
+            plot(waveforms(iWaveform,:));
+            xticklabels({});
+            yticklabels({});
+        end
+        set(gcf,'color','w');
     end
 end
 
