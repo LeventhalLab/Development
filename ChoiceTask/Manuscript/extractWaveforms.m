@@ -1,8 +1,8 @@
 function [waveforms,sameWire,wireLabels] = extractWaveforms(analysisConf,all_ts)
-    % same wire array: [1st wire start; 2nd wire start; ...]
-    % All first wire: x = sameWire{2}; -> idxs = z(1):z(2)-1;
-    % 366 rows x #
-    doDebug = false;
+    % waveforms: m units x n mean waveform data points (+/- 2 ms, in uV)
+    % sameWire: m units x n wires, where units on same wire are logical 1
+    % wireLabels: 1 x n wires, string/name for each wire
+    
     waveforms = [];
     sameWire = [];
     
@@ -57,7 +57,10 @@ function [waveforms,sameWire,wireLabels] = extractWaveforms(analysisConf,all_ts)
         end
     end
     
-    if doDebug
+    sameWire = logical(sameWire);
+    
+    % scrap code
+    if false
         figure;
         imagesc(sameWire)
         colormap(bone);
@@ -73,6 +76,8 @@ function [waveforms,sameWire,wireLabels] = extractWaveforms(analysisConf,all_ts)
             yticklabels({});
         end
         set(gcf,'color','w');
+        
+        save('sameWires','waveforms','sameWire','wireLabels');
     end
 end
 
