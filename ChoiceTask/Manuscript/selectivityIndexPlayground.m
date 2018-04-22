@@ -1,4 +1,4 @@
-% these are all units that meet criteria for firing rate > 5 Hx
+% these are all units that meet criteria for firing rate > 5 Hz
 % and >5 trials in both directions
 % they are sorted by unit class (i.e., Fig 2 heatmap)
 
