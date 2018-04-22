@@ -44,7 +44,10 @@ function [waveforms,sameWire,wireLabels] = extractWaveforms(analysisConf,all_ts)
         meanWaveforms = [];
         for iChannel = 1:numel(electrodeChannels)
             sevFile = sessionConf.sevFiles{electrodeChannels(iChannel)};
-            [meanWaveform, upperStd, lowerStd, ch, windowSize] = aveWaveform(ts,sevFile);
+            if ~ismac
+                sevFile = convertForWindows(sevFile);
+            end
+            [meanWaveform, upperStd, lowerStd, windowSize] = aveWaveform(ts,sevFile);
             meanWaveforms(iChannel,:) = meanWaveform;
         end
         if size(meanWaveforms,1) > 1
@@ -53,4 +56,9 @@ function [waveforms,sameWire,wireLabels] = extractWaveforms(analysisConf,all_ts)
             waveforms(iNeuron,:) = meanWaveforms;
         end
     end
+end
+
+function sevFile = convertForWindows(sevFile)
+    C = strsplit(sevFile,'/');
+    sevFile = fullfile('\\172.20.138.142\RecordingsLeventhal2',C{4:end});
 end
