@@ -12,12 +12,16 @@ t_vis = linspace(-tWindow_vis,tWindow_vis,SDEsamples);
 rows = 8;
 cols = 7;
     
-for iSession = 1:numel(sessionPCA_coeff)
+for iSession = 8%1:numel(sessionPCA_coeff)
     for iNeuron = 1:size(sessionPCA(iSession).PCA_arr,2)
         h = figuree(1300,900);
         for iEvent = 1:cols
             covMatrix = squeeze(sessionPCA_covMatrix(iSession).PCA_arr(iEvent,:,:))';
-            coeff = squeeze(sessionPCA_coeff(iSession).coeff(iEvent,:,:)); % NOTE COEFF SOURCE
+            if coeff_event == 0
+                coeff = squeeze(sessionPCA_coeff(iSession).coeff(iEvent,:,:));
+            else
+                coeff = squeeze(sessionPCA_coeff(iSession).coeff(coeff_event,:,:));
+            end
             su_covMatrixcov = covMatrix(:,iNeuron);
             pca_data = su_covMatrixcov * coeff(iNeuron,:);
             

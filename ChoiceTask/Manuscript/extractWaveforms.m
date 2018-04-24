@@ -3,6 +3,9 @@ function [waveforms,sameWire,wireLabels] = extractWaveforms(analysisConf,all_ts)
     % sameWire: m units x n wires, where units on same wire are logical 1
     % wireLabels: 1 x n wires, string/name for each wire
     
+    disp('!!! This function needs to handle the last neuron for sameWire');
+    error('comment this, and manually enter the last neuron for now');
+    % in our case (366 neurons) row 366, col 58 == 1
     waveforms = [];
     sameWire = [];
     
