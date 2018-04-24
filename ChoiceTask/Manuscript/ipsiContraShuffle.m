@@ -57,6 +57,9 @@ if doSetup
     
     all_matrixDiff = [];
     all_matrixDiffZ = [];
+    all_contraZ = [];
+    all_ipsiZ = [];
+    all_bothZ = [];
     all_ntpIdx = NaN(numel(analysisConf.neurons),1);
     SIcorr_SI = [];
     SIcorr_RT = [];
@@ -136,6 +139,10 @@ if doSetup
             
             all_matrixDiff(iNeuron,iEvent,:) = matrixDiff;
             all_matrixDiffZ(iNeuron,iEvent,:) = matrixDiffZ;
+            
+            all_ipsiZ(iNeuron,iEvent,:) = ipsiZ;
+            all_contraZ(iNeuron,iEvent,:) = contraZ;
+            all_bothZ(iNeuron,iEvent,:) = smooth((mean(eventMatrix) - mean2(eventMatrix)) ./ std(mean(eventMatrix)),nSmooth);
 % %             matrixDiff = abs(contraMean - ipsiMean);
             matrixDiffShuffle = [];
             for iShuffle = 1:nShuffle

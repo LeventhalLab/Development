@@ -11,14 +11,16 @@ selected_dirSelNeurons = [];
 selected_sorted_all_ntpIdx = [];
 selected_sorted_primSec = [];
 selected_sorted_all_matrixDiffZ = [];
-
+key_366_to_212 = [];
 for iNeuron = 1:size(sorted_all_matrixDiff,1)
+    
     checkNaNs = squeeze(sorted_all_matrixDiff(iNeuron,:,:));
     checkNaNs = checkNaNs(:);
     if any(isnan(checkNaNs)) || numel(find(checkNaNs == 0)) > 500
         continue;
     end
     neuronCount = neuronCount + 1;
+    key_212_to_366(neuronCount) = sorted_neuronIds(iNeuron);
     selected_dirSelNeurons(neuronCount) = sorted_dirSelNeurons(iNeuron);
     selected_sorted_all_ntpIdx(neuronCount) = sorted_all_ntpIdx(iNeuron);
     selected_sorted_primSec(neuronCount,:) = sorted_primSec(iNeuron,:);
