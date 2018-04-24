@@ -1,4 +1,4 @@
-doSave = false;
+doSave = true;
 
 sessionPCA_RT = sessionPCA_500ms_RT;
 sessionPCA_MT = sessionPCA_500ms_MT;
@@ -13,7 +13,7 @@ savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/PCA/perSessionAnalysis/
 coeff_event = 4;
 
 colors = [1 0 0;0 0 1]; % red for RT, blue for MT
-ylimVals = [0 8];
+ylimVals = [0 9];
 xlimVals = [0 0.5];
 
 for iSession = 1:numel(sessionPCA_RT)
@@ -30,13 +30,13 @@ for iSession = 1:numel(sessionPCA_RT)
                     subplot(rows,cols,prc(cols,[curRow iRTMT]));
                     sessionPCA = sessionPCA_RT;
                     allTimes = sessionPCA(iSession).RT;
-                    legendText{iRTMT} = 'RT ';
+                    legendText = 'RT ';
                     mainTiming = [.05,.35]; % from our paper
                 case 2
                     subplot(rows,cols,prc(cols,[curRow iRTMT]));
                     sessionPCA = sessionPCA_MT;
                     allTimes = sessionPCA(iSession).MT;
-                    legendText{iRTMT} = 'MT ';
+                    legendText = 'MT ';
                     mainTiming = [0,.4]; % from our paper
             end
             useTrials = find(allTimes >= mainTiming(1) & allTimes < mainTiming(2));
@@ -53,7 +53,7 @@ for iSession = 1:numel(sessionPCA_RT)
 
             x = allTimes(useTrials)';
             y = event_maxZ(useTrials)';
-            scatter(x,y,5,'filled','MarkerFaceColor',colors(iRTMT,:));
+            lns = scatter(x,y,5,'filled','MarkerFaceColor',colors(iRTMT,:));
             hold on;
             [rho,pval] = corr(x,y);
             pMark = '';
@@ -63,18 +63,19 @@ for iSession = 1:numel(sessionPCA_RT)
                     pMark = '**';
                 end
             end
-            legendText = [legendText{iRTMT},'r',num2str(rho,'%1.3f'),' ',pMark,'p',num2str(pval,'%1.3f')];
+            xlabel([legendText,'(s)'])
+            legendText = [legendText,' r',num2str(rho,'%1.3f'),', ',pMark,'p',num2str(pval,'%1.3f')];
             p = polyfit(x,y,1);
             f = polyval(p,x);
-            lns = plot(x,f,'-','color',colors(iRTMT,:));
+            plot(x,f,'-','color',colors(iRTMT,:));
             
-            xlabel('trial timing (s)')
             ylabel('PCxSDE max(Z)');
             ylim(ylimVals);
             yticks(unique(sort([ylimVals 0])));
             xlim(xlimVals);
             xticks(xlimVals);
-            legend(lns,legendText,'location','southoutside');
+            lgd = legend(lns,legendText,'location','north');
+            lgd.FontSize = 10;
             legend boxoff;
             grid on;
 
