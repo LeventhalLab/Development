@@ -11,7 +11,7 @@ selected_dirSelNeurons = [];
 selected_sorted_all_ntpIdx = [];
 selected_sorted_primSec = [];
 selected_sorted_all_matrixDiffZ = [];
-key_366_to_212 = [];
+
 for iNeuron = 1:size(sorted_all_matrixDiff,1)
     
     checkNaNs = squeeze(sorted_all_matrixDiff(iNeuron,:,:));

@@ -25,10 +25,21 @@ channel = {};
 unit = {};
 spiketimes = {};
 wmean = {};
+unitid = {};
+
+% % channel{1} = [1];
+% % unit{1} = [1:5];
+% % spiketimes{1} = all_ts(1:5);
+% % wmean{1} = {waveforms(1,[1:32]+8) waveforms(2,[1:32]+8) waveforms(3,[1:32]+8) waveforms(4,[1:32]+8) waveforms(5,[1:32]+8)};
+% % 
+% % channel{2} = [1];
+% % unit{2} = [1:4];
+% % spiketimes{2} = all_ts(14:17);
+% % wmean{2} = {waveforms(14,[1:32]+8) waveforms(15,[1:32]+8) waveforms(16,[1:32]+8) waveforms(17,[1:32]+8)};
 
 sessions = analysisConf.sessionNames;
 [C,ia,ic] = unique(sessions);
-for iDay = 1:4%numel(C)
+for iDay = 1:numel(C)
     sameWire_day = sameWire(ic == iDay,:);
     startNeuron = find(ic == iDay,1);
     
@@ -38,17 +49,31 @@ for iDay = 1:4%numel(C)
     spiketimesData = {};
     wmeanData = {};
     unitCount = 1;
+    unitidData = [];
     for iNeuron = 1:size(sameWire_day,1)
-        channelData(iNeuron) = find(sameWire_day(iNeuron,:) == 1) + (startNeuron - 1);
-        spiketimesData{iNeuron} = all_ts{iNeuron + (startNeuron - 1)};% all_ts(iNeuron + (startNeuron - 1));
-        wmeanData{iNeuron} = waveforms(iNeuron + (startNeuron - 1),[1:32]+8); % 32 centered samples
+        channelData(iNeuron) = find(sameWire_day(iNeuron,:) == 1);
         unitData(iNeuron) = unitCount;
+        spiketimesData{iNeuron} = all_ts{iNeuron + (startNeuron - 1)};
+        wmeanData{iNeuron} = waveforms(iNeuron + (startNeuron - 1),[1:32]+8); % 32 centered samples
         
+        unitidData(iNeuron) = iNeuron + (startNeuron - 1);
         unitCount = unitCount + 1;
     end
     channel{iDay,1}  = channelData;
     unit{iDay,1} = unitData;
     spiketimes{iDay,1} = spiketimesData;
     wmean{iDay,1} = wmeanData;
+    unitid{iDay,1} = unitidData;
 end
-[survival, score, corrscore, wavescore, autoscore, basescore, correlations] = unitIdentification(channel, unit, spiketimes, wmean);
+figure;
+[survival, score, corrscore, wavescore, autoscore, basescore, correlations] = unitIdentification(channel, unit, spiketimes, wmean, 'plot');
+
+figuree(1300,900);
+totalSurvived = 0;
+for iSubplot = 1:29
+    subplot(6,6,iSubplot)
+    imagesc(survival{iSubplot});
+    totalSurvived = totalSurvived + sum(sum(survival{iSubplot}));
+%     colormap(bone);
+end
+totalSurvived

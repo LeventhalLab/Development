@@ -29,7 +29,7 @@ end
 negative = data(~unroll(sameChan),:);
 [Cneg,err,Pneg] = classify(negative,data,C,'quadratic');
 negative = Pneg(:,2);
-threshold = quantile(negative,.95);
+threshold = quantile(negative,.999);
 C = P(:,2)>threshold;
 C = C & unrollSameChan;
 
