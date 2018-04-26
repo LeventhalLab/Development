@@ -21,6 +21,11 @@
 %   waveform.  wmean{day}{i} would be the mean waveform for channel{day}{i}
 %   unit number unit{day}{i}.
 
+if false
+    load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/session_20180420_soclose.mat', 'primSec')
+    load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/session_20180420_soclose.mat', 'dirSelNeuronsNO')
+end
+
 channel = {};
 unit = {};
 spiketimes = {};
@@ -38,8 +43,8 @@ unitid = {};
 % % wmean{2} = {waveforms(14,[1:32]+8) waveforms(15,[1:32]+8) waveforms(16,[1:32]+8) waveforms(17,[1:32]+8)};
 
 sessions = analysisConf.sessionNames;
-[C,ia,ic] = unique(sessions);
-for iDay = 1:numel(C)
+[sessionNames,ia,ic] = unique(sessions);
+for iDay = 1:numel(sessionNames)
     sameWire_day = sameWire(ic == iDay,:);
     startNeuron = find(ic == iDay,1);
     
@@ -65,8 +70,8 @@ for iDay = 1:numel(C)
     wmean{iDay,1} = wmeanData;
     unitid{iDay,1} = unitidData;
 end
-figure;
-[survival, score, corrscore, wavescore, autoscore, basescore, correlations] = unitIdentification(channel, unit, spiketimes, wmean, 'plot');
+
+[survival, score, corrscore, wavescore, autoscore, basescore, correlations] = unitIdentification(channel, unit, spiketimes, wmean);
 
 figuree(1300,900);
 totalSurvived = 0;
@@ -74,6 +79,6 @@ for iSubplot = 1:29
     subplot(6,6,iSubplot)
     imagesc(survival{iSubplot});
     totalSurvived = totalSurvived + sum(sum(survival{iSubplot}));
-%     colormap(bone);
+    colormap(bone);
 end
 totalSurvived

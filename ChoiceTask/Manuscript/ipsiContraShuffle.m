@@ -1,6 +1,6 @@
 % the fraction of units whose activity is significantly different between
 % ipsi/contra trials
-doSetup = true;
+doSetup = false;
 doSave = false;
 doLabels = false;
 dodebug = false;
@@ -68,6 +68,11 @@ if doSetup
         sessionConf = analysisConf.sessionConfs{iNeuron};
         neuronName = analysisConf.neurons{iNeuron};
         disp(neuronName);
+        
+        if ismember(iNeuron,removeUnits)
+            disp('REMOVE NEURON');
+            continue;
+        end
         
         curTrials = all_trials{iNeuron};
         
@@ -312,37 +317,37 @@ if doSetup
     end
 end
 
-dirSelNeurons = dirSelNeuronsNO | dirSelNeuronsSO;
-dirSelNO = sum(dirSelNeuronsNO)
-dirSelSO = sum(dirSelNeuronsSO)
-dirSelNOSO = sum(dirSelNeurons)
-
-percentDirNeurons = 100 * (dirSelNO + dirSelSO) / (numel(dirSelUsedNeuronsNO_correct) + numel(dirSelUsedNeuronsSO_correct));
-
-contra_x = sum(dirSelNeuronsNO_contra)
-x_contra = sum(dirSelNeuronsSO_contra)
-ipsi_x = sum(dirSelNeuronsNO_ipsi)
-x_ipsi = sum(dirSelNeuronsSO_ipsi)
-
-contraIpsi_x = sum(dirSelNeuronsNO_contra & dirSelNeuronsNO_ipsi)
-x_contraIpsi = sum(dirSelNeuronsSO_contra & dirSelNeuronsSO_ipsi)
-
-contra_contra = sum(dirSelNeuronsNO_contra & dirSelNeuronsSO_contra)
-contra_ipsi = sum(dirSelNeuronsNO_contra & dirSelNeuronsSO_ipsi)
-ipsi_contra = sum(dirSelNeuronsNO_ipsi & dirSelNeuronsSO_contra)
-ipsi_ipsi = sum(dirSelNeuronsNO_ipsi & dirSelNeuronsSO_ipsi)
-
-disp(['Codes SAME dir: ',num2str(contra_contra+ipsi_ipsi)]);
-disp(['Codes DIFF dir: ',num2str(contra_ipsi+ipsi_contra)]);
-
-contra_NR = contra_x - (contra_contra + ipsi_contra)
-ipsi_NR = ipsi_x - (ipsi_ipsi + contra_ipsi)
-NR_ipsi = sum(~dirSelNeuronsNO & dirSelNeuronsSO_ipsi)
-NR_contra = sum(~dirSelNeuronsNO & dirSelNeuronsSO_contra)
-
-NRNO = sum(~dirSelNeuronsNO)
-NRSO = sum(~dirSelNeuronsSO)
-NR_NOSO = sum(~dirSelNeurons)
+% % dirSelNeurons = dirSelNeuronsNO | dirSelNeuronsSO;
+% % dirSelNO = sum(dirSelNeuronsNO)
+% % dirSelSO = sum(dirSelNeuronsSO)
+% % dirSelNOSO = sum(dirSelNeurons)
+% % 
+% % percentDirNeurons = 100 * (dirSelNO + dirSelSO) / (numel(dirSelUsedNeuronsNO_correct) + numel(dirSelUsedNeuronsSO_correct));
+% % 
+% % contra_x = sum(dirSelNeuronsNO_contra)
+% % x_contra = sum(dirSelNeuronsSO_contra)
+% % ipsi_x = sum(dirSelNeuronsNO_ipsi)
+% % x_ipsi = sum(dirSelNeuronsSO_ipsi)
+% % 
+% % contraIpsi_x = sum(dirSelNeuronsNO_contra & dirSelNeuronsNO_ipsi)
+% % x_contraIpsi = sum(dirSelNeuronsSO_contra & dirSelNeuronsSO_ipsi)
+% % 
+% % contra_contra = sum(dirSelNeuronsNO_contra & dirSelNeuronsSO_contra)
+% % contra_ipsi = sum(dirSelNeuronsNO_contra & dirSelNeuronsSO_ipsi)
+% % ipsi_contra = sum(dirSelNeuronsNO_ipsi & dirSelNeuronsSO_contra)
+% % ipsi_ipsi = sum(dirSelNeuronsNO_ipsi & dirSelNeuronsSO_ipsi)
+% % 
+% % disp(['Codes SAME dir: ',num2str(contra_contra+ipsi_ipsi)]);
+% % disp(['Codes DIFF dir: ',num2str(contra_ipsi+ipsi_contra)]);
+% % 
+% % contra_NR = contra_x - (contra_contra + ipsi_contra)
+% % ipsi_NR = ipsi_x - (ipsi_ipsi + contra_ipsi)
+% % NR_ipsi = sum(~dirSelNeuronsNO & dirSelNeuronsSO_ipsi)
+% % NR_contra = sum(~dirSelNeuronsNO & dirSelNeuronsSO_contra)
+% % 
+% % NRNO = sum(~dirSelNeuronsNO)
+% % NRSO = sum(~dirSelNeuronsSO)
+% % NR_NOSO = sum(~dirSelNeurons)
 
 if doPies
     figure;
@@ -487,25 +492,3 @@ setFig('','',[2,1]);
 if doSave
     print(gcf,'-painters','-depsc',fullfile(figPath,'ipsiContraShuffle.eps'));
 end
-
-% % % % [sortedDirNeurons_vals,k] = sort(neuron_eventBins(dirSelUsedNeurons)); % low to high dirSel
-% % % % sortDirNeurons_keys = dirSelUsedNeurons(k);
-% % % % 
-% % % % figuree(900,300);
-% % % % for iEvent = 1:8
-% % % %     eventArr = [];
-% % % %     curPrimSec = iEvent;
-% % % %     if iEvent == 8
-% % % %         curPrimSec = NaN;
-% % % %     end
-% % % %     for ii = 1:numel(sortDirNeurons_keys)
-% % % %         iNeuron = sortDirNeurons_keys(ii);
-% % % %         if primSec(iNeuron,1) == curPrimSec || (iEvent == 8 && isnan(curPrimSec))
-% % % %             eventArr = [eventArr sortedDirNeurons_vals(ii)];
-% % % %         end
-% % % %     end
-% % % %     subplot(1,8,iEvent);
-% % % %     plotSpread(eventArr','showMM',5);
-% % % %     xlabel(eventFieldlabelsNR{iEvent});
-% % % %     ylim([0 100]);
-% % % % end

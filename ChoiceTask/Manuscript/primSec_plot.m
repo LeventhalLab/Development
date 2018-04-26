@@ -23,6 +23,10 @@ end
 
 primSec_wNC = primSec;
 primSec_wNC(isnan(primSec_wNC)) = 8;
+removeArr = ones(size(primSec,1),1);
+removeArr(removeUnits) = 0;
+removeArr = logical(removeArr);
+primSec_wNC = primSec_wNC(removeArr,:);
 
 h = figuree(600,500);
 % cols = 7;

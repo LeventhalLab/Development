@@ -1,4 +1,4 @@
-doSave = true;
+doSave = false;
 nMeanBins = 10; % corr bins; with gray = n+2 for RT, n+1 for MT
 binMs = 20;
 
@@ -35,7 +35,7 @@ lineWidth = 3;
 % RT_intercepts = ezReciprobit(all_rt,10);
 % MT_intercepts = ezReciprobit(all_mt,10);
 
-all_z_raw;
+% % all_z_raw;
 
 % % plotTypes = {'raster','bracketed','high/low'};
 % % burstCriterias = {'none','Poisson','LTS'};
@@ -93,14 +93,16 @@ for ii_events = 1:numel(events)
                 % must have first or second class of Tone or Nose Out
 %                 excludeUnits = find(ismember(primSec(:,2),[3,4]) == 0); % only primary
                 excludeUnits = find(any(ismember(primSec,[3,4]),2) == 0);
-
+                excludeUnits = unique([excludeUnits;removeUnits']);
+                
                 useNeuronClass = [1:7];
                 filterBy_dirSel = true;
                 dirSel = true;
             case '~dirSel'
 %                 excludeUnits = find(ismember(primSec(:,2),[3,4]) == 0); % only primary
                 excludeUnits = find(any(ismember(primSec,[3,4]),2) == 0);
-
+                excludeUnits = unique([excludeUnits;removeUnits']);
+                
                 useNeuronClass = [1:7];
                 filterBy_dirSel = true;
                 dirSel = false;
@@ -151,7 +153,7 @@ for ii_events = 1:numel(events)
                         end
                     end
 
-                    if ~ismember(unitClasses(iNeuron),useNeuronClass)
+                    if ~ismember(useNeuronClass,primSec(iNeuron,:))
                         continue;
                     end
                     
@@ -304,7 +306,7 @@ for ii_events = 1:numel(events)
                                 allTrial_LTSPeths{trialCount} = tempPeth;
                             end
                         end
-                        allTrial_unitClasses(trialCount) = unitClasses(iNeuron);
+                        allTrial_unitClasses(trialCount) = primSec(iNeuron,1); %unitClasses(iNeuron);
                         trialCount = trialCount + 1;
                     end
                 end

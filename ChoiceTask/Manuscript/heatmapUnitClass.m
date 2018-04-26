@@ -52,7 +52,7 @@ for iEvent = 1:numel(eventFieldnames)
     neuronClasses{iEvent} = [];
     for iNeuron = 1:numel(analysisConf.neurons)
         sessionConf = analysisConf.sessionConfs{iNeuron};
-        if ~useUnits(iNeuron)
+        if ~useUnits(iNeuron) || ismember(iNeuron,removeUnits)
             disp(['Skipping neuron ',num2str(iNeuron)]);
             continue;
         end
