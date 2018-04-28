@@ -17,10 +17,11 @@ for iNeuron = 1:size(sorted_all_matrixDiff,1)
     checkNaNs = squeeze(sorted_all_matrixDiff(iNeuron,:,:));
     checkNaNs = checkNaNs(:);
     if any(isnan(checkNaNs)) || numel(find(checkNaNs == 0)) > 500
+        disp('err');
         continue;
     end
     neuronCount = neuronCount + 1;
-    key_212_to_366(neuronCount) = sorted_neuronIds(iNeuron);
+    key_313_to_366(neuronCount) = sorted_neuronIds(iNeuron);
     selected_dirSelNeurons(neuronCount) = sorted_dirSelNeurons(iNeuron);
     selected_sorted_all_ntpIdx(neuronCount) = sorted_all_ntpIdx(iNeuron);
     selected_sorted_primSec(neuronCount,:) = sorted_primSec(iNeuron,:);
@@ -47,7 +48,7 @@ selected_sorted_all_ntpIdx_norm = normalize(selected_sorted_all_ntpIdx);
 % % xticks(1:numel(binEdges));
 % % xticklabels(binEdges);
 
-if true
+if false
     dataZ = {};
     dataBins = {};
     for iEvent = 1:7
@@ -97,7 +98,7 @@ end
 % % hold on;
 % % plot(find(selected_dirSelNeurons == 1),selected_sorted_all_ntpIdx(find(selected_dirSelNeurons == 1)),'ro');
 
-cmapPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Thalamus_behavior_2017/Resubmission/contra-ipsi-scale.jpg';
+cmapPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Thalamus_behavior_2017/Figures/contra-ipsi-scale.jpg';
 cmapColors = mycmap(cmapPath);
 
 event_maxUnsigned = NaN(7,size(all_matrixDiffZ,1));

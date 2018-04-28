@@ -1,23 +1,27 @@
 saveDir = '/Users/mattgaidica/Documents/Data/ChoiceTask/ipsiContraWithIncorrectRaster';
+figPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Thalamus_behavior_2017/Figures/MATLAB';
 saveExt = '.png';
 doLabels = false;
 doSave = true;
 doLegend = false;
-saveFig = true;
+saveFig = false;
 doNote = false;
 useEvents = [1:7];
+% for all see: /Volumes/RecordingsLeventhal2/ChoiceTask/sideOutAnalysis
+R0142_1209_sideOutDir = csvread('/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Thalamus_behavior_2017/Figures/MATLAB/R0142_20161209a_sideOutAnalysis.csv');
 % units: 113, 188, 201
-for iNeuron = 188 %1:numel(analysisConf.neurons)
+for iNeuron = 188 %1:numel(analysisConf.neurons) % use 188 for manuscript 20180426 -MG
     note_dirSel = '-';
     note_dirSelNO = '-';
 
     if dirSelNeuronsNO_01(iNeuron)
         note_dirSel = 'YES';
-        if dirSelNeuronsNO_type_correct(iNeuron)
-            note_dirSelNO = 'contra';
-        else
-            note_dirSelNO = 'ipsi';
-        end
+        % not sure when dirSelNeuronsNO_type_correct is set, skip for now
+% %         if dirSelNeuronsNO_type_correct(iNeuron)
+% %             note_dirSelNO = 'contra';
+% %         else
+% %             note_dirSelNO = 'ipsi';
+% %         end
     end
     
     neuronName = analysisConf.neurons{iNeuron};
@@ -124,9 +128,13 @@ for iNeuron = 188 %1:numel(analysisConf.neurons)
             cur_xlim = xlim;
             for iTrial = 1:numel(trialIds)
                 sideOutDir = R0142_1209_sideOutDir(trialIds(iTrial));
-                marker = '>';
-                if sideOutDir == 2
-                    marker = '<';
+                switch sideOutDir
+                    case 1
+                        marker = '>';
+                    case 2
+                        marker = '<';
+                    case 3
+                        continue;
                 end
                 plot(cur_xlim(sideOutDir),iTrial,marker,'MarkerFaceColor',colors(sideOutDir,:),'MarkerEdgeColor','none','markerSize',5);
             end

@@ -1,6 +1,6 @@
 % the fraction of units whose activity is significantly different between
 % ipsi/contra trials
-doSetup = false;
+doSetup = true;
 doSave = false;
 doLabels = false;
 dodebug = false;
@@ -13,7 +13,7 @@ dirSelType = 'NO'; % NO or SO
 useIncorrect = false;
 nSmooth = 3;
 requireTrials = 5;
-minFR = 5;
+minFR = 0;
 nShuffle = 1000;
 subplotMargins = [.05 .02];
 tWindow = 1;
@@ -111,6 +111,9 @@ if doSetup
             disp([num2str(iNeuron),' FR too low']);
             continue;
         end
+% %         if any(isnan(primSec(iNeuron,:)))
+% %              disp([num2str(iNeuron),' isnan']);
+% %         end
         
         if useIncorrect
             dirSelUsedNeurons_incorrect = [dirSelUsedNeurons_incorrect iNeuron];
@@ -137,10 +140,13 @@ if doSetup
 
             contraMean = smooth(mean(eventMatrix(trialClass == 1,:)),nSmooth);
             ipsiMean = smooth(mean(eventMatrix(trialClass == 0,:)),nSmooth);
-            contraZ = smooth((mean(eventMatrix(trialClass == 1,:)) - mean2(eventMatrix)) ./ std(mean(eventMatrix)),nSmooth);
-            ipsiZ = smooth((mean(eventMatrix(trialClass == 0,:)) - mean2(eventMatrix)) ./ std(mean(eventMatrix)),nSmooth);
+            contraZ = smooth((mean(eventMatrix(trialClass == 1,:)) - mean2(eventMatrix(trialClass == 1,:))) ./ std(mean(eventMatrix(trialClass == 1,:))),nSmooth);
+            ipsiZ = smooth((mean(eventMatrix(trialClass == 0,:)) - mean2(eventMatrix(trialClass == 0,:))) ./ std(mean(eventMatrix(trialClass == 0,:))),nSmooth);
             matrixDiff = contraMean - ipsiMean;
             matrixDiffZ = contraZ - ipsiZ;
+            if ~any(matrixDiffZ) || any(isnan(matrixDiffZ))
+                disp('all zeros');
+            end
             
             all_matrixDiff(iNeuron,iEvent,:) = matrixDiff;
             all_matrixDiffZ(iNeuron,iEvent,:) = matrixDiffZ;
@@ -152,15 +158,20 @@ if doSetup
             matrixDiffShuffle = [];
             for iShuffle = 1:nShuffle
                 shuffledTrialTypes = trialClass(randperm(numel(trialClass)));
-                contraMeanShuffled = smooth(mean(eventMatrix(shuffledTrialTypes == 1,:)),nSmooth);
-                ipsiMeanShuffled = smooth(mean(eventMatrix(shuffledTrialTypes == 0,:)),nSmooth);
-                matrixDiffShuffle(iShuffle,:) = contraMeanShuffled - ipsiMeanShuffled;
+% %                 contraMeanShuffled = smooth(mean(eventMatrix(shuffledTrialTypes == 1,:)),nSmooth);
+% %                 ipsiMeanShuffled = smooth(mean(eventMatrix(shuffledTrialTypes == 0,:)),nSmooth);
+% %                 matrixDiffShuffle(iShuffle,:) = contraMeanShuffled - ipsiMeanShuffled;
+                contraZMeanShuffled = smooth((mean(eventMatrix(shuffledTrialTypes == 1,:)) - mean2(eventMatrix)) ./ std(mean(eventMatrix)),nSmooth);
+                ipsiZMeanShuffled = smooth((mean(eventMatrix(shuffledTrialTypes == 0,:)) - mean2(eventMatrix)) ./ std(mean(eventMatrix)),nSmooth);
+  
+                matrixDiffShuffle(iShuffle,:) = contraZMeanShuffled - ipsiZMeanShuffled;
 % %                 matrixDiffShuffle(iShuffle,:) = abs(contraMeanShuffled - ipsiMeanShuffled);
             end
             % how often is matrixDiff greater than matrixDiffShuffle?
             for iBin = 1:numel(matrixDiff)
                 curMDS = matrixDiffShuffle(:,iBin);
-                pEventDiff(iEvent,iBin) = numel(find(matrixDiff(iBin) > curMDS)) / nShuffle;
+% %                 pEventDiff(iEvent,iBin) = numel(find(matrixDiff(iBin) > curMDS)) / nShuffle;
+                pEventDiff(iEvent,iBin) = numel(find(matrixDiffZ(iBin) > curMDS)) / nShuffle; % use Z
 % %                 pEventDiff_neg(iEvent,iBin) = numel(find(matrixDiff(iBin) < curMDS)) / nShuffle;
             end
             
@@ -404,7 +415,7 @@ end
 % % % % [primSec,fractions] = primSecClass(unitEvents,minZ);
 
 useEvents = 1:7;
-figuree(1200,400);
+h = figuree(1200,350);
 all_eventBins = [];
 neuron_eventBins = zeros(size(pNeuronDiff,1),1);
 for iEvent = 1:numel(useEvents)
@@ -491,4 +502,5 @@ setFig('','',[2,1]);
 
 if doSave
     print(gcf,'-painters','-depsc',fullfile(figPath,'ipsiContraShuffle.eps'));
+    close(h);
 end

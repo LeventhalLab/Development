@@ -160,6 +160,10 @@ for ii_events = 1:numel(events)
                     if ismember(iNeuron,excludeUnits)
                         continue;
                     end
+                    
+                    if ~ismember(iNeuron,dirSelUsedNeurons)
+                        continue;
+                    end
 
                     disp(['Using unit ',num2str(iNeuron),' (class=',num2str(primSec(iNeuron,1)),', maxz=',num2str(unitEvents{iNeuron}.maxz(primSec(iNeuron,1))),') ',neuronName]);
                     unitCount = unitCount + 1;

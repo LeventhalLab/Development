@@ -1,10 +1,11 @@
+figPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Thalamus_behavior_2017/Figures/MATLAB';
 onlyPrimary = false;
 show_primFate = false; % false = show_secOrigin
 plotOpt = 2; % 1 = both sides of x-axis, 2 = mosaic
 showMosaic = false;
 plotTitle = 'Unit Classes';
 doLabels = false;
-doSave = false;
+doSave = true;
 fontSize = 8;
 
 doSetup = false;

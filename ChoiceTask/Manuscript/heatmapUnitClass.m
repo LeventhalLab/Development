@@ -1,3 +1,4 @@
+figPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Thalamus_behavior_2017/Figures/MATLAB';
 % % unitEvents = corr_unitEvents;
 % % all_zscores = corr_all_zscores;
 specialUnit = 133;
@@ -22,7 +23,7 @@ if doSetup
 % %     [primSec_minZ0,~] = primSecClass(unitEvents,minZ);
 end
 
-runMap = 3;
+runMap = 5;
 switch runMap
     case 1 % dirSel
         use_dirSelNeurons = dirSelNeuronsNO;
@@ -41,6 +42,11 @@ switch runMap
         useUnits = isnan(primSec(:,1));
         plotSpecialArrows = false;
         doPrimSecArrows = false;
+    case 5
+        useUnits = ones(size(primSec,1),1);
+        plotSpecialArrows = false;
+        doPrimSecArrows = false;
+        doSave = false; % using case 5 to get sorted_neuronIds
 end
 
 imsc = [];
@@ -93,12 +99,14 @@ for iEvent = 1:numel(eventFieldnames)
 %     imagesc(squeeze(all_zscores(:,iEvent,:))); % in session order
     caxis(caxisVals);
     xlim([1 size(all_zscores,3)]);
+    yticks([]);
+    if doSave
+        ylim([1 numel(sorted_neuronIds)-2]); % otherwise smears last unit
+    end
     if doLabels
         xticks([1 round(size(all_zscores,3)/2) size(all_zscores,3)]);
         xticklabels({'-1','0','1'});
-        if iEvent ~= 1
-            yticklabels({'',''});
-        else
+        if iEvent == 1
             ylabel('Units');
         end
         if iEvent == 4
@@ -106,25 +114,24 @@ for iEvent = 1:numel(eventFieldnames)
                 xlabel('Time (s)');
             end
         end
-        yticks([1 numel(sorted_neuronIds)]);
     else
         xticks(round(size(all_zscores,3)/2));
         xticklabels([]);
-        yticks([1 numel(sorted_neuronIds)]);
-        yticklabels([]);
     end
     colormap jet;
     grid on;
     set(gca,'fontSize',14);
 end
 if doPrimSecArrows
+    markerSize = 4;
     for iNeuron = 1:numel(sorted_neuronIds)
+        % should probably use primSec here?
         if ~isempty(unitEvents{sorted_neuronIds(iNeuron)}.class)
             subplot(hs(unitEvents{sorted_neuronIds(iNeuron)}.class(1)));
-            plot(4,iNeuron,'>','MarkerFaceColor','k','MarkerEdgeColor','none','markerSize',5); % class 1
+            plot(markerSize-1,iNeuron,'>','MarkerFaceColor','k','MarkerEdgeColor','none','markerSize',markerSize); % class 1
             if ~isempty(unitEvents{sorted_neuronIds(iNeuron)}.class(2))
                 subplot(hs(unitEvents{sorted_neuronIds(iNeuron)}.class(2)));
-                plot(size(all_zscores,3)-1,iNeuron,'<','MarkerFaceColor',repmat(1,1,3),'MarkerEdgeColor','none','markerSize',5); % class 1
+                plot(size(all_zscores,3)-1,iNeuron,'<','MarkerFaceColor',repmat(1,1,3),'MarkerEdgeColor','none','markerSize',markerSize); % class 1
             end
         end
     end

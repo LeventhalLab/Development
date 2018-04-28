@@ -36,10 +36,10 @@ function RTMT_corrMatrix()
 % %     dirMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n72_movDirall_byMT_bins10_binMs20ORD20171031.mat');
 
     % nose out event, primary only
-    ndirRT = load(fullfile(uSessionsPath,'evNose Out_un~dirSel_n89_movDirall_byRT_bins10_binMs20_NO20171219.mat'));
-    ndirMT = load(fullfile(uSessionsPath,'evNose Out_un~dirSel_n89_movDirall_byMT_bins10_binMs20_NO20171219.mat'));
-    dirRT = load(fullfile(uSessionsPath,'evNose Out_undirSel_n116_movDirall_byRT_bins10_binMs20_NO20171219.mat'));
-    dirMT = load(fullfile(uSessionsPath,'evNose Out_undirSel_n116_movDirall_byMT_bins10_binMs20_NO20171219.mat'));
+    ndirRT = load(fullfile(uSessionsPath,'Nose Out_~dirSel_n73_movDirall_RT_10bins_20_msNO20180426.mat'));
+    ndirMT = load(fullfile(uSessionsPath,'Nose Out_~dirSel_n73_movDirall_MT_10bins_20_msNO20180426.mat'));
+    dirRT = load(fullfile(uSessionsPath,'Nose Out_dirSel_n105_movDirall_RT_10bins_20_msNO20180426.mat'));
+    dirMT = load(fullfile(uSessionsPath,'Nose Out_dirSel_n105_movDirall_MT_10bins_20_msNO20180426.mat'));
 
     % !!! these are now saved in ndirMT structs, delete these once
     % plotPermutations.m is ran again
@@ -89,7 +89,7 @@ function RTMT_corrMatrix()
 % %     end
     
     % RASTERS
-    if false
+    if true
         timingField = 'RT';
         h = plot_typeRaster(ndirRT,timingField,rt_meanColors);
         if doSave
