@@ -1,4 +1,4 @@
-doSave = true;
+doSave = false;
 doLabels = false;
 doPrimSecArrows = true;
 figPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Thalamus_behavior_2017/Figures/MATLAB';
@@ -46,7 +46,7 @@ cols = 7;
 rows = 1;
 subplotMargins = [0.05 0.02];
 caxisVals = [-3 3];
-dirType = 2;
+dirType = 1;
 if dirType == 1
     dirTypeUnits = selected_dirSelNeurons;
 else

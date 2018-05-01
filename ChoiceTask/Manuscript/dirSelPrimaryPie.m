@@ -3,15 +3,15 @@ figPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Thalamus_behavi
 doSave = false;
 % primary + secondary
 h = figuree(1200,200);
-removeUnitsArr = ones(1,366);
-removeUnitsArr(removeUnits) = 0;
-removeUnitsArr = logical(removeUnitsArr);
+keepUnitsArr = ones(1,366);
+keepUnitsArr(removeUnits) = 0;
+keepUnitsArr = logical(keepUnitsArr);
 rows = 1;
 for iEvent = 1:7
     subplot_tight(rows,7,iEvent,subplotMargins);
     % how many units for this event are directionally selective?
-    totalPrimSecUnitsForEvent = sum(any(ismember(primSec(removeUnitsArr,:),iEvent),2));
-    primSecUnitsDirAtEvent = sum(any(ismember(primSec(dirSelNeuronsNO(removeUnitsArr),:),iEvent),2));
+    totalPrimSecUnitsForEvent = sum(any(ismember(primSec(keepUnitsArr,:),iEvent),2));
+    primSecUnitsDirAtEvent = sum(any(ismember(primSec(dirSelNeuronsNO(keepUnitsArr),:),iEvent),2));
     if iEvent == 3
         a = primSecUnitsDirAtEvent;
         b = totalPrimSecUnitsForEvent;
@@ -19,7 +19,7 @@ for iEvent = 1:7
         c = primSecUnitsDirAtEvent;
         d = totalPrimSecUnitsForEvent;
     end
-    posRatio = primSecUnitsDirAtEvent / sum(dirSelNeuronsNO(removeUnitsArr));
+    posRatio = primSecUnitsDirAtEvent / sum(dirSelNeuronsNO(keepUnitsArr));
 % %     posRatio = primSecUnitsDirAtEvent / totalPrimSecUnitsForEvent;
     p = pie([posRatio 1-posRatio]);
 %     hText = findobj(h,'Type','text'); % text object handles

@@ -1,14 +1,18 @@
-doSetup = false;
+doSetup = true;
 doClasses = false;
 doDirSel = true;
 doAllUnits = false;
 doLabels = false;
 doSave = true;
-savePath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Thalamus_behavior_2017/Figures/MATLAB';
+figPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Thalamus_behavior_2017/Figures/MATLAB';
 
 eventFieldlabelsNR = {eventFieldlabels{:} 'NR'};
 fontSize = 8;
 gLabels = {'All Units','Dir Sel','Not Dir Sel'};
+
+% set these up for plotByUnitClass.m
+dirSelUnitIds = [];
+ndirSelUnitIds = [];
 
 if doSetup
     FRs = [];
@@ -19,6 +23,9 @@ if doSetup
     groupCount = 0;
     g = {};
     for iNeuron = 1:numel(all_ts)
+        if ismember(iNeuron,removeUnits)
+            continue;
+        end
         curTs = all_ts{iNeuron};
         curFR = numel(curTs) / curTs(end);
         curCV = coeffVar(curTs);
@@ -33,19 +40,29 @@ if doSetup
             FRs_classes{8} = [FRs_classes{8} curFR];
         end
 
-        % by dirSel
-        if any(ismember(primSec(iNeuron,:),[3,4])) % primary and secondary
-            groupCount = groupCount + 1;
-            g{groupCount} = gLabels{1};
-            FRs_dirSel{1} = [FRs_dirSel{1} curFR];
-            CVs_dirSel{1} = [CVs_dirSel{1} curCV];
+        % by dirSel, primary and secondary, see plotPermutations.m
+        % "Fig 5" units only
+        excludeUnits = find(any(ismember(primSec,[3,4]),2) == 0);
+        excludeUnits = unique([excludeUnits;removeUnits']);
+        
+        % "all" is truly all units
+        groupCount = groupCount + 1;
+        g{groupCount} = gLabels{1};
+        FRs_dirSel{1} = [FRs_dirSel{1} curFR];
+        CVs_dirSel{1} = [CVs_dirSel{1} curCV];
+            if ~ismember(iNeuron,excludeUnits)
+            if ~ismember(iNeuron,dirSelUsedNeurons)
+                continue;
+            end
 
             groupCount = groupCount + 1;
-            if dirSelNeuronsNO_01(iNeuron)
+            if dirSelNeuronsNO(iNeuron)
+                dirSelUnitIds = [dirSelUnitIds iNeuron];
                 g{groupCount} = gLabels{2};
                 FRs_dirSel{2} = [FRs_dirSel{2} curFR];
                 CVs_dirSel{2} = [CVs_dirSel{2} curCV];
             else
+                ndirSelUnitIds = [ndirSelUnitIds iNeuron];
                 g{groupCount} = gLabels{3};
                 FRs_dirSel{3} = [FRs_dirSel{3} curFR];
                 CVs_dirSel{3} = [CVs_dirSel{3} curCV];
@@ -109,7 +126,7 @@ if doDirSel
     setFig('','',[1,.7]);
     if doSave
         saveName = 'FRallUnits_dirSel';
-        print(h,'-painters','-depsc',fullfile(savePath,[saveName,'.eps']));
+        print(h,'-painters','-depsc',fullfile(figPath,[saveName,'.eps']));
         close(h);
     end
 end

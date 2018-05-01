@@ -148,7 +148,7 @@ for ii_events = 1:numel(events)
 % % % %                     end
                     
                     if filterBy_dirSel
-                        if (dirSel && ~dirSelNeuronsNO_01(iNeuron)) || (~dirSel && dirSelNeuronsNO_01(iNeuron))
+                        if (dirSel && ~dirSelNeuronsNO(iNeuron)) || (~dirSel && dirSelNeuronsNO(iNeuron))
                             continue;
                         end
                     end

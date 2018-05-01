@@ -1,10 +1,10 @@
 % the fraction of units whose activity is significantly different between
 % ipsi/contra trials
-doSetup = true;
-doSave = false;
+doSetup = false;
+doSave = true;
 doLabels = false;
 dodebug = false;
-doPies = false;
+doPies = true;
 debugPath = '/Users/mattgaidica/Documents/Data/ChoiceTask/ipsiContraShuffleDebug';
 pVal = 0.99;
 pVal_minBins = 2;
@@ -55,11 +55,11 @@ if doSetup
         end
     end
     
-    all_matrixDiff = [];
-    all_matrixDiffZ = [];
-    all_contraZ = [];
-    all_ipsiZ = [];
-    all_bothZ = [];
+    all_matrixDiff = NaN(numel(analysisConf.neurons),7,100);
+    all_matrixDiffZ = NaN(numel(analysisConf.neurons),7,100);
+    all_contraZ = NaN(numel(analysisConf.neurons),7,100);
+    all_ipsiZ = NaN(numel(analysisConf.neurons),7,100);
+    all_bothZ = NaN(numel(analysisConf.neurons),7,100);
     all_ntpIdx = NaN(numel(analysisConf.neurons),1);
     SIcorr_SI = [];
     SIcorr_RT = [];
@@ -443,7 +443,7 @@ for iEvent = 1:numel(useEvents)
     bar(1:size(pNeuronDiff,3),eventBins/numel(dirSelUsedNeuronsNO_correct),'FaceColor',colors(1,:),'EdgeColor',colors(1,:)); % contra
     hold on;
     bar(1:size(pNeuronDiff,3),-eventBins_neg/numel(dirSelUsedNeuronsNO_correct),'FaceColor',colors(2,:),'EdgeColor',colors(2,:)); % ipsi
-    ylim([-.25 .25]);
+    ylim([-.15 .15]);
     
 % % % %     yyaxis right;
 % % %     class_colors = jet(8);
