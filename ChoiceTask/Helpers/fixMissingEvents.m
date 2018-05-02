@@ -97,11 +97,11 @@ end
 % beginning which are equal to the startIdx (i.e. junk)... I don't think it
 % matters if I return them unpadded or that the amount of tone events I
 % have reflects the original amount that would have been recorded
-% % if numel(nexStruct.events{33}.timestamps) == 0 && numel(find(logData.Tone == 1000)) > 0
+if numel(nexStruct.events{33}.timestamps) < 5 && numel(find(logData.Tone == 1000)) >= 5
     nexStruct.events{33}.timestamps = tone1On';
     nexStruct.events{34}.timestamps = tone1Off';
-% % end
-% % if numel(nexStruct.events{35}.timestamps) == 0 && numel(find(logData.Tone == 4000)) > 0
+end
+if numel(nexStruct.events{35}.timestamps) < 5 && numel(find(logData.Tone == 4000)) >= 5
     nexStruct.events{35}.timestamps = tone2On';
     nexStruct.events{36}.timestamps = tone2Off';
-% % end
+end

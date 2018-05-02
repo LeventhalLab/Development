@@ -3,7 +3,7 @@
 % R0142_20161207a s16, 11a (1 trial) s20
 
 dirOfTrials = [];
-for iSession = 10%1:numel(C)
+for iSession = 1:numel(C)
     disp(num2str(iSession));
     iNeuron = ic(iSession); % first neuron in session
     sessionConf = analysisConf.sessionConfs{iNeuron};
@@ -14,26 +14,23 @@ for iSession = 10%1:numel(C)
     
     logFile = fixNasPath(logFile);
     logData = readLogData(logFile);
-    curTrials = createTrialsStruct_simpleChoice(logData,nexStruct);
-    trialIdInfo = organizeTrialsById(curTrials);
+    
     
     nexStruct2 = fixMissingEvents(logData,nexStruct);
     curTrials2 = createTrialsStruct_simpleChoice(logData,nexStruct2);
     trialIdInfo2 = organizeTrialsById(curTrials2);
-    
-    fix_contra = numel(trialIdInfo2.correctContra);
-    fix_ipsi = numel(trialIdInfo2.correctIpsi);
+    fix_contra =  numel(trialIdInfo2.correctContra);
+    fix_ipsi =  numel(trialIdInfo2.correctIpsi);
     try
+        curTrials = createTrialsStruct_simpleChoice(logData,nexStruct);
+        trialIdInfo = organizeTrialsById(curTrials);
         orig_contra =  numel(trialIdInfo.correctContra);
         orig_ipsi =  numel(trialIdInfo.correctIpsi);
     catch ME
-        orig_contra = NaN;
-        orig_ipsi = NaN;
+        orig_contra =  NaN;
+        orig_ipsi =  NaN;
     end
 
-    
-    contraTrials = [trialIdInfo.correctContra];
-    ipsiTrials = [trialIdInfo.correctIpsi];
     dirOfTrials(iSession,:) = [orig_contra fix_contra orig_ipsi fix_ipsi];
 end
 
