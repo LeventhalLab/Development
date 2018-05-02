@@ -8,9 +8,7 @@ function nexStruct = fixMissingEvents(logData,nexStruct)
 % ... subtract .01 and this is gotrialOn
 % ... gotrialOff = gotrialOn + .005;
 % get next cueOn port from logData.Center(ii)
-% 292 allcues (184 accounted, 108 rem)
-% 221 centers (129 accounted, 112 rem)
-% 108 trials
+
 % 66 [0]* correct
 % 14 [1] false start
 % N/A [2]
@@ -19,8 +17,6 @@ function nexStruct = fixMissingEvents(logData,nexStruct)
 % 9 [5]* wrong way
 % 17 [6]* failed side port entry
 % 35 [hl]
-% 184 2x cues
-% 92 zero-time cues
 % add all doubled cues, add single cues, subtract zero entries!
 
 curTime = 0;
@@ -70,7 +66,7 @@ for iTrial = 1:numel(logData.outcome)
             end
             curTime = targetInTimes(1);
         elseif ismember(outcome,[5]) % wrong side, invert targetPort
-%                 curTime = curTime + 5;
+                curTime = curTime + 5;
 %               if targetInPort > centerCuePort
 %                   targetInPort = centerCuePort - 1;
 %               else
@@ -102,10 +98,10 @@ end
 % matters if I return them unpadded or that the amount of tone events I
 % have reflects the original amount that would have been recorded
 % % if numel(nexStruct.events{33}.timestamps) == 0 && numel(find(logData.Tone == 1000)) > 0
-    nexStruct.events{33}.timestamps = tone1On;
-    nexStruct.events{34}.timestamps = tone1Off;
+    nexStruct.events{33}.timestamps = tone1On';
+    nexStruct.events{34}.timestamps = tone1Off';
 % % end
 % % if numel(nexStruct.events{35}.timestamps) == 0 && numel(find(logData.Tone == 4000)) > 0
-    nexStruct.events{35}.timestamps = tone2On;
-    nexStruct.events{36}.timestamps = tone2Off;
+    nexStruct.events{35}.timestamps = tone2On';
+    nexStruct.events{36}.timestamps = tone2Off';
 % % end
