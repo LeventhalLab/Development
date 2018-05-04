@@ -81,7 +81,7 @@ if doDirSel
     h = figuree(600,200);
     subplot(121);
     hb = boxplot([FRs_dirSel{1},FRs_dirSel{2},FRs_dirSel{3}],g,'Symbol','','Whisker',w9,'Boxstyle','filled','medianStyle','target','Colors',gColors);
-    FR_ylims = [0 60];
+    FR_ylims = [0 50];
     ylim(FR_ylims);
 % %     yticks(FR_ylims(1):10:FR_ylims(2));
     yticks(FR_ylims);

@@ -3,7 +3,7 @@ doSave = true;
 doFigure = false;
 figPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Thalamus_behavior_2017/Figures/MATLAB';
 
-doAnalysis = 1; % 1 = all events, 2 = dirSel
+doAnalysis = 2; % 1 = all events, 2 = dirSel
 colors = jet(7);
 dirColors = [1 0 0;.5 .5 .5];
 dotSize_mm = .04;

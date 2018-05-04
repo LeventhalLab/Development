@@ -4,8 +4,8 @@ show_primFate = false; % false = show_secOrigin
 plotOpt = 2; % 1 = both sides of x-axis, 2 = mosaic
 showMosaic = false;
 plotTitle = 'Unit Classes';
-doLabels = false;
-doSave = true;
+doLabels = true;
+doSave = false;
 fontSize = 8;
 
 doSetup = false;

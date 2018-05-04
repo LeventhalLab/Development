@@ -4,7 +4,7 @@ doSetup = false;
 doSave = true;
 doLabels = false;
 dodebug = false;
-doPies = true;
+doPies = false;
 debugPath = '/Users/mattgaidica/Documents/Data/ChoiceTask/ipsiContraShuffleDebug';
 pVal = 0.99;
 pVal_minBins = 2;
@@ -12,7 +12,7 @@ colors = lines(2);
 dirSelType = 'NO'; % NO or SO
 useIncorrect = false;
 nSmooth = 3;
-requireTrials = 5;
+requireTrials = 3;
 minFR = 0;
 nShuffle = 1000;
 subplotMargins = [.05 .02];
@@ -144,6 +144,14 @@ if doSetup
             ipsiZ = smooth((mean(eventMatrix(trialClass == 0,:)) - mean2(eventMatrix(trialClass == 0,:))) ./ std(mean(eventMatrix(trialClass == 0,:))),nSmooth);
             matrixDiff = contraMean - ipsiMean;
             matrixDiffZ = contraZ - ipsiZ;
+% %             if iEvent == 4
+% %                 htest = figure;
+% %                 plot(contraZ,'lineWidth',2);
+% %                 hold on;
+% %                 plot(ipsiZ,'lineWidth',2);
+% %                 plot(matrixDiffZ,'k-','lineWidth',2);
+% %                 close(htest);
+% %             end
             if ~any(matrixDiffZ) || any(isnan(matrixDiffZ))
                 disp('all zeros');
             end
@@ -318,7 +326,6 @@ if doSetup
         dirSelNeuronsNO_ipsi = dirSelNeurons_ipsi;
         dirSelNeuronsNO_type = dirSelNeurons_type;
         dirSelNeuronsNO_count = dirSelNeurons_count;
-
     else
         dirSelNeuronsSO = dirSelNeurons_contra | dirSelNeurons_ipsi;
         dirSelNeuronsSO_contra = dirSelNeurons_contra;
@@ -328,37 +335,37 @@ if doSetup
     end
 end
 
-% % dirSelNeurons = dirSelNeuronsNO | dirSelNeuronsSO;
-% % dirSelNO = sum(dirSelNeuronsNO)
-% % dirSelSO = sum(dirSelNeuronsSO)
-% % dirSelNOSO = sum(dirSelNeurons)
-% % 
-% % percentDirNeurons = 100 * (dirSelNO + dirSelSO) / (numel(dirSelUsedNeuronsNO_correct) + numel(dirSelUsedNeuronsSO_correct));
-% % 
-% % contra_x = sum(dirSelNeuronsNO_contra)
-% % x_contra = sum(dirSelNeuronsSO_contra)
-% % ipsi_x = sum(dirSelNeuronsNO_ipsi)
-% % x_ipsi = sum(dirSelNeuronsSO_ipsi)
-% % 
-% % contraIpsi_x = sum(dirSelNeuronsNO_contra & dirSelNeuronsNO_ipsi)
-% % x_contraIpsi = sum(dirSelNeuronsSO_contra & dirSelNeuronsSO_ipsi)
-% % 
-% % contra_contra = sum(dirSelNeuronsNO_contra & dirSelNeuronsSO_contra)
-% % contra_ipsi = sum(dirSelNeuronsNO_contra & dirSelNeuronsSO_ipsi)
-% % ipsi_contra = sum(dirSelNeuronsNO_ipsi & dirSelNeuronsSO_contra)
-% % ipsi_ipsi = sum(dirSelNeuronsNO_ipsi & dirSelNeuronsSO_ipsi)
-% % 
-% % disp(['Codes SAME dir: ',num2str(contra_contra+ipsi_ipsi)]);
-% % disp(['Codes DIFF dir: ',num2str(contra_ipsi+ipsi_contra)]);
-% % 
-% % contra_NR = contra_x - (contra_contra + ipsi_contra)
-% % ipsi_NR = ipsi_x - (ipsi_ipsi + contra_ipsi)
-% % NR_ipsi = sum(~dirSelNeuronsNO & dirSelNeuronsSO_ipsi)
-% % NR_contra = sum(~dirSelNeuronsNO & dirSelNeuronsSO_contra)
-% % 
-% % NRNO = sum(~dirSelNeuronsNO)
-% % NRSO = sum(~dirSelNeuronsSO)
-% % NR_NOSO = sum(~dirSelNeurons)
+dirSelNeurons = dirSelNeuronsNO | dirSelNeuronsSO;
+dirSelNO = sum(dirSelNeuronsNO)
+dirSelSO = sum(dirSelNeuronsSO)
+dirSelNOSO = sum(dirSelNeurons)
+
+percentDirNeurons = 100 * (dirSelNO + dirSelSO) / (numel(dirSelUsedNeuronsNO_correct) + numel(dirSelUsedNeuronsSO_correct));
+
+contra_x = sum(dirSelNeuronsNO_contra)
+x_contra = sum(dirSelNeuronsSO_contra)
+ipsi_x = sum(dirSelNeuronsNO_ipsi)
+x_ipsi = sum(dirSelNeuronsSO_ipsi)
+
+contraIpsi_x = sum(dirSelNeuronsNO_contra & dirSelNeuronsNO_ipsi)
+x_contraIpsi = sum(dirSelNeuronsSO_contra & dirSelNeuronsSO_ipsi)
+
+contra_contra = sum(dirSelNeuronsNO_contra & dirSelNeuronsSO_contra)
+contra_ipsi = sum(dirSelNeuronsNO_contra & dirSelNeuronsSO_ipsi)
+ipsi_contra = sum(dirSelNeuronsNO_ipsi & dirSelNeuronsSO_contra)
+ipsi_ipsi = sum(dirSelNeuronsNO_ipsi & dirSelNeuronsSO_ipsi)
+
+disp(['Codes SAME dir: ',num2str(contra_contra+ipsi_ipsi)]);
+disp(['Codes DIFF dir: ',num2str(contra_ipsi+ipsi_contra)]);
+
+contra_NR = contra_x - (contra_contra + ipsi_contra)
+ipsi_NR = ipsi_x - (ipsi_ipsi + contra_ipsi)
+NR_ipsi = sum(~dirSelNeuronsNO & dirSelNeuronsSO_ipsi)
+NR_contra = sum(~dirSelNeuronsNO & dirSelNeuronsSO_contra)
+
+NRNO = sum(~dirSelNeuronsNO)
+NRSO = sum(~dirSelNeuronsSO)
+NR_NOSO = sum(~dirSelNeurons)
 
 if doPies
     figure;
@@ -440,9 +447,9 @@ for iEvent = 1:numel(useEvents)
         end
     end
 %     yyaxis left;
-    bar(1:size(pNeuronDiff,3),eventBins/numel(dirSelUsedNeuronsNO_correct),'FaceColor',colors(1,:),'EdgeColor',colors(1,:)); % contra
+    bar(1:size(pNeuronDiff,3),eventBins/numel(dirSelUsedNeurons),'FaceColor',colors(1,:),'EdgeColor',colors(1,:)); % contra
     hold on;
-    bar(1:size(pNeuronDiff,3),-eventBins_neg/numel(dirSelUsedNeuronsNO_correct),'FaceColor',colors(2,:),'EdgeColor',colors(2,:)); % ipsi
+    bar(1:size(pNeuronDiff,3),-eventBins_neg/numel(dirSelUsedNeurons),'FaceColor',colors(2,:),'EdgeColor',colors(2,:)); % ipsi
     ylim([-.15 .15]);
     
 % % % %     yyaxis right;

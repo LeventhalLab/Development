@@ -2,14 +2,15 @@
 % and >5 trials in both directions
 % they are sorted by unit class (i.e., Fig 2 heatmap)
 
-save('session_20180428_selectivityVars','all_matrixDiffZ','all_contraZ','all_ipsiZ','dirSelUsedNeurons','dirSelNeuronsNO','dirSelUnitIds','ndirSelUnitIds');
+save('session_201805021739_selectivityVars','all_matrixDiffZ','all_contraZ','all_ipsiZ','all_bothZ',...
+    'dirSelUsedNeurons','dirSelNeuronsNO','dirSelUnitIds','ndirSelUnitIds','pNeuronDiff','primSec');
 all_matrixDiffZ % 366-based, NaNs for units not analyzed
 all_contraZ % 366-based contra Z's
 all_ipsiZ % 366-based ipsi Z's
 dirSelUsedNeurons % ID-based, all units minus 3 sessions with missing Tone Dir
 dirSelNeuronsNO % 366-based marking dir selective units, requires dirSelUsedNeurons to know ~dir units
-dirSelUnitIds % all the dirSel units used in Fig 5
-ndirSelUnitIds % all the ~dirSel units used in Fig 5
+dirSelUnitIds % all the dirSel units used in Fig 5 from FRallUnits.m
+ndirSelUnitIds % all the ~dirSel units used in Fig 5 from FRallUnits.m
 
 % rename vars, leave commented
 % % si_dirSelNeurons = selected_dirSelNeurons;

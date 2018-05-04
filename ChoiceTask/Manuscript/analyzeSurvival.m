@@ -1,5 +1,5 @@
 % function analyzeSurvival(sessionNames,unitid,waveforms,sameWire,wireLabels,channel,unit,spiketimes,wmean,survival)
-doSave = true;
+false = true;
 doPlot = false;
 savePath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Thalamus_behavior_2017/Resubmission/UnitSurvival';
 unitCount = 0;
@@ -68,7 +68,21 @@ for iDay = 1:numel(survival)
         end
     end
 end
-survivalUnitClasses = primSec(removeUnits,:);
+
+loopVals = [1:8];
+survival_prim = primSec(removeUnits,1);
+survival_prim(isnan(survival_prim)) = 8;
+survival_sec = primSec(removeUnits,2);
+survival_sec(isnan(survival_sec)) = 8;
+for ii = 1:numel(loopVals)
+    disp(['--- Class ',num2str(loopVals(ii))]);
+    disp(['prim: ',num2str(numel(find(survival_prim == loopVals(ii))))]);
+    disp(['sec: ',num2str(numel(find(survival_sec == loopVals(ii))))]);
+end
+removeUnits
+disp(['dir units: ',num2str(sum(dirSelNeuronsNO(removeUnits)))]);
+disp(['ndir units: ',num2str(sum(~dirSelNeuronsNO(removeUnits)))]);
+
 dirUnits = dirSelNeuronsNO(removeUnits);
 primaryTone = numel(find(survivalUnitClasses(:,1) == 3))
 primaryNoseOut = numel(find(survivalUnitClasses(:,1) == 4))

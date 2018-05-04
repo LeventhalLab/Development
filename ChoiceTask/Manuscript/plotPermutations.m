@@ -1,4 +1,4 @@
-doSave = false;
+doSave = true;
 nMeanBins = 10; % corr bins; with gray = n+2 for RT, n+1 for MT
 binMs = 20;
 
@@ -158,10 +158,6 @@ for ii_events = 1:numel(events)
                     end
                     
                     if ismember(iNeuron,excludeUnits)
-                        continue;
-                    end
-                    
-                    if ~ismember(iNeuron,dirSelUsedNeurons)
                         continue;
                     end
 

@@ -36,10 +36,10 @@ function RTMT_corrMatrix()
 % %     dirMT = load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/temp/uSessions/evNose Out_undirSel_n72_movDirall_byMT_bins10_binMs20ORD20171031.mat');
 
     % nose out event, primary only
-    ndirRT = load(fullfile(uSessionsPath,'Nose Out_~dirSel_n65_movDirall_RT_10bins_20_msNO20180428.mat'));
-    ndirMT = load(fullfile(uSessionsPath,'Nose Out_~dirSel_n65_movDirall_MT_10bins_20_msNO20180428.mat'));
-    dirRT = load(fullfile(uSessionsPath,'Nose Out_dirSel_n90_movDirall_RT_10bins_20_msNO20180428.mat'));
-    dirMT = load(fullfile(uSessionsPath,'Nose Out_dirSel_n90_movDirall_MT_10bins_20_msNO20180428.mat'));
+    ndirRT = load(fullfile(uSessionsPath,'Nose Out_~dirSel_n75_movDirall_RT_10bins_20_msNO20180502.mat'));
+    ndirMT = load(fullfile(uSessionsPath,'Nose Out_~dirSel_n75_movDirall_MT_10bins_20_msNO20180502.mat'));
+    dirRT = load(fullfile(uSessionsPath,'Nose Out_dirSel_n103_movDirall_RT_10bins_20_msNO20180502.mat'));
+    dirMT = load(fullfile(uSessionsPath,'Nose Out_dirSel_n103_movDirall_MT_10bins_20_msNO20180502.mat'));
 
     % !!! these are now saved in ndirMT structs, delete these once
     % plotPermutations.m is ran again
