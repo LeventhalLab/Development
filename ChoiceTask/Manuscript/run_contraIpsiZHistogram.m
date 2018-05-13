@@ -1,7 +1,7 @@
 % save('/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Thalamus_behavior_2017/Resubmission/20180513/contraIpsiZHistogramVars',...
 %     'dirSelUnitIds','ndirSelUnitIds','analyzeRange','all_matrixDiffZ');
 
-doSave = true;
+doSave = false;
 figPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Thalamus_behavior_2017/Figures/MATLAB';
 
 % get max magnitude Z within analyzeRange
