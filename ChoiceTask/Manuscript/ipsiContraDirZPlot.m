@@ -2,9 +2,70 @@ doSave = false;
 doLabels = false;
 doPrimSecArrows = true;
 figPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Thalamus_behavior_2017/Figures/MATLAB';
-
 cmapPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Thalamus_behavior_2017/Figures/contra-ipsi-scale.jpg';
 cmapColors = mycmap(cmapPath);
+
+% first run heatmapUnitClass.m -> runMap = 5;
+rows = 1;
+cols = 2;
+subplotMargins = [0.05 0.02];
+caxisValsZ = [-0.5 2];
+caxisValsDiff = [-1.5 1.5];
+iEvent = 4;
+
+for iFig = 1:2
+    switch iFig
+        case 1
+            useUnits = dirSelUnitIds;
+            saveLabel = 'dirUnits';
+        case 2
+            useUnits = ndirSelUnitIds;
+            saveLabel = 'ndirUnits';
+    end
+    h = figuree(round((1200/7)*2),numel(useUnits)/.75);
+    iSubplot = 1;
+    subplot_tight(rows,cols,iSubplot,subplotMargins);
+    useUnits_sorted = [];
+    for ii = 1:numel(sorted_neuronIds)
+        if ismember(sorted_neuronIds(ii),useUnits)
+            unitCount = unitCount + 1;
+            useUnits_sorted = [useUnits_sorted sorted_neuronIds(ii)];
+        end
+    end
+    % useUnits = ismember(sorted_neuronIds,dirSelUnitIds);
+    zScore = squeeze(all_zscores(useUnits_sorted,iEvent,:));
+    imagesc(zScore);
+    hold on;
+    colormap(gca,jet);
+    caxis(caxisValsZ);
+    xticks([1 round(size(zScore,2)/2) size(zScore,2)]);
+    yticks(ylim);
+    yticklabels({});
+    xticklabels({});
+    box off
+    grid on;
+
+    iSubplot = 2;
+    subplot_tight(rows,cols,iSubplot,subplotMargins);
+    zScore = squeeze(all_matrixDiffZ(useUnits_sorted,iEvent,:));
+    imagesc(zScore);
+    hold on;
+    colormap(gca,cmapColors);
+    caxis(caxisValsDiff);
+    xticks([1 round(size(zScore,2)/2) size(zScore,2)]);
+    xticklabels({});
+    yticks(ylim);
+    yticklabels({});
+    box off
+    grid on;
+
+    if doSave
+        tightfig;
+        setFig('','',[1,1.2]);
+        print(gcf,'-painters','-depsc',fullfile(figPath,['dirSel_contraIpsi_',saveLabel,'.eps']));
+        close(h);
+    end
+end
 
 neuronCount = 0;
 % % analyzeRange = 40:70; % from ipsiContraShuffle.m

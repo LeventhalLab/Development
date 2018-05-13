@@ -1,4 +1,5 @@
 doSave = true;
+doLabel = false;
 
 sessionPCA_RT = sessionPCA_500ms_RT;
 sessionPCA_MT = sessionPCA_500ms_MT;
@@ -7,8 +8,8 @@ tWindow_vis = 0.5;
 SDEsamples = tWindow_vis * 2 * 1000;
 rows = 3;
 cols = 2;
-figx = 400;
-figy = 800;
+figx = 250;
+figy = 400;
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/PCA/perSessionAnalysis/RTMT';
 coeff_event = 4;
 
@@ -16,7 +17,7 @@ colors = [1 0 0;0 0 1]; % red for RT, blue for MT
 ylimVals = [0 9];
 xlimVals = [0 0.5];
 
-for iSession = 1:numel(sessionPCA_RT)
+for iSession = [1,8]%1:numel(sessionPCA_RT)
     h = figuree(figx,figy);
     nPCAs = size(sessionPCA_RT(iSession).PCA_arr,2);
     nPCAs = 3; % !! manual override
@@ -63,38 +64,50 @@ for iSession = 1:numel(sessionPCA_RT)
                     pMark = '**';
                 end
             end
-            xlabel([legendText,'(s)'])
             legendText = [legendText,' r',num2str(rho,'%1.3f'),', ',pMark,'p',num2str(pval,'%1.3f')];
             p = polyfit(x,y,1);
             f = polyval(p,x);
             plot(x,f,'-','color',colors(iRTMT,:));
             
-            ylabel('PCxSDE max(Z)');
             ylim(ylimVals);
             yticks(unique(sort([ylimVals 0])));
             xlim(xlimVals);
             xticks(xlimVals);
-            lgd = legend(lns,legendText,'location','north');
-            lgd.FontSize = 10;
-            legend boxoff;
-            grid on;
-
             titleHeader = {''};
             if iRTMT == 1 && iPCA == 1
-                titleHeader = {sessionNames{iSession}};
+                titleHeader = {sessionNames_PCA{iSession}};
             end
             titleHeader = {titleHeader{:} eventFieldlabels{iEvent}};
-            title({titleHeader{:},['PC ',num2str(iPCA)]},'interpreter','none');
+            
+            if doLabel
+                xlabel([legendText,'(s)'])
+                ylabel('PCxSDE max(Z)');
+                lgd = legend(lns,legendText,'location','north');
+                lgd.FontSize = 10;
+                legend boxoff;
+                title({titleHeader{:},['PC ',num2str(iPCA)]},'interpreter','none');
+            else
+                xlabel([]);
+                ylabel([]);
+                xticklabels({});
+                yticklabels({});
+            end
+            grid on;
         end
 
         set(h,'color','w');
         drawnow;
 
         if (curRow == rows || iPCA == nPCAs) && iPCA > 1 && iRTMT == cols
-            tightfig;
             if doSave
-                saveFile = ['Session',num2str(iSession,'%02d'),'_',datestr(now,'yyyymmdd'),'_PCA',num2str(iPCA-rows+1),'-',num2str(iPCA)];
-                saveas(h,fullfile(savePath,saveFile),'png');
+                saveFile = ['RTMTPCA_',sessionNames_PCA{iSession}];
+                if doLabel
+                    saveas(h,fullfile(savePath,saveFile),'png');
+                else
+                    tightfig;
+                    setFig('','',[1,1]);
+                    print(gcf,'-painters','-depsc',fullfile(savePath,saveFile));
+                end
                 close(h);
             end
         end

@@ -23,7 +23,7 @@ if doSetup
 % %     [primSec_minZ0,~] = primSecClass(unitEvents,minZ);
 end
 
-runMap = 3;
+runMap = 5;
 switch runMap
     case 1 % dirSel
         use_dirSelNeurons = dirSelNeuronsNO;

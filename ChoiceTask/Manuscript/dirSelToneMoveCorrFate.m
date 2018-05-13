@@ -1,7 +1,7 @@
 % you have to run ipsiContraShuffle.m then set these, annoying
 % dirSelNeuronsNO_type_correct
 % dirSelNeuronsNO_type_incorrect
-doSave = true;
+doSave = false;
 
 corr_contra_ids = find(dirSelNeuronsNO_type_correct == 1);
 corr_ipsi_ids = find(dirSelNeuronsNO_type_correct == 2);

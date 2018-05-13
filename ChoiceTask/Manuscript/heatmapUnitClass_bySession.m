@@ -4,7 +4,7 @@ doLabels = true;
 doSave = true;
 doPrimSecArrows = true;
 caxisVals = [-0.5 2];
-savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/PCA/heatmaps';
+savePath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Thalamus_behavior_2017/Figures/MATLAB/Heatmaps';
 
 doSetup = false;
 % use primSec_plot.m to set primSec (unit classes)
@@ -142,19 +142,21 @@ for iSession = 1:numel(sessionNeurons)
         else
             title({'',eventFieldlabels{iEvent}});
         end
-
+        
+        ylimVals = ylim;
+        ylim([ylimVals(1) ylimVals(end)]); % for EPS
         colormap jet;
-        grid on;
+        grid off;
         set(gca,'fontSize',10);
     end
     if doPrimSecArrows
         for iNeuron = 1:numel(sorted_neuronIds)
             if ~isempty(unitEvents{sorted_neuronIds(iNeuron)}.class)
                 subplot(gcas(unitEvents{sorted_neuronIds(iNeuron)}.class(1)));
-                plot(4,iNeuron,'>','MarkerFaceColor','k','MarkerEdgeColor','none','markerSize',5); % class 1
+                plot(4,iNeuron,'>','MarkerFaceColor','k','MarkerEdgeColor','none','markerSize',10); % class 1
                 if ~isempty(unitEvents{sorted_neuronIds(iNeuron)}.class(2))
                     subplot(gcas(unitEvents{sorted_neuronIds(iNeuron)}.class(2)));
-                    plot(size(all_zscores,3)-1,iNeuron,'<','MarkerFaceColor',ones(1,3),'MarkerEdgeColor','none','markerSize',5); % class 1
+                    plot(size(all_zscores,3)-1,iNeuron,'<','MarkerFaceColor',ones(1,3),'MarkerEdgeColor','none','markerSize',10); % class 1
                 end
             end
         end
@@ -165,7 +167,10 @@ for iSession = 1:numel(sessionNeurons)
     set(gcf,'color','w');
     hFrame = getframe(h);
     if doSave
-        imwrite(hFrame.cdata,fullfile(savePath,['heatmapUnitClassBySession_',analysisConf.sessionConfs{useUnits(1)}.sessions__name,'.png']));
+        saveName = ['heatmapUnitClassBySession_',analysisConf.sessionConfs{useUnits(1)}.sessions__name];
+        imwrite(hFrame.cdata,fullfile(savePath,[saveName,'.png']));
+%         setFig('','',[1.5,0]);
+        print(gcf,'-painters','-depsc',fullfile(savePath,saveName));
     end
     frameArr = [frameArr;hFrame.cdata];
     close(h);

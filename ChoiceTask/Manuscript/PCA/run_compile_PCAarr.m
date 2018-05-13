@@ -1,6 +1,6 @@
-useDir = ''; % '' or 'ipsi' or 'contra'
-shortPCA = true;
-timingField = 'MT'; % timing assumes useDir = '';
+% % useDir = ''; % '' or 'ipsi' or 'contra'
+% % shortPCA = true;
+% % timingField = 'RT'; % timing assumes useDir = '';
 
 if shortPCA
     tWindow = 2;
@@ -45,20 +45,13 @@ for iSession = criteriaSessions
     groupNeurons = groupedNeurons{iSession};
     sessionConf = analysisConf.sessionConfs{groupNeurons(1)};
     neuronName = analysisConf.neurons{groupNeurons(1)};
-    nexMatFile = [sessionConf.leventhalPaths.nex,'.mat'];
-    load(nexMatFile);
-
-    logFile = getLogPath(sessionConf.leventhalPaths.rawdata);
-    logData = readLogData(logFile);
-    if strcmp(neuronName(1:5),'R0154')
-        nexStruct = fixMissingEvents(logData,nexStruct);
-    end
-    trials = createTrialsStruct_simpleChoice(logData,nexStruct);
+    
+    trials = all_trials{groupNeurons(1)};
     trialIdInfo = organizeTrialsById(trials);
-    if numel(trialIdInfo.correctIpsi) < require_ntrials || numel(trialIdInfo.correctContra) < require_ntrials
-        disp(['Removing session ',num2str(iSession),' for low ipsi/contra trials']);
-        continue;
-    end
+% %     if numel(trialIdInfo.correctIpsi) < require_ntrials || numel(trialIdInfo.correctContra) < require_ntrials
+% %         disp(['Removing session ',num2str(iSession),' for low ipsi/contra trials']);
+% %         continue;
+% %     end
     
     sessionCount = sessionCount + 1;
     % use for presentation
@@ -81,7 +74,7 @@ for iSession = criteriaSessions
             
         tsPeths = eventsPeth(trials(trialIds),all_ts{iNeuron},tWindow,eventFieldnames);
         % remove low timestamp trials
-        tsPeths = tsPeths(~any(cellfun(@numel,tsPeths) < require_nts,2),:);
+% %         tsPeths = tsPeths(~any(cellfun(@numel,tsPeths) < require_nts,2),:);
 % %         if size(tsPeths,1) < require_ntrials
 % %             disp(['Removing neuron ',num2str(iNeuron),' for low FR']);
 % %             continue;

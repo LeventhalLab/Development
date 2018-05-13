@@ -15,7 +15,7 @@ for iEvent = 1:7
     all_posRatios(iEvent,:) = [posRatio 1-posRatio];
     
 end
-h = figuree(250,275);
+h = figuree(250,150);
 b = bar(all_posRatios,'stacked');
 b(1).FaceColor = [1 0 0];
 b(2).FaceColor = [0 0 0];
@@ -35,7 +35,7 @@ end
 
 if doSave
     tightfig;
-    setFig('','',[2,13.5]);
+    setFig('','',[1,1]);
     print(gcf,'-painters','-depsc',fullfile(figPath,'dirSelPrimaryBar.eps'));
     close(h);
 end

@@ -2,8 +2,8 @@ doSetup = true;
 doClasses = false;
 doDirSel = true;
 doAllUnits = false;
-doLabels = false;
-doSave = true;
+doLabels = true;
+doSave = false;
 figPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Thalamus_behavior_2017/Figures/MATLAB';
 
 eventFieldlabelsNR = {eventFieldlabels{:} 'NR'};

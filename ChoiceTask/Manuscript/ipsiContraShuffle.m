@@ -1,10 +1,10 @@
 % the fraction of units whose activity is significantly different between
 % ipsi/contra trials
 doSetup = false;
-doSave = true;
-doLabels = false;
+doSave = false;
+doLabels = true;
 dodebug = false;
-doPies = false;
+doPies = true;
 debugPath = '/Users/mattgaidica/Documents/Data/ChoiceTask/ipsiContraShuffleDebug';
 pVal = 0.99;
 pVal_minBins = 2;
