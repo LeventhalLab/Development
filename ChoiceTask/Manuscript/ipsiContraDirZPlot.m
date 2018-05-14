@@ -1,3 +1,6 @@
+% % save('/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Thalamus_behavior_2017/Resubmission/20180514/ipsiContraDirZPlot',...
+% %     'dirSelUnitIds','ndirSelUnitIds','sorted_neuronIds','all_zscores','all_matrixDiff','all_matrixDiffZ','all_ntpIdx','eventFieldlabels','primSec');
+
 doSave = false;
 doLabels = false;
 doPrimSecArrows = true;

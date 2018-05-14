@@ -12,7 +12,7 @@ cols = 7;
 
 sessionPCA_coeff = sessionPCA_500ms;
 
-for iSession = [1,8]%1:numel(sessionPCA_500ms)
+for iSession = 1:numel(sessionPCA_500ms)
     h = figuree(1200,800);
     for iSource = 1:nSources
         if nSources == 1
