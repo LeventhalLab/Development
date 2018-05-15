@@ -1,5 +1,5 @@
 doSave = true;
-doLabel = false;
+doLabel = true;
 
 sessionPCA_RT = sessionPCA_500ms_RT;
 sessionPCA_MT = sessionPCA_500ms_MT;
@@ -17,7 +17,7 @@ colors = [1 0 0;0 0 1]; % red for RT, blue for MT
 ylimVals = [0 9];
 xlimVals = [0 0.5];
 
-for iSession = [1,8]%1:numel(sessionPCA_RT)
+for iSession = [2,16]%1:numel(sessionPCA_RT)
     h = figuree(figx,figy);
     nPCAs = size(sessionPCA_RT(iSession).PCA_arr,2);
     nPCAs = 3; % !! manual override

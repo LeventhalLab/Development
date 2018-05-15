@@ -27,7 +27,7 @@ for iNeuron = 1:numel(analysisConf.neurons)
     groupedNeurons{iSession} = [groupedNeurons{iSession} iNeuron];
 end
 
-require_ncriteria = 8;
+require_ncriteria = 2; % !!!change back to 8!!!
 criteriaSessions = [];
 unitsPerSession = [];
 for iSession = 1:numel(groupedNeurons)
@@ -40,7 +40,7 @@ end
 PCA_arr = [];
 sessionPCA = {};
 sessionCount = 0;
-sessionNames = {};
+sessionNames_PCA = {};
 for iSession = criteriaSessions
     groupNeurons = groupedNeurons{iSession};
     sessionConf = analysisConf.sessionConfs{groupNeurons(1)};
@@ -55,7 +55,7 @@ for iSession = criteriaSessions
     
     sessionCount = sessionCount + 1;
     % use for presentation
-    sessionNames{sessionCount} = analysisConf.sessionConfs{groupNeurons(1)}.sessions__name;
+    sessionNames_PCA{sessionCount} = analysisConf.sessionConfs{groupNeurons(1)}.sessions__name;
     
     switch useDir
         case 'ipsi'

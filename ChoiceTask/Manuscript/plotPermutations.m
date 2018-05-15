@@ -139,6 +139,11 @@ for ii_events = 1:numel(events)
                     sessionName = analysisConf.sessionConfs{iNeuron}.sessions__name;
                     subjectName = analysisConf.sessionConfs{iNeuron}.subjects__name;
                     
+% %                     if strcmp(sessionName,'R0142_20161209a')
+% %                         disp(['Skipping ',sessionName]);
+% %                         continue;
+% %                     end
+                    
                     % dirSel units = NO, ~dirsel units = all units that never show dirSel
                     % (NO&SO)
 % % % %                     if filterBy_dirSel

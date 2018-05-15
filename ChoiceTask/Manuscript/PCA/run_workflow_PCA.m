@@ -4,6 +4,7 @@ timingField = 'RT'; % timing assumes useDir = '';
 run_compile_PCAarr
 run_compute_PCA
 sessionPCA_RT = sessionPCA;
+sessionPCA_500ms = sessionPCA;
 sessionPCA_500ms_RT = sessionPCA;
 
 useDir = ''; % '' or 'ipsi' or 'contra'

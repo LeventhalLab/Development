@@ -40,6 +40,12 @@ function RTMT_corrMatrix()
     ndirMT = load(fullfile(uSessionsPath,'Nose Out_~dirSel_n75_movDirall_MT_10bins_20_msNO20180502.mat'));
     dirRT = load(fullfile(uSessionsPath,'Nose Out_dirSel_n103_movDirall_RT_10bins_20_msNO20180502.mat'));
     dirMT = load(fullfile(uSessionsPath,'Nose Out_dirSel_n103_movDirall_MT_10bins_20_msNO20180502.mat'));
+    
+    % excluding R0142_20161209a, temporary analysis
+% %     ndirRT = load(fullfile(uSessionsPath,'Nose Out_~dirSel_n71_movDirall_RT_10bins_20_msNO20180515.mat'));
+% %     ndirMT = load(fullfile(uSessionsPath,'Nose Out_~dirSel_n71_movDirall_MT_10bins_20_msNO20180515.mat'));
+% %     dirRT = load(fullfile(uSessionsPath,'Nose Out_dirSel_n94_movDirall_RT_10bins_20_msNO20180515.mat'));
+% %     dirMT = load(fullfile(uSessionsPath,'Nose Out_dirSel_n94_movDirall_MT_10bins_20_msNO20180515.mat'));
 
     % !!! these are now saved in ndirMT structs, delete these once
     % plotPermutations.m is ran again
