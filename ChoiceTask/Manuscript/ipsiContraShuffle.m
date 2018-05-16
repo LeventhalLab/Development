@@ -4,7 +4,7 @@ doSetup = false;
 doSave = false;
 doLabels = true;
 dodebug = false;
-doPies = true;
+doPies = false;
 debugPath = '/Users/mattgaidica/Documents/Data/ChoiceTask/ipsiContraShuffleDebug';
 pVal = 0.99;
 pVal_minBins = 2;
@@ -452,6 +452,25 @@ for iEvent = 1:numel(useEvents)
     bar(1:size(pNeuronDiff,3),-eventBins_neg/numel(dirSelUsedNeurons),'FaceColor',colors(2,:),'EdgeColor',colors(2,:)); % ipsi
     ylim([-.15 .15]);
     
+    X = binoinv(pVal,numel(dirSelUsedNeuronsNO_correct),1-pVal) / numel(dirSelUsedNeuronsNO_correct);
+    
+    if iEvent == 4
+        h2 = figure;
+        plot(1:size(pNeuronDiff,3),(eventBins + eventBins_neg)/numel(dirSelUsedNeurons),'color','k'); % contra
+        hold on;
+        nSmooth = 1;
+        plot(1:size(pNeuronDiff,3),smooth(eventBins/numel(dirSelUsedNeurons),nSmooth),'color',colors(1,:),'lineWidth',0.5); % contra
+        plot(1:size(pNeuronDiff,3),smooth(-eventBins_neg/numel(dirSelUsedNeurons),nSmooth),'color',colors(2,:),'lineWidth',0.5); % ipsi
+        nSmooth = 10;
+        plot(1:size(pNeuronDiff,3),smooth(eventBins/numel(dirSelUsedNeurons),nSmooth),'color',colors(1,:),'lineWidth',1.5); % contra
+        plot(1:size(pNeuronDiff,3),smooth(-eventBins_neg/numel(dirSelUsedNeurons),nSmooth),'color',colors(2,:),'lineWidth',1.5); % ipsi
+        plot(xlim,[X X],'r');
+        plot(xlim,[-X -X],'r');
+        ylim([-.15 .3]);
+        title('contra + ipsi');
+        figure(h);
+    end
+    
 % % % %     yyaxis right;
 % % %     class_colors = jet(8);
 % % % %     class_colors(3,:) = [1 1 0];
@@ -486,7 +505,6 @@ for iEvent = 1:numel(useEvents)
     end
     
     % Given pVal, what fraction is due to chance?
-    X = binoinv(pVal,numel(dirSelUsedNeuronsNO_correct),1-pVal) / numel(dirSelUsedNeuronsNO_correct);
     plot(xlim,[X X],'r');
     plot(xlim,[-X -X],'r');
     

@@ -18,7 +18,7 @@ end
 h = figuree(250,250);
 b = bar(all_posRatios,'stacked');
 b(1).FaceColor = [1 0 0];
-b(2).FaceColor = [0 0 0];
+b(2).FaceColor = [0.5 0.5 0.5];
 ylim([0 0.5]);
 yticks(ylim);
 xlim([0 8]);

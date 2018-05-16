@@ -141,8 +141,8 @@ for iEvent = 1:2
     percentValues = get(hText,'String'); % percent values
     oldExtents_cell = get(hText,'Extent'); % cell array
     oldExtents = cell2mat(oldExtents_cell); % numeric array
-    disp('Counter-clockwise values left -> right subplot');
-    disp(flip(percentValues));
+    disp([eventFieldlabels{useEvents(iEvent)},' pie:']);
+    disp((100 * pieData(useEvents(iEvent),:) / sum(pieData(useEvents(iEvent),:))));
     
     % labels are a pain in MATLAB, do them in illustrator
     if doLabels

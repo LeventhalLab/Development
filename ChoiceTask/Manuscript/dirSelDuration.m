@@ -29,16 +29,23 @@ neuronsShowingDirSel = sum(neuronDirFlags) / numel(dirSelUsedNeurons);
 h = figuree(600,600);
 dirSelDurations = dirSelDurations_contra;
 titleLabel = 'Contra';
+
 allMTs = [];
-for iNeuron = 1:numel(all_trials)
-    if ismember(iNeuron,excludeUnits)
-        continue;
+sessionName = '';
+groupedNeurons = {};
+iSession = 0;
+for iNeuron = 1:numel(analysisConf.neurons)
+    if strcmp(sessionName,analysisConf.sessionNames{iNeuron}) == 0
+        sessionName = analysisConf.sessionNames{iNeuron};
+        iSession = iSession + 1;
+        curTrials = all_trials{iNeuron};
+        [useTrials,allTimes] = sortTrialsBy(curTrials,'MT');
+        allMTs = [allMTs allTimes];
     end
-    curTrials = all_trials{iNeuron};
-    [useTrials,allTimes] = sortTrialsBy(curTrials,'MT');
-    allMTs = [allMTs allTimes];
 end
-medMT = median(allMTs)*1000; %ms
+
+medMT = median(allMTs) * 1000; %ms
+
 for ii = 1:3
     subplot(2,3,ii);
     if ii == 2

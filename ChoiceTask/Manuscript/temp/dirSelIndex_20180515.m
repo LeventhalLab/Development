@@ -74,7 +74,7 @@ end
 h = figuree(200,250);
 b = bar(binCenters,[squeeze(fract_zDiff_sum(1,3,:)) squeeze(fract_zDiff_sum(2,3,:))],'stacked');
 b(1).FaceColor = [1 0 0];
-b(2).FaceColor = [0 0 0];
+b(2).FaceColor = [0.5 0.5 0.5];
 xticks(binCenters);
 xlim([binCenters(1)-1 binCenters(end)+1]);
 ylim([0 1]);
