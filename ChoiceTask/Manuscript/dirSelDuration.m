@@ -29,7 +29,16 @@ neuronsShowingDirSel = sum(neuronDirFlags) / numel(dirSelUsedNeurons);
 h = figuree(600,600);
 dirSelDurations = dirSelDurations_contra;
 titleLabel = 'Contra';
-medMT = 259; %ms
+allMTs = [];
+for iNeuron = 1:numel(all_trials)
+    if ismember(iNeuron,excludeUnits)
+        continue;
+    end
+    curTrials = all_trials{iNeuron};
+    [useTrials,allTimes] = sortTrialsBy(curTrials,'MT');
+    allMTs = [allMTs allTimes];
+end
+medMT = median(allMTs)*1000; %ms
 for ii = 1:3
     subplot(2,3,ii);
     if ii == 2
@@ -71,7 +80,7 @@ for ii = 1:3
     yticks(ylim);
     grid on;
     plot([medMT/binMs medMT/binMs],ylim,'r:');
-    text(medMT/binMs,20,'\leftarrow median MT');
+    text(medMT/binMs,20,['\leftarrow median MT (',num2str(medMT),')']);
     plot([durationMed/binMs durationMed/binMs],ylim,'r-');
     text(durationMed/binMs,25,'\leftarrow median dirSel');
     title([num2str(fractionUnderMT*100,'%2.2f'),'% of units < MT']);
