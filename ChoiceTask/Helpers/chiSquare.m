@@ -1,4 +1,4 @@
-function [x2,p] = chiSquare(a,b,c,d)
+ function [x2,p] = chiSquare(a,b,c,d)
 % https://www.youtube.com/watch?v=WXPBoFDqNVk&t=136s
 % tests the null hypothesis that there is no difference between expected
 % values a,b and observed values c,d.
