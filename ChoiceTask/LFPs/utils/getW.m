@@ -1,7 +1,7 @@
-function [W,freqList,allTimes] = getW(sevFile,curTrials,eventFieldnames)
+function [W,freqList,allTimes] = getW(sevFile,curTrials,eventFieldnames,freqList)
 decimateFactor = 10;
-fpass = [1 100];
-freqList = logFreqList(fpass,30);
+% % fpass = [1 100];
+% % freqList = logFreqList(fpass,30);
 tWindow = [1,2];
 
 disp(sevFile);
