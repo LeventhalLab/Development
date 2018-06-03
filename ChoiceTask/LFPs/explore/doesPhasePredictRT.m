@@ -4,7 +4,7 @@ save_doesPhasePredictRT = {};
 
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/betaGammaRTCorr';
 freqList = [20,50];
-plotTimes = linspace(-.1,.1,100);
+plotTimes = linspace(-.25,.25,100);
 bandLabels = {'\beta','\gamma'};
 fontSize = 8;
 cols = 7;

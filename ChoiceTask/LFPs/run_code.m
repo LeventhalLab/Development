@@ -1,11 +1,20 @@
-SDE = all_SDEs_zscore{1,1}{1,4};
-SDE2 = all_SDEs_zscore{1,1}{2,4};
-figure;
-subplot(211);
-plot(SDE);
-hold on;
-plot(SDE2);
+all_pretones = {};
+for iNeuron = ic'
+    curTrials = all_trials{iNeuron};
+    [pretone_trialIds,allTimes_pretone] = sortTrialsBy(curTrials,'pretone');
+    [RT_trialIds,~] = sortTrialsBy(curTrials,'RT');
+    
+    resort_allTimes_pretone = [];
+    for iTrial = 1:numel(RT_trialIds)
+        resort_allTimes_pretone(iTrial) = allTimes_pretone(RT_trialIds(iTrial) == pretone_trialIds);
+    end
+    
+    all_pretones{iNeuron} = resort_allTimes_pretone;
+end
 
-[r,lags] = xcorr(SDE,SDE2);
-subplot(212);
-plot(lags,r);
+% % all_times = {};
+% % for iNeuron = ic'
+% %     curTrials = all_trials{iNeuron};
+% %     [RT_trialIds,allTimes] = sortTrialsBy(curTrials,'RT');
+% %     all_times{iNeuron} = allTimes;
+% % end
