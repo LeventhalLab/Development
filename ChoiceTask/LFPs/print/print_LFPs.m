@@ -1,4 +1,6 @@
 function print_LFPs(LFPfiles,all_trials,eventFieldnames,tWindow_vis)
+% !! freqList is now passed into function, need to established that
+% UPDATE!!
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/LFP';
 sevFile = '';
 tWindow = 1;

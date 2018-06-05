@@ -31,19 +31,23 @@ if doSetup
     end
 end
 
-figuree(600,800);
+figuree(900,800);
 imagescArr = ones(366,100);
 for iEvent = 1:7
+    sort_event = [];
     for iNeuron = 1:numel(pvals_neuron)
         cur_pvals = pvals_neuron{iNeuron};
         pvals_event = cur_pvals(iEvent,:);
         imagescArr(iNeuron,1:numel(pvals_event)) = sort(pvals_event);
+        sort_event(iNeuron) = numel(find(pvals_event < 0.05)) / numel(pvals_event);
     end
+    [~,k] = sort(sort_event);
     subplot(1,7,iEvent);
-    imagesc(imagescArr);
+    imagesc(imagescArr(k,:));
+    xlim([1 100]);
     colormap(jet);
     caxis([0 1]);
     title(eventFieldnames{iEvent});
     ylabel('units');
-    xlabel('trials');
+    xlabel('sorted trials');
 end

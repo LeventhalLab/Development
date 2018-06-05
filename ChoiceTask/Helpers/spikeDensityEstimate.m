@@ -12,7 +12,7 @@ if ~exist('tsEnd','var')
     tsEnd = ts(end);
 end
 if ~exist('sigma','var')
-    sigma = .05; % kernel std, 50ms
+    sigma = .02; % kernel std, 50ms
 %     sigma = mean(diff(ts)) * 2;
 end
 
