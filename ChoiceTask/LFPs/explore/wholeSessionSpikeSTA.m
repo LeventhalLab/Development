@@ -37,22 +37,22 @@ end
 
 decimateFactor = 20;
 freqList = logFreqList([3.5 100],30);
-nSamples = 200000;
 sampleInt = 100;
 tWindow = 1;
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/spikeTriggeredAvg';
-for iNeuron = 40%1:366
+for iNeuron = 1:366
+% %     curTs = compressTs(all_ts{iNeuron},.02);
     curTs = all_ts{iNeuron};
     curTs_shuffled = curTs(randperm(numel(curTs)));
     curTs_random = rand([1 numel(curTs_shuffled)*2]) * max(curTs);
-%     sevFile = uniqueLFPs_local{iNeuron};
-%     disp([num2str(iNeuron),': ',sevFile]);
-%     [sev,header] = read_tdt_sev(sevFile);
-%     sevFilt = decimate(double(sev),decimateFactor);
-%     tsEnd = numel(sev)/header.Fs;
-%     Fs = header.Fs / decimateFactor;
-%     W = calculateComplexScalograms_EnMasse(sevFilt','Fs',Fs,'freqList',freqList);
-%     W = squeeze(W);
+    sevFile = uniqueLFPs_local{iNeuron};
+    disp([num2str(iNeuron),': ',sevFile]);
+    [sev,header] = read_tdt_sev(sevFile);
+    sevFilt = decimate(double(sev),decimateFactor);
+    tsEnd = numel(sev)/header.Fs;
+    Fs = header.Fs / decimateFactor;
+    W = calculateComplexScalograms_EnMasse(sevFilt','Fs',Fs,'freqList',freqList);
+    W = squeeze(W);
     W_power = abs(W).^2;
     W_phase = angle(W);
     tW = linspace(0,tsEnd,size(W,1));
@@ -78,6 +78,8 @@ for iNeuron = 40%1:366
             if setupFlag && iSurr == 2
                 useTs = curTs_random;
                 exitAfter = spikeCount;
+                forSpikes = exitAfter * 2;
+                spikeCount = 0;
                 setupFlag = false;
             end
             for iSpike = 1:forSpikes % first loop up to numel(curTs), second loop just meets spikeCount
@@ -94,12 +96,12 @@ for iNeuron = 40%1:366
                     disp('overpower');
                 end
                 if spikeCount == exitAfter
-                    if iSurr == 1 % reshape to actual spikes
-                        STAArr_power = STAArr_power(:,1:spikeCount,:);
-                        STAArr_phase = STAArr_power(:,1:spikeCount,:);
-                    end
                     break;
                 end
+            end
+            if iSurr == 1 % reshape to actual spikes
+                STAArr_power = STAArr_power(:,1:spikeCount,:);
+                STAArr_phase = STAArr_phase(:,1:spikeCount,:);
             end
         end
         
@@ -141,14 +143,14 @@ for iNeuron = 40%1:366
         ylabel('freq (Hz)');
         set(gca,'ydir','normal');
         colormap(jet);
-        caxis([-5 5]);
+        caxis([-8 8]);
         cb = colorbar('Ticks',sort([0 caxis]));
         cb.Label.String = 'Z-score';
         set(gca,'fontSize',6);
     end
     set(h,'color','w');
-%     saveas(h,fullfile(savePath,[num2str(iNeuron,'%03d'),'.png']));
-%     close(h);
+    saveas(h,fullfile(savePath,[num2str(iNeuron,'%03d'),'.png']));
+    close(h);
 end
 
 % % tWindow = 1;
