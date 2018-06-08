@@ -49,6 +49,7 @@ for iNeuron = 1:366
     disp([num2str(iNeuron),': ',sevFile]);
     [sev,header] = read_tdt_sev(sevFile);
     sevFilt = decimate(double(sev),decimateFactor);
+    sevFilt = artifactThresh(sevFilt,1,1000);
     tsEnd = numel(sev)/header.Fs;
     Fs = header.Fs / decimateFactor;
     W = calculateComplexScalograms_EnMasse(sevFilt','Fs',Fs,'freqList',freqList);
@@ -83,11 +84,11 @@ for iNeuron = 1:366
                 setupFlag = false;
             end
             for iSpike = 1:forSpikes % first loop up to numel(curTs), second loop just meets spikeCount
-                if useTs(iSpike) < tWindow || useTs(iSpike) > tsEnd - tWindow
-                    continue;
-                end
                 Wcenter = round((size(W,1) / tsEnd) * useTs(iSpike)); %find(tW > useTs(iSpike),1);
                 Wrange = Wcenter - Wsamples:sampleInt:Wcenter + Wsamples;
+                if Wrange < 1 || Wrange > size(W_power,1)
+                    continue;
+                end
                 if max(max(W_power(Wrange,iFreq))) < 1e5 % power filter
                     spikeCount = spikeCount + 1;
                     STAArr_power(iSurr,spikeCount,:) = W_power(Wrange,iFreq);

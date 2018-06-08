@@ -17,22 +17,23 @@ newFig = true;
 for iField = 1:numel(eventFieldnames)
     data = [];
     for iTrial = 1:numel(trials)
-        centerTs = getfield(trials(iTrial).timestamps,eventFieldnames{iField});
-        centerSample = round(centerTs*Fs);
-        centerRangeSamples = (centerSample - tWindowSamples):(centerSample + tWindowSamples - 1);
-        if centerRangeSamples(1) > 0 && centerRangeSamples(end) < length(sevFilt) % !!!shouldn't use iTrial below
-            lfp = sevFilt(centerRangeSamples);
-            if doDebug
-                simpleFFT(lfp,Fs,'newFig',newFig);
-% %                 newFig = false;
-                title(iTrial);
+        try
+            centerTs = getfield(trials(iTrial).timestamps,eventFieldnames{iField});
+            centerSample = round(centerTs*Fs);
+            centerRangeSamples = (centerSample - tWindowSamples):(centerSample + tWindowSamples - 1);
+            if centerRangeSamples(1) > 0 && centerRangeSamples(end) < length(sevFilt)
+                lfp = sevFilt(centerRangeSamples);
             end
-            data(:,iTrial) = lfp;
+        catch % for trials without all events
+            centerRangeSamples = -tWindowSamples:tWindowSamples - 1;
+            lfp = NaN(1,numel(centerRangeSamples));
         end
+        data(:,iTrial) = lfp;
     end
+
     all_Lfp(iField,:,:) = data;
     W = calculateComplexScalograms_EnMasse(data,'Fs',Fs,'freqList',freqList,'doplot',doDebug);
-    
+
     if chopWindow
         chop_tWindowSamples = round(Fs * tWindow_select);
         selectRange = (size(W,1)/2) - round(chop_tWindowSamples):(size(W,1)/2) + round(chop_tWindowSamples) - 1;
