@@ -1,6 +1,7 @@
 % create session-wide SDE z-scores
 compileTs = false;
 compileWs = false;
+doBurst = true;
 
 if compileTs
     [uniqueSession,ic,ia] = unique(analysisConf.sessionNames);
@@ -36,16 +37,24 @@ if compileWs
 end
 
 decimateFactor = 20;
-freqList = logFreqList([3.5 100],30);
+freqList = logFreqList([3.5 200],30);
 sampleInt = 100;
 tWindow = 1;
-savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/spikeTriggeredAvg';
+if doBurst
+    savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/spikeTriggeredAvg_ISI';
+else
+    savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/spikeTriggeredAvg';
+end
 for iNeuron = 1:366
 % %     curTs = compressTs(all_ts{iNeuron},.02);
     curTs = all_ts{iNeuron};
-    curTs_shuffled = curTs(randperm(numel(curTs)));
-    curTs_random = rand([1 numel(curTs_shuffled)*2]) * max(curTs);
-    sevFile = uniqueLFPs_local{iNeuron};
+    if doBurst
+        [tsISI,tsLTS,tsPoisson] = tsBurstFilters(curTs);
+        curTs = tsISI;
+    end
+% %     curTs_shuffled = curTs(randperm(numel(curTs))); % not needed
+    curTs_random = rand([1 numel(curTs)*2]) * max(curTs);
+    sevFile = LFPfiles_local{iNeuron};
     disp([num2str(iNeuron),': ',sevFile]);
     [sev,header] = read_tdt_sev(sevFile);
     sevFilt = decimate(double(sev),decimateFactor);
@@ -71,7 +80,7 @@ for iNeuron = 1:366
         STAArr_phase = STAArr_power;
         disp(['working on ',num2str(freqList(iFreq)),' Hz...']);
         setupFlag = true;
-        useTs = curTs_shuffled;
+        useTs = curTs;
         forSpikes = numel(curTs);
         exitAfter = forSpikes;
         spikeCount = 0;
@@ -86,7 +95,7 @@ for iNeuron = 1:366
             for iSpike = 1:forSpikes % first loop up to numel(curTs), second loop just meets spikeCount
                 Wcenter = round((size(W,1) / tsEnd) * useTs(iSpike)); %find(tW > useTs(iSpike),1);
                 Wrange = Wcenter - Wsamples:sampleInt:Wcenter + Wsamples;
-                if Wrange < 1 || Wrange > size(W_power,1)
+                if min(Wrange) < 1 || max(Wrange) > size(W_power,1)
                     continue;
                 end
                 if max(max(W_power(Wrange,iFreq))) < 1e5 % power filter
@@ -144,7 +153,7 @@ for iNeuron = 1:366
         ylabel('freq (Hz)');
         set(gca,'ydir','normal');
         colormap(jet);
-        caxis([-8 8]);
+        caxis([-10 10]);
         cb = colorbar('Ticks',sort([0 caxis]));
         cb.Label.String = 'Z-score';
         set(gca,'fontSize',6);

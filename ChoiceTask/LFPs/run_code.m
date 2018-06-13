@@ -1,20 +1,14 @@
-all_pretones = {};
-for iNeuron = ic'
-    curTrials = all_trials{iNeuron};
-    [pretone_trialIds,allTimes_pretone] = sortTrialsBy(curTrials,'pretone');
-    [RT_trialIds,~] = sortTrialsBy(curTrials,'RT');
-    
-    resort_allTimes_pretone = [];
-    for iTrial = 1:numel(RT_trialIds)
-        resort_allTimes_pretone(iTrial) = allTimes_pretone(RT_trialIds(iTrial) == pretone_trialIds);
+for iNeuron = 1:numel(compiled_eventsArr)
+    if isempty(compiled_eventsArr(iNeuron).eventsArr)
+        continue;
     end
-    
-    all_pretones{iNeuron} = resort_allTimes_pretone;
+    for iFreq = 1:size(eventsArr,1)
+        for iTrial = 1:numel(eventRTcorr)
+            transientTiming = t_compiled_eventsArr(iNeuron).eventsArr_meta{iFreq,iTrial};
+            if ~isempty(transientTiming)
+                transientTiming(1,:) = (transientTiming(1,:).*4)-1;
+                compiled_eventsArr(iNeuron).eventsArr_meta{iFreq,iTrial} = transientTiming;
+            end
+        end
+    end
 end
-
-% % all_times = {};
-% % for iNeuron = ic'
-% %     curTrials = all_trials{iNeuron};
-% %     [RT_trialIds,allTimes] = sortTrialsBy(curTrials,'RT');
-% %     all_times{iNeuron} = allTimes;
-% % end

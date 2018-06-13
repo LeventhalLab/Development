@@ -9,14 +9,14 @@ pxHeight = 150;
 allFrames = [];
 for iNeuron = 1:numel(LFPfiles)
     % only unique sev files
-    if strcmp(sevFile,LFPfiles{iNeuron})
+    if strcmp(sevFile,LFPfiles_local{iNeuron})
         continue;
     end
     sevFile = LFPfiles{iNeuron};
     [~,name,~] = fileparts(sevFile);
     subjectName = name(1:5);
     curTrials = all_trials{iNeuron};
-    [W,freqList,allTimes] = getW(sevFile,curTrials,eventFieldnames);
+    [W,freqList,allTimes] = getW(sevFile,curTrials,eventFieldnames,freqList);
     tickIds = [1 10 17 23 26 30]; % !! HARDCODED FOR NOW
     
     % all trials (single sheet or many?)

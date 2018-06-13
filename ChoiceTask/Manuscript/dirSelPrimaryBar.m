@@ -1,6 +1,6 @@
 % use primSec_plot.m to set primSec (unit classes)
 figPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Thalamus_behavior_2017/Figures/MATLAB';
-doSave = true;
+doSave = false;
 % primary + secondary
 keepUnitsArr = ones(1,366);
 keepUnitsArr(removeUnits) = 0;
