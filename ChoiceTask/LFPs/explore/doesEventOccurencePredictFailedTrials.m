@@ -1,3 +1,5 @@
+% non-conclusive, may benefit from true "failure" of trials but we don't
+% have enough.
 doSetup = true;
 iCond = 3;
 if doSetup

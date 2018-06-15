@@ -4,6 +4,7 @@
 % eventMTcorr
 
 condLabels = {'before','after','total'};
+figuree(1200,800);
 allPb = zeros(3,1);
 allPg = zeros(3,1);
 allRb = zeros(3,1);

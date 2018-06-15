@@ -1,7 +1,7 @@
 % create session-wide SDE z-scores
 compileTs = false;
 compileWs = false;
-doBurst = true;
+doBurst = false;
 
 if compileTs
     [uniqueSession,ic,ia] = unique(analysisConf.sessionNames);
@@ -45,7 +45,7 @@ if doBurst
 else
     savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/spikeTriggeredAvg';
 end
-for iNeuron = 1:366
+for iNeuron = 78:366 % !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 % %     curTs = compressTs(all_ts{iNeuron},.02);
     curTs = all_ts{iNeuron};
     if doBurst
