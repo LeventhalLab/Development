@@ -15,7 +15,7 @@ end
 
 % % savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/transientTiming/MT';
 freqList = logFreqList([3.5 100],30);
-binEdges = [-1:.05:1];
+binEdges = [-1:0.05:1];
 
 for iRTMT  = 1%:2 
     if iRTMT == 1

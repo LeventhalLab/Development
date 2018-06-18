@@ -3,9 +3,9 @@ savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/transientLFPevents
 
 
 sevFile = '';
-iEvent = 4;
+iEvent = 3;
 compiled_eventsArr = {};
-for iNeuron = 1%:numel(LFPfiles_local)
+for iNeuron = 1:numel(LFPfiles_local)
     % only unique sev files
     if strcmp(sevFile,LFPfiles_local{iNeuron})
         continue;
