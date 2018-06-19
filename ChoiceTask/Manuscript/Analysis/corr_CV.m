@@ -1,7 +1,7 @@
 timingField = 'RT';
 eventFieldnames = {'cueOn';'centerIn';'tone';'centerOut';'sideIn';'sideOut';'foodRetrieval'};
 useEvent = 4;
-if false
+if true
     all_AP = [];
     all_ML = [];
     all_DV = [];

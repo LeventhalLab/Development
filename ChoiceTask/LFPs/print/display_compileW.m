@@ -8,6 +8,7 @@
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/transientTiming/DecileTransientsRTMT';
 freqList = [3.5,8,12,20,50,80,100];
 RTMTlabels = {'RT','MT'};
+cutoffDivisors = [120,200];
 testMedians = [6,10];
 useEvents = [3,4];
 rows = numel(testMedians) + 1;
@@ -35,13 +36,16 @@ lineWidth = 2;
 phaseColors = cmocean('phase',361);
 
 for iFreq = 1:numel(freqList)
+%     testMedians = round(cutoffDivisors / freqList(iFreq),2);
     for iSortby = 1:2
+        caxisTickVals = sortTimes(iSortby,binIdxs);
+        caxisTickLabels = num2str(caxisTickVals(:),'%0.2f');
         if iSortby == 1
             sortByColors = cool(nBins);
         else
             sortByColors = summer(nBins);
         end
-        h = figuree(1200,900);
+        h = figuree(1400,900);
         for iEvent = 1:2
             subplot(rows,cols,prc(cols,[1,(iEvent*2)-1]));
             curPower = squeeze(squeeze(W_power(iFreq,iEvent,sortKeys(iSortby,:),:)));
@@ -52,9 +56,9 @@ for iFreq = 1:numel(freqList)
             xlabel('time (s)');
             ylim([1 size(curPower,1)]);
             yticks(ylim);
-            ylabel('wire-trials');
+            ylabel('slow \leftarrow wire-trials \rightarrow fast');
             colormap(jet);
-            caxis([0 1000]); % !! UPDATE
+            caxis([0 median(mean(curPower))*3]);
             title([num2str(freqList(iFreq)),'Hz at ',eventFieldnames{useEvents(iEvent)},' by ',RTMTlabels{iSortby}]);
             grid on;
 
@@ -70,18 +74,20 @@ for iFreq = 1:numel(freqList)
             ylabel('power');
             cb = colorbar;
             colormap(cb,sortByColors);
-            caxis([round(min(sortTimes(iSortby,:)),2) round(max(sortTimes(iSortby,:)),2)]);
-            set(cb,'YTick',caxis);
-            ylabel(cb,RTMTlabels{iSortby});
+            caxis([1 numel(binIdxs)]);
+            set(cb,'YTick',1:numel(binIdxs));
+            set(cb,'YTickLabel',caxisTickLabels);
+            ylabel(cb,[RTMTlabels{iSortby},' (s)']);
             title('Median Power');
             grid on;
 
             for iMedian = 1:numel(testMedians)
-                cutoffPower =  W_median(W_key(iTrial,2),iFreq) * testMedians(iMedian);
                 x = [];
                 y = [];
                 C = [];
+                cutoffPower = mean(W_median(:,iFreq)) * testMedians(iMedian);
                 for iTrial = 1:size(curPower,1)
+% %                     cutoffPower = W_median(W_key(iTrial,2),iFreq) * testMedians(iMedian);
                     [locs,pks] = peakseek(curPower(iTrial,:),round(size(curPower,2)/2/freqList(iFreq)),cutoffPower);
                     x = [x (locs/size(curPower,2)*2) - 1];
                     y = [y repmat(iTrial,[1 numel(locs)])];
@@ -94,7 +100,7 @@ for iFreq = 1:numel(freqList)
                 xlabel('time (s)');
                 ylim([1 size(curPower,1)]);
                 yticks(ylim);
-                ylabel('wire-trials');
+                ylabel('slow \leftarrow wire-trials \rightarrow fast');
                 cb = colorbar;
                 colormap(cb,phaseColors);
                 caxis([-pi pi]);
@@ -108,7 +114,7 @@ for iFreq = 1:numel(freqList)
                 nSmooth = 3;
                 subplot(rows,cols,prc(cols,[1+iMedian,(iEvent*2)]));
                 for iBin = 1:nBins
-                    binx = x(find(y >= binIdxs(iBin) & y < binIdxs(iBin+1)));
+                    binx = x(y >= binIdxs(iBin) & y < binIdxs(iBin+1));
                     medCounts = histcounts(binx,linspace(-1,1,nmedBins));
                     plot(linspace(-1,1,nmedBins-1),smooth(medCounts,nSmooth),'-','color',sortByColors(iBin,:),'LineWidth',lineWidth);
                     hold on;
@@ -121,9 +127,10 @@ for iFreq = 1:numel(freqList)
                 title('Transient Event Histogram');
                 cb = colorbar;
                 colormap(cb,sortByColors);
-                caxis([round(min(sortTimes(iSortby,:)),2) round(max(sortTimes(iSortby,:)),2)]);
-                set(cb,'YTick',caxis);
-                ylabel(cb,RTMTlabels{iSortby});
+                caxis([1 numel(binIdxs)]);
+                set(cb,'YTick',1:numel(binIdxs));
+                set(cb,'YTickLabel',caxisTickLabels);
+                ylabel(cb,[RTMTlabels{iSortby},' (s)']);
                 grid on;
                 box on;
             end

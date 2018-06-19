@@ -32,13 +32,15 @@ for iField = 1:numel(eventFieldnames)
     end
 
     all_Lfp(iField,:,:) = data;
-    W = calculateComplexScalograms_EnMasse(data,'Fs',Fs,'freqList',freqList,'doplot',doDebug);
+    if ~isempty(freqList)
+        W = calculateComplexScalograms_EnMasse(data,'Fs',Fs,'freqList',freqList,'doplot',doDebug);
 
-    if chopWindow
-        chop_tWindowSamples = round(Fs * tWindow_select);
-        selectRange = (size(W,1)/2) - round(chop_tWindowSamples):(size(W,1)/2) + round(chop_tWindowSamples) - 1;
-        all_W(iField,:,:,:) = W(selectRange,:,:);
-    else
-        all_W(iField,:,:,:) = W;
+        if chopWindow
+            chop_tWindowSamples = round(Fs * tWindow_select);
+            selectRange = (size(W,1)/2) - round(chop_tWindowSamples):(size(W,1)/2) + round(chop_tWindowSamples) - 1;
+            all_W(iField,:,:,:) = W(selectRange,:,:);
+        else
+            all_W(iField,:,:,:) = W;
+        end
     end
 end

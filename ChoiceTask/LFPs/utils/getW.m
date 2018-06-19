@@ -1,4 +1,4 @@
-function [W,freqList,allTimes,allTrialIds] = getW(sevFile,curTrials,eventFieldnames,freqList,sortBy)
+function [W,freqList,allTimes,allTrialIds,LFP] = getW(sevFile,curTrials,eventFieldnames,freqList,sortBy)
 if ~exist('sortBy')
     sortBy = 'RT';
 end
@@ -17,7 +17,7 @@ if isempty(sortBy)
 elseif strcmp(sortBy,'RT') || strcmp(sortBy,'MT')
     [trialIds,allTimes] = sortTrialsBy(curTrials,sortBy);
     useTrials = curTrials(trialIds);
-    allTrialIds = trialsIds;
+    allTrialIds = trialIds;
 else
     [trialIdsRT,allTimesRT] = sortTrialsBy(curTrials,'RT');
     useTrials = curTrials(trialIdsRT);
@@ -25,4 +25,4 @@ else
     allTimes = [allTimesRT;allTimesMT];
     allTrialIds = [trialIdsRT;trialIdsMT];
 end
-W = eventsLFP(useTrials,sevFilt,tWindow,Fs,freqList,eventFieldnames);
+[W,LFP] = eventsLFP(useTrials,sevFilt,tWindow,Fs,freqList,eventFieldnames);

@@ -6,7 +6,7 @@
 
 useEventFeature = 'number'; % 'number' or 'timing'
 
-useEventArr = 'Tone';
+useEventArr = 'Nose Out';
 if strcmp(useEventArr,'Tone')
     compiled_eventsArr = compiled_eventsArr_Tone;
 else
@@ -81,7 +81,7 @@ for iFreq = 1:size(allPs,1)
     
     yyaxis left;
     plot(t,allRs(iFreq,:),'k-','linewidth',2);
-    ylim([-0.5 0.5]);
+    ylim([-0.25 0.25]);
     yticks(sort([ylim 0]));
     ylabel('R');
     
