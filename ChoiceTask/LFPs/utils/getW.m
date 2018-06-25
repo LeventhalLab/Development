@@ -8,8 +8,14 @@ decimateFactor = 10;
 tWindow = [1,2];
 
 [sev,header] = read_tdt_sev(sevFile);
-sevFilt = decimate(double(sev),decimateFactor);
+sevDec = decimate(double(sev),decimateFactor);
 Fs = header.Fs / decimateFactor;
+
+% % Fc = [1 200];
+% % Wn = Fc ./ (Fs/2);
+% % [b,a] = butter(4,Wn);
+% % sevFilt_lfp = filtfilt(b,a,sevFilt);
+
 if isempty(sortBy)
     useTrials = curTrials;
     allTrialIds = 1:numel(curTrials);
@@ -25,4 +31,4 @@ else
     allTimes = [allTimesRT;allTimesMT];
     allTrialIds = [trialIdsRT;trialIdsMT];
 end
-[W,LFP] = eventsLFP(useTrials,sevFilt,tWindow,Fs,freqList,eventFieldnames);
+[W,LFP] = eventsLFP(useTrials,sevDec,tWindow,Fs,freqList,eventFieldnames);
