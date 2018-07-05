@@ -4,8 +4,8 @@ doDebug = false;
 % LFP: events x samples x trials x freqs
 % this method is only slightly different: instead of finding the crossing of 1std after a beta peak, it uses the local
 % minima on either side of the beta peak as the beginning/end of the epoch.
-ms100 = (size(LFP,2) / 2) / 10;
-minpeakdist = ms100 / 10; % 10 ms
+ms100 = round((size(LFP,2) / 2) / 10); % 100 ms
+minpeakdist = round((size(LFP,2) / 2) / 100); % 10 ms
 
 ref_power_mean = [];
 ref_power_median = [];

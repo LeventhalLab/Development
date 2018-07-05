@@ -31,4 +31,4 @@ else
     allTimes = [allTimesRT;allTimesMT];
     allTrialIds = [trialIdsRT;trialIdsMT];
 end
-[W,LFP] = eventsLFP(useTrials,sevDec,tWindow,Fs,freqList,eventFieldnames);
+[W,LFP] = eventsLFPv2(useTrials,sevDec,tWindow,Fs,freqList,eventFieldnames);

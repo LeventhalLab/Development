@@ -55,8 +55,8 @@ if doPlot
     for iTrial = 1:numel(allTimes_all{iNeuron})
         trialCount = trialCount + 1;
         sortArr(trialCount) = allTimes_all{iNeuron}(iTrial);
-        compiled_locs_dkl{trialCount} = (locs_dkl_all{iNeuron}{iTrial}/size(LFP,!!)*2) - 1;
-        compiled_locs_jones{trialCount} = (locs_jones_all{iNeuron}{iTrial}/size(LFP,!!)*2) - 1;
+        compiled_locs_dkl{trialCount} = (locs_dkl_all{iNeuron}{iTrial}/size(LFP,2)*2) - 1;
+        compiled_locs_jones{trialCount} = (locs_jones_all{iNeuron}{iTrial}/size(LFP,2)*2) - 1;
     end
     end
 
@@ -76,9 +76,9 @@ if doPlot
     end
 
     methodLabels = {'DKL','Jones'};
-    figuree(1400,800);
+    figuree(700,700);
     for iPlot = 1:2
-        subplot(1,2,iPlot);
+        subplot(2,2,iPlot);
         if iPlot == 1
             usex = x_dkl;
             usey = y_dkl;
@@ -86,11 +86,16 @@ if doPlot
             usex = x_jones;
             usey = y_jones;
         end
-        scatter(usex,usey,3,'k','filled');
+        scatter(usex,usey,4,'k','filled');
         xlim([-1 1]);
         xticks(sort([xlim 0]));
+        xlabel('time (s)');
+        ylim([1 numel(compiled_locs_jones_sorted)]);
         yticks(ylim);
+        ylabel('SLOW \leftarrow trials \rightarrow FAST');
+        set(gca,'YDir','reverse');
         title(methodLabels{iPlot});
+        grid on;
     end
     
     x_dkl = [];
@@ -103,25 +108,29 @@ if doPlot
         x_jones = [x_jones compiled_locs_jones_sorted{iTrial}];
         y_jones = [y_jones repmat(v(iTrial),size(compiled_locs_jones_sorted{iTrial}))];
     end
-    nBins = 10;
-    timeIntervals = linspace(1,numel(y_dkl),nBins+1);
+    nBins = 5;
     histBins = -1:0.05:1;
     colors = cool(nBins);
-    figuree(800,400);
     for iPlot = 1:2
-        subplot(1,2,iPlot);
+        subplot(2,2,iPlot+2);
         if iPlot == 1
             usex = x_dkl;
         else
             usex = x_jones;
         end
+        timeIntervals = floor(linspace(1,numel(usex),nBins+1));
         for iBin = 1:nBins
             theseLocs = usex(timeIntervals(iBin):timeIntervals(iBin+1));
-            plot(linspace(-1,1,numel(histBins)-1),histcounts(theseLocs,histBins),'color',colors(iBin,:),'lineWidth',2);
+            counts = histcounts(theseLocs,histBins);
+            plot(linspace(-1,1,numel(histBins)-1),smooth(counts,3),'color',colors(iBin,:),'lineWidth',2);
+            hold on;
         end
         xlim([-1 1]);
         xticks(sort([xlim 0]));
+        xlabel('time (s)');
+        ylim([0 400]);
         yticks(ylim);
-        title(methodLabels{iPlot});
+        ylabel('bin count');
+        grid on;
     end 
 end

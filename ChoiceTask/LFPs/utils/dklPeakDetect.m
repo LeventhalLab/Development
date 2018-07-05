@@ -1,4 +1,4 @@
-function keepLocs = dklPeakDetect(LFP,iEvent)
+ function keepLocs = dklPeakDetect(LFP,iEvent)
 doDebug = false;
 % LFP is [flank,power,flank]
 % LFP: events x samples x trials x freqs
@@ -17,7 +17,7 @@ keepLocs = {};
 for iTrial = 1:size(LFP,3)
     keepLocs{iTrial} = [];
     trialPower = abs(squeeze(LFP(iEvent,:,iTrial,2))).^2;
-    flankPower = mean([abs(squeeze(LFP(iEvent,:,iTrial,1))).^2;...
+    flankPower = mean([abs(sq ueeze(LFP(iEvent,:,iTrial,1))).^2;...
                        abs(squeeze(LFP(iEvent,:,iTrial,3))).^2]);
     cutoffPower = ref_power(2) + ref_std(2) * 2;
     ncutoffPower = max(-trialPower - min(-trialPower)) - (ref_power(2) + ref_std(2));
@@ -32,8 +32,8 @@ for iTrial = 1:size(LFP,3)
             nloc1 = max(nlocs(nlocs < thisLoc));
             nloc2 = min(nlocs(nlocs > thisLoc));
             if nloc2 - nloc1 >= ms100
-% %                 keepLocs{iTrial} = [keepLocs{iTrial};nloc1 thisLoc nloc2];
-                keepLocs{iTrial} = [keepLocs{iTrial} thisLoc];
+                keepLocs{iTrial} = [keepLocs{iTrial};nloc1 thisLoc nloc2];
+%                 keepLocs{iTrial} = [keepLocs{iTrial} thisLoc];
             end
         end
     end
