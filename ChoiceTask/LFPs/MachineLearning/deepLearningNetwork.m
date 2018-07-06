@@ -2,6 +2,7 @@ trainingPath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/MachineLearnin
 longXT = 200; % ms
 trainingFrac = 0.8;
 scramble = false;
+showDist = false;
 
 accuracy = [];
 for iEvent = 3%1:7
@@ -52,10 +53,27 @@ for iEvent = 3%1:7
     net = trainNetwork(imdsTrain,layers,options);
 
     YPred = classify(net,imdsValidation);
+    YTrain = imdsTrain.Labels;
     YValidation = imdsValidation.Labels;
 
     accuracy(iEvent) = sum(YPred == YValidation)/numel(YValidation);
-    
+    if showDist
+        figure('Units','normalized','Position',[0.2 0.2 0.5 0.5]);
+        subplot(2,1,1)
+        histogram(YTrain)
+        title("Training Label Distribution")
+        subplot(2,1,2)
+        histogram(YValidation)
+        title("Validation Label Distribution")
+    end
+    if showDream
+        I = deepDreamImage(net,layer,1:12);
+        figure;
+        montage(I,'Size',[12,1]);
+        
+        figure;
+        plotconfusion(YValidation,YPred,'Validation Data')
+    end
 % %     analyzeNetwork(net);
 end
 
