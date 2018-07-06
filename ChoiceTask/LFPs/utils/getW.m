@@ -1,4 +1,7 @@
-function [W,freqList,allTimes,allTrialIds,LFP] = getW(sevFile,curTrials,eventFieldnames,freqList,sortBy)
+function [W,freqList,allTimes,allTrialIds] = getW(sevFile,curTrials,eventFieldnames,freqList,sortBy)
+
+error('deprecated');
+
 if ~exist('sortBy')
     sortBy = 'RT';
 end
@@ -6,7 +9,6 @@ decimateFactor = 10;
 % % fpass = [1 100];
 % % freqList = logFreqList(fpass,30);
 tWindow = [1,2];
-
 [sev,header] = read_tdt_sev(sevFile);
 sevDec = decimate(double(sev),decimateFactor);
 Fs = header.Fs / decimateFactor;
@@ -31,4 +33,3 @@ else
     allTimes = [allTimesRT;allTimesMT];
     allTrialIds = [trialIdsRT;trialIdsMT];
 end
-[W,LFP] = eventsLFPv2(useTrials,sevDec,tWindow,Fs,freqList,eventFieldnames);
