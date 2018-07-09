@@ -1,8 +1,9 @@
-trainingPath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/MachineLearning/trainingData250msRT';
+trainingPath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/MachineLearning/trainingData-500msRTsel';
 longXT = 200; % ms
 trainingFrac = 0.8;
 scramble = false;
 showDist = false;
+showDream = false;
 
 accuracy = [];
 for iEvent = 3%1:7
@@ -44,7 +45,7 @@ for iEvent = 3%1:7
         classificationLayer];
 
     options = trainingOptions('sgdm', ...
-        'MaxEpochs',4, ...
+        'MaxEpochs',10, ...
         'ValidationData',imdsValidation, ...
         'ValidationFrequency',30, ...
         'Verbose',false, ...
@@ -79,4 +80,4 @@ end
 
 figure;
 bar(accuracy);
-ylim([0.7 1]);
+ylim([0.1 0.4]);

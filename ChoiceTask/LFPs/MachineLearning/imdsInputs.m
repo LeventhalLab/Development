@@ -7,7 +7,7 @@ function [files,labels,labelsArr] = imdsInputs(allFiles,trainingIds,meanBinsSeco
             continue;
         end
         iidCount = iidCount + 1;
-% %         labelsArr(iidCount) = double(thisRT > longXT);
+% %         labelsArr(iidCount) = double(thisXT > longXT);
         labelsArr(iidCount) = sum(thisXT >= meanBinsSeconds*1000) - 1;
         files{iidCount} = fullfile(allFiles(thisId).folder,allFiles(thisId).name);
     end

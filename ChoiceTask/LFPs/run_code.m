@@ -1,14 +1,8 @@
-for iNeuron = 1:numel(compiled_eventsArr)
-    if isempty(compiled_eventsArr(iNeuron).eventsArr)
-        continue;
-    end
-    for iFreq = 1:size(eventsArr,1)
-        for iTrial = 1:numel(eventRTcorr)
-            transientTiming = t_compiled_eventsArr(iNeuron).eventsArr_meta{iFreq,iTrial};
-            if ~isempty(transientTiming)
-                transientTiming(1,:) = (transientTiming(1,:).*4)-1;
-                compiled_eventsArr(iNeuron).eventsArr_meta{iFreq,iTrial} = transientTiming;
-            end
-        end
+allFiles = dir(fullfile('/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/MachineLearning/trainingData-500msRT','*.jpg')); % u364_e7_t094_RT0687_id18291
+
+for iFile = 1:numel(allFiles)
+    if ismember(str2num(allFiles(iFile).name(2:4)),selectedLFPFiles)
+        copyfile(fullfile(allFiles(iFile).folder,allFiles(iFile).name),...
+            fullfile('/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/MachineLearning/trainingData-500msRTsel',allFiles(iFile).name));
     end
 end
