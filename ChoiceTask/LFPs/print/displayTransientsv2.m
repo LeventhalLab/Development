@@ -8,6 +8,7 @@ tWindow = 1;
 powerScale_wide = 200;
 powerScale_lfp = 2000;
 medianMult = 6;
+decimateFactor = 10;
 
 for iNeuron = 1:numel(LFPfiles_local)
     % only unique sev files
@@ -21,7 +22,6 @@ for iNeuron = 1:numel(LFPfiles_local)
     [trialIds,allTimes] = sortTrialsBy(curTrials,timingField);
 
     [sev,header] = read_tdt_sev(sevFile);
-    decimateFactor = 10;
     sevFilt = decimate(double(sev),decimateFactor);
     clear sev;
     

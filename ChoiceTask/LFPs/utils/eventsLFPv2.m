@@ -10,12 +10,9 @@ tWindow_oversamples = tWindow_samples * 2;
 all_LFP = [];
 for iFreq = 1:nLoop
     if iscell(freqList) & ~isnan(freqList{:}(iFreq,:)) %#ok<AND2>
-        Fc = freqList{:}(iFreq,:);
-        Wn = Fc ./ (Fs/2);
-        [b,a] = butter(4,Wn);
-        sevFiltFilt = hilbert(filtfilt(b,a,sevFilt));
+        sevFiltFilt = eegfilt(sevFilt,Fs,freqList{:}(iFreq,1),freqList{:}(iFreq,2));
     else
-        sevFiltFilt = sevFilt; % non-analytic
+        sevFiltFilt = sevFilt;
     end
     for iField = 1:numel(eventFieldnames)
         data = [];
@@ -36,7 +33,7 @@ for iFreq = 1:nLoop
         selectRange = (numel(lfp)/2) - round(tWindow_samples):(numel(lfp)/2) + round(tWindow_samples) - 1;
         
         if iscell(freqList)
-            all_LFP(iField,:,:,iFreq) = data(selectRange,:);
+            all_LFP(iField,:,:,iFreq) = hilbert(data(selectRange,:));
         else
             W = calculateComplexScalograms_EnMasse(data,'Fs',Fs,'freqList',freqList);
             all_LFP(iField,:,:,:) = W(selectRange,:,:);
