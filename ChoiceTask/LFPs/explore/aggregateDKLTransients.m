@@ -1,13 +1,13 @@
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/transientLFPevents/aggregate';
 doSave = true;
-doSetup = false;
+doSetup = true;
 
 sevFile = '';
 timingFields = {'RT','MT'};
 tWindow = 1;
 medianMult = 6;
-decimateFactor = 10;
-freqList = {[8 15;15 25;25 45]}; % beta
+decimateFactor = 16;
+freqList = {[8 12;13 35;35 50]}; % beta
 
 if doSetup
     compiledDKL = {};
@@ -21,10 +21,11 @@ if doSetup
         [~,name,~] = fileparts(sevFile);
         curTrials = all_trials{iNeuron};
 
-        [sev,header] = read_tdt_sev(sevFile);
-        sevFilt = decimate(double(sev),decimateFactor);
-        Fs = header.Fs / decimateFactor;
-        clear sev;
+        [sevFilt,Fs,decimateFactor] = loadCompressedSEV(sevFile);
+% %         [sev,header] = read_tdt_sev(sevFile);
+% %         sevFilt = decimate(double(sev),decimateFactor);
+% %         Fs = header.Fs / decimateFactor;
+% %         clear sev;
 
         for iTiming = 1:2
             [trialIds,allTimes] = sortTrialsBy(curTrials,timingFields{iTiming});
