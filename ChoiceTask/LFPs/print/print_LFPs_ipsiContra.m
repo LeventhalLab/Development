@@ -13,8 +13,7 @@ allFrames = [];
 Wlength = 200;
 caxisVals = [-3 3];
 zThresh = 2;
-decimateFactor = 16;
-for iNeuron = 1:numel(LFPfiles_local)
+for iNeuron = 104:numel(LFPfiles_local)
     % only unique sev files
     if strcmp(sevFile,LFPfiles_local{iNeuron})
         continue;
@@ -23,13 +22,11 @@ for iNeuron = 1:numel(LFPfiles_local)
     disp(sevFile);
     [~,name,~] = fileparts(sevFile);
     subjectName = name(1:5);
-    [sev,header] = read_tdt_sev(sevFile);
-    sevFilt = decimate(double(sev),decimateFactor);
-    Fs = header.Fs / decimateFactor;
+    [sevFilt,Fs,decimateFactor] = loadCompressedSEV(sevFile);
     
     curTrials = all_trials{iNeuron};
     W = eventsLFPv2(curTrials,sevFilt,tWindow,Fs,freqList,eventFieldnames);
-    [Wz_power,Wz_phase] = zScoreW(W,Wlength); % power Z-score
+    [Wz_power,Wz_phase] = zScoreW(W,Wlength); % power Z-score, artifacts below
     t = linspace(-tWindow,tWindow,size(W,2));
     trialIdInfo = organizeTrialsById(curTrials);
     

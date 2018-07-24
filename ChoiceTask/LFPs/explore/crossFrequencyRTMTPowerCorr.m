@@ -5,7 +5,6 @@ timingFields = {'RT','MT'};
 tWindow = 1;
 freqList = logFreqList([1 200],30);
 Wlength = 200;
-decimateFactor = 20;
 
 rows = 4;
 cols = 7;
@@ -29,11 +28,7 @@ if false
         sevFile = LFPfiles_local{iNeuron};
         [~,name,~] = fileparts(sevFile);
 
-        [sev,header] = read_tdt_sev(sevFile);
-        sevFilt = decimate(double(sev),decimateFactor);
-        Fs = header.Fs / decimateFactor;
-        clear sev;
-
+        [sevFilt,Fs,decimateFactor] = loadCompressedSEV(sevFile);
         curTrials = all_trials{iNeuron};
 
         h = figuree(1400,800);

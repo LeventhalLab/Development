@@ -1,50 +1,54 @@
 % function spikeLFPxcorr(LFPfiles,all_trials,all_SDEs_zscore,eventFieldnames)
-% sevFile = '';
+sevFile = '';
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/xcorrTrials';
 tWindow = 1;
-tWindow_vis = 1;
-cols = 7;
-pxHeight = 150;
-bandLabels = {'beta','gamma'};
-bandIds = {};
-bandIds{1} = 1:10;
-bandIds{2} = 15:17;
-bandIds{3} = 18:23;
-bandIds{4} = 25:27;
-band_tWindow_vis = [1,.25,.1,.05];
-            
-rows = numel(bandLabels)+3;
+cols = 7;  
+rows = 3;
+freqList = logFreqList([1 200],30);
+ytickIds = [1 7 10 14 17 20 25 30]; % selected from freqList
+Wlength = 200;
+cmapPath = '/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/LFPs/utils/corr_colormap.jpg';
+cmap = mycmap(cmapPath);
+zThresh = 2;
 
-tickIds = [1 10 17 23 26 30]; % !! HARDCODED FOR NOW
-
-for iNeuron = dirSelUnitIds%1:numel(LFPfiles)
+allNeuron_scaloData_xcorr = {};
+for iNeuron = 1:numel(LFPfiles_local)
     saveFolder = fullfile(savePath,['u',num2str(iNeuron,'%03d')]);
     if ~exist(saveFolder)
         mkdir(saveFolder)
     end
     % only unique sev files
-    if ~strcmp(sevFile,LFPfiles{iNeuron})
-        sevFile = LFPfiles{iNeuron};
+    if ~strcmp(sevFile,LFPfiles_local{iNeuron})
+        sevFile = LFPfiles_local{iNeuron};
+        disp(sevFile);
         [~,name,~] = fileparts(sevFile);
         subjectName = name(1:5);
         curTrials = all_trials{iNeuron};
-        [W,freqList,allTimes] = getW(sevFile,curTrials,eventFieldnames);
+        [trialIds,allTimes] = sortTrialsBy(curTrials,'RT');
+        [sevFilt,Fs,decimateFactor] = loadCompressedSEV(sevFile);
+        W = eventsLFPv2(curTrials(trialIds),sevFilt,tWindow,Fs,freqList,eventFieldnames);
+        [Wz_power,Wz_phase] = zScoreW(W,numel(all_SDEs_zscore{1}{1,1})); % power Z-score
+        [~,keepTrials] = removeWzTrials(Wz_power,zThresh);
     end
     curSDEs = all_SDEs_zscore{iNeuron};
-    for iTrial = 1:size(W,3)
-        h = figuree(1300,pxHeight*rows);
-        ax = [];
-        caxisArr = [];
+    allTrial_scaloData_xcorr = [];
+    allTrial_scaloData = [];
+    allTrial_curSDE = [];
+    trialCount = 1;
+    for iTrial = keepTrials
+        h = figuree(1300,900);
+        trialCount = trialCount + 1;
         for iEvent = 1:cols
-            curSDE = curSDEs{iTrial,iEvent};
-            
-            ax(iEvent) = subplot(rows,cols,prc(cols,[1 iEvent]));
-            scaloData = squeeze(abs(W(iEvent,:,iTrial,:)));
-            phaseData = squeeze(angle(W(iEvent,:,iTrial,:)));
-            disp_scalo(scaloData,freqList,tWindow);
-            % format
-            xticks([-tWindow_vis 0 tWindow_vis]);
-            xlim([-tWindow_vis tWindow_vis]);
+            % power
+            subplot(rows,cols,prc(cols,[1 iEvent]));
+            scaloData = squeeze(Wz_power(iEvent,:,iTrial,:));
+            allTrial_scaloData(trialCount,:,:) = scaloData;
+            t = linspace(-tWindow,tWindow,size(scaloData,1));
+            imagesc(t,1:numel(freqList),scaloData');
+            set(gca,'YDir','normal');
+            colormap(gca,jet);
+            xticks([-tWindow 0 tWindow]);
+            xlim([-tWindow tWindow]);
             titleText = eventFieldnames{iEvent};
             ylabelText = {['#',num2str(iTrial)],['RT ',num2str(allTimes(iTrial),'%0.3f'), 's'],'Freq (Hz)'};
             if iEvent == 1
@@ -53,67 +57,55 @@ for iNeuron = dirSelUnitIds%1:numel(LFPfiles)
             else
                 title({'',eventFieldnames{iEvent}});
             end
-            yticks(tickIds);
-            ytickLabels = round(freqList(tickIds));
+            yticks(ytickIds);
+            ytickLabels = round(freqList(ytickIds));
             yticklabels(ytickLabels);
-            
-            caxisArr(iEvent,:) = caxis;
+            caxis([-8 8]);
+            if iEvent == 7
+                cb = colorbar('location','east');
+                cb.Ticks = caxis;
+            end
+            grid on;
             
             % SDE
-            sampleSDE = round(linspace(1,size(scaloData,1),numel(curSDE)));
-            t_SDE = linspace(-tWindow,tWindow,numel(sampleSDE));
-            
             subplot(rows,cols,prc(cols,[2 iEvent]));
-            plot(t_SDE,curSDE,'k','linewidth',2);
-            ylabel('SDE (Z)');
-            ylim([-2 4]);
+            curSDE = curSDEs{iTrial,iEvent};
+            allTrial_curSDE(trialCount,:) = curSDE;
+            plot(t,curSDE,'k','linewidth',2);
+            if iEvent == 1
+                ylabel('SDE (Z)');
+            end
+            ylim([-2 5]);
             yticks(sort([0 ylim]));
             grid on;
             
-            for iBand = 1:numel(bandLabels)
-                subplot(rows,cols,prc(cols,[iBand+2 iEvent]));
-                yyaxis left;
-                plot(t_SDE,circ_mean(phaseData(sampleSDE,bandIds{iBand}),[],2),'linewidth',2);
-                ylabel('phase');
-                ylim([-pi pi]);
-                yticks(sort([0 ylim]));
-                yticklabels({'-pi','0','pi'});
-
-                yyaxis right;
-                plot(t_SDE,mean(scaloData(sampleSDE,bandIds{iBand}),2),'linewidth',2); % beta
-                ylabel('power');
-                ylim([0 100]);
-                yticks(ylim);
-                
-                
-                xticks([-band_tWindow_vis(iBand) 0 band_tWindow_vis(iBand)]);
-                xlim([-band_tWindow_vis(iBand) band_tWindow_vis(iBand)]);
-                grid on;
-                title(bandLabels{iBand});
-            end
-            
+            % xcorr
+            subplot(rows,cols,prc(cols,[3 iEvent]));
             scaloData_xcorr = [];
             for iBand = 1:size(scaloData,2)
-                [r,lags] = xcorr(scaloData(sampleSDE,iBand)',curSDE);
+                [r,lags] = xcorr(scaloData(:,iBand)',curSDE);
                 scaloData_xcorr(:,iBand) = r;
             end
-            subplot(rows,cols,prc(cols,[numel(bandLabels)+3 iEvent]));
-            disp_scalo(scaloData_xcorr,freqList,tWindow*2);
-            xticks([-tWindow_vis*2 0 tWindow_vis*2]);
-            xlim([-tWindow_vis*2 tWindow_vis*2]);
-            yticks(tickIds);
+            allTrial_scaloData_xcorr(trialCount,:,:) = scaloData_xcorr;
+            imagesc(linspace(-tWindow*2,tWindow*2,size(scaloData_xcorr,1)),1:numel(freqList),scaloData_xcorr');
+            set(gca,'YDir','normal');
+            xticks([-tWindow 0 tWindow]);
+            xlim([-tWindow tWindow]);
+            yticks(ytickIds);
             yticklabels(ytickLabels);
             if iEvent == 1
                 ylabel('Freq (Hz)');
             end
-            caxis(1e4*[-6 6]);
+            colormap(gca,cmap);
             title('xcorr');
-            xlabel('Time (s)');
-        end
-        
-        for iEvent = 1:cols
-            subplot(ax(iEvent));
-            caxis([mean(caxisArr(:,1)) mean(caxisArr(:,2))])
+            xlabel('time (s)');
+            caxis([-4 4]*10e2);
+            if iEvent == 7
+                cb = colorbar('location','east');
+                cb.Ticks = caxis;
+                cb.Color = 'w';
+            end
+            grid on;
         end
         
         set(gcf,'color','w');
@@ -121,15 +113,7 @@ for iNeuron = dirSelUnitIds%1:numel(LFPfiles)
         saveas(h,fullfile(saveFolder,saveFile));
         close(h);
     end
-end
-                
-% end % end function
-
-function disp_scalo(scaloData,freqList,tWindow)
-t = linspace(-tWindow,tWindow,size(scaloData,1));
-imagesc(t,1:numel(freqList),scaloData');
-set(gca,'YDir','normal');
-colormap(jet);
-% set(gca,'ColorScale','log');
-grid on;
+    % make average plot
+    
+    allNeuron_scaloData_xcorr{iNeuron} = allTrial_scaloData_xcorr;
 end

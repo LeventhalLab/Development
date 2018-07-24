@@ -1,13 +1,15 @@
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/transientLFPevents/aggregate';
 doSave = true;
-doSetup = true;
+doSetup = false;
 
 sevFile = '';
 timingFields = {'RT','MT'};
 tWindow = 1;
 medianMult = 6;
-decimateFactor = 16;
 freqList = {[8 12;13 35;35 50]}; % beta
+
+cmapPath = '/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/LFPs/utils/corr_colormap.jpg';
+cmap = mycmap(cmapPath);
 
 if doSetup
     compiledDKL = {};
@@ -22,10 +24,6 @@ if doSetup
         curTrials = all_trials{iNeuron};
 
         [sevFilt,Fs,decimateFactor] = loadCompressedSEV(sevFile);
-% %         [sev,header] = read_tdt_sev(sevFile);
-% %         sevFilt = decimate(double(sev),decimateFactor);
-% %         Fs = header.Fs / decimateFactor;
-% %         clear sev;
 
         for iTiming = 1:2
             [trialIds,allTimes] = sortTrialsBy(curTrials,timingFields{iTiming});
@@ -43,7 +41,7 @@ end
 figuree(1400,900);
 rows = 4;
 cols = 7;
-nLines = 3;
+nLines = 10;
 nBins = 30;
 colors = cool(nLines);
 for iTiming = 1:2
@@ -120,7 +118,7 @@ for iTiming = 1:2
         end
         xlim([-1 1]);
         xticks(sort([xlim 0]));
-        ylim([-5 15]);
+        ylim([-5 20]);
         ylabel('z');
         grid on;
     end
