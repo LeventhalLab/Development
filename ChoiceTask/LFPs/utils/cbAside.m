@@ -21,7 +21,9 @@ end
 if exist('caxisVals')
     caxis(ax,caxisVals);
 else
-    caxis(ax,round(caxis));
+    if sum(abs(caxis)) > 10
+        caxis(ax,round(caxis));
+    end
 end
 cb.Ticks = caxis;
 

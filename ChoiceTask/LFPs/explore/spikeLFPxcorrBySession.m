@@ -1,5 +1,5 @@
 doSetup = true;
-doDebug = false;
+doDebug = true;
 nSurr = 100;
 zThresh = 2;
 freqList = logFreqList([1 200],30);
@@ -13,13 +13,20 @@ Wlength = 200;
 tWindow = 1;
 t = linspace(-tWindow,tWindow,Wlength);
 
-all_xcorrBands_events = {};
-all_surr_result = {};
+all_xcorrBands_events = [];
+all_surr_result = [];
+sessionCount = 0;
+useUnitClass = 4;
 for iSession = 1:numel(sessionNames)
     if doSetup
         sessionTs = [];
         sessionUnits = find(ia == iSession)';
-        for iNeuron = sessionUnits % sessionUnits(primSec(sessionUnits,1)==4)
+        if numel(sessionUnits(primSec(sessionUnits,1) == useUnitClass)) < 3
+            disp(['skipping session: ',num2str(iSession)]);
+            continue;
+        end
+        sessionCount = sessionCount + 1;
+        for iNeuron = sessionUnits(primSec(sessionUnits,1) == useUnitClass) % sessionUnits
             sessionTs = [sessionTs;all_ts{iNeuron}];
         end
         sessionTs = sort(sessionTs);
@@ -88,7 +95,7 @@ for iSession = 1:numel(sessionNames)
     
     % -- DEBUG
     if doDebug
-        savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/xcorrBySession/debug';
+        savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/xcorrBySession/debug/_centerOut';
         rows = 3;
         cols = 7;
         for iTrial = 1:size(tsPeths,1)
@@ -246,17 +253,69 @@ for iSession = 1:numel(sessionNames)
         caxis([-1 1]);
         grid on;
     end
-    all_xcorrBands_events{iSession} = xcorrBands_events;
-    all_surr_result{iSession} = surr_result;
+    all_xcorrBands_events(sessionCount,:,:,:) = xcorrBands_events;
+    all_surr_result(sessionCount,:,:,:,:) = surr_result;
     
     set(gcf,'color','w');
-    savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/xcorrBySession';
+    savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/xcorrBySession/_centerOut';
     saveFile = ['debug_u',num2str(find(ia == iSession,1),'%03d'),'-',num2str(find(ia == iSession,1,'last'),'%03d'),...
         '_s',num2str(iSession,'%02d')];
     saveas(h,fullfile(savePath,[saveFile,'.png']));
     close(h);
 end
 
+%% session-average plots
+rows = 2;
+cols = 7;
+figuree(1300,500);
+
+for iEvent = 1:7
+    subplot(rows,cols,prc(cols,[1,iEvent]));
+    imagesc(t_xcorr,1:numel(freqList),squeeze(mean(squeeze( (:,iEvent,:,:))))');
+    colormap(gca,jet);
+    set(gca,'YDir','normal');
+    xlim([-1 1]);
+    xticks(sort([xlim 0]));
+    yticks(ytickIds);
+    yticklabels(ytickLabelText);
+    if iEvent == 1
+        ylabel('freq (Hz)');
+    end
+    caxis(round(minmaxRed(xcorrBands_events(4,:,:))));
+    if iEvent == 7
+        cb = cbAside(gca,'mean xcorr','k');
+        cb.Ticks = caxis;
+    end
+    title(eventFieldnames{iEvent});
+    grid on;
+    
+    all_fracSurr = [];
+    for iSession = 1:size(all_surr_result,1)
+        theseSurr = squeeze(all_surr_result(iSession,iEvent,:,:,:));
+        fracSurr = squeeze(sum(theseSurr)) ./ nSurr;
+        all_fracSurr(iSession,:,:) = fracSurr;
+    end
+    
+    subplot(rows,cols,prc(cols,[2,iEvent]));
+    imagesc(t_xcorr,1:numel(freqList),squeeze(mean(all_fracSurr))');
+    colormap(gca,cmap);
+    set(gca,'YDir','normal');
+    xlim([-1 1]);
+    xticks(sort([xlim 0]));
+    xlabel('time (s)');
+    yticks(ytickIds);
+    yticklabels(ytickLabelText);
+    caxis([-0.5 0.5]);
+    if iEvent == 1
+        ylabel('freq (Hz)');
+    end
+    if iEvent == 7
+        cb = cbAside(gca,'shuffle sign.','k');
+        cb.Ticks = caxis;
+    end
+    grid on;
+end
+%%
 
 function [refMean,refStd] = getRefsForZscore(tsPeths,tWindow,Wlength)
     for iTrial = 1:size(tsPeths,1)
