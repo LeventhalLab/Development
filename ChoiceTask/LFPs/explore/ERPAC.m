@@ -1,6 +1,6 @@
 doSetup = true;
 doSave = true;
-savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/ERPAC';
+savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/ERPAC/3D';
 zThresh = 2;
 tWindow = 1;
 freqList = logFreqList([3.5 200],30);
@@ -10,6 +10,7 @@ freqLabels = freqList(freqIdx);
 freqLabels = num2str(freqLabels(:),'%2.1f');
 views = [0 0;45 15; 80 15];
 pvalThresh = 0.01;
+Wlength = 200;
 
 iSession = 0;
 all_M = [];
@@ -27,7 +28,6 @@ for iNeuron = selectedLFPFiles'
         [Wz_power,Wz_phase] = zScoreW(W,Wlength); % power Z-score
         [Wz_power,keepTrials] = removeWzTrials(Wz_power,zThresh);
         Wz_phase = Wz_phase(:,:,keepTrials,:);
-    
     
         ERPAC_rho = NaN(size(Wz_power,1),size(Wz_power,2),size(Wz_power,4),size(Wz_power,4));
         ERPAC_pval = NaN(size(Wz_power,1),size(Wz_power,2),size(Wz_power,4),size(Wz_power,4));
@@ -94,7 +94,7 @@ for iNeuron = selectedLFPFiles'
         set(gcf,'color','w');
 
         saveFile = [subjectName,'_s',num2str(iSession,'%02d'),'_ERPAC'];
-        saveas(h,fullfile(savePath,[saveFile,'.fig']));
+%         saveas(h,fullfile(savePath,[saveFile,'.fig']));
         saveas(h,fullfile(savePath,[saveFile,'.png']));
         close(h);
     end
