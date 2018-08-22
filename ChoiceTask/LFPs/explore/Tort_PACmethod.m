@@ -17,7 +17,7 @@ iSession = 0;
 all_MImatrix = [];
 session_MIMatrix_byRT = {};
 MImatrix_RT = {};
-for iNeuron = selectedLFPFiles'
+for iNeuron = selectedLFPFiles(1)'
     iSession = iSession + 1;
 
     sevFile = LFPfiles_local{iNeuron};

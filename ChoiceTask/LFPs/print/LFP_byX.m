@@ -1,12 +1,13 @@
 doSetup = false;
 zThresh = 2;
-tWindow = 1;
+tWindow = 2;
 freqList = logFreqList([1 200],30);
-Wlength = 200;
+Wlength = 400;
 
 if doSetup
     session_Wz_power = [];
     session_Wz_phase = [];
+    session_Wz_rayleigh_pval = [];
     iSession = 0;
     for iNeuron = selectedLFPFiles'
         iSession = iSession + 1;
@@ -23,6 +24,16 @@ if doSetup
         Wz_phase = Wz_phase(:,:,keepTrials,:);
         session_Wz_power(iSession,:,:,:) = squeeze(mean(Wz_power,3));
         session_Wz_phase(iSession,:,:,:) = squeeze(circ_r(Wz_phase,[],[],3));
+        
+        for iEvent = 1:size(Wz_phase,1)
+            for iBin = 1:size(Wz_phase,2)
+                for iFreq = 1:size(Wz_phase,4)
+                    alpha = squeeze(Wz_phase(iEvent,iBin,:,iFreq));
+                    [pval,rho] = circ_rtest(alpha);
+                    session_Wz_rayleigh_pval(iSession,iEvent,iBin,iFreq) = pval;
+                end
+            end
+        end
     end
 end
 
@@ -35,7 +46,8 @@ if false
         saveFile = [subjectName,'_session',num2str(iSession,'%02d')];
         scaloPower = squeeze(session_Wz_power(iSession,:,:,:));
         scaloPhase = squeeze(session_Wz_phase(iSession,:,:,:));
-        plotLFPandMRL(scaloPower,scaloPhase,savePath,saveFile,freqList,eventFieldnames);
+        scaloRayleigh = squeeze(session_Wz_rayleigh_pval(iSession,:,:,:));
+        plotLFPandMRLandRayleigh(scaloPower,scaloPhase,scaloRayleigh,savePath,saveFile,freqList,eventFieldnames);
     end
 end
 
@@ -52,11 +64,13 @@ if false
         if subjectSessions(iSubject,1) < subjectSessions(iSubject,2)
             scaloPower = squeeze(mean(session_Wz_power(subjectSessions(iSubject,1):subjectSessions(iSubject,2),:,:,:)));
             scaloPhase = squeeze(mean(session_Wz_phase(subjectSessions(iSubject,1):subjectSessions(iSubject,2),:,:,:)));
+            scaloRayleigh = squeeze(mean(session_Wz_rayleigh_pval(subjectSessions(iSubject,1):subjectSessions(iSubject,2),:,:,:)));
         else
             scaloPower = squeeze(session_Wz_power(subjectSessions(iSubject,1):subjectSessions(iSubject,2),:,:,:));
             scaloPhase = squeeze(session_Wz_phase(subjectSessions(iSubject,1):subjectSessions(iSubject,2),:,:,:));
+            scaloRayleigh = squeeze(session_Wz_rayleigh_pval(subjectSessions(iSubject,1):subjectSessions(iSubject,2),:,:,:));
         end
-        plotLFPandMRL(scaloPower,scaloPhase,savePath,saveFile,freqList,eventFieldnames);
+        plotLFPandMRLandRayleigh(scaloPower,scaloPhase,scaloRayleigh,savePath,saveFile,freqList,eventFieldnames);
     end
 end
 
@@ -65,28 +79,26 @@ if true
     saveFile = 'allSubject_allSessions';
     scaloPower = squeeze(mean(session_Wz_power(:,:,:,:)));
     scaloPhase = squeeze(mean(session_Wz_phase(:,:,:,:)));
-    plotLFPandMRL(scaloPower,scaloPhase,savePath,saveFile,freqList,eventFieldnames);
-
+    scaloRayleigh = squeeze(mean(session_Wz_rayleigh_pval(:,:,:,:)));
+    plotLFPandMRLandRayleigh(scaloPower,scaloPhase,scaloRayleigh,savePath,saveFile,freqList,eventFieldnames);
 end
 
-function plotLFPandMRL(scaloPower,scaloPhase,savePath,saveFile,freqList,eventFieldnames)
+function plotLFPandMRLandRayleigh(scaloPower,scaloPhase,scaloRayleigh,savePath,saveFile,freqList,eventFieldnames)
     cmapPath = '/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/LFPs/utils/corr_colormap.jpg';
     cmap = mycmap(cmapPath);    
-    ytickIds = [1 closest(freqList,20) closest(freqList,55) numel(freqList)]; % selected from freqList
-    ytickLabelText = freqList(ytickIds);
-    ytickLabelText = num2str(ytickLabelText(:),'%3.0f');    
-    h = figuree(1300,500);
-    rows = 2;
+    ytickLabelText = num2str(freqList(:),'%3.1f');    
+    h = figuree(1300,700);
+    rows = 3;
     cols = 7;
     gridColor = repmat(.7,[1,3]);
     for iEvent = 1:7
         subplot(rows,cols,prc(cols,[1,iEvent]));
-        imagesc(linspace(-1,1,size(scaloPower,2)),1:numel(freqList),squeeze(scaloPower(iEvent,:,:))');
+        imagesc(linspace(-2,2,size(scaloPower,2)),1:numel(freqList),squeeze(scaloPower(iEvent,:,:))');
         colormap(gca,jet);
         caxis([-3 3]);
         xlim([-1 1]);
         xticks(sort([0 xlim]));
-        yticks(ytickIds);
+        yticks(1:numel(freqList));
         yticklabels(ytickLabelText);
         set(gca,'YDir','normal');
         grid on;
@@ -96,29 +108,41 @@ function plotLFPandMRL(scaloPower,scaloPhase,savePath,saveFile,freqList,eventFie
             title({'',eventFieldnames{iEvent}});
         end
         if iEvent == 7
-            cb = colorbar('Location','east');
-            cb.Ticks = caxis;
-            cb.Label.String = 'z power'; % !! label
-            cb.Color = 'k';
+            cbAside(gca,'z power','k');
         end
+        set(gca,'fontsize',6);
         
         subplot(rows,cols,prc(cols,[2,iEvent]));
-        imagesc(linspace(-1,1,size(scaloPhase,2)),1:numel(freqList),squeeze(scaloPhase(iEvent,:,:))');
+        imagesc(linspace(-2,2,size(scaloPhase,2)),1:numel(freqList),squeeze(scaloPhase(iEvent,:,:))');
         colormap(gca,hot);
         caxis([0 1]);
         xlim([-1 1]);
         xticks(sort([0 xlim]));
-        yticks(ytickIds);
+        yticks(1:numel(freqList));
         yticklabels(ytickLabelText);
         set(gca,'YDir','normal');
         grid on;
         set(gca,'GridColor',gridColor);
         if iEvent == 7
-            cb = colorbar('Location','east');
-            cb.Ticks = caxis;
-            cb.Label.String = 'MRL'; % !! label
-            cb.Color = 'w';
+            cbAside(gca,'MRL','k');
         end
+        set(gca,'fontsize',6);
+
+        subplot(rows,cols,prc(cols,[3,iEvent]));
+        imagesc(linspace(-2,2,size(scaloRayleigh,2)),1:numel(freqList),squeeze(scaloRayleigh(iEvent,:,:))');
+        colormap(gca,gray);
+        caxis([0 0.05]);
+        xlim([-1 1]);
+        xticks(sort([0 xlim]));
+        yticks(1:numel(freqList));
+        yticklabels(ytickLabelText);
+        set(gca,'YDir','normal');
+        grid on;
+        set(gca,'GridColor',gridColor);
+        if iEvent == 7
+            cbAside(gca,'Rayleigh pval','k');
+        end
+        set(gca,'fontsize',6);
     end
     set(gcf,'color','w');
     saveas(h,fullfile(savePath,[saveFile,'.png']));
