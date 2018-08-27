@@ -5,8 +5,8 @@ doPlot = true;
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/PAC/tortMethod';
 zThresh = 2;
 tWindow = 2;
-tSweep = 0.5;
-nSteps = 11;
+tSweep = 1;
+nSteps = 21;
 freqList = logFreqList([1 200],10);
 
 freqLabels = num2str(freqList(:),'%2.1f');
@@ -17,7 +17,7 @@ iSession = 0;
 all_MImatrix = [];
 session_MIMatrix_byRT = {};
 MImatrix_RT = {};
-for iNeuron = selectedLFPFiles(1)'
+for iNeuron = selectedLFPFiles'
     iSession = iSession + 1;
 
     sevFile = LFPfiles_local{iNeuron};
@@ -40,8 +40,8 @@ for iNeuron = selectedLFPFiles(1)'
 %         Wz_phase = Wz_phase(:,:,keepTrials,:);
 
     MImatrix = NaN(size(W,1),size(W,3),nSteps,numel(freqList),numel(freqList));
-    for iEvent = 4%1:size(W,1)
-        for iTrial = 1:3%size(W,3)
+    for iEvent = 1:size(W,1)
+        for iTrial = 1:size(W,3)
             for iSweep = 1:nSteps
                 disp(['e',num2str(iEvent),' t',num2str(iTrial),' s',num2str(iSweep)]);
                 sweepRange = (sweepCenters(iSweep) - sweepSamples : sweepCenters(iSweep) + sweepSamples - 1) + 1;
@@ -84,35 +84,35 @@ for iNeuron = selectedLFPFiles(1)'
     if doPlot
         h2 = figuree(400,800);
         for iEvent = 1:size(MImatrix,1)
-            h = figuree(600,600);
-            rowscols = ceil(sqrt(nSteps));
-            for iSweep = 1:nSteps
-                subplot(rowscols,rowscols,iSweep);
-                curMat = squeeze(nanmean(MImatrix(iEvent,:,iSweep,:,:),2));
-                imagesc(curMat');
-                colormap(jet);
-                set(gca,'ydir','normal');
-                caxis([0 0.25]);
-                xticks(1:numel(freqList));
-                xticklabels(freqLabels);
-                xtickangle(90);
-                xlabel('phase (Hz)');
-                yticks(1:numel(freqList));
-                yticklabels(freqLabels);
-                ylabel('amp (Hz)');
-                set(gca,'fontsize',8);
-                title({['e',num2str(iEvent)],['+/- ',num2str(tSweep),'s @ ',num2str(tSweeps(iSweep),'%1.2f')]});
-            end
-            set(gcf,'color','w');
-            saveFile = ['s',num2str(iSession,'%02d'),'_e',num2str(iEvent),'_allTrialsByRT.png'];
-            saveas(h,fullfile(savePath,saveFile));
-            close(h);
+%             h = figuree(600,600);
+%             rowscols = ceil(sqrt(nSteps));
+%             for iSweep = 1:nSteps
+%                 subplot(rowscols,rowscols,iSweep);
+%                 curMat = squeeze(nanmean(MImatrix(iEvent,:,iSweep,:,:),2));
+%                 imagesc(curMat');
+%                 colormap(jet);
+%                 set(gca,'ydir','normal');
+%                 caxis([0 0.25]);
+%                 xticks(1:numel(freqList));
+%                 xticklabels(freqLabels);
+%                 xtickangle(90);
+%                 xlabel('phase (Hz)');
+%                 yticks(1:numel(freqList));
+%                 yticklabels(freqLabels);
+%                 ylabel('amp (Hz)');
+%                 set(gca,'fontsize',8);
+%                 title({['e',num2str(iEvent)],['+/- ',num2str(tSweep),'s @ ',num2str(tSweeps(iSweep),'%1.2f')]});
+%             end
+%             set(gcf,'color','w');
+%             saveFile = ['s',num2str(iSession,'%02d'),'_e',num2str(iEvent),'_allTrialsByRT.png'];
+%             saveas(h,fullfile(savePath,saveFile));
+%             close(h);
             
             figure(h2);
             subplot(7,1,iEvent);
             sweepSeries = squeeze(mean(mean(squeeze(nanmean(squeeze(MImatrix(iEvent,:,:,ifp_range,ifA_range)))),2),3));
             plot(tSweeps,sweepSeries,'k-','linewidth',2);
-            ylim([0.1 0.25]);
+            ylim([0.1 0.2]);
             ylabel('MI');
             yticks(ylim);
             title(eventFieldnames{iEvent});
