@@ -1,7 +1,7 @@
-doSetup = true;
+doSetup = false;
 doSave = true;
 doPlot = true;
-savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/powerCorr';
+savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/phaseCorr';
 freqList = logFreqList([1 200],10);
 tickLabels = {num2str(freqList(:),'%2.1f')};
 
@@ -36,13 +36,13 @@ if doSetup
             for iFreq = 1:numel(freqList)
                 for jFreq = iFreq:numel(freqList)
                     range_in = trialTimeRanges_samples_in(iTrial,1):trialTimeRanges_samples_in(iTrial,2);
-                    [R,P] = corrcoef(abs(W(range_in,iFreq).^2),abs(W(range_in,jFreq).^2));
-                    corr_arr_in(iTrial,iFreq,jFreq) = R(2);
-                    pval_arr_in(iTrial,iFreq,jFreq) = P(2);
+                    [R,P] = circ_corrcc(angle(W(range_in,iFreq)),angle(W(range_in,jFreq)));
+                    corr_arr_in(iTrial,iFreq,jFreq) = R;
+                    pval_arr_in(iTrial,iFreq,jFreq) = P;
                     range_out = trialTimeRanges_samples_out(iTrial,1):trialTimeRanges_samples_out(iTrial,2);
-                    [R,P] = corrcoef(abs(W(range_out,iFreq).^2),abs(W(range_out,jFreq).^2));
-                    corr_arr_out(iTrial,iFreq,jFreq) = R(2);
-                    pval_arr_out(iTrial,iFreq,jFreq) = P(2);
+                    [R,P] = circ_corrcc(angle(W(range_out,iFreq)),angle(W(range_out,jFreq)));
+                    corr_arr_out(iTrial,iFreq,jFreq) = R;
+                    pval_arr_out(iTrial,iFreq,jFreq) = P;
                 end
             end
         end
@@ -70,14 +70,14 @@ if doSetup
                 imagesc(use_corr);
                 colormap(gca,jet);
                 set(gca,'ydir','normal');
-                caxis([-0.5 0.5]);
+                caxis([-0.1 0.1]);
                 xticks(1:numel(freqList));
                 xticklabels(tickLabels);
                 xtickangle(270);
                 yticks(1:numel(freqList));
                 yticklabels(tickLabels);
                 cbAside(gca,'corr','k');
-                title({['Session ',num2str(iSession),', LFP power xcorr'],titleLabel});
+                title({['Session ',num2str(iSession),', LFP phase xcorr'],titleLabel});
 
                 [row,col] = find(use_pval < 0.05 & use_pval >= 0.01);
                 for jj = 1:numel(row)
@@ -96,7 +96,7 @@ if doSetup
                 imagesc(use_pval);
                 colormap(gca,hot);
                 set(gca,'ydir','normal');
-                caxis([0 0.2]);
+                caxis([0 0.5]);
                 xticks(1:numel(freqList));
                 xticklabels(tickLabels);
                 xtickangle(270);
@@ -120,7 +120,7 @@ if doSetup
             end
             set(gcf,'color','w');
             if doSave
-                saveFile = ['session',num2str(iSession,'%02d'),'_IN-OUT_lfpPowerXcorr.png'];
+                saveFile = ['session',num2str(iSession,'%02d'),'_IN-OUT_lfpPhaseXcorr.png'];
                 saveas(h,fullfile(savePath,saveFile));
                 close(h);
             end
@@ -146,14 +146,14 @@ for iCol = 1:2
     imagesc(use_corr);
     colormap(gca,jet);
     set(gca,'ydir','normal');
-    caxis([-0.5 0.5]);
+    caxis([-0.1 0.1]);
     xticks(1:numel(freqList));
     xticklabels(tickLabels);
     xtickangle(270);
     yticks(1:numel(freqList));
     yticklabels(tickLabels);
     cbAside(gca,'corr','k');
-    title({['All Sessions, LFP power xcorr'],titleLabel});
+    title({['All Sessions, LFP phase corr'],titleLabel});
 
     [row,col] = find(use_pval < 0.05 & use_pval >= 0.01);
     for jj = 1:numel(row)
@@ -172,7 +172,7 @@ for iCol = 1:2
     imagesc(use_pval);
     colormap(gca,hot);
     set(gca,'ydir','normal');
-    caxis([0 0.2]);
+    caxis([0 0.5]);
     xticks(1:numel(freqList));
     xticklabels(tickLabels);
     xtickangle(270);
@@ -196,7 +196,7 @@ for iCol = 1:2
 end
 set(gcf,'color','w');
 if doSave
-    saveFile = ['allSessions_IN-OUT_lfpPowerXcorr.png'];
+    saveFile = ['allSessions_IN-OUT_lfpPhaseXcorr.png'];
     saveas(h,fullfile(savePath,saveFile));
     close(h);
 end
