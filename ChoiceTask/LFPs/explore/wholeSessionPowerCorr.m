@@ -36,13 +36,13 @@ if doSetup
             for iFreq = 1:numel(freqList)
                 for jFreq = iFreq:numel(freqList)
                     range_in = trialTimeRanges_samples_in(iTrial,1):trialTimeRanges_samples_in(iTrial,2);
-                    [R,P] = corrcoef(abs(W(range_in,iFreq).^2),abs(W(range_in,jFreq).^2));
-                    corr_arr_in(iTrial,iFreq,jFreq) = R(2);
-                    pval_arr_in(iTrial,iFreq,jFreq) = P(2);
+                    [R,P] = corr(abs(W(range_in,iFreq).^2),abs(W(range_in,jFreq).^2));
+                    corr_arr_in(iTrial,iFreq,jFreq) = R;
+                    pval_arr_in(iTrial,iFreq,jFreq) = P;
                     range_out = trialTimeRanges_samples_out(iTrial,1):trialTimeRanges_samples_out(iTrial,2);
-                    [R,P] = corrcoef(abs(W(range_out,iFreq).^2),abs(W(range_out,jFreq).^2));
-                    corr_arr_out(iTrial,iFreq,jFreq) = R(2);
-                    pval_arr_out(iTrial,iFreq,jFreq) = P(2);
+                    [R,P] = corr(abs(W(range_out,iFreq).^2),abs(W(range_out,jFreq).^2));
+                    corr_arr_out(iTrial,iFreq,jFreq) = R;
+                    pval_arr_out(iTrial,iFreq,jFreq) = P;
                 end
             end
         end

@@ -1,7 +1,7 @@
 doSetup = false;
 zThresh = 2;
 tWindow = 2;
-freqList = logFreqList([1 200],30);
+freqList = logFreqList([1 200],10);
 Wlength = 400;
 
 if doSetup
@@ -110,12 +110,11 @@ function plotLFPandMRLandRayleigh(scaloPower,scaloPhase,scaloRayleigh,savePath,s
         if iEvent == 7
             cbAside(gca,'z power','k');
         end
-        set(gca,'fontsize',6);
         
         subplot(rows,cols,prc(cols,[2,iEvent]));
         imagesc(linspace(-2,2,size(scaloPhase,2)),1:numel(freqList),squeeze(scaloPhase(iEvent,:,:))');
-        colormap(gca,hot);
-        caxis([0 1]);
+        colormap(gca,gray);
+        caxis([0 0.5]);
         xlim([-1 1]);
         xticks(sort([0 xlim]));
         yticks(1:numel(freqList));
@@ -126,12 +125,11 @@ function plotLFPandMRLandRayleigh(scaloPower,scaloPhase,scaloRayleigh,savePath,s
         if iEvent == 7
             cbAside(gca,'MRL','k');
         end
-        set(gca,'fontsize',6);
 
         subplot(rows,cols,prc(cols,[3,iEvent]));
         imagesc(linspace(-2,2,size(scaloRayleigh,2)),1:numel(freqList),squeeze(scaloRayleigh(iEvent,:,:))');
-        colormap(gca,gray);
-        caxis([0 0.05]);
+        colormap(gca,hot);
+        caxis([0 0.2]);
         xlim([-1 1]);
         xticks(sort([0 xlim]));
         yticks(1:numel(freqList));
@@ -142,7 +140,6 @@ function plotLFPandMRLandRayleigh(scaloPower,scaloPhase,scaloRayleigh,savePath,s
         if iEvent == 7
             cbAside(gca,'Rayleigh pval','k');
         end
-        set(gca,'fontsize',6);
     end
     set(gcf,'color','w');
     saveas(h,fullfile(savePath,[saveFile,'.png']));
