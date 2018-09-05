@@ -15,7 +15,7 @@ doPlot = true;
 doSetup = false;
 doSave = true;
 freqList = [8 15;15 25;25 45]; % beta
-savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/spikePhaseHist';
+savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/spikePhaseHist_beta';
 nBins = 12;
 
 if doSetup

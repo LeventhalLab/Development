@@ -37,6 +37,65 @@ if doSetup
     end
 end
 
+if true
+    scaloPower = squeeze(mean(session_Wz_power(:,:,100:300-1,:)));
+    scaloPhase = squeeze(mean(session_Wz_phase(:,:,100:300-1,:)));
+    figuree(1400,300);
+    for iEvent = 1:7
+        subplot(1,7,iEvent);
+        yyaxis left;
+        iFreq = 2;
+        plot(normalize(squeeze(scaloPower(iEvent,:,selectFreqs(iFreq)))),'-','color',colors(iFreq,:),'lineWidth',2);
+        hold on;
+        iFreq = 1;
+        plot(normalize(squeeze(scaloPower(iEvent,:,selectFreqs(iFreq)))),':','color',colors(iFreq,:),'lineWidth',1);
+        yticks(ylim);
+        if iEvent == 1
+            ylabel('normalized units');
+        end
+        yyaxis right;
+        MRLZ = (squeeze(scaloPhase(iEvent,:,selectFreqs(iFreq))) - mean(squeeze(scaloPhase(1,:,selectFreqs(iFreq)))))...
+            ./  std(squeeze(scaloPhase(1,:,selectFreqs(iFreq))));
+        plot(normalize(MRLZ),'-','color',colors(iFreq,:),'lineWidth',2);
+        title(eventFieldnames{iEvent});
+        yticks(ylim);
+        if iEvent == 7
+            legend('Beta Power','Delta Power','Delta MRL');
+        end
+    end
+end
+
+% for phase of trials
+% iNeuron = 148;
+if false
+    figuree(500,250);
+    subplot(121);
+    imagesc(squeeze(Wz_phase(3,100:300-1,:,2))');
+    cmap_phase = cmocean('phase');
+    colormap(gca,cmap_phase);
+    caxis([-pi pi]);
+    colorbar;
+    title('\delta Phase at Tone');
+    ylabel('trials');
+    yticks([]);
+    xlabel('time (s)');
+    xticks([1 100 200]);
+    xticklabels({'-1','0','1'});
+    subplot(122);
+    imagesc(squeeze(Wz_phase(4,100:300-1,:,2))');
+    cmap_phase = cmocean('phase');
+    colormap(gca,cmap_phase);
+    caxis([-pi pi]);
+    colorbar;
+    title('\delta Phase at Nose Out');
+    ylabel('trials');
+    yticks([]);
+    xlabel('time (s)');
+    xticks([1 100 200]);
+    xticklabels({'-1','0','1'});
+    set(gcf,'color','w');
+end
+
 if false
     savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/LFP/bySession';
     for iSession = 1:size(session_Wz_power,1)
@@ -74,13 +133,102 @@ if false
     end
 end
 
-if true
+if false
     savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/LFP/allSessions';
     saveFile = 'allSubject_allSessions';
     scaloPower = squeeze(mean(session_Wz_power(:,:,:,:)));
     scaloPhase = squeeze(mean(session_Wz_phase(:,:,:,:)));
     scaloRayleigh = squeeze(mean(session_Wz_rayleigh_pval(:,:,:,:)));
     plotLFPandMRLandRayleigh(scaloPower,scaloPhase,scaloRayleigh,savePath,saveFile,freqList,eventFieldnames);
+end
+
+if true
+    scaloPower = squeeze(mean(session_Wz_power(:,:,100:300-1,:)));
+    scaloPhase = squeeze(mean(session_Wz_phase(:,:,100:300-1,:)));
+    savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/LFP/allSessions';
+    selectFreqs = [2,6,7,8];
+    freqLabels = {'\delta','\beta','\gamma_L','\gamma_H'};
+    rows = 2;
+    cols = 7;
+    h = figuree(1400,400);
+    for iEvent = 1:7
+% %         iEvent = iCol + 2;
+        subplot(rows,cols,prc(cols,[1 iEvent]));
+        colors = lines(numel(selectFreqs));
+        for iFreq = 1:numel(selectFreqs)
+            plot(squeeze(scaloPower(iEvent,:,selectFreqs(iFreq))),'color',colors(iFreq,:),'lineWidth',2);
+            hold on;
+        end
+        xlim([1 size(scaloPower,2)]);
+        xticks([1 round(size(scaloPower,2)/2) size(scaloPower,2)]);
+        xticklabels({'-1','0','1'});
+        xlabel('Time (s)');
+        ylim([-0.5 2]);
+        yticks(sort([ylim,0]));
+        if iEvent == 1
+            ylabel('LFP Power Z-score');
+        end
+        grid on;
+% %         legend(freqLabels);
+        title(['Power at ',eventFieldnames{iEvent}]);
+    %     set(gcf,'color','w');
+    %     saveFile = 'allSubject_allSessions_Power_freqBands';
+    %     saveas(h,fullfile(savePath,[saveFile,'.png']));
+    %     close(h);
+        subplot(rows,cols,prc(cols,[2 iEvent]));
+        for iFreq = 1:numel(selectFreqs)
+            MRLZ = (squeeze(scaloPhase(iEvent,:,selectFreqs(iFreq))) - mean(squeeze(scaloPhase(1,:,selectFreqs(iFreq))))) ...
+                ./  std(squeeze(scaloPhase(1,:,selectFreqs(iFreq))));
+            plot(MRLZ,'color',colors(iFreq,:),'lineWidth',2);
+            hold on;
+        end
+        xlim([1 size(scaloPower,2)]);
+        xticks([1 round(size(scaloPower,2)/2) size(scaloPower,2)]);
+        xticklabels({'-1','0','1'});
+        xlabel('Time (s)');
+        ylim([-5 20]);
+        yticks(sort([ylim,0]));
+        if iEvent == 1
+            ylabel('LFP MRL Z-score');
+        end
+        grid on;
+        if iEvent == 7
+            legend(freqLabels);
+        end
+        title(['MRL at ',eventFieldnames{iEvent}]);
+    end
+    set(gcf,'color','w');
+    saveFile = 'allSubject_allSessions_PowerAndMRL_freqBands';
+    saveas(h,fullfile(savePath,[saveFile,'.png']));
+    close(h);
+end
+
+if false
+    scaloPower = squeeze(mean(session_Wz_power(:,:,:,:)));
+    scaloPhase = squeeze(mean(session_Wz_phase(:,:,:,:)));
+    colors = lines(4);
+    savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/LFP/allSessions';
+    selectFreqs = [2,6,7,8];
+    freqLabels = {'\delta','\beta','\gamma_L','\gamma_H'};
+    iEvent = 3;
+    h = figuree(800,200);
+    rows = 1;
+    cols = numel(selectFreqs);
+    for iFreq = 1:numel(selectFreqs)
+        subplot(rows,cols,iFreq);
+        yyaxis left;
+        plot(squeeze(scaloPower(iEvent,:,selectFreqs(iFreq))),'lineWidth',2);
+        ylim([-0.5 2]);
+        yticks(sort([ylim 0]));
+        ylabel('Power');
+        hold on;
+        yyaxis right;
+        plot(squeeze(scaloPhase(iEvent,:,selectFreqs(iFreq))) - mean(squeeze(scaloPhase(1,:,selectFreqs(iFreq)))),'lineWidth',2);
+        ylim([-0.05 0.4]);
+        yticks(sort([ylim 0]));
+        ylabel('MRL');
+        title(freqLabels{iFreq});
+    end
 end
 
 function plotLFPandMRLandRayleigh(scaloPower,scaloPhase,scaloRayleigh,savePath,saveFile,freqList,eventFieldnames)
@@ -95,7 +243,7 @@ function plotLFPandMRLandRayleigh(scaloPower,scaloPhase,scaloRayleigh,savePath,s
         subplot(rows,cols,prc(cols,[1,iEvent]));
         imagesc(linspace(-2,2,size(scaloPower,2)),1:numel(freqList),squeeze(scaloPower(iEvent,:,:))');
         colormap(gca,jet);
-        caxis([-3 3]);
+        caxis([-2 2]);
         xlim([-1 1]);
         xticks(sort([0 xlim]));
         yticks(1:numel(freqList));

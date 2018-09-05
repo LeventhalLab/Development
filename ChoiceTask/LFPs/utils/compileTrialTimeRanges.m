@@ -1,6 +1,7 @@
 function trialTimeRanges = compileTrialTimeRanges(trials)
-
+maxTrialTime = 20;
 trialTimeRanges = [];
+trialCount = 0;
 for iTrial = 1:numel(trials)
     fields = fieldnames(trials(iTrial).timestamps);
     trialTimes = [];
@@ -10,5 +11,8 @@ for iTrial = 1:numel(trials)
             trialTimes = [trialTimes ts];
         end
     end
-    trialTimeRanges(iTrial,:) = [min(trialTimes),max(trialTimes)];
+    if max(trialTimes) - min(trialTimes) < maxTrialTime
+        trialCount = trialCount + 1;
+        trialTimeRanges(trialCount,:) = [min(trialTimes),max(trialTimes)];
+    end
 end

@@ -1,8 +1,13 @@
 doSetup = true;
 doTiming = 'RT';
 
+doPlot1 = true;
+doPlot2 = false;
+doSave = false;
+savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/spikePhaseDeltaRT';
+
 tWindow = 1;
-freqList = [1.8];
+freqList = [1.8 20];
 if strcmp(doTiming,'RT')
     iEvent = 3;
     caxisVals = [0.1 0.3];
@@ -10,11 +15,12 @@ else
     iEvent = 5;
     caxisVals = [0.2 0.4];
 end
-n_timePoints = 101;
 
 if doSetup
+    n_timePoints = 21;
     phaseCorr = [];
     phaseCorrs = [];
+    betaCorrs = [];
     all_Times = [];
     for iNeuron = selectedLFPFiles'
         iSession = iSession + 1;
@@ -28,7 +34,8 @@ if doSetup
         W = eventsLFPv2(curTrials(trialIds),sevFilt,tWindow,Fs,freqList,eventFieldnames);
         
         tIdxs = floor(linspace(1,size(W,2),n_timePoints));
-        phaseCorrs = [phaseCorrs;squeeze(angle(W(iEvent,tIdxs,:)))'];
+        phaseCorrs = [phaseCorrs;squeeze(angle(W(iEvent,tIdxs,:,1)))'];
+        betaCorrs = [betaCorrs;squeeze(abs(W(4,tIdxs,:,2)).^2)'];
         
         t0 = round(size(W,2)/2);
         phaseCorr = [phaseCorr;squeeze(angle(W(iEvent,t0,:)))];
@@ -36,10 +43,17 @@ if doSetup
     end
 end
 
-doPlot1 = false;
-doPlot2 = true;
-doSave = true;
-savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/spikePhaseDeltaRT';
+if false
+    [v,k] = sort(all_Times);
+    betaCorrs_sorted = betaCorrs(k,:);
+    figure;
+    phaseIds = find(phaseCorrs(:,14) < 0 & phaseCorrs(:,14) > -pi/2);
+    plot(all_Times(phaseIds),betaCorrs(phaseIds,14),'.');
+    hold on;
+    phaseIds = find(phaseCorrs(:,14) > pi/2);
+    plot(all_Times(phaseIds),betaCorrs(phaseIds,14),'.');
+end
+
 cmapPath = '/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/LFPs/utils/corr_colormap.jpg';
 cmap = mycmap(cmapPath,n_timePoints);
 rows = ceil(sqrt(n_timePoints));
@@ -56,6 +70,7 @@ for ii = 1:n_timePoints
     phaseCorr = phaseCorrs(:,ii);
     meanTimes = [];
     stdTimes = [];
+    all_Times_surr = all_Times(randperm(numel(all_Times)));
     for iBin = 1:nBins
         theseTimes = all_Times(phaseCorr >= binEdges(iBin) & phaseCorr < binEdges(iBin+1));
         meanTimes(iBin) = mean(theseTimes);
@@ -69,15 +84,23 @@ for ii = 1:n_timePoints
             plot([meanTimes(iBin)-stdTimes(iBin) meanTimes(iBin)+stdTimes(iBin)],[binCenters(iBin) binCenters(iBin)],'-','color',repmat(0.8,[1,3]));
             hold on;
         end
-        plot(meanTimes,binCenters,'-','lineWidth',2,'color',cmap(ii,:));
+        plot(meanTimes,binCenters,'k-','lineWidth',2);
         hold on;
-        plot(meanTimes,binCenters,'o','color',cmap(ii,:));
+        plot(meanTimes,binCenters,'ko');
         xticks([0.1:0.1:0.4]);
         xlabel([doTiming,' (s)']);
         yticks(binCenters);
         yticklabels(num2str(binCenters(:),'%1.2f'));
         ylabel('delta phase');
         title(['t = ',num2str(timeCenters(ii),'%1.2f')]);
+    end
+end
+if doPlot1
+    set(gcf,'color','w');
+    if doSave
+        saveFile = ['delta',doTiming,'corrSubplots_',eventFieldnames{iEvent},'.png'];
+        saveas(h,fullfile(savePath,saveFile));
+        close(h);
     end
 end
 
