@@ -1,4 +1,4 @@
-doSetup = false;
+doSetup = true;
 zThresh = 2;
 tWindow = 2;
 freqList = logFreqList([1 200],10);
@@ -37,31 +37,44 @@ if doSetup
     end
 end
 
-if true
-    scaloPower = squeeze(mean(session_Wz_power(:,:,100:300-1,:)));
-    scaloPhase = squeeze(mean(session_Wz_phase(:,:,100:300-1,:)));
-    figuree(1400,300);
+% delta MRL envelope
+if false
+    scaloPower = squeeze(mean(session_Wz_power(:,:,:,:)));
+    scaloPhase = squeeze(mean(session_Wz_phase(:,:,:,:)));
+    h = figuree(1400,300);
     for iEvent = 1:7
         subplot(1,7,iEvent);
         yyaxis left;
         iFreq = 2;
-        plot(normalize(squeeze(scaloPower(iEvent,:,selectFreqs(iFreq)))),'-','color',colors(iFreq,:),'lineWidth',2);
+        REF = squeeze(scaloPower(4,:,selectFreqs(iFreq)));
+        plot(normalize2(squeeze(scaloPower(iEvent,:,selectFreqs(iFreq))),REF),'-','color',colors(iFreq,:),'lineWidth',2);
         hold on;
         iFreq = 1;
-        plot(normalize(squeeze(scaloPower(iEvent,:,selectFreqs(iFreq)))),':','color',colors(iFreq,:),'lineWidth',1);
+        REF = squeeze(scaloPower(4,:,selectFreqs(iFreq)));
+        plot(normalize2(squeeze(scaloPower(iEvent,:,selectFreqs(iFreq))),REF),':','color',colors(iFreq,:),'lineWidth',1);
+        ylim([0 1]);
         yticks(ylim);
         if iEvent == 1
             ylabel('normalized units');
         end
         yyaxis right;
-        MRLZ = (squeeze(scaloPhase(iEvent,:,selectFreqs(iFreq))) - mean(squeeze(scaloPhase(1,:,selectFreqs(iFreq)))))...
-            ./  std(squeeze(scaloPhase(1,:,selectFreqs(iFreq))));
-        plot(normalize(MRLZ),'-','color',colors(iFreq,:),'lineWidth',2);
+% %         MRLZ = (squeeze(scaloPhase(iEvent,:,selectFreqs(iFreq))) - mean(squeeze(scaloPhase(1,:,selectFreqs(iFreq)))))...
+% %             ./  std(squeeze(scaloPhase(1,:,selectFreqs(iFreq))));
+        REF = squeeze(scaloPhase(4,:,selectFreqs(iFreq)));
+        plot(normalize2(squeeze(scaloPhase(iEvent,:,selectFreqs(iFreq))),REF),'-','color',colors(iFreq,:),'lineWidth',2);
         title(eventFieldnames{iEvent});
+        ylim([0 1]);
         yticks(ylim);
         if iEvent == 7
             legend('Beta Power','Delta Power','Delta MRL');
         end
+        
+    end
+    set(gcf,'color','w');
+    if true
+        savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/LFP/allSessions';
+        saveas(h,fullfile(savePath,'betaPowerDeltaMRLEnvelope.png'));
+        close(h);
     end
 end
 

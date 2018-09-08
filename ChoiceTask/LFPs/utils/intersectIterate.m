@@ -5,5 +5,6 @@ for ii = 1:size(trialTimeRanges,1)
     C = intersect(thisRange,Brange);
     if ~isempty(C)
         overlap = true;
+        return;
     end
 end

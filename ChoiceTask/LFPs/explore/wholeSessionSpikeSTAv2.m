@@ -1,5 +1,4 @@
-decimateFactor = 40;
-freqList = logFreqList([3.5 100],30);
+freqList = logFreqList([1 200],10);
 tWindow = 1;
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/spikeTriggeredAvg';
 
@@ -8,9 +7,8 @@ for iNeuron = 1%:366
     curTs = all_ts{iNeuron};
     sevFile = uniqueLFPs_local{iNeuron};
     disp([num2str(iNeuron),': ',sevFile]);
-%     [sev,header] = read_tdt_sev(sevFile);
-    sevFilt = decimate(double(sev),decimateFactor);
-    tsEnd = numel(sev)/header.Fs;
+    [sevFilt,Fs,decimateFactor] = loadCompressedSEV(sevFile);
+    tsEnd = numel(sevFilt)/Fs;
     
     extractSamples = round(tWindow_extract * Fs);
     

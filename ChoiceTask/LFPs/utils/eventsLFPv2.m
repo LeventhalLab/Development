@@ -23,7 +23,8 @@ for iFreq = 1:nLoop
                 centerRangeSamples = (centerSample - tWindow_oversamples):(centerSample + tWindow_oversamples - 1);
                 if centerRangeSamples(1) > 0 && centerRangeSamples(end) < length(sevFiltFilt)
                     lfp = sevFiltFilt(centerRangeSamples);
-                    lfp(1:round(numel(lfp)/2)) = 0;
+                    lfp(round(numel(lfp)/2):end) = 0;
+%                     lfp(1:round(numel(lfp)/2)) = 0;
                 end
             catch % for trials without all events
                 centerRangeSamples = -tWindow_oversamples:tWindow_oversamples - 1;

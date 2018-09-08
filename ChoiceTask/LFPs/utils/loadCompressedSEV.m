@@ -1,4 +1,4 @@
-function [sevFilt,Fs,decimateFactor] = loadCompressedSEV(sevFile)
+function [sevFilt,Fs,decimateFactor,loadedFile] = loadCompressedSEV(sevFile)
 compressor = 'x16';
 
 [filepath,name,ext] = fileparts(sevFile);
@@ -8,3 +8,4 @@ S = load(compressedPath,'sevFilt','Fs','decimateFactor');
 sevFilt = S.sevFilt;
 Fs = S.Fs;
 decimateFactor = S.decimateFactor;
+loadedFile = sevFile;

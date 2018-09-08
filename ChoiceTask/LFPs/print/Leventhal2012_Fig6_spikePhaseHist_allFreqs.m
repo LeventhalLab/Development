@@ -4,30 +4,28 @@ freqList = logFreqList([1 200],10);
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/spikePhaseHist';
 nBins = 12;
 binEdges = linspace(-pi,pi,nBins+1);
+loadedFile = [];
 
 if doSetup
-%     validUnits = [];
-%     all_spikeHist_pvals = NaN(numel(all_ts),numel(freqList));
-%     all_spikeHist_angles = NaN(numel(all_ts),nBins,numel(freqList));
-%     all_spikeHist_inTrial_pvals = NaN(numel(all_ts),numel(freqList));
-%     all_spikeHist_inTrial_angles = NaN(numel(all_ts),nBins,numel(freqList));
-    for iNeuron = validUnits(end):numel(all_ts)
+    validUnits = [];
+    all_spikeHist_pvals = NaN(numel(all_ts),numel(freqList));
+    all_spikeHist_angles = NaN(numel(all_ts),nBins,numel(freqList));
+    all_spikeHist_inTrial_pvals = NaN(numel(all_ts),numel(freqList));
+    all_spikeHist_inTrial_angles = NaN(numel(all_ts),nBins,numel(freqList));
+    for iNeuron = 1:numel(all_ts)
         sevFile = LFPfiles_local{iNeuron};
         disp(sevFile);
         [~,name,~] = fileparts(sevFile);
-        [sevFilt,Fs,decimateFactor] = loadCompressedSEV(sevFile);
+        if isempty(loadedFile) || ~strcmp(loadedFile,sevFile)
+            [sevFilt,Fs,decimateFactor,loadedFile] = loadCompressedSEV(sevFile);
+        end
+        
         ts = all_ts{iNeuron};
         ts_samples = floor(ts * Fs);
         curTrials = all_trials{iNeuron};
         [trialIds,allTimes] = sortTrialsBy(curTrials,'RT');
         trialTimeRanges = compileTrialTimeRanges(curTrials(trialIds));
-        
-% %         trialTimeRanges_vector = [];
-% %         for iTrial = 1:size(trialTimeRanges,1)
-% %             trialTimeRanges_vector = [trialTimeRanges_vector,...
-% %                 trialTimeRanges_samples(iTrial,1):trialTimeRanges_samples(iTrial,2)];
-% %         end
-        
+
         W = calculateComplexScalograms_EnMasse(sevFilt','Fs',Fs,'freqList',freqList);
         W = squeeze(W);
         ts_samples = ts_samples(ts_samples > 0 & ts_samples <= size(W,1)); % clean conversion errors
@@ -57,19 +55,30 @@ if doSetup
     end
 end
 
-pp = size(W,1);
-sp = ts_samples(ts_samples < pp);
-figure;
-% plot(angle(W(1:pp,1)));
-% hold on;
-% plot(angle(W(1:pp,5)));
-% plot(angle(W(1:pp,8)));
-plot(ts_samples(1:numel(sp)),angle(W(sp,1)),'.');
-hold on;
-plot(ts_samples(1:numel(sp)),angle(W(sp,5)),'.');
-plot(ts_samples(1:numel(sp)),angle(W(sp,8)),'.');
+if false % display spike times on phase
+    pp = 1000;%size(W,1);
+    sp = ts_samples(ts_samples < pp);
+    figure;
+    for iFreq = [10]
+        yyaxis left;
+        plot(angle(W(1:pp,iFreq))); hold on;
+        plot(ts_samples(1:numel(sp)),angle(W(sp,iFreq)),'.');
+        yyaxis right;
+        plot(abs(W(1:pp,iFreq)).^2);
+    end
+    
+    % scrap
+    sevFilt = eegfilt(sev(1:10000),Fs,175,225);
+    W = calculateComplexScalograms_EnMasse(sev(1:10000)','Fs',Fs,'freqList',[20]);
+    r_beta = xcorr(squeeze(abs(W(:,:,1)).^2),sev(1:10000));
+    r_gamma1 = xcorr(squeeze(abs(W(:,:,2)).^2),sev(1:10000));
+    figure;
+    plot(normalize(r_beta));
+    hold on;
+    plot(normalize(r_gamma1));
+end
 
-if false % single plots
+if true % single plots
     for iNeuron = validUnits
         h = figuree(1400,400);
         rows = 2;
@@ -140,7 +149,7 @@ if false % single plots
     end
 end
 
-if true
+if false
     h = figuree(1400,400);
     rows = 2;
     cols = numel(freqList);
