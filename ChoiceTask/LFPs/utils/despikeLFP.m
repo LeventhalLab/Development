@@ -1,52 +1,14 @@
-function [sevDespiked,header] = despikeLFP(sev,header,ts)
-doDebug = true;
+function [sevDespiked,header] = despikeLFP(sevFile,ts)
+doDebug = false;
+[sev,header] = read_tdt_sev(sevFile);
 ts_samples = round(ts*header.Fs);
-
-testWindow = 0.005;
-nSamples = round(testWindow * header.Fs);
-nSpikes = 10000;
-randSamples = ts_samples(1:nSpikes);
-spikeArr = [];
-for iSpike = 1:nSpikes
-    spikeArr(:,iSpike) = sev(randSamples(iSpike) - nSamples:randSamples(iSpike) + nSamples - 1);
-    spikeArr(:,iSpike) = spikeArr(:,iSpike) - mean(spikeArr(:,iSpike));
-end
-mspike = mean(spikeArr,2);
-mspike_ad = smooth(abs(mspike),5);
-spikeids = find(mspike_ad > mean(mspike_ad(1:round(nSamples/4))) * 5);
-xs = [];
-xs(1) = spikeids(1);
-xs(2) = spikeids(end);
-xs = xs - nSamples;
-
-if doDebug
-    x = (1:nSamples*2)-nSamples-1;
-    figure;
-    plot(x,mspike,'linewidth',2); hold on;
-    plot(x,mspike_ad,'k');
-    plot([xs(1) xs(1)],ylim,'r');
-    plot([xs(2) xs(2)],ylim,'r');
-    xlim([x(1) x(end)]);
-    legend('spike','abs(spike)');
-end
-
-% % h = figure;
-% % yyaxis left;
-% % plot(x,spikeArr,'-','color',repmat(0.7,[1,4]),'linewidth',0.5);
-% % yyaxis right;
-% % plot(x,mean(spikeArr,2),'k-','lineWidth',2);
-% % xlim([min(x),max(x)]);
-% % xlabel('samples');
-% % title([num2str(showSamples),' spikes +/- ',num2str(testWindow*1000),'ms']);
-% % disp('Select the start and end of the spike...');
-% % [xs,~] = ginput(2);
-% % xs = round(xs);
-% % close(h);
+chopBefore = round(.002 * header.Fs);
+chopAfter = round(.008 * header.Fs);
 
 f = waitbar(0,'setting up inerpolation...');
 sevNaN = double(sev);
-for iSpike = 1:5000%numel(ts)
-    sevNaN(ts_samples(iSpike)+xs(1):ts_samples(iSpike)+xs(2)) = NaN;
+for iSpike = 1:numel(ts)
+    sevNaN(ts_samples(iSpike)-chopBefore:ts_samples(iSpike)+chopAfter-1) = NaN;
     waitbar(iSpike/numel(ts),f);
 end
 waitbar(1,f,'interpolating...');

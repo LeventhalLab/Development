@@ -1,4 +1,4 @@
-doSetup = false;
+doSetup = true;
 doSave = true;
 freqList = logFreqList([1 200],10);
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/spikePhaseHist';
@@ -12,12 +12,12 @@ if doSetup
     all_spikeHist_angles = NaN(numel(all_ts),nBins,numel(freqList));
     all_spikeHist_inTrial_pvals = NaN(numel(all_ts),numel(freqList));
     all_spikeHist_inTrial_angles = NaN(numel(all_ts),nBins,numel(freqList));
-    for iNeuron = 1:numel(all_ts)
+    for iNeuron = 15%:numel(all_ts)
         sevFile = LFPfiles_local{iNeuron};
         disp(sevFile);
         [~,name,~] = fileparts(sevFile);
         if isempty(loadedFile) || ~strcmp(loadedFile,sevFile)
-            [sevFilt,Fs,decimateFactor,loadedFile] = loadCompressedSEV(sevFile);
+            [sevFilt,Fs,decimateFactor,loadedFile] = loadCompressedSEV(sevFile,iNeuron);
         end
         
         ts = all_ts{iNeuron};
