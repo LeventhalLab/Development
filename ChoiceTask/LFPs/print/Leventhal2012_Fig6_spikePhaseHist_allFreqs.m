@@ -1,4 +1,4 @@
-doSetup = true;
+doSetup = false;
 doSave = true;
 freqList = logFreqList([1 200],10);
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/spikePhaseHist';

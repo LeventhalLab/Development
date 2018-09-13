@@ -7,14 +7,14 @@ cols = numel(freqList);
 
 conds_pvals = {all_spikeHist_pvals,all_spikeHist_inTrial_pvals};
 conds_angles = {all_spikeHist_angles,all_spikeHist_inTrial_angles};
-titleLabels = {'ALL','IN TRIAL'};
+titleLabels = {'OUT TRIAL','IN TRIAL'};
 useRanges = {[1:366],dirSelUnitIds,ndirSelUnitIds};
 plotLabels = {'All','dirSel','ndirSel'};
 
 for iFreq = 1%:numel(freqList)
 %     h = ff(600,800);
     h = ff(1600,800);
-    iCond = 2;
+    iCond = 1;
     for iFreq = 1:numel(freqList)
 %     for iCond = 1:2
 %         subplot(rows,cols,prc(cols,[1,iCond]));

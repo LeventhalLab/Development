@@ -1,11 +1,12 @@
 % function spikeLFPxcorr(LFPfiles,all_trials,all_SDEs_zscore,eventFieldnames)
+% load('session_20180717_SDExcorr.mat', 'all_SDEs_zscore')
 sevFile = '';
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/xcorrTrials';
 tWindow = 1;
 cols = 7;  
 rows = 3;
-freqList = logFreqList([1 200],30);
-ytickIds = [1 7 10 14 17 20 25 30]; % selected from freqList
+freqList = logFreqList([1 200],10);
+ytickIds = 1:numel(freqList);%[1 7 10 14 17 20 25 30]; % selected from freqList
 Wlength = 200;
 cmapPath = '/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/LFPs/utils/corr_colormap.jpg';
 cmap = mycmap(cmapPath);
@@ -25,7 +26,7 @@ for iNeuron = 1:numel(LFPfiles_local)
         subjectName = name(1:5);
         curTrials = all_trials{iNeuron};
         [trialIds,allTimes] = sortTrialsBy(curTrials,'RT');
-        [sevFilt,Fs,decimateFactor] = loadCompressedSEV(sevFile);
+        [sevFilt,Fs,decimateFactor] = loadCompressedSEV(sevFile,[]);
         W = eventsLFPv2(curTrials(trialIds),sevFilt,tWindow,Fs,freqList,eventFieldnames);
         [Wz_power,Wz_phase] = zScoreW(W,numel(all_SDEs_zscore{1}{1,1})); % power Z-score
         [~,keepTrials] = removeWzTrials(Wz_power,zThresh);

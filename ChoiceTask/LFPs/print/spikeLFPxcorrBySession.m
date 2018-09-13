@@ -1,11 +1,13 @@
 doSetup = true;
-doDebug = true;
+doDebug = false;
 nSurr = 100;
 zThresh = 2;
-freqList = logFreqList([1 200],30);
-ytickIds = [1 closest(freqList,20) closest(freqList,55) numel(freqList)]; % selected from freqList
-ytickLabelText = freqList(ytickIds);
-ytickLabelText = num2str(ytickLabelText(:),'%3.0f');
+freqList = logFreqList([1 200],10);
+ytickIds = 1:numel(freqList);
+ytickLabelText = num2str(freqList(:),'%1.2f');
+% % ytickIds = [1 closest(freqList,20) closest(freqList,55) numel(freqList)]; % selected from freqList
+% % ytickLabelText = freqList(ytickIds);
+% % ytickLabelText = num2str(ytickLabelText(:),'%3.0f');
 [sessionNames,~,ia] = unique(analysisConf.sessionNames);
 cmapPath = '/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/LFPs/utils/colormap_pval.jpg';
 cmap = mycmap(cmapPath);
@@ -17,16 +19,17 @@ all_xcorrBands_events = [];
 all_surr_result = [];
 sessionCount = 0;
 useUnitClass = 4;
-for iSession = 1:numel(sessionNames)
+for iSession = 1%:numel(sessionNames)
     if doSetup
         sessionTs = [];
         sessionUnits = find(ia == iSession)';
-        if numel(sessionUnits(primSec(sessionUnits,1) == useUnitClass)) < 3
-            disp(['skipping session: ',num2str(iSession)]);
-            continue;
-        end
+% %         if numel(sessionUnits(primSec(sessionUnits,1) == useUnitClass)) < 3
+% %             disp(['skipping session: ',num2str(iSession)]);
+% %             continue;
+% %         end
         sessionCount = sessionCount + 1;
-        for iNeuron = sessionUnits(primSec(sessionUnits,1) == useUnitClass) % sessionUnits
+        for iNeuron = sessionUnits(sessionUnits)
+%         for iNeuron = sessionUnits(primSec(sessionUnits,1) == useUnitClass)
             sessionTs = [sessionTs;all_ts{iNeuron}];
         end
         sessionTs = sort(sessionTs);
@@ -34,7 +37,7 @@ for iSession = 1:numel(sessionNames)
         sevFile = LFPfiles_local{selectedLFPFiles(iSession)};
         curTrials = all_trials{iNeuron};
         [trialIds,allTimes] = sortTrialsBy(curTrials,'RT');
-        [sevFilt,Fs,decimateFactor] = loadCompressedSEV(sevFile);
+        [sevFilt,Fs,decimateFactor] = loadCompressedSEV(sevFile,[]);
         W = eventsLFPv2(curTrials(trialIds),sevFilt,tWindow,Fs,freqList,eventFieldnames);
         [Wz_power,Wz_phase] = zScoreW(W,Wlength); % power Z-score
         [Wz_power,keepTrials] = removeWzTrials(Wz_power,zThresh);
@@ -93,7 +96,7 @@ for iSession = 1:numel(sessionNames)
     
     t_xcorr = linspace(-tWindow*2,tWindow*2,size(xcorrBands,1));
     
-    % -- DEBUG
+    % -- DEBUG START
     if doDebug
         savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/xcorrBySession/debug/_centerOut';
         rows = 3;
@@ -172,7 +175,7 @@ for iSession = 1:numel(sessionNames)
             close(h);
         end
     end
-    % -- DEBUG
+    % -- DEBUG END
 
     h = figuree(1300,900);
     rows = 4;
@@ -271,7 +274,8 @@ figuree(1300,500);
 
 for iEvent = 1:7
     subplot(rows,cols,prc(cols,[1,iEvent]));
-    imagesc(t_xcorr,1:numel(freqList),squeeze(mean(squeeze( (:,iEvent,:,:))))');
+%     imagesc(t_xcorr,1:numel(freqList),squeeze(mean(squeeze( (:,iEvent,:,:))))');
+    imagesc(t_xcorr,1:numel(freqList),squeeze(mean(squeeze(Wz_power(iEvent,:,:,:)),2))');
     colormap(gca,jet);
     set(gca,'YDir','normal');
     xlim([-1 1]);

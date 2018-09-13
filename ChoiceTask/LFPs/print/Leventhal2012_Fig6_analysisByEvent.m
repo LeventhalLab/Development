@@ -1,4 +1,4 @@
-doSave = false;
+doSave = true;
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/spikePhaseUnitTypes';
 % rows = 3;
 % cols = 2;
@@ -7,15 +7,16 @@ cols = numel(freqList);
 
 conds_pvals = {all_spikeHist_pvals,all_spikeHist_inTrial_pvals};
 conds_angles = {all_spikeHist_angles,all_spikeHist_inTrial_angles};
-titleLabels = {'ALL','IN TRIAL'};
+titleLabels = {'OUT TRIAL','IN TRIAL'};
 plotLabels = {eventFieldnames{:} 'NaN'};
 investigateCounts = [];
+investigateFreq = 3;
 
 for iFreq = 1%1:numel(freqList)
 %     h = ff(400,800);
     h = ff(1600,800);
 %     for iCond = 1:2 
-    iCond = 2;
+    iCond = 1;
     for iFreq = 1:numel(freqList)
 %         subplot(rows,cols,prc(cols,[1,iCond]));
         subplot(rows,cols,prc(cols,[1,iFreq]));
@@ -99,7 +100,7 @@ for iFreq = 1%1:numel(freqList)
                 sigBinMax(ii) = k;
             end
             counts = histcounts(sigBinMax,12) / size(sigMat,1); % !!assumes range(nSigBinMax) is 1:12
-            if iFreq == 4
+            if iFreq == investigateFreq
                 investigateCounts(iEvent,:) = [mean(sigMatZ) mean(sigMatZ)];
             end
             plot([mean(sigMatZ) mean(sigMatZ)],'-','lineWidth',1);
