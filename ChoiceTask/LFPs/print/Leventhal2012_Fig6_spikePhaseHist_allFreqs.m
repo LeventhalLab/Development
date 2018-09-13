@@ -12,12 +12,14 @@ if doSetup
     all_spikeHist_angles = NaN(numel(all_ts),nBins,numel(freqList));
     all_spikeHist_inTrial_pvals = NaN(numel(all_ts),numel(freqList));
     all_spikeHist_inTrial_angles = NaN(numel(all_ts),nBins,numel(freqList));
-    for iNeuron = 15%:numel(all_ts)
+    for iNeuron = 1:numel(all_ts)
         sevFile = LFPfiles_local{iNeuron};
+        % replace with alternative for LFP
+        sevFile = LFPfiles_local_altLookup{strcmp(sevFile,{LFPfiles_local_altLookup{:,1}}),2};
         disp(sevFile);
         [~,name,~] = fileparts(sevFile);
         if isempty(loadedFile) || ~strcmp(loadedFile,sevFile)
-            [sevFilt,Fs,decimateFactor,loadedFile] = loadCompressedSEV(sevFile,iNeuron);
+            [sevFilt,Fs,decimateFactor,loadedFile] = loadCompressedSEV(sevFile,[]);
         end
         
         ts = all_ts{iNeuron};
@@ -31,8 +33,10 @@ if doSetup
         ts_samples = ts_samples(ts_samples > 0 & ts_samples <= size(W,1)); % clean conversion errors
         
         spikeAngles = [];
+        all_inTrial_ids = [];
         for ii = 1:size(trialTimeRanges,1)
             inTrial_ids = find(ts > trialTimeRanges(ii,1) & ts <= trialTimeRanges(ii,2));
+            all_inTrial_ids = [all_inTrial_ids;inTrial_ids];
             spikeAngles = [spikeAngles;angle(W(floor(ts(inTrial_ids)*Fs),:))];
         end
         if size(spikeAngles,1) > 50
@@ -43,8 +47,11 @@ if doSetup
                 counts = histcounts(spikeAngles(:,iFreq),binEdges);
                 all_spikeHist_inTrial_angles(iNeuron,:,iFreq) = counts;
             end
-
-            spikeAngles = angle(W(ts_samples,:));
+            
+            all_outTrial_ids = ones(numel(ts_samples),1);
+            all_outTrial_ids(all_inTrial_ids) = 0;
+            all_outTrial_ids = logical(all_outTrial_ids);
+            spikeAngles = angle(W(ts_samples(all_outTrial_ids),:));
             for iFreq = 1:numel(freqList)
                 pval = circ_rtest(spikeAngles(:,iFreq));
                 all_spikeHist_pvals(iNeuron,iFreq) = pval;
@@ -88,7 +95,7 @@ if true % single plots
                 case 1
                     use_pvals = squeeze(all_spikeHist_pvals(iNeuron,:));
                     use_angles = squeeze(all_spikeHist_angles(iNeuron,:,:));
-                    ylabelText = 'ALL';
+                    ylabelText = 'OUT TRIAL';
                 case 2
                     use_pvals = squeeze(all_spikeHist_inTrial_pvals(iNeuron,:));
                     use_angles = squeeze(all_spikeHist_inTrial_angles(iNeuron,:,:));
@@ -149,7 +156,7 @@ if true % single plots
     end
 end
 
-if false
+if true
     h = figuree(1400,400);
     rows = 2;
     cols = numel(freqList);
@@ -158,7 +165,7 @@ if false
             case 1
                 use_pvals = all_spikeHist_pvals;
                 use_angles = all_spikeHist_angles;
-                ylabelText = 'ALL';
+                ylabelText = 'OUT TRIAL';
             case 2
                 use_pvals = all_spikeHist_inTrial_pvals;
                 use_angles = all_spikeHist_inTrial_angles;

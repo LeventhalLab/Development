@@ -42,7 +42,7 @@ for iNeuron = 1:size(analysisConf.neurons,1)
 end
 
 if doVideo
-    newVideo = VideoWriter(saveFile,'Motion JPEG AVI');
+    newVideo = VideoWriter(saveFile,'MPEG-4');
     newVideo.Quality = 100;
     newVideo.FrameRate = 30;
     open(newVideo);

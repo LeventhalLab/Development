@@ -1,4 +1,4 @@
-function h = figuree(varargin)
+function h = ff(varargin)
 xpos = 0;
 ypos = 0;
 screensize = get(groot,'Screensize');

@@ -1,6 +1,6 @@
 function [sevFilt,Fs,decimateFactor,loadedFile] = loadCompressedSEV(sevFile,unitId)
-% compressor = 'x16';
-compressor = 'x16_despiked';
+compressor = 'x16';
+% compressor = 'x16_despiked';
 
 [filepath,name,ext] = fileparts(sevFile);
 if isempty(unitId)

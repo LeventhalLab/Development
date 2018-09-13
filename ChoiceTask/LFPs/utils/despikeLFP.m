@@ -1,15 +1,16 @@
-function [sevDespiked,header] = despikeLFP(sevFile,ts)
+function [sevDespiked,header] = despikeLFP(sevFile,ts,waveformBounds)
 doDebug = false;
 [sev,header] = read_tdt_sev(sevFile);
 ts_samples = round(ts*header.Fs);
-chopBefore = round(.002 * header.Fs);
-chopAfter = round(.008 * header.Fs);
 
 f = waitbar(0,'setting up inerpolation...');
 sevNaN = double(sev);
 for iSpike = 1:numel(ts)
-    sevNaN(ts_samples(iSpike)-chopBefore:ts_samples(iSpike)+chopAfter-1) = NaN;
     waitbar(iSpike/numel(ts),f);
+    nanRange = ts_samples(iSpike)+waveformBounds(1):ts_samples(iSpike)+waveformBounds(2)-1;
+    if nanRange(1) > 0 && nanRange(end) < numel(sevNaN)
+        sevNaN(nanRange) = NaN;
+    end
 end
 waitbar(1,f,'interpolating...');
 v = 1:numel(sevNaN);

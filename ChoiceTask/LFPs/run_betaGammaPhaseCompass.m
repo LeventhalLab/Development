@@ -63,7 +63,7 @@ for iSubject = 5
 
     if doVideo
         savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/betaGammaVideo';
-        newVideo = VideoWriter(fullfile(savePath,[subject__names{iSubject},'_',datestr(now,'yyyymmdd-HHMMSS') '_betaGammaPhase']),'Motion JPEG AVI');
+        newVideo = VideoWriter(fullfile(savePath,[subject__names{iSubject},'_',datestr(now,'yyyymmdd-HHMMSS') '_betaGammaPhase']),'MPEG-4');
         newVideo.Quality = 100;
         open(newVideo);
     end
