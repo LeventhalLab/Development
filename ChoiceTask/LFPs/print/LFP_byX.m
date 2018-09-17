@@ -9,7 +9,7 @@ if doSetup
     session_Wz_phase = [];
     session_Wz_rayleigh_pval = [];
     iSession = 0;
-    for iNeuron = selectedLFPFiles'
+    for iNeuron = selectedLFPFiles(1:2)'
         iSession = iSession + 1;
         sevFile = LFPfiles_local{iNeuron};
         disp(sevFile);
@@ -17,7 +17,7 @@ if doSetup
         subjectName = name(1:5);
         curTrials = all_trials{iNeuron};
         [trialIds,allTimes] = sortTrialsBy(curTrials,'RT');
-        [sevFilt,Fs,decimateFactor] = loadCompressedSEV(sevFile);
+        [sevFilt,Fs,decimateFactor] = loadCompressedSEV(sevFile,[]);
         W = eventsLFPv2(curTrials(trialIds),sevFilt,tWindow,Fs,freqList,eventFieldnames);
         [Wz_power,Wz_phase] = zScoreW(W,Wlength); % power Z-score
         [Wz_power,keepTrials] = removeWzTrials(Wz_power,zThresh);
@@ -109,7 +109,7 @@ if false
     set(gcf,'color','w');
 end
 
-if false
+if true
     savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/LFP/bySession';
     for iSession = 1:size(session_Wz_power,1)
         sevFile = LFPfiles_local{selectedLFPFiles(iSession)};
@@ -155,7 +155,7 @@ if false
     plotLFPandMRLandRayleigh(scaloPower,scaloPhase,scaloRayleigh,savePath,saveFile,freqList,eventFieldnames);
 end
 
-if true
+if false
     scaloPower = squeeze(mean(session_Wz_power(:,:,100:300-1,:)));
     scaloPhase = squeeze(mean(session_Wz_phase(:,:,100:300-1,:)));
     savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/LFP/allSessions';

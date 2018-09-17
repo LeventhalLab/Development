@@ -17,9 +17,9 @@ t = linspace(-tWindow,tWindow,Wlength);
 
 all_xcorrBands_events = [];
 all_surr_result = [];
-sessionCount = 0;
 useUnitClass = 4;
-for iSession = 1%:numel(sessionNames)
+sessionCount = 0;
+for iSession = 1:2%numel(sessionNames)
     if doSetup
         sessionTs = [];
         sessionUnits = find(ia == iSession)';
@@ -28,7 +28,7 @@ for iSession = 1%:numel(sessionNames)
 % %             continue;
 % %         end
         sessionCount = sessionCount + 1;
-        for iNeuron = sessionUnits(sessionUnits)
+        for iNeuron = sessionUnits
 %         for iNeuron = sessionUnits(primSec(sessionUnits,1) == useUnitClass)
             sessionTs = [sessionTs;all_ts{iNeuron}];
         end
@@ -92,13 +92,16 @@ for iSession = 1%:numel(sessionNames)
                 surr_result(iEvent,iSurr,:,:) = sign(xcorrArr - surrArr);
             end
         end
+        all_xcorrBands_events(sessionCount,:,:,:) = xcorrBands_events;
+        all_surr_result(sessionCount,:,:,:,:) = surr_result;
     end
     
     t_xcorr = linspace(-tWindow*2,tWindow*2,size(xcorrBands,1));
     
     % -- DEBUG START
     if doDebug
-        savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/xcorrBySession/debug/_centerOut';
+%         savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/xcorrBySession/debug/_centerOut';
+        savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/xcorrBySession/debug';
         rows = 3;
         cols = 7;
         for iTrial = 1:size(tsPeths,1)
@@ -182,14 +185,14 @@ for iSession = 1%:numel(sessionNames)
     cols = 7;
     for iEvent = 1:7
         subplot(rows,cols,prc(cols,[1,iEvent]));
-        imagesc(t,1:numel(freqList),squeeze(mean(squeeze(Wz_power(iEvent,:,:,:)),2))');
+        imagesc(t,1:numel(freqList),squeeze(mean(Wz_power(iEvent,:,:,:),3))');
         colormap(gca,jet);
         set(gca,'YDir','normal');
         xlim([-1 1]);
         xticks(sort([xlim 0]));
         yticks(ytickIds);
         yticklabels(ytickLabelText);
-        caxis([-3 3]);
+        caxis([-5 5]);
         if iEvent == 7
             cb = cbAside(gca,'mean power','k');
             cb.Ticks = caxis;
@@ -210,7 +213,7 @@ for iSession = 1%:numel(sessionNames)
         plot(t,mean(squeeze(all_SDEz(iEvent,:,:))),'k-','lineWidth',1);
         xlim([-1 1]);
         xticks(sort([xlim 0]));
-        ylim([-3 3]);
+        ylim([-5 5]);
         yticks(sort([ylim 0]));
         if iEvent == 1
             ylabel('mean SDE Z');
@@ -228,7 +231,7 @@ for iSession = 1%:numel(sessionNames)
         if iEvent == 1
             ylabel('freq (Hz)');
         end
-        caxis(round(minmaxRed(xcorrBands_events(3,:,:))));
+        caxis(round(minmaxRed(xcorrBands_events)));
         if iEvent == 7
             cb = cbAside(gca,'mean xcorr','k');
             cb.Ticks = caxis;
@@ -256,11 +259,10 @@ for iSession = 1%:numel(sessionNames)
         caxis([-1 1]);
         grid on;
     end
-    all_xcorrBands_events(sessionCount,:,:,:) = xcorrBands_events;
-    all_surr_result(sessionCount,:,:,:,:) = surr_result;
     
     set(gcf,'color','w');
-    savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/xcorrBySession/_centerOut';
+%     savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/xcorrBySession/_centerOut';
+    savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/xcorrBySession';
     saveFile = ['debug_u',num2str(find(ia == iSession,1),'%03d'),'-',num2str(find(ia == iSession,1,'last'),'%03d'),...
         '_s',num2str(iSession,'%02d')];
     saveas(h,fullfile(savePath,[saveFile,'.png']));
