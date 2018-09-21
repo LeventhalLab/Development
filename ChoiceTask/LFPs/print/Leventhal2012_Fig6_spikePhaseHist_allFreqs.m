@@ -1,5 +1,5 @@
-doSetup = false;
-doSave = true;
+doSetup = true;
+doSave = false;
 freqList = logFreqList([1 200],10);
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/spikePhaseHist';
 nBins = 12;
@@ -9,8 +9,12 @@ loadedFile = [];
 if doSetup
     validUnits = [];
     all_spikeHist_pvals = NaN(numel(all_ts),numel(freqList));
+    all_spikeHist_rs = NaN(numel(all_ts),numel(freqList));
+    all_spikeHist_mus = NaN(numel(all_ts),numel(freqList));
     all_spikeHist_angles = NaN(numel(all_ts),nBins,numel(freqList));
     all_spikeHist_inTrial_pvals = NaN(numel(all_ts),numel(freqList));
+    all_spikeHist_inTrial_rs = NaN(numel(all_ts),numel(freqList));
+    all_spikeHist_inTrial_mus = NaN(numel(all_ts),numel(freqList));
     all_spikeHist_inTrial_angles = NaN(numel(all_ts),nBins,numel(freqList));
     for iNeuron = 1:numel(all_ts)
         sevFile = LFPfiles_local{iNeuron};
@@ -42,8 +46,13 @@ if doSetup
         if size(spikeAngles,1) > 50
             validUnits = [validUnits iNeuron];
             for iFreq = 1:numel(freqList)
-                pval = circ_rtest(spikeAngles(:,iFreq));
+                alpha = spikeAngles(:,iFreq);
+                pval = circ_rtest(alpha);
                 all_spikeHist_inTrial_pvals(iNeuron,iFreq) = pval;
+                r = circ_r(alpha);
+                all_spikeHist_inTrial_rs(iNeuron,iFreq) = r;
+                mu = circ_mean(alpha);
+                all_spikeHist_inTrial_mus(iNeuron,iFreq) = mu;
                 counts = histcounts(spikeAngles(:,iFreq),binEdges);
                 all_spikeHist_inTrial_angles(iNeuron,:,iFreq) = counts;
             end
@@ -53,8 +62,13 @@ if doSetup
             all_outTrial_ids = logical(all_outTrial_ids);
             spikeAngles = angle(W(ts_samples(all_outTrial_ids),:));
             for iFreq = 1:numel(freqList)
-                pval = circ_rtest(spikeAngles(:,iFreq));
+                alpha = spikeAngles(:,iFreq);
+                pval = circ_rtest(alpha);
                 all_spikeHist_pvals(iNeuron,iFreq) = pval;
+                r = circ_r(alpha);
+                all_spikeHist_rs(iNeuron,iFreq) = r;
+                mu = circ_mean(alpha);
+                all_spikeHist_mus(iNeuron,iFreq) = mu;
                 counts = histcounts(spikeAngles(:,iFreq),binEdges);
                 all_spikeHist_angles(iNeuron,:,iFreq) = counts;
             end
@@ -85,7 +99,7 @@ if false % display spike times on phase
     plot(normalize(r_gamma1));
 end
 
-if true % single plots
+if false % single plots
     for iNeuron = validUnits
         h = figuree(1400,400);
         rows = 2;
@@ -156,7 +170,7 @@ if true % single plots
     end
 end
 
-if true
+if false
     h = figuree(1400,400);
     rows = 2;
     cols = numel(freqList);
