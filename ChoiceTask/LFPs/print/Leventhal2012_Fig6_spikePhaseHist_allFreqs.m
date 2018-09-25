@@ -1,6 +1,7 @@
 doSetup = true;
 doSave = false;
-freqList = logFreqList([1 200],10);
+% freqList = logFreqList([1 200],10);
+freqList = [3.2,19];
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/spikePhaseHist';
 nBins = 12;
 binEdges = linspace(-pi,pi,nBins+1);
@@ -12,10 +13,12 @@ if doSetup
     all_spikeHist_rs = NaN(numel(all_ts),numel(freqList));
     all_spikeHist_mus = NaN(numel(all_ts),numel(freqList));
     all_spikeHist_angles = NaN(numel(all_ts),nBins,numel(freqList));
+    all_spikeHist_alphas = cell(numel(all_ts),numel(freqList));
     all_spikeHist_inTrial_pvals = NaN(numel(all_ts),numel(freqList));
     all_spikeHist_inTrial_rs = NaN(numel(all_ts),numel(freqList));
     all_spikeHist_inTrial_mus = NaN(numel(all_ts),numel(freqList));
     all_spikeHist_inTrial_angles = NaN(numel(all_ts),nBins,numel(freqList));
+    all_spikeHist_inTrial_alphas = cell(numel(all_ts),numel(freqList));
     for iNeuron = 1:numel(all_ts)
         sevFile = LFPfiles_local{iNeuron};
         % replace with alternative for LFP
@@ -47,6 +50,7 @@ if doSetup
             validUnits = [validUnits iNeuron];
             for iFreq = 1:numel(freqList)
                 alpha = spikeAngles(:,iFreq);
+                all_spikeHist_alphas{iNeuron,iFreq} = alpha;
                 pval = circ_rtest(alpha);
                 all_spikeHist_inTrial_pvals(iNeuron,iFreq) = pval;
                 r = circ_r(alpha);
@@ -63,6 +67,7 @@ if doSetup
             spikeAngles = angle(W(ts_samples(all_outTrial_ids),:));
             for iFreq = 1:numel(freqList)
                 alpha = spikeAngles(:,iFreq);
+                all_spikeHist_inTrial_alphas{iNeuron,iFreq} = alpha;
                 pval = circ_rtest(alpha);
                 all_spikeHist_pvals(iNeuron,iFreq) = pval;
                 r = circ_r(alpha);
