@@ -6,6 +6,7 @@ savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/spike
 nBins = 12;
 binEdges = linspace(-pi,pi,nBins+1);
 loadedFile = [];
+nSurr = 100;
 
 if doSetup
     validUnits = [];
@@ -14,6 +15,13 @@ if doSetup
     all_spikeHist_mus = NaN(numel(all_ts),numel(freqList));
     all_spikeHist_angles = NaN(numel(all_ts),nBins,numel(freqList));
     all_spikeHist_alphas = cell(numel(all_ts),numel(freqList));
+    
+    all_spikeHist_pvals_surr = NaN(nSurr,numel(all_ts),numel(freqList));
+    all_spikeHist_rs_surr = NaN(nSurr,numel(all_ts),numel(freqList));
+    all_spikeHist_mus_surr = NaN(nSurr,numel(all_ts),numel(freqList));
+    all_spikeHist_angles_surr = NaN(nSurr,numel(all_ts),nBins,numel(freqList));
+    all_spikeHist_alphas_surr = cell(nSurr,numel(all_ts),numel(freqList));
+    
     all_spikeHist_inTrial_pvals = NaN(numel(all_ts),numel(freqList));
     all_spikeHist_inTrial_rs = NaN(numel(all_ts),numel(freqList));
     all_spikeHist_inTrial_mus = NaN(numel(all_ts),numel(freqList));
@@ -44,13 +52,14 @@ if doSetup
         for ii = 1:size(trialTimeRanges,1)
             inTrial_ids = find(ts > trialTimeRanges(ii,1) & ts <= trialTimeRanges(ii,2));
             all_inTrial_ids = [all_inTrial_ids;inTrial_ids];
-            spikeAngles = [spikeAngles;angle(W(floor(ts(inTrial_ids)*Fs),:))];
+            spikeAngles = [spikeAngles;angle(W(floor(ts(inTrial_ids)*Fs),:))]; % compiling inTrial spikeAngles
         end
         if size(spikeAngles,1) > 50
             validUnits = [validUnits iNeuron];
+            % this is inTrial
             for iFreq = 1:numel(freqList)
                 alpha = spikeAngles(:,iFreq);
-                all_spikeHist_alphas{iNeuron,iFreq} = alpha;
+                all_spikeHist_inTrial_alphas{iNeuron,iFreq} = alpha;
                 pval = circ_rtest(alpha);
                 all_spikeHist_inTrial_pvals(iNeuron,iFreq) = pval;
                 r = circ_r(alpha);
@@ -60,21 +69,41 @@ if doSetup
                 counts = histcounts(spikeAngles(:,iFreq),binEdges);
                 all_spikeHist_inTrial_angles(iNeuron,:,iFreq) = counts;
             end
-            
+            % this is outTrial
             all_outTrial_ids = ones(numel(ts_samples),1);
             all_outTrial_ids(all_inTrial_ids) = 0;
             all_outTrial_ids = logical(all_outTrial_ids);
+            
+            % surrogate code
+            outTrialIdx = find(all_outTrial_ids == 1);
+            for iSurr = 1:nSurr
+                outTrialSurrIdx = randsample(outTrialIdx,numel(all_inTrial_ids));
+                spikeAngles = angle(W(ts_samples(outTrialSurrIdx),:));
+                for iFreq = 1:numel(freqList)
+                    alpha = spikeAngles(:,iFreq);
+                    all_spikeHist_alphas_surr{iSurr,iNeuron,iFreq} = alpha;
+                    pval = circ_rtest(alpha);
+                    all_spikeHist_pvals_surr(iSurr,iNeuron,iFreq) = pval;
+                    r = circ_r(alpha);
+                    all_spikeHist_rs_surr(iSurr,iNeuron,iFreq) = r;
+                    mu = circ_mean(alpha);
+                    all_spikeHist_mus_surr(iSurr,iNeuron,iFreq) = mu;
+                    counts = histcounts(alpha,binEdges);
+                    all_spikeHist_angles_surr(iSurr,iNeuron,:,iFreq) = counts;
+                end
+            end
+            
             spikeAngles = angle(W(ts_samples(all_outTrial_ids),:));
             for iFreq = 1:numel(freqList)
                 alpha = spikeAngles(:,iFreq);
-                all_spikeHist_inTrial_alphas{iNeuron,iFreq} = alpha;
+                all_spikeHist_alphas{iNeuron,iFreq} = alpha;
                 pval = circ_rtest(alpha);
                 all_spikeHist_pvals(iNeuron,iFreq) = pval;
                 r = circ_r(alpha);
                 all_spikeHist_rs(iNeuron,iFreq) = r;
                 mu = circ_mean(alpha);
                 all_spikeHist_mus(iNeuron,iFreq) = mu;
-                counts = histcounts(spikeAngles(:,iFreq),binEdges);
+                counts = histcounts(alpha,binEdges);
                 all_spikeHist_angles(iNeuron,:,iFreq) = counts;
             end
         end

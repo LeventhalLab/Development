@@ -1,14 +1,13 @@
-doSetup = true;
 doSave = false;
 doPlot = true;
 useFakeTrials = false; % then >> all_MImatrix_surr = all_MImatrix;
-onlyAfter_t0 = true;
+onlyAfter_t0 = false;
 
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/PAC/tortMethod';
 zThresh = 2;
 tWindow = 2;
-tPeri = 1;
-freqList = logFreqList([1 200],10);
+tPeri = 0.5;
+freqList = logFreqList([1 200],30);
 
 freqLabels = num2str(freqList(:),'%2.1f');
 Wlength = 200;
@@ -18,7 +17,7 @@ iSession = 0;
 all_MImatrix = [];
 session_MIMatrix_byRT = {};
 MImatrix_RT = {};
-for iNeuron = selectedLFPFiles'
+for iNeuron = selectedLFPFiles(1)'
     iSession = iSession + 1;
 
     sevFile = LFPfiles_local{iNeuron};
@@ -27,7 +26,7 @@ for iNeuron = selectedLFPFiles'
     subjectName = name(1:5);
     curTrials = all_trials{iNeuron};
     [trialIds,allTimes] = sortTrialsBy(curTrials,'RT');
-    [sevFilt,Fs,decimateFactor] = loadCompressedSEV(sevFile);
+    [sevFilt,Fs,decimateFactor] = loadCompressedSEV(sevFile,[]);
     if ~useFakeTrials
         W = eventsLFPv2(curTrials(trialIds),sevFilt,tWindow,Fs,freqList,eventFieldnames);
     else
@@ -108,10 +107,13 @@ for iNeuron = selectedLFPFiles'
 %             close(h);
 %         end
 
-        h = figuree(1200,200);
+        rows = 3;
+        cols = 7;
+        h = figuree(1200,600);
         for iEvent = 1:7
-            subplot(1,7,iEvent);
             curMat = squeeze(nanmean(MImatrix(iEvent,:,:,:)));
+            
+            subplot(rows,cols,prc(cols,[1 iEvent]));
             all_MImatrix(iSession,iEvent,:,:) = curMat;
             imagesc(curMat');
             colormap(jet);
@@ -129,14 +131,43 @@ for iNeuron = selectedLFPFiles'
             else
                 title({'',eventFieldnames{iEvent}});
             end
+            
+            surr_Arr = [];
+            for iSurr = 1:nSurr
+                curMat_surr = squeeze(MImatrix_surr(iSurr,:,:));
+                if isempty(surr_Arr)
+                    surr_Arr = (curMat > curMat_surr);
+                else
+                    surr_Arr = surr_Arr + (curMat > curMat_surr);
+                end
+            end
+            subplot(rows,cols,prc(cols,[2 iEvent]));
+            surr_Arr = surr_Arr ./ nSurr;
+            imagesc(curMat');
+            colormap(bone);
+            set(gca,'ydir','normal');
+            caxis([0 0.05]);
+            xticks(1:numel(freqList));
+            xticklabels(freqLabels);
+            xlabel('phase (Hz)');
+            yticks(1:numel(freqList));
+            yticklabels(freqLabels);
+            ylabel('amp (Hz)');
+            set(gca,'fontsize',6);
+            if iEvent == 7
+                cbAside(gca,'pval','k');
+            end
         end
+        
         set(gcf,'color','w');
-        if useFakeTrials
-            saveFile = ['s',num2str(iSession,'%02d'),'_allEvent_surr.png'];
-        else
-            saveFile = ['s',num2str(iSession,'%02d'),'_allEvent.png'];
+        if doSave
+            if useFakeTrials
+                saveFile = ['s',num2str(iSession,'%02d'),'_allEvent_surr.png'];
+            else
+                saveFile = ['s',num2str(iSession,'%02d'),'_allEvent.png'];
+            end
+            saveas(h,fullfile(savePath,saveFile));
+            close(h);
         end
-        saveas(h,fullfile(savePath,saveFile));
-        close(h);
     end
 end

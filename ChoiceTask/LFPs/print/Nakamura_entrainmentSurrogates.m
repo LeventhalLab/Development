@@ -132,3 +132,15 @@ for iFreq = 1%:numel(freqList)
     
     set(gcf,'color','w');
 end
+
+nBins = 20;
+figure;
+h1 = polarhistogram(in_dir,nBins,'FaceColor','r');
+h1.DisplayStyle = 'stairs';
+hold on;
+ax = gca;
+ax.ThetaDir = 'counterclockwise';
+ax.ThetaZeroLocation = 'top';
+ax.ThetaTick = [0 90 180 270];
+h2 = polarhistogram(in_ndir,nBins,'FaceColor','k');
+h2.DisplayStyle = 'stairs';
