@@ -1,4 +1,5 @@
-function [meanScalo, stdScalo, log_meanScalo, log_stdScalo] = meanScalogram(sevFilt,tWindow,scaloWindow,Fs,freqList,num_iterations)
+% function [meanScalo, stdScalo, log_meanScalo, log_stdScalo] = meanScalogram(sevFilt,tWindow,scaloWindow,Fs,freqList,num_iterations)
+function [allScalo] = meanScalogram(sevFilt,tWindow,scaloWindow,Fs,freqList,num_iterations)
 
 % lfpThresh = 0.5e6; % diff uV^2, *this depends on decimate factor, need to generalize it
 lfpThresh = 2500; % diff uV^2, *this depends on decimate factor, need to generalize it
@@ -43,8 +44,8 @@ while scaloCount <= num_iterations
     
 end
     
-meanScalo = squeeze(mean(allScalo,1));
-log_meanScalo = squeeze(mean(log10(allScalo),1));
-log_stdScalo = squeeze(std(log10(allScalo),0,1));
-stdScalo = squeeze(std(allScalo,0,1));
+% meanScalo = squeeze(mean(allScalo,1));
+% log_meanScalo = squeeze(mean(log10(allScalo),1));
+% log_stdScalo = squeeze(std(log10(allScalo),0,1));
+% stdScalo = squeeze(std(allScalo,0,1));
     

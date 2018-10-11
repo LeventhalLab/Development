@@ -7,7 +7,7 @@ sessions_to_analyze = {'R0088_20151030a','R0088_20151031a','R0088_20151101a','R0
 lfpWire = [44,39,40,39,93,120,100,93,120,93,120];
 plot_t_limits = [-1,1];
 
-analysisConf = exportAnalysisConfv2('R0117',nasPath);
+analysisConf = exportAnalysisConfv2('R0088',nasPath);
 numSurrogate_xcorrs = 100;
 fpass = [16 25];
 
@@ -73,7 +73,7 @@ for iNeuron=1:size(analysisConf.neurons,1)
 
     if plotIdx == plots_per_page || iNeuron == size(analysisConf.neurons,1)
         numPages = numPages + 1;
-        pdfName = sprintf('%s_spike_beta_xcorr_%02d',ratID,numPages);
+        pdfName = sprintf('%s_spike_beta_xcov_%02d',ratID,numPages);
         pdfName = fullfile(xcorr_subject_dir, pdfName);
         fp = fillPage(h_fig,'margins',[0 0 1 0],'papersize',[11 8.5]);
         
