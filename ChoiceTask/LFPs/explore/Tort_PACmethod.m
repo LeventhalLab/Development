@@ -4,7 +4,7 @@ doPlot = false;
 
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/PAC/tortMethod';
 zThresh = 2;
-tWindow = 2;
+tWindow = 0.5;
 tPeri = 0.5;
 freqList = logFreqList([2 200],30);
 
@@ -29,9 +29,9 @@ for iNeuron = selectedLFPFiles'
         [sevFilt,Fs,decimateFactor] = loadCompressedSEV(sevFile,[]);
         W = eventsLFPv2(curTrials(trialIds),sevFilt,tWindow,Fs,freqList,eventFieldnames);
 
-        secSamples = size(W,2) / (tWindow * 2);
-        periSamples = secSamples * tPeri;
-        W = W(:,round(size(W,2)/2) - periSamples:round(size(W,2)/2) + periSamples - 1,:,:);
+%         secSamples = size(W,2) / (tWindow * 2);
+%         periSamples = secSamples * tPeri;
+%         W = W(:,round(size(W,2)/2) - periSamples:round(size(W,2)/2) + periSamples - 1,:,:);
     %         [Wz_power,Wz_phase] = zScoreW(W,Wlength); % power Z-score
     %         [Wz_power,keepTrials] = removeWzTrials(Wz_power,zThresh);
     %         Wz_phase = Wz_phase(:,:,keepTrials,:);

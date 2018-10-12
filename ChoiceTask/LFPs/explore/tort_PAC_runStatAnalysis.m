@@ -3,8 +3,14 @@ doSave = true;
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/PAC/tortMethod';
 nSurr = size(all_MImatrix_surr,2);
 freqLabels = num2str(freqList(:),'%2.1f');
+useCueSurr = false;
+if useCueSurr
+    saveLabel = 'ZCUE';
+else
+    saveLabel = '';
+end
 
-if false
+if true
     % random time-shifted surrogates
     rows = 2;
     cols = 7;
@@ -14,22 +20,95 @@ if false
         for iEvent = 1:7
             sessionMat = all_MImatrix{iSession};
             curMat = squeeze(nanmean(sessionMat(iEvent,:,:,:)));
-            surrMats = squeeze(all_MImatrix_surr(iSession,:,:,:));
-% %             surrMats = squeeze(sessionMat(1,:,:,:));
+            if useCueSurr
+                surrMats = squeeze(sessionMat(1,:,:,:)); % cue
+            else
+                surrMats = squeeze(all_MImatrix_surr(iSession,:,:,:));
+            end
             curMatZ = (curMat - squeeze(nanmean(surrMats))) ./ squeeze(nanstd(surrMats));
             
-            ff(900,300);
-            subplot(131);
-            imagesc(curMat');
-            title('curMat');
-            subplot(132);
-            imagesc(squeeze(nanmean(surrMats))');
-            title('mean(surrMat)');
-            subplot(133);
-            imagesc(curMatZ');
-            title('curMatZ');
-            colormap(jet);
-
+            if iEvent == 4
+                h1 = ff(1200,200);
+                rows_h1 = 1;
+                cols_h1 = 5;
+                
+                subplot(rows_h1,cols_h1,1);
+                imagesc(curMat');
+                set(gca,'ydir','normal');
+                caxis([0 0.03]);
+                cbAside(gca,'MI','k');
+                title({'Nose Out','curMat'});
+                xticks(1:numel(freqList));
+                xticklabels(freqLabels);
+                xlabel('phase (Hz)');
+                yticks(1:numel(freqList));
+                yticklabels(freqLabels);
+                ylabel('amp (Hz)');
+                set(gca,'fontsize',6);
+                
+                subplot(rows_h1,cols_h1,2);
+                imagesc(squeeze(nanmean(surrMats))');
+                set(gca,'ydir','normal');
+                caxis([0 0.03]);
+                cbAside(gca,'MI','k');
+                title({'Nose Out','mean(surrMat)'});
+                xticks(1:numel(freqList));
+                xticklabels(freqLabels);
+                xlabel('phase (Hz)');
+                yticks(1:numel(freqList));
+                yticklabels(freqLabels);
+                set(gca,'fontsize',6);
+                
+                subplot(rows_h1,cols_h1,3);
+                imagesc(curMat' - squeeze(nanmean(surrMats))');
+                set(gca,'ydir','normal');
+                caxis([0 0.03]);
+                cbAside(gca,'MI','k');
+                title({'Nose Out','curMat - mean(surrMat)'});
+                xticks(1:numel(freqList));
+                xticklabels(freqLabels);
+                xlabel('phase (Hz)');
+                yticks(1:numel(freqList));
+                yticklabels(freqLabels);
+                set(gca,'fontsize',6);
+                
+                subplot(rows_h1,cols_h1,4);
+                imagesc(squeeze(nanstd(surrMats))');
+                set(gca,'ydir','normal');
+                caxis([0 0.015]);
+                cbAside(gca,'MI','k');
+                title({'Nose Out','std(surrMat)'});
+                xticks(1:numel(freqList));
+                xticklabels(freqLabels);
+                xlabel('phase (Hz)');
+                yticks(1:numel(freqList));
+                yticklabels(freqLabels);
+                set(gca,'fontsize',6);
+                
+                subplot(rows_h1,cols_h1,5);
+                imagesc(curMatZ');
+                set(gca,'ydir','normal');
+                caxis([-2 2]);
+                cbAside(gca,'Z-MI','k');
+                title({'Nose Out','curMatZ'});
+                colormap(jet);
+                xticks(1:numel(freqList));
+                xticklabels(freqLabels);
+                xlabel('phase (Hz)');
+                yticks(1:numel(freqList));
+                yticklabels(freqLabels);
+                set(gca,'fontsize',6);
+                
+                set(gcf,'color','w');
+                if doSave
+                    saveFile = ['surr',saveLabel,'_',num2str(iSession,'%02d'),'_timeShifted_NoseOut.png'];
+                    saveas(h1,fullfile(savePath,saveFile));
+                    close(h1);
+                end
+                    
+                figure(h);
+            end
+            
             subplot(rows,cols,prc(cols,[1 iEvent]));
             imagesc(curMatZ');
             colormap(gca,jet);
@@ -52,7 +131,7 @@ if false
             end
 
             surrArr = [];
-            for iSurr = 1:nSurr
+            for iSurr = 1:size(surrMats,1)
                 curSurr = squeeze(surrMats(iSurr,:,:));
                 curSurrZ = (curSurr - squeeze(nanmean(surrMats))) ./ squeeze(nanstd(surrMats));
                 if isempty(surrArr)
@@ -62,12 +141,12 @@ if false
                 end
             end
             subplot(rows,cols,prc(cols,[2 iEvent]));
-            surrArr_pval = 1 - (surrArr ./ nSurr);
+            surrArr_pval = 1 - (surrArr ./ size(surrMats,1));
             all_surrArr_pval(iSession,iEvent,:,:) = surrArr_pval;
             imagesc(surrArr_pval');
             colormap(gca,jet);
             set(gca,'ydir','normal');
-            caxis([0 0.05]);
+            caxis([0 0.2]);
             xticks(1:numel(freqList));
             xticklabels(freqLabels);
             xlabel('phase (Hz)');
@@ -83,7 +162,7 @@ if false
 
         set(gcf,'color','w');
         if doSave
-            saveFile = ['surr_',num2str(iSession,'%02d'),'_timeShifted.png'];
+            saveFile = ['surr',saveLabel,'_',num2str(iSession,'%02d'),'_timeShifted.png'];
             saveas(h,fullfile(savePath,saveFile));
             close(h);
         end
@@ -97,8 +176,11 @@ if false
         for iEvent = 1:7
             sessionMat = all_MImatrix{iSession};
             curMat = squeeze(nanmean(sessionMat(iEvent,:,:,:)));
-            surrMats = squeeze(all_MImatrix_surr(iSession,:,:,:));
-%             surrMats = squeeze(sessionMat(1,:,:,:));
+            if useCueSurr
+                surrMats = squeeze(sessionMat(1,:,:,:)); % cue
+            else
+                surrMats = squeeze(all_MImatrix_surr(iSession,:,:,:));
+            end
             curMatZ = (curMat - squeeze(nanmean(surrMats))) ./ squeeze(nanstd(surrMats));
             session_matZ(iSession,iEvent,:,:) = curMatZ;
         end
@@ -149,13 +231,14 @@ if false
     end
     set(gcf,'color','w');
     if doSave
-        saveFile = 'surr_AllSessions_timeShifted.png';
+        saveFile = ['surr',saveLabel,'_AllSessions_timeShifted.png'];
         saveas(h,fullfile(savePath,saveFile));
         close(h);
     end
 end
 
-if true
+% !! add mean surrogate, chanes to 3 rows, 7 cols so side-by-side?
+if false
     % shuffled trials
     rows = 2;
     cols = 7;
@@ -177,31 +260,25 @@ if true
                 end
             end
 
-            for iRow = 1:2
-                if iRow == 1
-                    caxisVals = [0 1];
-                else
-                    caxisVals = [0.9 1];
-                end
-                subplot(rows,cols,prc(cols,[iRow iEvent]));
-                surrArr = 1 - (surrArr ./ (nSurr * size(sessionMat,2)));
-                imagesc(surrArr');
-                colormap(gca,jet);
-                set(gca,'ydir','normal');
-                caxis(caxisVals);
-                xticks(1:numel(freqList));
-                xticklabels(freqLabels);
-                xlabel('phase (Hz)');
-                yticks(1:numel(freqList));
-                yticklabels(freqLabels);
-                ylabel('amp (Hz)');
-                set(gca,'fontsize',6);
-                title({eventFieldnames{iEvent}});
-                if iEvent == 7
-                    cbAside(gca,'pval','k');
-                end
+            subplot(rows,cols,prc(cols,[iRow iEvent]));
+            surrArr = 1 - (surrArr ./ (nSurr * size(sessionMat,2)));
+            imagesc(surrArr');
+            colormap(gca,jet);
+            set(gca,'ydir','normal');
+            caxis([0 1]);
+            xticks(1:numel(freqList));
+            xticklabels(freqLabels);
+            xlabel('phase (Hz)');
+            yticks(1:numel(freqList));
+            yticklabels(freqLabels);
+            ylabel('amp (Hz)');
+            set(gca,'fontsize',6);
+            title({eventFieldnames{iEvent}});
+            if iEvent == 7
+                cbAside(gca,'pval','k');
             end
         end
+
         set(gcf,'color','w');
         if doSave
             saveFile = ['surr',num2str(iSession,'%02d'),'_shuffledTrials.png'];

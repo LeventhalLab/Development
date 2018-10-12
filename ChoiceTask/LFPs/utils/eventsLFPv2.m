@@ -5,7 +5,8 @@ if iscell(freqList)
 end
 
 tWindow_samples = round(Fs * tWindow);
-tWindow_oversamples = tWindow_samples + 4 * round(1/min(freqList));
+% +/- tWindow + edge based on lowest frequency
+tWindow_oversamples = (tWindow_samples * 2) + (4 * round(Fs/min(freqList)));
 
 all_LFP = [];
 for iFreq = 1:nLoop

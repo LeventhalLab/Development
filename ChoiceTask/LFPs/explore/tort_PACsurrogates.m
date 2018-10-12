@@ -1,18 +1,18 @@
 function MImatrix_surr = tort_PACsurrogates(sevFilt,Fs,curTrials,freqList)
 
-    doDebug = true;
+    doDebug = false;
     % (1) use surrogates from a distance: ~4 wavelengths/cycles from actual time point
     % (2) scramble amplitude/phase trials and compare Nose Out PAC
     % - if PAC is sig. larger normally, delta/beta are locked
     % - if PAC is sig. smaller normally, delta/beta are coincendental to the event
     tWindow = 1;
     sampleCycles = 5; % cycles
-    oversampleBy = 3;
+    oversampleBy = 4;
     % % freqList = logFreqList([2 200],30);
 
     freqLabels = num2str(freqList(:),'%2.1f');
     nBins = 18;
-    nSurr = 50;
+    nSurr = 200;
 
     trialTimeRanges = compileTrialTimeRanges(curTrials);
     % trialTimeRanges_samples = trialTimeRanges * Fs;
@@ -39,6 +39,7 @@ function MImatrix_surr = tort_PACsurrogates(sevFilt,Fs,curTrials,freqList)
         end
     end
     disp('Done searching!');
+    
     tWindowSamples = tWindow * Fs;
     % we oversampled by 3 (@2Hz, 5 cycles * 3 = 7.5s)
     % should be able to start at tWindow (1s) and still have room to offset by 5 cycles for all freqs
@@ -50,18 +51,23 @@ function MImatrix_surr = tort_PACsurrogates(sevFilt,Fs,curTrials,freqList)
     for iSurr = 1:nSurr
         disp(['s',num2str(iSurr)]);
         for ifp = 1:numel(freqList)
-            fpStart = round((tWindow * 2 * Fs) + (sampleCycles / freqList(ifp)) * Fs);
+            faStart = round(tWindow * 2 * Fs);
+            faEnd = round(faStart + (tWindow * Fs) - 1);
+            % centered on sampleCycles + rnd from faStart
+%             fpStart = faStart + round(tWindow * 2 * Fs) + round((sampleCycles - 0.5 + rand) / freqList(ifp) * Fs); % freq dep.
+%             fpStart = faStart + round((2 + 2 * rand) * Fs); % fixed
+            fpStart = faStart + round(tWindow * 2 * Fs) + round((sampleCycles - 0.5 + rand) / min(freqList) * Fs);
+
             fpEnd = round(fpStart + (tWindow * Fs) - 1);
             cur_fp = angle(W(fpStart:fpEnd,iSurr,ifp));
             for ifA = ifp:numel(freqList)
                 binEdges = linspace(-pi,pi,nBins+1);
                 [N,edges,bin] = histcounts(cur_fp,binEdges);
 
-                faStart = round(tWindow * 2 * Fs);
-                faEnd = round(faStart + (tWindow * Fs) - 1);
 % %                 cur_fA = abs(W(faStart:faEnd,iSurr,ifA).^2);
                 cur_fA = abs(W(faStart:faEnd,iSurr,ifA));
                 mi_bins = zeros(1,nBins);
+                
                 for iBin = 1:nBins
                     mi_bins(1,iBin) = sum(cur_fA(bin == iBin)) ./ sum(bin == iBin); % mean
                 end
@@ -79,6 +85,57 @@ function MImatrix_surr = tort_PACsurrogates(sevFilt,Fs,curTrials,freqList)
                 Hmax = log(nBins);
                 MI = (Hmax - H) / Hmax;
                 MImatrix_surr(iSurr,ifp,ifA) = MI;
+                
+                
+                % debug
+                if doDebug
+                    rows = 4;
+                    cols = 1;
+                    h = ff(900,800);
+                    t = linspace(0,size(W,1)/Fs,size(W,1));
+
+                    subplot(rows,cols,1);
+                    plot(t,data(:,iSurr));
+                    xlim([0 size(W,1)/Fs]);
+                    xlabel('time (s)');
+                    title({['iSurr: ',num2str(iSurr,'%02d')],'raw data'});
+
+                    subplot(rows,cols,2);
+                    plot(t,abs(W(:,iSurr,ifA)));
+                    yticks(ylim);
+                    xlim([0 size(W,1)/Fs]);
+                    xlabel('time (s)');
+                    hold on;
+                    plot([faStart faEnd]./Fs,[diff(ylim)/2 diff(ylim)/2],'r','lineWidth',6);
+                    title(['amplitude ',num2str(freqList(ifA),'%1.2f'),'Hz']);
+
+                    subplot(rows,cols,3);
+                    plot(t,angle(W(:,iSurr,ifp)));
+                    ylim([-pi pi]);
+                    yticks(sort([ylim 0]));
+                    xlim([0 size(W,1)/Fs]);
+                    xlabel('time (s)');
+                    hold on;
+                    plot([fpStart fpEnd]./Fs,[0 0],'b','lineWidth',6);
+                    title(['phase ',num2str(freqList(ifp),'%1.2f'),'Hz']);
+                    
+                    subplot(rows,cols,4);
+                    bar([pj pj],'k');
+                    xticks([1 9 18 19 27 36]);
+                    xticklabels({'0','180','270','0','180','270'});
+                    xtickangle(270);
+                    xlabel('phase');
+                    ylim([0 0.1]);
+                    yticks(ylim);
+                    ylabel('pj');
+                    title({'entropy measure',['MI = ',num2str(MI,2)]});
+                    
+                    savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/PAC/tortMethod/debug';
+                    set(gcf,'color','w');
+                    saveas(h,fullfile(savePath,['iSurr',num2str(iSurr,'%03d'),'_amp',num2str(ifA,'%02d'),'_phase',num2str(ifp,'%02d'),'.png']));
+                     close(h);
+                end
+                
             end
         end
     end
@@ -86,20 +143,24 @@ function MImatrix_surr = tort_PACsurrogates(sevFilt,Fs,curTrials,freqList)
     if doDebug
         rows = 5;
         cols = 8;
-        ff(1400,900);
-        for ii = 1:rows*cols
-            subplot(rows,cols,ii);
-            imagesc(squeeze(MImatrix_surr(ii,:,:))');
-            colormap(jet);
-            set(gca,'ydir','normal');
-        %     caxis([0 0.2]);
-            xticks(1:numel(freqList));
-            xticklabels(freqLabels);
-            xlabel('phase (Hz)');
-            yticks(1:numel(freqList));
-            yticklabels(freqLabels);
-            ylabel('amp (Hz)');
-            set(gca,'fontsize',6);
+        iSurr = 0;
+        for jj = 1:5
+            ff(1400,900);
+            for ii = 1:rows*cols
+                iSurr = iSurr + 1;
+                subplot(rows,cols,ii);
+                imagesc(squeeze(MImatrix_surr(iSurr,:,:))');
+                colormap(jet);
+                set(gca,'ydir','normal');
+                caxis([0 0.05])
+                xticks(1:numel(freqList));
+                xticklabels(freqLabels);
+                xlabel('phase (Hz)');
+                yticks(1:numel(freqList));
+                yticklabels(freqLabels);
+                ylabel('amp (Hz)');
+                set(gca,'fontsize',6);
+            end
         end
 
         ff(500,500);

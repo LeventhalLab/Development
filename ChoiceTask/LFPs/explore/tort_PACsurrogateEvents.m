@@ -1,18 +1,18 @@
 function MImatrix_surrEvents = tort_PACsurrogateEvents(sevFilt,Fs,curTrials,freqList,eventFieldnames)
 
-tWindow = 2;
-tPeri = 0.5;
+tWindow = 0.5;
+% % tPeri = 0.5;
 
 freqLabels = num2str(freqList(:),'%2.1f');
 nBins = 18;
-nSurr = 1000;
+nSurr = 200;
 
 [trialIds,~] = sortTrialsBy(curTrials,'RT');
 W = eventsLFPv2(curTrials(trialIds),sevFilt,tWindow,Fs,freqList,eventFieldnames);
 
-secSamples = size(W,2) / (tWindow * 2);
-periSamples = secSamples * tPeri;
-W = W(:,round(size(W,2)/2) - periSamples:round(size(W,2)/2) + periSamples - 1,:,:);
+% % secSamples = size(W,2) / (tWindow * 2);
+% % periSamples = secSamples * tPeri;
+% % W = W(:,round(size(W,2)/2) - periSamples:round(size(W,2)/2) + periSamples - 1,:,:);
 
 MImatrix_surrEvents = NaN(size(W,1),nSurr,numel(freqList),numel(freqList));
 for iEvent = 1:size(W,1)
