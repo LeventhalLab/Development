@@ -1,4 +1,4 @@
-function [ mean_xcorr ] = calc_trial_xcorr( s, trialTimes, filtLFP, Fs, twin )
+function [ mean_xcorr ] = calc_trial_xcov( s, trialTimes, filtLFP, Fs, twin )
 %UNTITLED3 Summary of this function goes here
 %   Detailed explanation goes here
 % s - spike density estimate
@@ -21,12 +21,13 @@ for i_ts = 1 : length(trialTimes)
     sampRange = centerSamp + sampWin;
     curr_s = s(sampRange(1):sampRange(2));
     curr_LFP = filtLFP(sampRange(1):sampRange(2));
-    curr_xcorr = xcorr(curr_s, curr_LFP); 
-    
-    all_xcorr(num_valid_ts,:) = curr_xcorr;
+    curr_xcorr = xcov(curr_s, curr_LFP,'coeff'); 
+    startSamp = round(length(curr_s)/2);
+    endSamp = startSamp + length(curr_s) - 1;
+    all_xcorr(num_valid_ts,:) = curr_xcorr(startSamp:endSamp);
 %     STA = STA + lfp(sampRange(1):sampRange(2));
     
 end
 
-mean_xcorr = mean(all_xcorr,1);
+mean_xcorr = nanmean(all_xcorr,1);
 

@@ -8,7 +8,7 @@ lfpWire = [44,39,40,39,93,120,100,93,120,93,120];
 plot_t_limits = [-1,1];
 
 analysisConf = exportAnalysisConfv2('R0088',nasPath);
-numRandomScalograms = 100;
+numRandomScalograms = 1000;
 
 % compiles all waveforms by averaging all waveforms
 % compileOFSWaveforms(waveformDir);
@@ -22,7 +22,8 @@ sevFile = '';
 for iNeuron=1:size(analysisConf.neurons,1)
     fpass = [1 500];
 %     freqList = logFreqList(fpass,30);
-    freqList = logspace(0,2.7,50);            % DKL addition to match frequencies I've been using on my old data from Josh's lab
+%     freqList = logspace(0,2.7,50);            % DKL addition to match frequencies I've been using on my old data from Josh's lab
+    freqList = 2:55;
     
     neuronName = analysisConf.neurons{iNeuron};
     sessionName = analysisConf.sessionNames{iNeuron};
@@ -122,7 +123,7 @@ for iNeuron=1:size(analysisConf.neurons,1)
 %     eventAnalysis(); % format
     
     % filenames to store the analyzed scalogram data
-    tsScalo_name = [neuronName '_scalos_correctOnly.mat'];
+    tsScalo_name = [neuronName '_scalos_correctOnly_lin_f.mat'];
     tsScalo_subject_dir = fullfile(analysis_storage_dir, [analysisConf.subjects__name '_spike_triggered_scalos']);
     if ~exist(tsScalo_subject_dir,'dir')
         mkdir(tsScalo_subject_dir);
@@ -136,7 +137,13 @@ for iNeuron=1:size(analysisConf.neurons,1)
     % scalograms based on different ts bursts separated by low-med-high
     % spike density
     if isNewSession
-        [meanScalo, stdScalo, log_meanScalo, log_stdScalo] = meanScalogram(sevFilt,tWindow,scaloWindow,Fs,freqList,numRandomScalograms);
+%         [meanScalo, stdScalo, log_meanScalo, log_stdScalo] = meanScalogram(sevFilt,tWindow,scaloWindow,Fs,freqList,numRandomScalograms);
+        [allRandScalo] = meanScalogram(sevFilt,tWindow,scaloWindow,Fs,freqList,numRandomScalograms);
+        meanScalo = squeeze(mean(allRandScalo,1));
+        log_meanScalo = squeeze(mean(log10(allRandScalo),1));
+        log_stdScalo = squeeze(std(log10(allRandScalo),0,1));
+        stdScalo = squeeze(std(allRandScalo,0,1));
+        
         mean_psd = mean(meanScalo,2);
         mean_logpsd = mean(log_meanScalo,2);
         std_psd = mean(stdScalo,2);
@@ -171,7 +178,7 @@ for iNeuron=1:size(analysisConf.neurons,1)
     scaloMetadata.t = t;
     scaloMetadata.numRandomScalograms = numRandomScalograms;
     
-    save(tsScalo_name,'allTsScalograms','all_logTsScalograms','allTsMRL','allnScalograms','scaloMetadata','mean_psd','mean_logpsd','std_psd','std_logpsd');
+    save(tsScalo_name,'allTsScalograms','all_logTsScalograms','allTsMRL','allnScalograms','scaloMetadata','mean_psd','mean_logpsd','std_psd','std_logpsd','allRandScalo');
 %     tsPrctlScalos_DKL(); % format
     
     % high beta power centered analysis using ts raster

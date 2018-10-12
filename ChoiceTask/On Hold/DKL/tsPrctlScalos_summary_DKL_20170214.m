@@ -53,7 +53,7 @@ for i_ratDir = 1 : length(ratDirs)
                 case 'R0088'
                     powerScalo_clim = [2 3.5];
                 case 'R0117'
-                    powerScalo_clim = [0 2];
+                    powerScalo_clim = [1 2.5];
             end
             load(cur_unitFile);
             suffixStart = strfind(cur_unitFile,'_scalos');
