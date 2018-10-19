@@ -1,141 +1,81 @@
 function MImatrix_surr = tort_PACsurrogates(sevFilt,Fs,curTrials,freqList)
 
-    doDebug = false;
+    doDebug = true;
+    doDebug_iSurr = false;
     % (1) use surrogates from a distance: ~4 wavelengths/cycles from actual time point
     % (2) scramble amplitude/phase trials and compare Nose Out PAC
     % - if PAC is sig. larger normally, delta/beta are locked
     % - if PAC is sig. smaller normally, delta/beta are coincendental to the event
     tWindow = 1;
-    sampleCycles = 5; % cycles
+    tWindow_halfSample = round((tWindow * Fs) / 2);
     oversampleBy = 4;
     % % freqList = logFreqList([2 200],30);
 
     freqLabels = num2str(freqList(:),'%2.1f');
     nBins = 18;
-    nSurr = 200;
+    nSurr = 20;
+    nLocs = nSurr;
 
     trialTimeRanges = compileTrialTimeRanges(curTrials);
-    % trialTimeRanges_samples = trialTimeRanges * Fs;
-    takeTime = (sampleCycles / min(freqList)) * oversampleBy;
+    takeTime = tWindow * oversampleBy;
     takeSamples = round(takeTime * Fs);
     minTime = min(trialTimeRanges(:,2));
     maxTime = max(trialTimeRanges(:,1)) - takeTime;
 
     data = [];
     randSampleLog = [];
-    iSurr = 0;
+    iLoc = 0;
     disp('Searching for out of trial times...');
     iTry = 0;
-    while iSurr < nSurr
+    while iLoc <= nLocs % nSurr+!
         % try randTs
         randTs = (maxTime-minTime) .* rand + minTime;
         iTry = iTry + 1;
         % check that randTs is not in-trial
         if ~inTrial(randTs,takeTime,trialTimeRanges)
-            iSurr = iSurr + 1;
+            iLoc = iLoc + 1;
             randSample = round(randTs * Fs);
-            randSampleLog(iSurr) = randSample;
-            data(:,iSurr) = sevFilt(randSample:randSample + takeSamples - 1);
+            randSampleLog(iLoc) = randSample;
+            data(:,iLoc) = sevFilt(randSample:randSample + takeSamples - 1);
         end
     end
     disp('Done searching!');
     
-    tWindowSamples = tWindow * Fs;
-    % we oversampled by 3 (@2Hz, 5 cycles * 3 = 7.5s)
-    % should be able to start at tWindow (1s) and still have room to offset by 5 cycles for all freqs
     disp('Calculating W...');
     W = calculateComplexScalograms_EnMasse(data,'Fs',Fs,'freqList',freqList);
-
+    % reshape W
+    reshapeRange = round(size(W,1)/2)-tWindow_halfSample:round(size(W,1)/2)+tWindow_halfSample-1;
+    W = W(reshapeRange,:,:);
+    
     disp('Generating surrogates...');
     MImatrix_surr = NaN(nSurr,numel(freqList),numel(freqList));
-    for iSurr = 1:nSurr
-        disp(['s',num2str(iSurr)]);
+
+    for iLoc = 1:nLocs
+        disp(iLoc);
         for ifp = 1:numel(freqList)
-            faStart = round(tWindow * 2 * Fs);
-            faEnd = round(faStart + (tWindow * Fs) - 1);
-            % centered on sampleCycles + rnd from faStart
-%             fpStart = faStart + round(tWindow * 2 * Fs) + round((sampleCycles - 0.5 + rand) / freqList(ifp) * Fs); % freq dep.
-%             fpStart = faStart + round((2 + 2 * rand) * Fs); % fixed
-            fpStart = faStart + round(tWindow * 2 * Fs) + round((sampleCycles - 0.5 + rand) / min(freqList) * Fs);
-
-            fpEnd = round(fpStart + (tWindow * Fs) - 1);
-            cur_fp = angle(W(fpStart:fpEnd,iSurr,ifp));
+            phase = angle(W(:,iLoc,ifp));
             for ifA = ifp:numel(freqList)
-                binEdges = linspace(-pi,pi,nBins+1);
-                [N,edges,bin] = histcounts(cur_fp,binEdges);
-
-% %                 cur_fA = abs(W(faStart:faEnd,iSurr,ifA).^2);
-                cur_fA = abs(W(faStart:faEnd,iSurr,ifA));
-                mi_bins = zeros(1,nBins);
-                
-                for iBin = 1:nBins
-                    mi_bins(1,iBin) = sum(cur_fA(bin == iBin)) ./ sum(bin == iBin); % mean
+                amplitude = abs(W(:,iLoc,ifA));
+                z = amplitude.*exp(1i*phase);
+                % mean of z over time, prenormalized value
+                m_raw = mean(z);
+                surrogate_m = zeros(nSurr,1);
+                surrCount = 0;
+                for iSurr = 1:nSurr
+                    if iLoc ~= iSurr
+                        surrCount = surrCount + 1;
+                        surrogate_amplitude = abs(W(:,iSurr,ifA));
+                        surrogate_m(surrCount) = abs(mean(surrogate_amplitude.*exp(1i*phase)));
+                    end
                 end
-                % now get pj
-                pj = zeros(1,nBins);
-                for iBin = 1:nBins
-                    pj(1,iBin) = mi_bins(1,iBin) / sum(mi_bins);
-                end
-                % now get H
-                H = 0;
-                for iBin = 1:nBins
-                    H = H + (pj(1,iBin) * log(pj(1,iBin)));
-                end
-                H = -H;
-                Hmax = log(nBins);
-                MI = (Hmax - H) / Hmax;
-                MImatrix_surr(iSurr,ifp,ifA) = MI;
-                
-                
-                % debug
-                if doDebug
-                    rows = 4;
-                    cols = 1;
-                    h = ff(900,800);
-                    t = linspace(0,size(W,1)/Fs,size(W,1));
+                % fit gaussian to surrogate data, uses normfit.m from MATLAB Statistics toolbox
+                [surrogate_mean,surrogate_std] = normfit(surrogate_m);
+                % normalize length using surrogate data (z-score) 
+                m_norm_length = (abs(m_raw)-surrogate_mean)/surrogate_std;
+                m_norm_phase = angle(m_raw);
+                m_norm = m_norm_length*exp(1i*m_norm_phase);
 
-                    subplot(rows,cols,1);
-                    plot(t,data(:,iSurr));
-                    xlim([0 size(W,1)/Fs]);
-                    xlabel('time (s)');
-                    title({['iSurr: ',num2str(iSurr,'%02d')],'raw data'});
-
-                    subplot(rows,cols,2);
-                    plot(t,abs(W(:,iSurr,ifA)));
-                    yticks(ylim);
-                    xlim([0 size(W,1)/Fs]);
-                    xlabel('time (s)');
-                    hold on;
-                    plot([faStart faEnd]./Fs,[diff(ylim)/2 diff(ylim)/2],'r','lineWidth',6);
-                    title(['amplitude ',num2str(freqList(ifA),'%1.2f'),'Hz']);
-
-                    subplot(rows,cols,3);
-                    plot(t,angle(W(:,iSurr,ifp)));
-                    ylim([-pi pi]);
-                    yticks(sort([ylim 0]));
-                    xlim([0 size(W,1)/Fs]);
-                    xlabel('time (s)');
-                    hold on;
-                    plot([fpStart fpEnd]./Fs,[0 0],'b','lineWidth',6);
-                    title(['phase ',num2str(freqList(ifp),'%1.2f'),'Hz']);
-                    
-                    subplot(rows,cols,4);
-                    bar([pj pj],'k');
-                    xticks([1 9 18 19 27 36]);
-                    xticklabels({'0','180','270','0','180','270'});
-                    xtickangle(270);
-                    xlabel('phase');
-                    ylim([0 0.1]);
-                    yticks(ylim);
-                    ylabel('pj');
-                    title({'entropy measure',['MI = ',num2str(MI,2)]});
-                    
-                    savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/PAC/tortMethod/debug';
-                    set(gcf,'color','w');
-                    saveas(h,fullfile(savePath,['iSurr',num2str(iSurr,'%03d'),'_amp',num2str(ifA,'%02d'),'_phase',num2str(ifp,'%02d'),'.png']));
-                     close(h);
-                end
-                
+                MImatrix_surr(iLoc,ifp,ifA) = m_norm_length;
             end
         end
     end
@@ -143,13 +83,13 @@ function MImatrix_surr = tort_PACsurrogates(sevFilt,Fs,curTrials,freqList)
     if doDebug
         rows = 5;
         cols = 8;
-        iSurr = 0;
+        iLoc = 0;
         for jj = 1:5
             ff(1400,900);
             for ii = 1:rows*cols
-                iSurr = iSurr + 1;
+                iLoc = iLoc + 1;
                 subplot(rows,cols,ii);
-                imagesc(squeeze(MImatrix_surr(iSurr,:,:))');
+                imagesc(squeeze(MImatrix_surr(iLoc,:,:))');
                 colormap(jet);
                 set(gca,'ydir','normal');
                 caxis([0 0.05])
@@ -176,27 +116,17 @@ function MImatrix_surr = tort_PACsurrogates(sevFilt,Fs,curTrials,freqList)
         ylabel('amp (Hz)');
         set(gca,'fontsize',6);
 
-        figure;
+        ff(300,600);
+        subplot(211);
         plot(sort(randSampleLog));
         ylim([1 numel(sevFilt)]);
         ylabel('whole session samples');
         xlabel('surrogate #');
         title('sampls point of surrogate (sorted)');
-    end
-end
-
-function isInTrial = inTrial(randTs,takeTime,trialTimeRanges)
-    isInTrial = false;
-    for iTrial = 1:size(trialTimeRanges,1)
-        % does it start in-trial?
-        if randTs > trialTimeRanges(iTrial,1) && randTs < trialTimeRanges(iTrial,2)
-            isInTrial = true;
-            return;
-        end
-        % does it end in-trial?
-        if randTs + takeTime > trialTimeRanges(iTrial,1) && randTs + takeTime < trialTimeRanges(iTrial,2)
-            isInTrial = true;
-            return;
-        end
+        subplot(212);
+        plot(randSampleLog,'k.');
+        ylim([1 numel(sevFilt)]);
+        ylabel('whole session samples');
+        title('sampls point of surrogate (not sorted)');
     end
 end
