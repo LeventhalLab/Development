@@ -43,17 +43,19 @@ for iNeuron = selectedLFPFiles(1)'
 
         if ~mixTrials % i.e., we need W_surr
             data = [];
+            surrLog = [];
             iSurr = 0;
             disp('Searching for out of trial times...');
             while iSurr < nSurr
                 % try randTs
                 randTs = (maxTime-minTime) .* rand + minTime;
                 % check that randTs is not in-trial
-                if ~inTrial(randTs,takeTime,trialTimeRanges)
+% %                 if ~inTrial(randTs,takeTime,trialTimeRanges)
                     iSurr = iSurr + 1;
                     randSample = round(randTs * Fs);
+                    surrLog(iSurr) = randTs;
                     data(:,iSurr) = sevFilt(randSample:randSample + takeSamples - 1);
-                end
+% %                 end
             end
             disp('Done searching!');
             tWindow_sample = round(tWindow * Fs);

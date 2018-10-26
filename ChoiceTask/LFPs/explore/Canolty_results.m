@@ -6,8 +6,8 @@ for iSession = 1:numel(all_MImatrix_noMix)
     MImatrix_noMix =  all_MImatrix_noMix{iSession};
     MImatrix_mix =  all_MImatrix_mix{iSession};
     for iEvent = 1:7
-        mean_MImatrix_noMix(iSession,iEvent,:,:) = nanmean(MImatrix_noMix(iEvent,:,:,:),2);
-        mean_MImatrix_mix(iSession,iEvent,:,:) = nanmean(MImatrix_mix(iEvent,:,:,:),2);
+        mean_MImatrix_noMix(iSession,iEvent,:,:) = MImatrix_noMix(iEvent,:,:);
+        mean_MImatrix_mix(iSession,iEvent,:,:) = MImatrix_mix(iEvent,:,:);
     end
 end
 rows = 4;
@@ -19,7 +19,7 @@ for iEvent = 1:7
     imagesc(smean_MImatrix_noMix');
     colormap(gca,jet);
     set(gca,'ydir','normal');
-    caxis([-1 1]);
+    caxis([-10 10]);
     xticks(1:numel(freqList));
     xticklabels(freqLabels);
     xtickangle(270);
@@ -28,7 +28,7 @@ for iEvent = 1:7
     if iEvent == 1
         ylabel('amp (Hz)');
     end
-    title({'real',eventFieldnames{iEvent}});
+    title({'mean','real',eventFieldnames{iEvent}});
     if iEvent == 7
         cbAside(gca,'Z-MI','k');
     end
@@ -38,7 +38,7 @@ for iEvent = 1:7
     imagesc(pMat');
     colormap(gca,jet);
     set(gca,'ydir','normal');
-    caxis([0 1]);
+    caxis([0 .001]);
     xticks(1:numel(freqList));
     xticklabels(freqLabels);
     xtickangle(270);
@@ -56,7 +56,7 @@ for iEvent = 1:7
     imagesc(smean_MImatrix_mix');
     colormap(gca,jet);
     set(gca,'ydir','normal');
-    caxis([-1 1]);
+    caxis([-10 10]);
     xticks(1:numel(freqList));
     xticklabels(freqLabels);
     xtickangle(270);
@@ -75,7 +75,7 @@ for iEvent = 1:7
     imagesc(pMat');
     colormap(gca,jet);
     set(gca,'ydir','normal');
-    caxis([0 1]);
+    caxis([0 .001]);
     xticks(1:numel(freqList));
     xticklabels(freqLabels);
     xtickangle(270);
@@ -90,7 +90,7 @@ for iEvent = 1:7
     end
 end
 set(gcf,'color','w');
-saveFile = 'allSessions_zscoreTrialwMixed.png';
+saveFile = 'allSessions_zscoreTrialwMixed_mean.png';
 saveas(h,fullfile(savePath,saveFile));
 close(h);
 
