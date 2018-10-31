@@ -1,5 +1,5 @@
 doSetup = true;
-zThresh = 2;
+zThresh = 5;
 tWindow = 2;
 freqList = logFreqList([1 200],10);
 Wlength = 400;
@@ -18,10 +18,12 @@ if doSetup
         curTrials = all_trials{iNeuron};
         [trialIds,allTimes] = sortTrialsBy(curTrials,'RT');
         [sevFilt,Fs,decimateFactor] = loadCompressedSEV(sevFile,[]);
-        W = eventsLFPv2(curTrials(trialIds),sevFilt,tWindow,Fs,freqList,eventFieldnames);
+        [W,all_data] = eventsLFPv2(curTrials(trialIds),sevFilt,tWindow,Fs,freqList,eventFieldnames);
+        keepTrials = threshTrialData(all_data,zThresh);
+        W = W(:,:,keepTrials,:);
+        
         [Wz_power,Wz_phase] = zScoreW(W,Wlength); % power Z-score
-        [Wz_power,keepTrials] = removeWzTrials(Wz_power,zThresh);
-        Wz_phase = Wz_phase(:,:,keepTrials,:);
+
         session_Wz_power(iSession,:,:,:) = squeeze(mean(Wz_power,3));
         session_Wz_phase(iSession,:,:,:) = squeeze(circ_r(Wz_phase,[],[],3));
         

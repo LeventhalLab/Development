@@ -3,6 +3,7 @@
 % load('session_20180925_entrainmentSurrogates.mat', 'LFPfiles_local')
 % load('session_20180925_entrainmentSurrogates.mat', 'selectedLFPFiles')
 
+savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/PAC/canoltyMethod/bySession';
 doSetup = true;
 doSave = true;
 doPlot = true;
@@ -10,17 +11,22 @@ doDebug = false;
 dbstop if error
 
 tWindow = 0.5;
-freqList = logFreqList([2 200],31);
+% freqList = logFreqList([2 200],11);
+freqList_p = logFreqList([2 10],10);
+freqList_a = logFreqList([10 200],10);
+freqList = unique([freqList_p freqList_a]);
 
-freqLabels = num2str(freqList(:),'%2.1f');
 nSurr = 200;
-nShuff = 1000;
+nShuff = 10;
 oversampleBy = 4;
+zThresh = 5;
 
 iSession = 0;
 all_MImatrix = {};
+all_shuff_MImatrix_mean = {};
+all_shuff_MImatrix_pvals = {};
 
-for iNeuron = selectedLFPFiles(1)'
+for iNeuron = selectedLFPFiles(2:end)'
     iSession = iSession + 1;
     disp(['Session #',num2str(iSession)]);
     if doSetup
@@ -31,7 +37,9 @@ for iNeuron = selectedLFPFiles(1)'
         curTrials = all_trials{iNeuron};
         [trialIds,allTimes] = sortTrialsBy(curTrials,'RT');
         [sevFilt,Fs,decimateFactor] = loadCompressedSEV(sevFile,[]);
-        W = eventsLFPv2(curTrials(trialIds),sevFilt,tWindow,Fs,freqList,eventFieldnames);
+        [W,all_data] = eventsLFPv2(curTrials(trialIds),sevFilt,tWindow,Fs,freqList,eventFieldnames);
+        keepTrials = threshTrialData(all_data,zThresh);
+        W = W(:,:,keepTrials,:);
         
         % surrogates
         trialTimeRanges = compileTrialTimeRanges(curTrials);
@@ -44,34 +52,40 @@ for iNeuron = selectedLFPFiles(1)'
         surrLog = [];
         iSurr = 0;
         disp('Searching for out of trial times...');
-        while iSurr < nSurr
+        while iSurr < nSurr + 40 % add buffer for artifact removal
             % try randTs
             randTs = (maxTime-minTime) .* rand + minTime;
             % check that randTs is not in-trial
-% %                 if ~inTrial(randTs,takeTime,trialTimeRanges)
+% %             if inTrial(randTs,takeTime,trialTimeRanges)
                 iSurr = iSurr + 1;
                 randSample = round(randTs * Fs);
                 surrLog(iSurr) = randTs;
                 data(:,iSurr) = sevFilt(randSample:randSample + takeSamples - 1);
-% %                 end
+%             end
         end
         disp('Done searching!');
+        keepTrials = threshTrialData(data,zThresh);
+        W_surr = calculateComplexScalograms_EnMasse(data(:,keepTrials(1:nSurr)),'Fs',Fs,'freqList',freqList);
         tWindow_sample = round(tWindow * Fs);
-        W_surr = calculateComplexScalograms_EnMasse(data,'Fs',Fs,'freqList',freqList);
         reshapeRange = round(size(W_surr,1)/2)-tWindow_sample:round(size(W_surr,1)/2)+tWindow_sample-1;
         W_surr = W_surr(reshapeRange,:,:);
         
-        MImatrix = NaN(size(W,1),numel(freqList),numel(freqList));
+        MImatrix = NaN(size(W,1),numel(freqList_p),numel(freqList_a));
         shuff_MImatrix_mean = MImatrix;
         shuff_MImatrix_pvals = MImatrix;
+        surr_ifA = NaN(numel(freqList_a),nSurr); % #save
         for iEvent = 1:size(W,1)
             disp(['working on event #',num2str(iEvent)]);
-            for ifp = 1:numel(freqList)
-                for ifA = ifp:numel(freqList)
-                    phase = squeeze(angle(W(iEvent,:,:,ifp)));
+            for ifp = 1:numel(freqList_p)
+                for ifA = 1:numel(freqList_a)
+                    pIdx = find(freqList == freqList_p(ifp));
+                    phase = squeeze(angle(W(iEvent,:,:,pIdx)));
                     phase = phase(:)';
-                    amplitude = squeeze(abs(W(iEvent,:,:,ifA)));
+                    
+                    aIdx = find(freqList == freqList_a(ifA));
+                    amplitude = squeeze(abs(W(iEvent,:,:,aIdx)));
                     amplitude = amplitude(:)';
+                    
                     z = amplitude.*exp(1i*phase);
                     m_raw = mean(z);
                     
@@ -83,16 +97,18 @@ for iNeuron = selectedLFPFiles(1)'
                         shuff_m_raw(iShuff) = mean(shuff_z);
                     end
                     
-                    if iEvent == 1
+                    if ~any(surr_ifA(ifA,:))
                         surrVals = [];
                         for iSurr = 1:nSurr
-                            surrogate_amplitude = squeeze(abs(W_surr(:,randperm(size(W,3),size(W,3)),ifA)));
+                            surrogate_amplitude = squeeze(abs(W_surr(:,randperm(nSurr,size(W,3)),ifA)));
                             surrogate_amplitude = surrogate_amplitude(:)';
                             surrVals(iSurr) = mean(surrogate_amplitude.*exp(1i*phase));
                             surrogate_m(iSurr) = abs(mean(surrogate_amplitude.*exp(1i*phase)));
                         end
+                    else
+                        surrogate_m = surr_ifA(ifA,:);
                     end
-                    
+                        
                     [surrogate_mean,surrogate_std] = normfit(surrogate_m);
                     
                     m_norm_length = (abs(m_raw)-surrogate_mean)/surrogate_std;
@@ -102,7 +118,8 @@ for iNeuron = selectedLFPFiles(1)'
                     
                     shuff_m_norm_length = (abs(shuff_m_raw)-surrogate_mean)./surrogate_std;
                     shuff_MImatrix_mean(iEvent,ifp,ifA) = mean(shuff_m_norm_length);
-                    shuff_MImatrix_pvals(iEvent,ifp,ifA) = sum(abs(m_norm_length) > abs(shuff_m_norm_length)) / nShuff;
+%                     shuff_MImatrix_pvals(iEvent,ifp,ifA) = sum(abs(m_norm_length) > abs(shuff_m_norm_length)) / nShuff;
+                    shuff_MImatrix_pvals(iEvent,ifp,ifA) = sum(abs(m_raw) > abs(shuff_m_raw)) / nShuff;
                     
                     if doDebug
                         t = linspace(0,1,numel(amplitude));
@@ -210,11 +227,13 @@ for iNeuron = selectedLFPFiles(1)'
             end
         end
         all_MImatrix{iSession} = MImatrix;
+        all_shuff_MImatrix_mean{iSession} = shuff_MImatrix_mean;
+        all_shuff_MImatrix_pvals{iSession} = shuff_MImatrix_pvals;
     end
     
     if doPlot
-        pLims = [0 0.01];
-        zLims = [-15 15];
+        pLims = [0 0.001];
+        zLims = [-26 26];
         rows = 4;
         cols = 7;
         h = figuree(1300,800);
@@ -225,18 +244,18 @@ for iNeuron = selectedLFPFiles(1)'
             colormap(gca,jet);
             set(gca,'ydir','normal');
             caxis(zLims);
-            xticks(1:numel(freqList));
-            xticklabels(freqLabels);
+            xticks(1:numel(freqList_p));
+            xticklabels(num2str(freqList_p(:),'%2.1f'));
             xtickangle(270);
             xlabel('phase (Hz)');
-            yticks(1:numel(freqList));
-            yticklabels(freqLabels);
+            yticks(1:numel(freqList_a));
+            yticklabels(num2str(freqList_a(:),'%2.1f'));
             ylabel('amp (Hz)');
             set(gca,'fontsize',6);
             if iEvent == 1
-                title({[subjectName,' s',num2str(iSession,'%02d')],eventFieldnames{iEvent}});
+                title({'mean real Z',[subjectName,' s',num2str(iSession,'%02d')],eventFieldnames{iEvent}});
             else
-                title(eventFieldnames{iEvent});
+                title({'mean real Z',eventFieldnames{iEvent}});
             end
             if iEvent == 7
                 cbAside(gca,'Z-MI','k');
@@ -249,14 +268,15 @@ for iNeuron = selectedLFPFiles(1)'
             colormap(gca,jet);
             set(gca,'ydir','normal');
             caxis(pLims);
-            xticks(1:numel(freqList));
-            xticklabels(freqLabels);
+            xticks(1:numel(freqList_p));
+            xticklabels(num2str(freqList_p(:),'%2.1f'));
             xtickangle(270);
             xlabel('phase (Hz)');
-            yticks(1:numel(freqList));
-            yticklabels(freqLabels);
+            yticks(1:numel(freqList_a));
+            yticklabels(num2str(freqList_a(:),'%2.1f'));
             ylabel('amp (Hz)');
             set(gca,'fontsize',6);
+            title('mean real pval');
             if iEvent == 7
                 cbAside(gca,'p-value','k');
             end
@@ -267,19 +287,15 @@ for iNeuron = selectedLFPFiles(1)'
             colormap(gca,jet);
             set(gca,'ydir','normal');
             caxis(zLims);
-            xticks(1:numel(freqList));
-            xticklabels(freqLabels);
+            xticks(1:numel(freqList_p));
+            xticklabels(num2str(freqList_p(:),'%2.1f'));
             xtickangle(270);
             xlabel('phase (Hz)');
-            yticks(1:numel(freqList));
-            yticklabels(freqLabels);
+            yticks(1:numel(freqList_a));
+            yticklabels(num2str(freqList_a(:),'%2.1f'));
             ylabel('amp (Hz)');
             set(gca,'fontsize',6);
-            if iEvent == 1
-                title({[subjectName,' s',num2str(iSession,'%02d')],eventFieldnames{iEvent}});
-            else
-                title(eventFieldnames{iEvent});
-            end
+            title('mean shuff Z');
             if iEvent == 7
                 cbAside(gca,'Z-MI','k');
             end
@@ -290,14 +306,15 @@ for iNeuron = selectedLFPFiles(1)'
             colormap(gca,jet);
             set(gca,'ydir','normal');
             caxis(pLims);
-            xticks(1:numel(freqList));
-            xticklabels(freqLabels);
+            xticks(1:numel(freqList_p));
+            xticklabels(num2str(freqList_p(:),'%2.1f'));
             xtickangle(270);
             xlabel('phase (Hz)');
-            yticks(1:numel(freqList));
-            yticklabels(freqLabels);
+            yticks(1:numel(freqList_a));
+            yticklabels(num2str(freqList_a(:),'%2.1f'));
             ylabel('amp (Hz)');
             set(gca,'fontsize',6);
+            title('mean shuff pval');
             if iEvent == 7
                 cbAside(gca,'p-value','k');
             end
