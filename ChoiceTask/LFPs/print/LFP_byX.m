@@ -1,7 +1,7 @@
-doSetup = true;
-zThresh = 5;
-tWindow = 2;
-freqList = logFreqList([1 200],10);
+doSetup = false;
+zThresh = 2;
+tWindow = 1;
+freqList = logFreqList([2 200],30);
 Wlength = 400;
 
 if doSetup
@@ -9,7 +9,7 @@ if doSetup
     session_Wz_phase = [];
     session_Wz_rayleigh_pval = [];
     iSession = 0;
-    for iNeuron = selectedLFPFiles(1:2)'
+    for iNeuron = selectedLFPFiles'
         iSession = iSession + 1;
         sevFile = LFPfiles_local{iNeuron};
         disp(sevFile);
@@ -111,7 +111,7 @@ if false
     set(gcf,'color','w');
 end
 
-if true
+if false
     savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/LFP/bySession';
     for iSession = 1:size(session_Wz_power,1)
         sevFile = LFPfiles_local{selectedLFPFiles(iSession)};
@@ -148,12 +148,12 @@ if false
     end
 end
 
-if false
+if true
     savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/LFP/allSessions';
     saveFile = 'allSubject_allSessions';
-    scaloPower = squeeze(mean(session_Wz_power(:,:,:,:)));
-    scaloPhase = squeeze(mean(session_Wz_phase(:,:,:,:)));
-    scaloRayleigh = squeeze(mean(session_Wz_rayleigh_pval(:,:,:,:)));
+    scaloPower = squeeze(median(session_Wz_power(:,:,:,:)));
+    scaloPhase = squeeze(median(session_Wz_phase(:,:,:,:)));
+    scaloRayleigh = squeeze(median(session_Wz_rayleigh_pval(:,:,:,:)));
     plotLFPandMRLandRayleigh(scaloPower,scaloPhase,scaloRayleigh,savePath,saveFile,freqList,eventFieldnames);
 end
 
@@ -256,7 +256,7 @@ function plotLFPandMRLandRayleigh(scaloPower,scaloPhase,scaloRayleigh,savePath,s
     gridColor = repmat(.7,[1,3]);
     for iEvent = 1:7
         subplot(rows,cols,prc(cols,[1,iEvent]));
-        imagesc(linspace(-2,2,size(scaloPower,2)),1:numel(freqList),squeeze(scaloPower(iEvent,:,:))');
+        imagesc(linspace(-1,1,size(scaloPower,2)),1:numel(freqList),squeeze(scaloPower(iEvent,:,:))');
         colormap(gca,jet);
         caxis([-2 2]);
         xlim([-1 1]);
@@ -275,7 +275,7 @@ function plotLFPandMRLandRayleigh(scaloPower,scaloPhase,scaloRayleigh,savePath,s
         end
         
         subplot(rows,cols,prc(cols,[2,iEvent]));
-        imagesc(linspace(-2,2,size(scaloPhase,2)),1:numel(freqList),squeeze(scaloPhase(iEvent,:,:))');
+        imagesc(linspace(-1,1,size(scaloPhase,2)),1:numel(freqList),squeeze(scaloPhase(iEvent,:,:))');
         colormap(gca,gray);
         caxis([0 0.5]);
         xlim([-1 1]);
@@ -290,9 +290,9 @@ function plotLFPandMRLandRayleigh(scaloPower,scaloPhase,scaloRayleigh,savePath,s
         end
 
         subplot(rows,cols,prc(cols,[3,iEvent]));
-        imagesc(linspace(-2,2,size(scaloRayleigh,2)),1:numel(freqList),squeeze(scaloRayleigh(iEvent,:,:))');
+        imagesc(linspace(-1,1,size(scaloRayleigh,2)),1:numel(freqList),squeeze(scaloRayleigh(iEvent,:,:))');
         colormap(gca,hot);
-        caxis([0 0.2]);
+        caxis([0 0.05]);
         xlim([-1 1]);
         xticks(sort([0 xlim]));
         yticks(1:numel(freqList));

@@ -1,6 +1,7 @@
-doSetup = false;
+doSetup = true;
 
-iEvent = 4;
+savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/PAC/canoltyMethod/allSessions';
+
 freqList = {[1 4;13 30]};
 nSurr = 200;
 oversampleBy = 4;
@@ -150,3 +151,4 @@ for iEvent = 1:7
     grid on;
 end
 set(gcf,'color','w');
+saveas(h,fullfile(savePath,'canolty_timeSweep.png'));
