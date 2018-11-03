@@ -7,7 +7,7 @@ nSurr = 50;
 oversampleBy = 4;
 tWindow = 2;
 tSweep = 0.5;
-nSweep = 30;
+nSweep = 200;
 zThresh = 5;
 
 if doSetup
@@ -71,7 +71,7 @@ if doSetup
     end
 end
 
-if false
+if true
     nBins = 10;
     RTlinspace = ceil(linspace(1,numel(compiled_RT),nBins+1));
     RTsorted = sort(compiled_RT);
@@ -109,7 +109,7 @@ sweepPoints = floor(linspace(1,size(W,2)-sweepSamples,nSweep));
 for iBin = 1:nBins
     W = W_RT{iBin};
     theseSessions = decodeSession{iBin};
-    for iEvent = 4%1:7
+    for iEvent = 1:7
         m_sweep = [];
         for iSweep = 1:nSweep
             disp(['iBin ',num2str(iBin),'; iEvent = ',num2str(iEvent),'; iSweep = ',num2str(iSweep)]);
@@ -148,7 +148,7 @@ subplotMat = [1 3 5 7 2 4 6 8];
 t = linspace(-tWindow,tWindow,nSweep);
 colors = cool(nBins);
 nSmooth = 1;
-for iEvent = 4%1:7
+for iEvent = 1:7
     subplot(rows,cols,subplotMat(iEvent));
     for iBin = 1:size(all_m_sweep,1)
         plot(t,smooth(squeeze(all_m_sweep(iBin,iEvent,:)),nSmooth),'color',colors(iBin,:),'lineWidth',2);
