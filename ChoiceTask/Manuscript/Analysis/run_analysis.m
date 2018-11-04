@@ -1,5 +1,4 @@
 % % nasPath = '/Volumes/RecordingsLeventhal2/ChoiceTask';
-% % analysisConf = exportAnalysisConfv2('R0088',nasPath);
 
 % compiles all waveforms by averaging all waveforms
 % compileOFSWaveforms(waveformDir);
@@ -50,9 +49,9 @@ for iNeuron = 1:size(analysisConf.neurons,1)
     
     logFile = getLogPath(sessionConf.leventhalPaths.rawdata);
     logData = readLogData(logFile);
-    if strcmp(neuronName(1:5),'R0154')
+% %     if strcmp(neuronName(1:5),'R0154')
         nexStruct = fixMissingEvents(logData,nexStruct);
-    end
+% %     end
     trials = createTrialsStruct_simpleChoice(logData,nexStruct);
     all_trials{iNeuron} = trials; % for debugging
     timingField = 'RT';
