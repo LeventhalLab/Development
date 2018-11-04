@@ -1,7 +1,20 @@
+load('session_20180925_entrainmentSurrogates.mat', 'eventFieldnames')
+load('session_20180925_entrainmentSurrogates.mat', 'all_trials')
+load('session_20180925_entrainmentSurrogates.mat', 'LFPfiles_local')
+load('session_20180925_entrainmentSurrogates.mat', 'selectedLFPFiles')
+load('session_20180925_entrainmentSurrogates.mat', 'all_ts')
+load('session_20180925_entrainmentSurrogates.mat', 'LFPfiles_local_altLookup')
+
 doSetup = true;
 doSave = false;
 % freqList = logFreqList([1 200],10);
-freqList = [3.2,19];
+% freqList = [3.2,19];
+freqList = {[1 4;4 7;8 12;13 30]};
+if iscell(freqList)
+    numelFreqs = size(freqList{:},1);
+else
+    numelFreqs = numel(freqList);
+end
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/spikePhaseHist';
 nBins = 12;
 binEdges = linspace(-pi,pi,nBins+1);
@@ -10,23 +23,23 @@ nSurr = 100;
 
 if doSetup
     validUnits = [];
-    all_spikeHist_pvals = NaN(numel(all_ts),numel(freqList));
-    all_spikeHist_rs = NaN(numel(all_ts),numel(freqList));
-    all_spikeHist_mus = NaN(numel(all_ts),numel(freqList));
-    all_spikeHist_angles = NaN(numel(all_ts),nBins,numel(freqList));
-    all_spikeHist_alphas = cell(numel(all_ts),numel(freqList));
+    all_spikeHist_pvals = NaN(numel(all_ts),numelFreqs);
+    all_spikeHist_rs = NaN(numel(all_ts),numelFreqs);
+    all_spikeHist_mus = NaN(numel(all_ts),numelFreqs);
+    all_spikeHist_angles = NaN(numel(all_ts),nBins,numelFreqs);
+    all_spikeHist_alphas = cell(numel(all_ts),numelFreqs);
     
-    all_spikeHist_pvals_surr = NaN(nSurr,numel(all_ts),numel(freqList));
-    all_spikeHist_rs_surr = NaN(nSurr,numel(all_ts),numel(freqList));
-    all_spikeHist_mus_surr = NaN(nSurr,numel(all_ts),numel(freqList));
-    all_spikeHist_angles_surr = NaN(nSurr,numel(all_ts),nBins,numel(freqList));
-    all_spikeHist_alphas_surr = cell(nSurr,numel(all_ts),numel(freqList));
+    all_spikeHist_pvals_surr = NaN(nSurr,numel(all_ts),numelFreqs);
+    all_spikeHist_rs_surr = NaN(nSurr,numel(all_ts),numelFreqs);
+    all_spikeHist_mus_surr = NaN(nSurr,numel(all_ts),numelFreqs);
+    all_spikeHist_angles_surr = NaN(nSurr,numel(all_ts),nBins,numelFreqs);
+    all_spikeHist_alphas_surr = cell(nSurr,numel(all_ts),numelFreqs);
     
-    all_spikeHist_inTrial_pvals = NaN(numel(all_ts),numel(freqList));
-    all_spikeHist_inTrial_rs = NaN(numel(all_ts),numel(freqList));
-    all_spikeHist_inTrial_mus = NaN(numel(all_ts),numel(freqList));
-    all_spikeHist_inTrial_angles = NaN(numel(all_ts),nBins,numel(freqList));
-    all_spikeHist_inTrial_alphas = cell(numel(all_ts),numel(freqList));
+    all_spikeHist_inTrial_pvals = NaN(numel(all_ts),numelFreqs);
+    all_spikeHist_inTrial_rs = NaN(numel(all_ts),numelFreqs);
+    all_spikeHist_inTrial_mus = NaN(numel(all_ts),numelFreqs);
+    all_spikeHist_inTrial_angles = NaN(numel(all_ts),nBins,numelFreqs);
+    all_spikeHist_inTrial_alphas = cell(numel(all_ts),numelFreqs);
     for iNeuron = 1:numel(all_ts)
         sevFile = LFPfiles_local{iNeuron};
         % replace with alternative for LFP
@@ -43,8 +56,16 @@ if doSetup
         [trialIds,allTimes] = sortTrialsBy(curTrials,'RT');
         trialTimeRanges = compileTrialTimeRanges(curTrials(trialIds));
 
-        W = calculateComplexScalograms_EnMasse(sevFilt','Fs',Fs,'freqList',freqList);
-        W = squeeze(W);
+        if iscell(freqList)
+            W = [];
+            for iFreq = 1:size(freqList{:},1)
+                disp(['Filtering for surrogates ',num2str(freqList{:}(iFreq,1)),' - ',num2str(freqList{:}(iFreq,2)),' Hz']);
+                W(:,iFreq) = eegfilt(sevFilt,Fs,freqList{:}(iFreq,1),freqList{:}(iFreq,2));
+            end
+        else
+            W = calculateComplexScalograms_EnMasse(sevFilt','Fs',Fs,'freqList',freqList); % size: 5568092, 1, 3
+            W = squeeze(W); % size: 5568092, 3
+        end
         ts_samples = ts_samples(ts_samples > 0 & ts_samples <= size(W,1)); % clean conversion errors
         
         spikeAngles = [];
