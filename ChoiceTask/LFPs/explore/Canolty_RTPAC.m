@@ -71,7 +71,7 @@ if doSetup
     end
 end
 
-if true
+if false
     nBins = 10;
     RTlinspace = ceil(linspace(1,numel(compiled_RT),nBins+1));
     RTsorted = sort(compiled_RT);
@@ -105,7 +105,7 @@ end
 
 all_m_sweep = [];
 sweepSamples = round(tSweep * 2 * Fs);
-sweepPoints = floor(linspace(1,size(W,2)-sweepSamples,nSweep));
+sweepPoints = floor(linspace(1,size(compiled_PACRTdata(1).W,2)-sweepSamples,nSweep));
 for iBin = 1:nBins
     W = W_RT{iBin};
     theseSessions = decodeSession{iBin};
