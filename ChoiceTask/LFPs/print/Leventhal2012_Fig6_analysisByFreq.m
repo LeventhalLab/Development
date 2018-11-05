@@ -1,9 +1,20 @@
+% load('session_20180919_NakamuraMRL.mat','dirSelUnitIds','ndirSelUnitIds');
+
 doSave = true;
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/spikePhaseUnitTypes';
-% rows = 3;
-% cols = 2;
+
+freqList = {[1 4;4 7;8 12;13 30]};
+if iscell(freqList)
+    numelFreqs = size(freqList{:},1);
+else
+    numelFreqs = numel(freqList);
+end
+freqLabels = {'\delta','\theta','\alpha','\beta'};
+
 rows = 3;
-cols = numel(freqList);
+cols = numelFreqs;
+pThresh = 1;
+ylimVals = [0 0.75];
 
 conds_pvals = {all_spikeHist_pvals,all_spikeHist_inTrial_pvals};
 conds_angles = {all_spikeHist_angles,all_spikeHist_inTrial_angles};
@@ -13,9 +24,9 @@ plotLabels = {'All','dirSel','ndirSel'};
 
 for iFreq = 1%:numel(freqList)
 %     h = ff(600,800);
-    h = ff(1600,800);
+    h = ff(800,600);
     iCond = 1;
-    for iFreq = 1:numel(freqList)
+    for iFreq = 1:numelFreqs
 %     for iCond = 1:2
 %         subplot(rows,cols,prc(cols,[1,iCond]));
         subplot(rows,cols,prc(cols,[1,iFreq]));
@@ -34,14 +45,14 @@ for iFreq = 1%:numel(freqList)
         ylim([0 1]);
         yticks(ylim);
         ylabel('fraction p < 0.05');
-        title({[num2str(freqList(iFreq),'%2.1f'),' Hz'],titleLabels{iCond}});
+        title([freqLabels{iFreq},' ',titleLabels{iCond}]);
         
 %         subplot(rows,cols,prc(cols,[2,iCond]));
         subplot(rows,cols,prc(cols,[2,iFreq]));
         for iPlot = 1:3
             use_pvals = conds_pvals{iCond}(useRanges{iPlot},iFreq);
             use_angles = conds_angles{iCond}(useRanges{iPlot},:,iFreq);
-            sigMat = use_angles(use_pvals < 0.05,:);
+            sigMat = use_angles(use_pvals < pThresh,:);
             sig_zMean = mean(sigMat,2);
             sig_zStd = std(sigMat,[],2);
             sigMatZ = (sigMat - sig_zMean) ./ sig_zStd;
@@ -57,14 +68,14 @@ for iFreq = 1%:numel(freqList)
             xticklabels([0 180 360 540 720]);
             xtickangle(270);
             xlabel('Mean phase (deg)');
-            ylim([0 0.5]);
+            ylim(ylimVals);
             yticks(ylim);
             ylabel('Fraction of units');
             grid on;
         end
-        title(titleLabels{iCond});
+        title([freqLabels{iFreq},' ',titleLabels{iCond}]);
 %         if iCond == 2
-        if iFreq == numel(freqList)
+        if iFreq == numelFreqs
             legend(plotLabels);
             legend boxoff;
         end
@@ -74,7 +85,7 @@ for iFreq = 1%:numel(freqList)
         for iPlot = 1:3
             use_pvals = conds_pvals{iCond}(useRanges{iPlot},iFreq);
             use_angles = conds_angles{iCond}(useRanges{iPlot},:,iFreq);
-            sigMat = use_angles(use_pvals < 0.05,:);
+            sigMat = use_angles(use_pvals < pThresh,:);
             sig_zMean = mean(sigMat,2);
             sig_zStd = std(sigMat,[],2);
             sigMatZ = (sigMat - sig_zMean) ./ sig_zStd;
@@ -95,7 +106,7 @@ for iFreq = 1%:numel(freqList)
             ylabel('Z bins');
             grid on;
         end
-        title(titleLabels{iCond});
+        title([freqLabels{iFreq},' ',titleLabels{iCond}]);
     end
     
     set(gcf,'color','w');

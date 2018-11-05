@@ -28,10 +28,11 @@ for iFreq = 1:nLoop
                 centerRangeSamples = (centerSample - tWindow_oversamples):(centerSample + tWindow_oversamples - 1);
                 if centerRangeSamples(1) > 0 && centerRangeSamples(end) < length(sevFiltFilt)
                     lfp = sevFiltFilt(centerRangeSamples);
+                    lfp = lfp - mean(lfp);
                     rlfp = sevFilt(centerRangeSamples); % same for scalo method
                     % !! ONLY FOR t>0 DELTA ANALYSIS
-%                     lfp(round(numel(lfp)/2):end) = 0;
-%                     lfp(1:round(numel(lfp)/2)) = 0;
+%                     lfp(ceil(numel(lfp)/2):end) = 0; % after t0
+%                     lfp(1:floor(numel(lfp)/2)) = 0; % before t0
                 end
             catch % for trials without all events
                 centerRangeSamples = -tWindow_oversamples:tWindow_oversamples - 1;
