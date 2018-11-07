@@ -1,6 +1,6 @@
 doSetup = true;
-doPlot1 = false;
-doPlot2 = true;
+doPlot1 = true;
+doPlot2 = false;
 doSave = false;
 doDebug = false;
 
@@ -23,7 +23,9 @@ if doSetup
     n_timePoints = 1001;
     all_Times = [];
     phaseCorrs_delta = {};
+    rawData_log = {};
     iSession = 0;
+    dataLog = [];
     for iNeuron = selectedLFPFiles'
         iSession = iSession + 1;
         disp(num2str(iSession));
@@ -33,7 +35,7 @@ if doSetup
         curTrials = all_trials{iNeuron};
 
         [trialIds,allTimes] = sortTrialsBy(curTrials,doTiming);
-        W = eventsLFPv2(curTrials(trialIds),sevFilt,tWindow,Fs,freqList,eventFieldnames);
+        [W,all_data] = eventsLFPv2(curTrials(trialIds),sevFilt,tWindow,Fs,freqList,eventFieldnames);
         
         if doDebug
             figure;
@@ -44,10 +46,12 @@ if doSetup
         
         tIdxs = floor(linspace(1,size(W,2),n_timePoints));
         for iEvent = 1:7
-            if iNeuron == 1
+            if iSession == 1
                 phaseCorrs_delta{iEvent} = [];
+                rawData_log{iEvent} = [];
             end
             phaseCorrs_delta{iEvent} = [phaseCorrs_delta{iEvent};squeeze(angle(W(iEvent,tIdxs,:)))'];
+            rawData_log{iEvent} = [rawData_log{iEvent};squeeze(all_data(iEvent,tIdxs,:))'];
         end
         all_Times = [all_Times;allTimes'];
     end
@@ -66,7 +70,7 @@ iSubplot = 1;
 if doPlot1
     h = figuree(900,800);
     timeLabels = {};
-    plot1Range = floor(linspace(450,550,36));
+    plot1Range = floor(linspace(1,n_timePoints,36));
     all_pvals = [];
     all_rhos = [];
     rows = ceil(sqrt(numel(plot1Range)));
@@ -106,7 +110,8 @@ for iEvent = 1:7
             yticklabels(num2str(binCenters(:),'%1.2f'));
             ylabel('delta phase');
             timeLabels{iSubplot} = num2str(timeCenters(ii),'%1.2f');
-            title({['t = ',timeLabels{iSubplot}],['p = ',num2str(pval),', rho = ',num2str(rho,2)]});
+            title({['t = ',timeLabels{iSubplot}],['p = ',num2str(pval,2),', rho = ',num2str(rho,2)]});
+            set(gca,'fontSize',8);
             iSubplot = iSubplot + 1;
         end
     end
@@ -117,12 +122,12 @@ if doPlot1 % companion
     ff(600,300);
     subplot(121);
     plot(timeCenters,all_pvals(plot1Event,:));
-    ylim([0 0.05]);
+%     ylim([0 0.05]);
     xlabel('time (s)');
     title('pval');
     subplot(122);
     plot(timeCenters,all_rhos(plot1Event,:));
-    ylim([0 0.5]);
+%     ylim([0 0.5]);
     xlabel('time (s)');
     title('rho');
 end

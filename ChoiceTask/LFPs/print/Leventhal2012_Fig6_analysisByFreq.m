@@ -1,9 +1,9 @@
-% load('session_20180919_NakamuraMRL.mat','dirSelUnitIds','ndirSelUnitIds');
+% load('session_20180919_NakamuraMRL.mat','dirSelUnitIds','ndirSelUnitIds','primSec');
 
 doSave = true;
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/spikePhaseUnitTypes';
 
-freqList = {[1 4;4 7;8 12;13 30]};
+% % freqList = {[1 4;4 7;8 12;13 30]};
 if iscell(freqList)
     numelFreqs = size(freqList{:},1);
 else
@@ -13,8 +13,8 @@ freqLabels = {'\delta','\theta','\alpha','\beta'};
 
 rows = 3;
 cols = numelFreqs;
-pThresh = 1;
-ylimVals = [0 0.75];
+pThresh = 0.01;
+ylimVals = [0 0.5];
 
 conds_pvals = {all_spikeHist_pvals,all_spikeHist_inTrial_pvals};
 conds_angles = {all_spikeHist_angles,all_spikeHist_inTrial_angles};
@@ -25,7 +25,7 @@ plotLabels = {'All','dirSel','ndirSel'};
 for iFreq = 1%:numel(freqList)
 %     h = ff(600,800);
     h = ff(800,600);
-    iCond = 1;
+    iCond = 2;
     for iFreq = 1:numelFreqs
 %     for iCond = 1:2
 %         subplot(rows,cols,prc(cols,[1,iCond]));
@@ -111,7 +111,7 @@ for iFreq = 1%:numel(freqList)
     
     set(gcf,'color','w');
     if doSave
-        saveFreq = strrep(num2str(freqList(iFreq),'%1.2f'),'.','-');
+%         saveFreq = strrep(num2str(freqList(iFreq),'%1.2f'),'.','-');
 %         saveas(h,fullfile(savePath,['Leventhal2012_Fig6_spikeHist_dirSel_',saveFreq,'Hz.png']));
         saveas(h,fullfile(savePath,['Leventhal2012_Fig6_spikeHist_dirSel_AllFreq_',titleLabels{iCond},'.png']));
         close(h);

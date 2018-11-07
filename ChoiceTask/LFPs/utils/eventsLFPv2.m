@@ -1,4 +1,6 @@
 function [all_LFP,all_data] = eventsLFPv2(trials,sevFilt,tWindow,Fs,freqList,eventFieldnames)
+eliminateData = 0;
+
 nLoop = 1;
 tWindow_samples = round(Fs * tWindow);
 if iscell(freqList)
@@ -29,10 +31,17 @@ for iFreq = 1:nLoop
                 if centerRangeSamples(1) > 0 && centerRangeSamples(end) < length(sevFiltFilt)
                     lfp = sevFiltFilt(centerRangeSamples);
                     lfp = lfp - mean(lfp);
+                    
                     rlfp = sevFilt(centerRangeSamples); % same for scalo method
-                    % !! ONLY FOR t>0 DELTA ANALYSIS
-%                     lfp(ceil(numel(lfp)/2):end) = 0; % after t0
-%                     lfp(1:floor(numel(lfp)/2)) = 0; % before t0
+                    rlfp = rlfp - mean(rlfp);
+                    
+                    if sign(eliminateData) == 1
+                        lfp(ceil(numel(lfp)/2):end) = 0; % after t0
+                        rlfp(ceil(numel(rlfp)/2):end) = 0; % after t0
+                    elseif sign(eliminateData) == -1
+                        lfp(1:floor(numel(lfp)/2)) = 0; % before t0
+                        rlfp(1:floor(numel(rlfp)/2)) = 0; % before t0
+                    end
                 end
             catch % for trials without all events
                 centerRangeSamples = -tWindow_oversamples:tWindow_oversamples - 1;

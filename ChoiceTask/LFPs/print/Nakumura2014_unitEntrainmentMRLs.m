@@ -1,21 +1,30 @@
+% load('session_20180919_NakamuraMRL.mat','dirSelUnitIds','ndirSelUnitIds','primSec');
+
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/entrainmentVectors';
 doSave = true;
 nBins = 12;
 binEdges = linspace(-pi,pi,nBins+1);
 binCenters = linspace(-pi,pi,nBins);
 
-rows = 4;
-cols = 5;
-rlimVals = [0 0.05];
-freqPos = [1 2 3 4 5 11 12 13 14 15;6 7 8 9 10 16 17 18 19 20];
+if iscell(freqList)
+    numelFreqs = size(freqList{:},1);
+else
+    numelFreqs = numel(freqList);
+end
+freqLabels = {'\delta','\theta','\alpha','\beta'};
 
-if true
-    pval_thresh = 0.01;
+rows = 2;
+cols = numelFreqs;
+rlimVals = [0 0.05];
+freqPos = [1:4 9:12;5:8 13:16];
+
+if false
+    pval_thresh = 0.05;
     noteText = {'All Units',['Red p < ',num2str(pval_thresh,'%1.2f')]};
-    h = figuree(1400,900);
+    h = figuree(1400,600);
     for iInOut = 1:2
-        for iFreq = 1:numel(freqList)
-            subplot(rows,cols,freqPos(iInOut,iFreq));
+        for iFreq = 1:numelFreqs
+            subplot(rows,cols,prc(cols,[iInOut,iFreq]));
             for iNeuron = validUnits
                 if iInOut == 1
                     r = all_spikeHist_inTrial_rs(iNeuron,iFreq);
@@ -43,7 +52,7 @@ if true
             ax.ThetaTick = [0 90 180 270];
             rlim(rlimVals);
             rticks(rlimVals);
-            title([titleLabel,' ',num2str(freqList(iFreq),'%2.1f'),' Hz MRLs']);
+            title([titleLabel,' ',freqLabels{iFreq},' MRLs']);
             set(gca,'fontsize',8)
         end
     end
@@ -56,13 +65,13 @@ if true
 end
 
 if true
-    pval_thresh = 1;
+    pval_thresh = 0.05;
     noteText = {'Red dirSel','Black ndirSel',['*only p < ',num2str(pval_thresh,'%1.2f')]};
     h = figuree(1400,900);
     for iInOut = 1:2
         alphas = {};
-        for iFreq = 1:numel(freqList)
-            subplot(rows,cols,freqPos(iInOut,iFreq));
+        for iFreq = 1:numelFreqs
+            subplot(rows,cols,prc(cols,[iInOut,iFreq]));
             for iNeuron = validUnits
                 if iInOut == 1
                     r = all_spikeHist_inTrial_rs(iNeuron,iFreq);
@@ -103,8 +112,8 @@ if true
             rticks(rlimVals);
         end
 
-        for iFreq = 1:numel(freqList)
-            subplot(rows,cols,freqPos(iInOut,iFreq));
+        for iFreq = 1:numelFreqs
+            subplot(rows,cols,prc(cols,[iInOut,iFreq]));
             dir_pval = 1;
             if ~isempty(alphas{iFreq,1})
                 dir_pval = circ_rtest(alphas{iFreq,1});
@@ -117,14 +126,14 @@ if true
             if numel(alphas{iFreq,1}) > 20 && numel(alphas{iFreq,2}) > 20
                 kuiper_pval = circ_kuipertest(alphas{iFreq,1},alphas{iFreq,2});
             end
-            title({[titleLabel,' ',num2str(freqList(iFreq),'%2.1f'),' Hz MRLs']...
+            title({[titleLabel,' ',freqLabels{iFreq},' MRLs']...
 % %                 ['dir r-test: ',num2str(dir_pval,2)],...
 % %                 ['ndir r-test: ',num2str(ndir_pval,2)],...
                 ['dir x ndir kuiper-test: ',num2str(kuiper_pval,2)]});
             set(gca,'fontsize',8)
         end
-        for iFreq = 1:numel(freqList)
-            subplot(rows,cols,freqPos(iInOut,iFreq));
+        for iFreq = 1:numelFreqs
+            subplot(rows,cols,prc(cols,[iInOut,iFreq]));
             for iCond = 1:2
                 if ~isempty(alphas{iFreq,iCond})
                     useColor = 'k';
@@ -152,15 +161,15 @@ if true
     end
 end
 
-if true
-    pval_thresh = 1;
+if false
+    pval_thresh = 0.05;
     noteText = {'Colored by event',['*only p < ',num2str(pval_thresh,'%1.2f')]};
     colors = [cool(7); repmat(0.8,[1,3])];
     h = figuree(1400,900);
     for iInOut = 1:2
         alphas = {};
-        for iFreq = 1:numel(freqList)
-            subplot(rows,cols,freqPos(iInOut,iFreq));
+        for iFreq = 1:numelFreqs
+            subplot(rows,cols,prc(cols,[iInOut,iFreq]));
             for iNeuron = validUnits
                 if iInOut == 1
                     r = all_spikeHist_inTrial_rs(iNeuron,iFreq);
@@ -197,11 +206,11 @@ if true
             ax.ThetaTick = [0 90 180 270];
             rlim(rlimVals);
             rticks(rlimVals);
-            title([titleLabel,' ',num2str(freqList(iFreq),'%2.1f'),' Hz MRLs']);
+            title([titleLabel,' ',freqLabels{iFreq},' MRLs']);
             set(gca,'fontsize',8)
         end
-        for iFreq = 1:numel(freqList)
-            subplot(rows,cols,freqPos(iInOut,iFreq));
+        for iFreq = 1:numelFreqs
+            subplot(rows,cols,prc(cols,[iInOut,iFreq]));
             for iEvent = 1:7
                 if ~isempty(alphas{iFreq,iEvent})
                     polarplot(circ_mean(alphas{iFreq,iEvent}'),rlimVals(2),'.','MarkerSize',40,'color',colors(iEvent,:));
