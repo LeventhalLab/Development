@@ -1,16 +1,22 @@
-doSetup = false;
+% % load('\\172.20.138.142\RecordingsLeventhal2\ChoiceTask\MthalLFPs\RTPAC.mat')
+% % load('\\172.20.138.142\RecordingsLeventhal2\ChoiceTask\MthalLFPs\RTPAC_compiled_RT.mat')
+% % load('\\172.20.138.142\RecordingsLeventhal2\ChoiceTask\MthalLFPs\RTPAC_Fs.mat')
+% % load('\\172.20.138.142\RecordingsLeventhal2\ChoiceTask\MthalLFPs\RTPAC_supp.mat')
 
-savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/PAC/canoltyMethod/RT';
+doSetup1 = true; % compile data
+doSetup2 = true; % RT brackets
+% % savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/PAC/canoltyMethod/RT';
 
 freqList = {[1 4;13 30]};
 nSurr = 50;
 oversampleBy = 4;
-tWindow = 2;
+tWindow = 1;
 tSweep = 0.5;
-nSweep = 200;
+nSweep = 30;
 zThresh = 5;
+nBins = 5;
 
-if doSetup
+if doSetup1
     compiled_PACRTdata = {};
     compiled_RT = [];
     iSession = 0;
@@ -32,11 +38,7 @@ if doSetup
         keepAllTimes = allTimes(keepTrials);
         compiled_RT = [compiled_RT keepAllTimes];
         
-        filtArr = [];
-        for iFreq = 1:size(freqList{:},1)
-            disp(['Filtering for surrogates ',num2str(freqList{:}(iFreq,1)),' - ',num2str(freqList{:}(iFreq,2)),' Hz']);
-            filtArr(iFreq,:) = eegfilt(sevFilt,Fs,freqList{:}(iFreq,1),freqList{:}(iFreq,2));
-        end
+        filtArr = calculateComplexSpectrum(sevFilt,Fs,freqList);
         
         % surrogates
         trialTimeRanges = compileTrialTimeRanges(curTrials);
@@ -58,7 +60,7 @@ if doSetup
             sampleRange = randSample:randSample + takeSamples - 1;
             surrLog(iSurr) = randTs;
             for iFreq = 1:size(freqList{:},1)
-                W_surr(:,iSurr,iFreq) = filtArr(iFreq,sampleRange);
+                W_surr(:,iSurr,iFreq) = filtArr(sampleRange,iFreq);
             end
             data(:,iSurr) = sevFilt(sampleRange);
         end
@@ -71,8 +73,7 @@ if doSetup
     end
 end
 
-if false
-    nBins = 10;
+if doSetup2
     RTlinspace = ceil(linspace(1,numel(compiled_RT),nBins+1));
     RTsorted = sort(compiled_RT);
     RTintervals = RTsorted(RTlinspace);

@@ -3,8 +3,19 @@
 % load('session_20180925_entrainmentSurrogates.mat', 'LFPfiles_local')
 % load('session_20180925_entrainmentSurrogates.mat', 'selectedLFPFiles')
 
-savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/PAC/canoltyMethod/bySession';
-doSetup = false;
+% % load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
+% % load('session_20180919_NakamuraMRL.mat', 'all_trials')
+% % load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local')
+% % load('session_20180919_NakamuraMRL.mat', 'selectedLFPFiles')
+% % load('session_20180919_NakamuraMRL.mat', 'all_ts')
+% % load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local_altLookup')
+
+if ismac
+    savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/PAC/canoltyMethod/bySession';
+else
+    savePath = '\\172.20.138.142\RecordingsLeventhal2\ChoiceTask\MthalLFPs\CanoltySessions';
+end
+doSetup = true;
 doSave = true;
 doPlot = true;
 doDebug = false;
@@ -26,7 +37,7 @@ all_MImatrix = {};
 all_shuff_MImatrix_mean = {};
 all_shuff_MImatrix_pvals = {};
 
-for iNeuron = selectedLFPFiles(1)'
+for iNeuron = selectedLFPFiles'
     iSession = iSession + 1;
     disp(['Session #',num2str(iSession)]);
     if doSetup

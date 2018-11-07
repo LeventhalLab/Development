@@ -3,6 +3,9 @@ compressor = 'x16';
 % compressor = 'x16_despiked';
 
 [filepath,name,ext] = fileparts(sevFile);
+if ~ismac % override
+    filepath = '\\172.20.138.142\RecordingsLeventhal2\ChoiceTask\LFPfiles';
+end
 if isempty(unitId)
     compressedPath = fullfile(filepath,compressor,[name,ext,'.mat']);
 else

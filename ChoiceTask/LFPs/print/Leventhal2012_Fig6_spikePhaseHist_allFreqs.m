@@ -1,9 +1,9 @@
-load('session_20180925_entrainmentSurrogates.mat', 'eventFieldnames')
-load('session_20180925_entrainmentSurrogates.mat', 'all_trials')
-load('session_20180925_entrainmentSurrogates.mat', 'LFPfiles_local')
-load('session_20180925_entrainmentSurrogates.mat', 'selectedLFPFiles')
-load('session_20180925_entrainmentSurrogates.mat', 'all_ts')
-load('session_20180925_entrainmentSurrogates.mat', 'LFPfiles_local_altLookup')
+% % load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
+% % load('session_20180919_NakamuraMRL.mat', 'all_trials')
+% % load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local')
+% % load('session_20180919_NakamuraMRL.mat', 'selectedLFPFiles')
+% % load('session_20180919_NakamuraMRL.mat', 'all_ts')
+% % load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local_altLookup')
 
 doSetup = true;
 doSave = false;
@@ -57,11 +57,7 @@ if doSetup
         trialTimeRanges = compileTrialTimeRanges(curTrials(trialIds));
 
         if iscell(freqList)
-            W = [];
-            for iFreq = 1:size(freqList{:},1)
-                disp(['Filtering for surrogates ',num2str(freqList{:}(iFreq,1)),' - ',num2str(freqList{:}(iFreq,2)),' Hz']);
-                W(:,iFreq) = eegfilt(sevFilt,Fs,freqList{:}(iFreq,1),freqList{:}(iFreq,2));
-            end
+            W = calculateComplexSpectrum(sevFilt,Fs,freqList);
         else
             W = calculateComplexScalograms_EnMasse(sevFilt','Fs',Fs,'freqList',freqList); % size: 5568092, 1, 3
             W = squeeze(W); % size: 5568092, 3
@@ -78,7 +74,7 @@ if doSetup
         if size(spikeAngles,1) > 50
             validUnits = [validUnits iNeuron];
             % this is inTrial
-            for iFreq = 1:numel(freqList)
+            for iFreq = 1:numelFreqs
                 alpha = spikeAngles(:,iFreq);
                 all_spikeHist_inTrial_alphas{iNeuron,iFreq} = alpha;
                 pval = circ_rtest(alpha);
@@ -100,7 +96,7 @@ if doSetup
             for iSurr = 1:nSurr
                 outTrialSurrIdx = randsample(outTrialIdx,numel(all_inTrial_ids));
                 spikeAngles = angle(W(ts_samples(outTrialSurrIdx),:));
-                for iFreq = 1:numel(freqList)
+                for iFreq = 1:numelFreqs
                     alpha = spikeAngles(:,iFreq);
                     all_spikeHist_alphas_surr{iSurr,iNeuron,iFreq} = alpha;
                     pval = circ_rtest(alpha);
@@ -115,7 +111,7 @@ if doSetup
             end
             
             spikeAngles = angle(W(ts_samples(all_outTrial_ids),:));
-            for iFreq = 1:numel(freqList)
+            for iFreq = 1:numelFreqs
                 alpha = spikeAngles(:,iFreq);
                 all_spikeHist_alphas{iNeuron,iFreq} = alpha;
                 pval = circ_rtest(alpha);
@@ -228,7 +224,7 @@ end
 if false
     h = figuree(1400,400);
     rows = 2;
-    cols = numel(freqList);
+    cols = numel(numelFreqs);
     for iRow = 1:2
         switch iRow
             case 1
@@ -240,7 +236,7 @@ if false
                 use_angles = all_spikeHist_inTrial_angles;
                 ylabelText = 'IN TRIAL';
         end
-        for iFreq = 1:numel(freqList)
+        for iFreq = 1:numel(numelFreqs)
             counts = histcounts(use_pvals(validUnits,iFreq),linspace(0,1,20));
             subplot(rows,cols,prc(cols,[iRow,iFreq]));
             bar(counts,'k');
