@@ -1,7 +1,19 @@
-doSetup = false;
-zThresh = 2;
+% load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local')
+% load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local_alt')
+% load('session_20180919_NakamuraMRL.mat', 'selectedLFPFiles')
+% load('session_20180919_NakamuraMRL.mat', 'all_trials')
+% load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
+% load('session_20180925_entrainmentSurrogates.mat', 'session_Wz_phase')
+% load('session_20180925_entrainmentSurrogates.mat', 'session_Wz_power')
+% load('session_20180925_entrainmentSurrogates.mat', 'session_Wz_rayleigh_pval')
+
+% save('fig__spectrum_MRL_20181108','LFPfiles_local','selectedLFPFiles','all_trials',...
+%     'eventFieldnames','session_Wz_power','session_Wz_phase','session_Wz_rayleigh_pval','freqList');
+
+doSetup = true;
+zThresh = 5;
 tWindow = 1;
-freqList = logFreqList([2 200],30);
+freqList = logFreqList([1 200],30);
 Wlength = 400;
 
 if doSetup
@@ -24,7 +36,8 @@ if doSetup
         
         [Wz_power,Wz_phase] = zScoreW(W,Wlength); % power Z-score
 
-        session_Wz_power(iSession,:,:,:) = squeeze(mean(Wz_power,3));
+%         session_Wz_power(iSession,:,:,:) = squeeze(mean(Wz_power,3));
+        session_Wz_power(iSession,:,:,:) = squeeze(median(Wz_power,3));
         session_Wz_phase(iSession,:,:,:) = squeeze(circ_r(Wz_phase,[],[],3));
         
         for iEvent = 1:size(Wz_phase,1)

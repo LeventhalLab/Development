@@ -9,8 +9,8 @@ doTiming = 'RT';
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/spikePhaseDeltaRT';
 
 tWindow = 1;
-% freqList = {[1 4]}; % hilbert method
-freqList = [1.8];
+freqList = {[0.5 2]}; % hilbert method
+% freqList = [3.4];
 if strcmp(doTiming,'RT')
     plot1Event = 3;
     caxisVals = [0.1 0.3];
@@ -20,7 +20,7 @@ else
 end
 
 if doSetup
-    n_timePoints = 1001;
+    n_timePoints = 101;
     all_Times = [];
     phaseCorrs_delta = {};
     rawData_log = {};
@@ -94,7 +94,7 @@ for iEvent = 1:7
         
         all_pvals(iEvent,ii) = pval;
         all_rhos(iEvent,ii) = rho;
-        if iEvent == plot1Event && doPlot1 && ismember(ii,plot1Range)
+        if doPlot1 && iEvent == plot1Event && ismember(ii,plot1Range)
             subplot(rows,cols,iSubplot);
             % STD
             for iBin = 1:nBins
