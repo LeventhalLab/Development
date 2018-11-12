@@ -2,7 +2,10 @@
 % load('session_20181106_entrainmentData.mat', 'eventFieldnames');
 % load('session_20180804_ERPAC.mat', 'LFPfiles_local');
 
+savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/delta';
+
 doSetup = false;
+doSave = true;
 freqList = {[1 4]}; % hilbert method
 iEvent = 4;
 tWindow = 1;
@@ -25,8 +28,8 @@ rows = 2;
 cols = 1;
 lineWidth = 1.5;
 t = linspace(-tWindow,tWindow,size(all_data,2));
-for iTrial = 1:10
-    ff(500,300);
+for iTrial = 1:numel(allTimes)
+    h = ff(500,300);
 
     subplot(rows,cols,prc(cols,[1 1]));
     plot(t,all_data(iEvent,:,iTrial),'k-','lineWidth',lineWidth);
@@ -39,7 +42,7 @@ for iTrial = 1:10
     subplot(rows,cols,prc(cols,[2 1]));
     yyaxis left;
     plot(t,real(W(iEvent,:,iTrial)),'lineWidth',lineWidth);
-    ylabel('power');
+    ylabel('real');
     yticks(ylim);
     xlabel('time (s)');
 
@@ -55,4 +58,8 @@ for iTrial = 1:10
     grid on;
 
     set(gcf,'color','w');
+    if doSave
+        saveas(h,fullfile(savePath,['deltaRawPhase_s',num2str(iSession,'%02d'),'_t',num2str(iTrial,'%03d'),'.png']));
+        close(h);
+    end
 end
