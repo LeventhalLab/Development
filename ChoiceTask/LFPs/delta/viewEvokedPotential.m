@@ -1,10 +1,11 @@
-% load('session_20181106_entrainmentData.mat', 'selectedLFPFiles');
-% load('session_20181106_entrainmentData.mat', 'eventFieldnames');
-% load('session_20180804_ERPAC.mat', 'LFPfiles_local');
+% % load('session_20181106_entrainmentData.mat', 'selectedLFPFiles');
+% % load('session_20181106_entrainmentData.mat', 'eventFieldnames');
+% % load('session_20180804_ERPAC.mat', 'LFPfiles_local');
+% % load('session_20181106_entrainmentData.mat', 'all_trials');
 
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/delta';
 
-doSetup = false;
+doSetup = true;
 doSave = true;
 freqList = {[1 4]}; % hilbert method
 iEvent = 4;
