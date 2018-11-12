@@ -9,7 +9,7 @@ doTiming = 'RT';
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/spikePhaseDeltaRT';
 
 tWindow = 1;
-freqList = {[0.5 2]}; % hilbert method
+freqList = {[1 4]}; % hilbert method
 % freqList = [3.4];
 if strcmp(doTiming,'RT')
     plot1Event = 3;

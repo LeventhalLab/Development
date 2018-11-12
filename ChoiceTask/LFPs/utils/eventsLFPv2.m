@@ -1,5 +1,5 @@
 function [all_LFP,all_data] = eventsLFPv2(trials,sevFilt,tWindow,Fs,freqList,eventFieldnames)
-eliminateData = 0;
+eliminateData = 0; % 0 = none, -1 = before, +1 = after
 
 nLoop = 1;
 tWindow_samples = round(Fs * tWindow);
@@ -54,7 +54,8 @@ for iFreq = 1:nLoop
         selectRange = (numel(lfp)/2) - round(tWindow_samples):(numel(lfp)/2) + round(tWindow_samples) - 1;
         
         if iscell(freqList)
-            all_LFP(iField,:,:,iFreq) = hilbert(data(selectRange,:));
+            hx = hilbert(data); % hilbert has window effects: filter then select
+            all_LFP(iField,:,:,iFreq) = hx(selectRange,:);
         else
             W = calculateComplexScalograms_EnMasse(data,'Fs',Fs,'freqList',freqList);
             all_LFP(iField,:,:,:) = W(selectRange,:,:);
