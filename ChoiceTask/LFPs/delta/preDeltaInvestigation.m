@@ -1,6 +1,6 @@
-doSetup = false;
+doSetup = true;
 doSave = true;
-freqList = {[1 4]}; % hilbert method
+freqList = {[4 7]}; % hilbert method
 iEvent = 4;
 tWindow = 1;
 
@@ -22,7 +22,7 @@ if doSetup
         lineWidth = 1.5;
         grayColor = repmat(0.8,[1 4]);
         t = linspace(-tWindow,tWindow,size(all_data,2));
-        ylimVals = [-250 250];
+        ylimVals = [-150 150];
         rows = 2;
         cols = 2;
         h = ff(800,500);
