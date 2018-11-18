@@ -2,15 +2,16 @@
 doLabels = false;
 doSave = true;
 
-if false
+if true
     all_rt = [];
     all_rt_c = {};
     all_mt = [];
     all_mt_c = {};
     all_subjects__id = [];
     lastSession = '';
-    iCount = 1;
+    iSession = 0;
     for iNeuron = 1:size(analysisConf.neurons,1)
+        iSession = iSession + 1;
         sessionConf = analysisConf.sessionConfs{iNeuron};
         if strcmp(sessionConf.sessions__name,lastSession)
             continue;
@@ -32,18 +33,17 @@ if false
         timingField = 'RT';
         [trialIds,rt] = sortTrialsBy(trials,timingField); % forces to be 'correct'
         all_rt = [all_rt rt];
-        all_rt_c{iCount} = rt;
+        all_rt_c{iSession} = rt;
         mt = [];
         for iTrial = 1:numel(trialIds)
             curTrial = trialIds(iTrial);
             mt(iTrial) = getfield(trials(curTrial).timing,'MT');
         end
         all_mt = [all_mt mt];
-        all_mt_c{iCount} = mt;
+        all_mt_c{iSession} = mt;
         
         all_subjects__id = [all_subjects__id sessionConf.subjects__id];
-        iCount = iCount + 1;
-        disp(['Session: ',num2str(iCount)]);
+        disp(['Session: ',num2str(iSession)]);
     end
 end
 

@@ -1,6 +1,7 @@
 % load('fig__spectrum_MRL_20181108');
 % raw data was compiled with LFP_byX.m (doSetup = true)
-doSave = true;
+% freqList = logFreqList([1 200],30);
+doSave = false;
 figPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
 subplotMargins = [.05 .02];
 
@@ -45,17 +46,19 @@ if doSave
     close(h);
 end
 
-h = ff(1200,450);
-subplot_tight(rows,cols,7,subplotMargins);
-colormap(gca,jet);
-cb = colorbar;
-cb.Ticks = [];
-
-subplot_tight(rows,cols,14,subplotMargins);
-colormap(gca,hot);
-cb = colorbar;
-cb.Ticks = [];
 if doSave
-    print(gcf,'-painters','-depsc',fullfile(figPath,'spectrum_MRL_colorbars.eps'));
-    close(h);
+    h = ff(1200,450);
+    subplot_tight(rows,cols,7,subplotMargins);
+    colormap(gca,jet);
+    cb = colorbar;
+    cb.Ticks = [];
+
+    subplot_tight(rows,cols,14,subplotMargins);
+    colormap(gca,hot);
+    cb = colorbar;
+    cb.Ticks = [];
+    if doSave
+        print(gcf,'-painters','-depsc',fullfile(figPath,'spectrum_MRL_colorbars.eps'));
+        close(h);
+    end
 end

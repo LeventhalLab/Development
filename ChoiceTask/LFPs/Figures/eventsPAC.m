@@ -1,4 +1,5 @@
 % load('session_20181107_PACdata.mat');
+% see Canolty_PACmethod.m
 
 doSave = true;
 figPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
