@@ -1,15 +1,18 @@
-doSetup = false;
+doSetup = true;
 doSave = true;
 doPlot = true;
+
+mixTrials = true;
+
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/powerCorr';
-freqList = logFreqList([1 200],10);
+freqList = logFreqList([1 200],30);
 tickLabels = {num2str(freqList(:),'%2.1f')};
-tWindow = 1;
+tWindow = 0.5;
 iEvent = 4;
 refEvent = 1;
 nSurr = 200; % just needs to be more than trial count
 zThresh = 5;
-pThresh = 0.01;
+pThresh = 0.05;
 
 if doSetup
     all_corr_arr_in = [];
@@ -30,7 +33,7 @@ if doSetup
     all_z_corr_arr_out = [];
     
     iSession = 0;
-    for iNeuron = selectedLFPFiles(1:2)'
+    for iNeuron = selectedLFPFiles'
         iSession = iSession + 1;
         sevFile = LFPfiles_local{iNeuron};
         disp(sevFile);
@@ -43,7 +46,7 @@ if doSetup
         
         % surrogates
         trialTimeRanges = compileTrialTimeRanges(curTrials(trialIds));
-        takeTime = tWindow * 4;
+        takeTime = 2;
         takeSamples = round(takeTime * Fs);
         minTime = min(trialTimeRanges(:,2));
         maxTime = max(trialTimeRanges(:,1)) - takeTime;
@@ -85,21 +88,28 @@ if doSetup
         pvalp_arr_out = NaN(nSurr,numel(freqList),numel(freqList));
         
         for iTrial = 1:size(W,3)
+            if mixTrials
+                mixLabel = '_mixed';
+                jTrial = randsample(1:size(W,3),1);
+            else
+                mixLabel = '';
+                jTrial = iTrial;
+            end
             for iFreq = 1:numel(freqList)
                 for jFreq = iFreq:numel(freqList)
-                    [R,P] = corr(abs(W(iEvent,:,iTrial,iFreq))',abs(W(iEvent,:,iTrial,jFreq))');
+                    [R,P] = corr(abs(W(iEvent,:,iTrial,iFreq))',abs(W(iEvent,:,jTrial,jFreq))');
                     corr_arr_in(iTrial,iFreq,jFreq) = R;
                     pval_arr_in(iTrial,iFreq,jFreq) = P;
                     
-                    [R,P] = circ_corrcc(angle(W(iEvent,:,iTrial,iFreq))',angle(W(iEvent,:,iTrial,jFreq))');
+                    [R,P] = circ_corrcc(angle(W(iEvent,:,iTrial,iFreq))',angle(W(iEvent,:,jTrial,jFreq))');
                     corrp_arr_in(iTrial,iFreq,jFreq) = R;
                     pvalp_arr_in(iTrial,iFreq,jFreq) = P;
                     
-                    [R,P] = corr(abs(W(refEvent,:,iTrial,iFreq))',abs(W(refEvent,:,iTrial,jFreq))');
+                    [R,P] = corr(abs(W(refEvent,:,iTrial,iFreq))',abs(W(refEvent,:,jTrial,jFreq))');
                     corr_arr_in_ref(iTrial,iFreq,jFreq) = R;
                     pval_arr_in_ref(iTrial,iFreq,jFreq) = P;
                     
-                    [R,P] = circ_corrcc(angle(W(refEvent,:,iTrial,iFreq))',angle(W(refEvent,:,iTrial,jFreq))');
+                    [R,P] = circ_corrcc(angle(W(refEvent,:,iTrial,iFreq))',angle(W(refEvent,:,jTrial,jFreq))');
                     corrp_arr_in_ref(iTrial,iFreq,jFreq) = R;
                     pvalp_arr_in_ref(iTrial,iFreq,jFreq) = P;
                     
@@ -115,13 +125,18 @@ if doSetup
         end
         
         for iSurr = 1:nSurr
+            if mixTrials
+                jTrial = randsample(1:nSurr,1);
+            else
+                jTrial = iTrial;
+            end
             for iFreq = 1:numel(freqList)
                 for jFreq = iFreq:numel(freqList)
-                    [R,P] = corr(abs(W_surr(:,iSurr,iFreq)),abs(W_surr(:,iSurr,jFreq)));
+                    [R,P] = corr(abs(W_surr(:,iSurr,iFreq)),abs(W_surr(:,jTrial,jFreq)));
                     corr_arr_out(iSurr,iFreq,jFreq) = R;
                     pval_arr_out(iSurr,iFreq,jFreq) = P;
                     
-                    [R,P] = circ_corrcc(angle(W_surr(:,iSurr,iFreq)),angle(W_surr(:,iSurr,jFreq)));
+                    [R,P] = circ_corrcc(angle(W_surr(:,iSurr,iFreq)),angle(W_surr(:,jTrial,jFreq)));
                     corrp_arr_out(iSurr,iFreq,jFreq) = R;
                     pvalp_arr_out(iSurr,iFreq,jFreq) = P;
                 end
@@ -172,12 +187,12 @@ if doSetup
                     case 4
                         use_corr = (squeeze(nanmean(corr_arr_in)) - squeeze(nanmean(corr_arr_in_ref))) ./ squeeze(nanstd(corr_arr_in_ref));
                         all_z_corr_arr_ref(iSession,:,:) = use_corr;
-                        caxisVals = [-2 2];
+                        caxisVals = [-1 1];
                         titleLabel = 'Z-score (norm by ref)';
                     case 5
                         use_corr = (squeeze(nanmean(corr_arr_in)) - squeeze(nanmean(corr_arr_out))) ./ squeeze(nanstd(corr_arr_out));
                         all_z_corr_arr_out(iSession,:,:) = use_corr;
-                        caxisVals = [-2 2];
+                        caxisVals = [-1 1];
                         titleLabel = 'Z-score (norm by OUT)';
                 end
                 subplot(rows,cols,prc(cols,[1 iCol]));
@@ -192,6 +207,7 @@ if doSetup
                 yticklabels(tickLabels);
                 cbAside(gca,'corr','k');
                 title({['Session ',num2str(iSession)],['power ',titleLabel]});
+                set(gca,'fontSize',6);
 
                 if ismember(iCol,[1,2])
                     [row,col] = find(use_pval < pThresh);
@@ -215,6 +231,7 @@ if doSetup
                     yticklabels(tickLabels);
                     cbAside(gca,'corr','k');
                     title(['phase ',titleLabel]);
+                    set(gca,'fontSize',6);
                 
                     [row,col] = find(use_pvalp < pThresh);
                     for jj = 1:numel(row)
@@ -228,7 +245,7 @@ if doSetup
                 
             set(gcf,'color','w');
             if doSave
-                saveFile = ['session',num2str(iSession,'%02d'),'_IN-OUT_lfpPowerXcorr.png'];
+                saveFile = ['session',num2str(iSession,'%02d'),'_IN-OUT_lfpPowerXcorr',mixLabel,'.png'];
                 saveas(h,fullfile(savePath,saveFile));
                 close(h);
             end
@@ -283,6 +300,7 @@ for iCol = 1:cols
     yticklabels(tickLabels);
     cbAside(gca,'corr','k');
     title({['Session ',num2str(iSession)],['power ',titleLabel]});
+    set(gca,'fontSize',6);
 
     if ismember(iCol,[1,2])
         [row,col] = find(use_pval < pThresh);
@@ -306,6 +324,7 @@ for iCol = 1:cols
         yticklabels(tickLabels);
         cbAside(gca,'corr','k');
         title(['phase ',titleLabel]);
+        set(gca,'fontSize',6);
 
         [row,col] = find(use_pvalp < pThresh);
         for jj = 1:numel(row)
@@ -318,7 +337,7 @@ end
 
 set(gcf,'color','w');
 if doSave
-    saveFile = 'allSessions_IN-OUT_lfpPowerXcorr.png';
+    saveFile = ['allSessions_IN-OUT_lfpPowerXcorr',mixLabel,'.png'];
     saveas(h,fullfile(savePath,saveFile));
     close(h);
 end
