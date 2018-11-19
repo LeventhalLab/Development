@@ -2,7 +2,7 @@ doSetup = true;
 doSave = true;
 doPlot = true;
 
-mixTrials = true;
+mixTrials = false;
 
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/powerCorr';
 freqList = logFreqList([1 200],30);
@@ -46,7 +46,7 @@ if doSetup
         
         % surrogates
         trialTimeRanges = compileTrialTimeRanges(curTrials(trialIds));
-        takeTime = 2;
+        takeTime = 3;
         takeSamples = round(takeTime * Fs);
         minTime = min(trialTimeRanges(:,2));
         maxTime = max(trialTimeRanges(:,1)) - takeTime;
@@ -64,7 +64,6 @@ if doSetup
             data(:,iSurr) = sevFilt(randSample:randSample + takeSamples - 1);
         end
         disp('Done searching!');
-        tWindow_sample = round(tWindow * Fs);
         W_surr = calculateComplexScalograms_EnMasse(data,'Fs',Fs,'freqList',freqList);
         keepTrials = threshTrialData(data,zThresh);
         startRange = (round(size(W_surr,1)/2) - round(size(W,2)/2/2));
