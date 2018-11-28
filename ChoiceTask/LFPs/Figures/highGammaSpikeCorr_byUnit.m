@@ -4,7 +4,7 @@
 % load('session_20180925_entrainmentSurrogates.mat', 'selectedLFPFiles')
 % load('session_20180925_entrainmentSurrogates.mat', 'all_trials')
 % load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local_altLookup')
-useAlt = true;
+useAlt = false;
 freqList = [1 4;4 7;13 30;30 70;70 200];
 loaded_sevFile = '';
 sessionRhos_byPower = [];
@@ -45,10 +45,13 @@ for iNeuron = 1:numel(LFPfiles_local)
     disp(['iNeuron ',num2str(iNeuron)]);
     
     ts = all_ts{iNeuron};
+    temp = [];
     % remove in-trial ts
     for iTrial = 1:size(trialTimeRanges,1)
-        ts(ts > trialTimeRanges(iTrial,1) & ts < trialTimeRanges(iTrial,2)) = [];
+%         ts(ts > trialTimeRanges(iTrial,1) & ts < trialTimeRanges(iTrial,2)) = [];
+        temp = [temp ts(ts > trialTimeRanges(iTrial,1) & ts < trialTimeRanges(iTrial,2))];
     end
+    ts = temp;
     
     s = equalVectors(spikeDensityEstimate(ts),dataZPower(iFreq,:));
     
