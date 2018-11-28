@@ -3,6 +3,7 @@
 % load('session_20180925_entrainmentSurrogates.mat', 'analysisConf')
 % load('session_20180925_entrainmentSurrogates.mat', 'selectedLFPFiles')
 % load('session_20180925_entrainmentSurrogates.mat', 'all_trials')
+% load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local_altLookup')
 
 freqList = [1 4;4 7;13 30;30 70;70 200];
 iSession = 0;
@@ -49,7 +50,7 @@ for jNeuron = selectedLFPFiles'
         sessionRhos_byPower(iSession,iFreq) = rho;
         sessionPvals(iSession,iFreq) = pval;
         
-        [rho,~] = circ_corrcc(dataPhase(iFreq,:)',s');
+        [rho,~] = circ_corrcl(dataPhase(iFreq,:)',s');
         sessionRhos_byPhase(iSession,iFreq) = rho;
         
         [rho,~] = corr(dataZEnvelope(iFreq,:)',s');
