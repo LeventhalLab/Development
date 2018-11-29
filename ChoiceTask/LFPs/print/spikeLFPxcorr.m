@@ -1,4 +1,4 @@
-3% function spikeLFPxcorr(LFPfiles,all_trials,all_SDEs_zscore,eventFieldnames)
+% function spikeLFPxcorr(LFPfiles,all_trials,all_SDEs_zscore,eventFieldnames)
 % load('session_20180717_SDExcorr.mat', 'all_SDEs_zscore')
 sevFile = '';
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/xcorrTrials';

@@ -1,6 +1,6 @@
 % load('session_20180919_NakamuraMRL.mat','dirSelUnitIds','ndirSelUnitIds','primSec');
-
-doSave = true;
+% load('session_20181106_entrainmentData.mat')
+doSave = false;
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/spikePhaseUnitTypes';
 
 % % freqList = {[1 4;4 7;8 12;13 30]};
