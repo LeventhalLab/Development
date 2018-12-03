@@ -1,11 +1,11 @@
-% load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local')
-% load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local_alt')
-% load('session_20180919_NakamuraMRL.mat', 'selectedLFPFiles')
-% load('session_20180919_NakamuraMRL.mat', 'all_trials')
-% load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
-% load('session_20180925_entrainmentSurrogates.mat', 'session_Wz_phase')
-% load('session_20180925_entrainmentSurrogates.mat', 'session_Wz_power')
-% load('session_20180925_entrainmentSurrogates.mat', 'session_Wz_rayleigh_pval')
+load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local')
+load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local_alt')
+load('session_20180919_NakamuraMRL.mat', 'selectedLFPFiles')
+load('session_20180919_NakamuraMRL.mat', 'all_trials')
+load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
+load('session_20180925_entrainmentSurrogates.mat', 'session_Wz_phase')
+load('session_20180925_entrainmentSurrogates.mat', 'session_Wz_power')
+load('session_20180925_entrainmentSurrogates.mat', 'session_Wz_rayleigh_pval')
 
 % save('fig__spectrum_MRL_20181108','LFPfiles_local','selectedLFPFiles','all_trials',...
 %     'eventFieldnames','session_Wz_power','session_Wz_phase','session_Wz_rayleigh_pval','freqList');
@@ -14,6 +14,7 @@ doSetup = true;
 zThresh = 5;
 tWindow = 1;
 freqList = logFreqList([1 200],30);
+freqList = {[1 4;4 8;13 30;30 70;70 200]};
 Wlength = 400;
 
 if doSetup
@@ -161,7 +162,7 @@ if false
     end
 end
 
-if true
+if false
     savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/LFP/allSessions';
     saveFile = 'allSubject_allSessions';
     scaloPower = squeeze(median(session_Wz_power(:,:,:,:)));

@@ -4,7 +4,7 @@
 % load('session_20180925_entrainmentSurrogates.mat', 'all_trials')
 % load('session_20181129_sub_allA.mat')
 doSetup = false;
-doSave = true;
+doSave = false;
 
 makeLength = 400000;
 nSmooth = makeLength / 1000;
