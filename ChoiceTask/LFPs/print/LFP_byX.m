@@ -14,7 +14,6 @@ doSetup = true;
 zThresh = 5;
 tWindow = 1;
 freqList = logFreqList([1 200],30);
-freqList = {[1 4;4 8;13 30;30 70;70 200]};
 Wlength = 400;
 
 if doSetup
