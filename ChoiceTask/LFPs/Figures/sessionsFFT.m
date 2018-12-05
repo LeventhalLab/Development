@@ -7,7 +7,7 @@ doSetup = false;
 doSave = false;
 
 makeLength = 400000;
-c = makeLength / 1000;
+nSmooth = makeLength / 1000;
 if doSetup
     for iInOut = 1:2
         if iInOut == 1

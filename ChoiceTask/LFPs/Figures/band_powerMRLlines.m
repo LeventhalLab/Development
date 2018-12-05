@@ -1,17 +1,23 @@
 % load('fig__spectrum_MRL_20181108');
 % load('deltaRTcorr_norm.mat');
+% load('session_20180925_entrainmentSurrogates.mat', 'eventFieldnames')
+
+doSave = true;
+figPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
+subplotMargins = [.05 .02];
 
 % copied setup from LFP_byX.m, using band freqList here
 doSetup = false;
 zThresh = 5;
 tWindow = 1;
-freqList = {[1 4;4 8;13 30;30 70;70 200]};
+freqList = {[1 4;4 8;13 30;30 70]};
 Wlength = 400;
 
 if doSetup
     session_Wz_power = [];
     session_Wz_phase = [];
     session_Wz_rayleigh_pval = [];
+    all_Times = [];
     iSession = 0;
     for iNeuron = selectedLFPFiles'
         iSession = iSession + 1;
@@ -21,6 +27,7 @@ if doSetup
         subjectName = name(1:5);
         curTrials = all_trials{iNeuron};
         [trialIds,allTimes] = sortTrialsBy(curTrials,'RT');
+        all_Times = [all_Times allTimes];
         [sevFilt,Fs,decimateFactor] = loadCompressedSEV(sevFile,[]);
         [W,all_data] = eventsLFPv2(curTrials(trialIds),sevFilt,tWindow,Fs,freqList,eventFieldnames);
         keepTrials = threshTrialData(all_data,zThresh);
@@ -44,10 +51,6 @@ if doSetup
     end
 end
 
-doSave = false;
-figPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
-subplotMargins = [.05 .02];
-
 scaloPower = squeeze(median(session_Wz_power(:,:,:,:)));
 scaloPhase = squeeze(median(session_Wz_phase(:,:,:,:)));
 scaloRayleigh = squeeze(median(session_Wz_rayleigh_pval(:,:,:,:)));
@@ -64,7 +67,7 @@ lineWidth = 1;
 phaseMap = cmocean('phase');
 for iEvent = 3:4
     subplot_tight(rows,cols,prc(cols,[1 iEvent-2]),subplotMargins);
-    for iFreq = 1:5
+    for iFreq = 1:size(freqList{:},1)
 %         useRange = closest(freqList,useFreqs(iFreq,1)):closest(freqList,useFreqs(iFreq,2));
 %         data = mean(squeeze(scaloPower(iEvent,:,useRange)),2);
         data = smooth(squeeze(scaloPower(iEvent,:,iFreq)),nSmooth);
@@ -79,7 +82,7 @@ for iEvent = 3:4
     grid on;
     
     subplot_tight(rows,cols,prc(cols,[2 iEvent-2]),subplotMargins);
-    for iFreq = 1:5
+    for iFreq = 1:size(freqList{:},1)
 %         useRange = closest(freqList,useFreqs(iFreq,1)):closest(freqList,useFreqs(iFreq,2));
 %         data = mean(squeeze(scaloPhase(iEvent,:,useRange)),2);
         data = smooth(squeeze(scaloPhase(iEvent,:,iFreq)),nSmooth);
