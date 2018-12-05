@@ -1,4 +1,5 @@
-doSetup = false;
+% run with doMix=true to set mix variable, then false
+doSetup = true;
 doMix = false;
 
 freqList = logFreqList([1 200],50);
@@ -31,6 +32,8 @@ if doSetup
         curTrials = all_trials{iNeuron};
         [trialIds,allTimes] = sortTrialsBy(curTrials,'RT');
         [sevFilt,Fs,decimateFactor] = loadCompressedSEV(sevFile,[]);
+        sevFilt = artifactThresh(sevFilt,[1],2000);
+        sevFilt = sevFilt - mean(sevFilt);
     % %     [W,all_data] = eventsLFPv2(curTrials(trialIds),sevFilt,tWindow,Fs,freqList,eventFieldnames);
 
         % surrogates
@@ -44,16 +47,18 @@ if doSetup
         surrLog = [];
         iSurr = 0;
         disp('Gathering surrogates...');
-        while iSurr < nSurr + 40 % add buffer for artifact removal
+        while iSurr < nSurr*2 % add buffer for artifact removal
             % try randTs
             randTs = (maxTime-minTime) .* rand + minTime;
-            iSurr = iSurr + 1;
             randSample = round(randTs * Fs);
             sampleRange = randSample:randSample + takeSamples - 1;
-            surrLog(:,iSurr) = sampleRange;
-            data(:,iSurr) = sevFilt(sampleRange);
+            thisData = sevFilt(sampleRange);
+            if isempty(strfind(diff(thisData),zeros(1,round(numel(sampleRange)*0.1))))
+                iSurr = iSurr + 1;
+                data(:,iSurr) = thisData;
+                surrLog(:,iSurr) = sampleRange;
+            end
         end
-        disp('Done searching!');
         keepTrials = threshTrialData(data,zThresh);
         W_surr = calculateComplexScalograms_EnMasse(data(:,keepTrials(1:nSurr)),'Fs',Fs,'freqList',freqList);
         surrLog = surrLog(:,keepTrials(1:nSurr));

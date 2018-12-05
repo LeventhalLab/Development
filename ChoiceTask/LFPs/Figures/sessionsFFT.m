@@ -7,7 +7,7 @@ doSetup = false;
 doSave = false;
 
 makeLength = 400000;
-nSmooth = makeLength / 1000;
+c = makeLength / 1000;
 if doSetup
     for iInOut = 1:2
         if iInOut == 1
@@ -22,6 +22,8 @@ if doSetup
             disp(iSession);
             sevFile = LFPfiles_local{iNeuron};
             [sevFilt,Fs,decimateFactor] = loadCompressedSEV(sevFile,[]);
+            sevFilt = artifactThresh(sevFilt,[1],2000);
+            sevFilt = sevFilt - mean(sevFilt);
 
             curTrials = all_trials{iNeuron};
             trialTimeRanges = compileTrialTimeRanges(curTrials);
@@ -49,17 +51,37 @@ if doSetup
     end
     fnew = equalVectors(f,zeros(1,makeLength));
 end
-save('session_20181129_sub_allA','all_A_in','all_A_out');
+xlimVals = [1 200];
+f1_idx = closest(f,xlimVals(1));
+f2_idx = closest(f,xlimVals(2));
+f3_idx = closest(f,70);
+f4_idx = closest(f,150);
+
+norm_data_out = [];
+norm_data_in = [];
+% % ff(500,500);
+for ii = 1:size(all_A_out,1)
+    data_out = (all_A_out(ii,f1_idx:f2_idx) - mean(all_A_out(ii,f3_idx:f4_idx))) ./ std(all_A_out(ii,f3_idx:f4_idx));
+    norm_data_out(ii,:) = data_out;
+    data_in = (all_A_in(ii,f1_idx:f2_idx) - mean(all_A_in(ii,f3_idx:f4_idx))) ./ std(all_A_in(ii,f3_idx:f4_idx));
+    norm_data_in(ii,:) = data_in;
+% %     plot(smooth(data_out,nSmooth));
+% %     hold on;
+end
+usef = linspace(xlimVals(1),xlimVals(2),size(norm_data_in,2));
+% save('session_20181129_sub_allA','all_A_in','all_A_out','fnew');
 h = figure;
-data_out = (smooth(median(all_A_out),nSmooth));
-loglog(fnew,data_out,'lineWidth',2,'color','r');
+norm_med_out = smooth(mean(norm_data_out),nSmooth);
+plot(usef,norm_med_out,'lineWidth',2,'color','r');
 hold on;
 
-data_in = (smooth(median(all_A_in),nSmooth));
-loglog(fnew,data_in,'lineWidth',2,'color','k');
-xmarks = [4 7 13 30 70];
+norm_med_in = smooth(mean(norm_data_in),nSmooth);
+plot(usef,norm_med_in,'lineWidth',2,'color','k');
+set(gca,'xscale','log')
+
+xmarks = [4 8 13 30 70];
 xticks(xmarks);
-xlim([1 200]);
+xlim(xlimVals);
 for ii = 1:numel(xmarks)
     plot([xmarks(ii) xmarks(ii)],ylim,':','color',repmat(.8,[1,4]));
 end
@@ -69,11 +91,11 @@ for ii = 1:numel(bandLabels)
     text(bandLocs(ii),min(ylim) + mean(ylim)/4,bandLabels{ii},'color','k','fontSize',16,'horizontalAlignment','center');
 end
 
-xlabel('log freq. (Hz)');
+xlabel('freq. (Hz)');
 % ylim([0.035 0.2]);
 yticks([]);
-ylabel('log power (uv^2)');
-title('Median Spectrum All Sessions');
+ylabel('power (uv^2)');
+title('Mean Spectrum All Sessions');
 legend({'OUT trial','IN trial'});
 set(gca,'fontSize',16);
 set(gcf,'color','w');
