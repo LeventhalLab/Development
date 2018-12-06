@@ -1,10 +1,11 @@
-% see bottom of: /Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/LFPs/Figures/band_powerMRLlines.m
+% build with: deltaRTcorr.m
+% see bottom of: band_powerMRLlines.m
 % load('deltaRTcorr_norm.mat');
 % load('session_20180925_entrainmentSurrogates.mat', 'eventFieldnames')
 
-doPlot1 = false;
+doPlot1 = true;
 drawPlot1 = false;
-doPlot_pMat = false;
+doPlot_pMat = true;
 
 doPlot2 = false;
 
@@ -18,13 +19,16 @@ nBoot = 1000;
 nSmooth = 200;
 pvalThresh = 0.01;
 bootThresh = nBoot * (1-pvalThresh);
-rows = 3;
+rows = 4;
 cols = 4;
-% nTimes = rows*cols;
-nTimes = size(phaseCorr,2);
+if drawPlot1
+    nTimes = rows*cols;
+else
+    nTimes = size(phaseCorr,2);
+end
 if doPlot1
     if drawPlot1
-        ff(1400,600);
+        ff(1400,800);
     end
     tp = round(linspace(1,101,nTimes));
     pMat = NaN(nTimes,numel(RTsorted)-1);
@@ -114,7 +118,7 @@ end
 % % figure;
 % % [rho,pval] = corr(RTsorted(k),v);
 
-if true
+if false
     n = 1000;
     t = linspace(0,100,n);
     pd = makedist('Weibull','a',60,'b',5);

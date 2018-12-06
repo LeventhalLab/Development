@@ -2,7 +2,7 @@
 % load('deltaRTcorr_norm.mat');
 % load('session_20180925_entrainmentSurrogates.mat', 'eventFieldnames')
 
-doSave = true;
+doSave = false;
 figPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
 subplotMargins = [.05 .02];
 

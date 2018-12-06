@@ -1,5 +1,10 @@
+% load('session_20180925_entrainmentSurrogates.mat', 'LFPfiles_local')
+% load('session_20180925_entrainmentSurrogates.mat', 'selectedLFPFiles')
+% load('session_20180925_entrainmentSurrogates.mat', 'all_trials')
+% load('session_20180925_entrainmentSurrogates.mat', 'eventFieldnames')
+
 doSetup = true;
-doPlot1 = true;
+doPlot1 = false;
 doPlot2 = false;
 doSave = false;
 doDebug = false;
@@ -10,6 +15,7 @@ savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/spike
 
 tWindow = 1;
 freqList = {[1 4]}; % hilbert method
+% freqList = {[4 8]}; % hilbert method
 % freqList = [3.4];
 if strcmp(doTiming,'RT')
     plot1Event = 3;
