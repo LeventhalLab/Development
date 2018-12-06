@@ -1,16 +1,20 @@
 % see bottom of: /Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/LFPs/Figures/band_powerMRLlines.m
-doPlot1 = true;
+% load('deltaRTcorr_norm.mat');
+% load('session_20180925_entrainmentSurrogates.mat', 'eventFieldnames')
+
+doPlot1 = false;
 drawPlot1 = false;
-doPlot_pMat = true;
+doPlot_pMat = false;
 
 doPlot2 = false;
 
 useNeighbor = false;
 
 iEvent = 4;
-[v,k] = sort(all_Times,'descend'); % SORTED HIGH RT -> LOW RT
-phaseCorr = phaseCorrs_delta{iEvent}(k,:);
+[RTsorted,RTk] = sort(all_Times,'descend'); % SORTED HIGH RT -> LOW RT
+phaseCorr = phaseCorrs_delta{iEvent}(RTk,:);
 
+nBoot = 1000;
 nSmooth = 200;
 pvalThresh = 0.01;
 bootThresh = nBoot * (1-pvalThresh);
@@ -23,9 +27,8 @@ if doPlot1
         ff(1400,600);
     end
     tp = round(linspace(1,101,nTimes));
-    pMat = NaN(nTimes,numel(v)-1);
+    pMat = NaN(nTimes,numel(RTsorted)-1);
     t = linspace(0,1,size(phaseCorr,2));
-    nBoot = 1000;
     MBoot = [];
     for iTime = 1:numel(tp)
         disp([num2str(iTime),'/',num2str(numel(tp))]);
@@ -72,7 +75,7 @@ if doPlot1
             ylim([0 2]);
             yticks([min(ylim):1:max(ylim)]);
             xlim([1 numel(r)]);
-            xticklabels(compose('%1.2f',v(xticks)));
+            xticklabels(compose('%1.2f',RTsorted(xticks)));
             xlabel('RT');
             title({eventFieldnames{iEvent},['t = ',num2str(t(tp(iTime)),2),'s, ',num2str(tp(iTime)),'/101']});
             drawnow;
@@ -85,7 +88,7 @@ end
 
 if doPlot_pMat
     ff(500,300);
-    imagesc(linspace(-1,1,size(pMat,1)),v,pMat');
+    imagesc(linspace(-1,1,size(pMat,1)),RTsorted,pMat');
     colormap(jet);
     caxis([950 1000]);
     set(gca,'ydir','normal');
@@ -105,8 +108,35 @@ if doPlot_pMat
     grid on;
 end
 
+% sort by phase and assess RT correlation
+% % midPhases = phaseCorr(:,55);
+% % [v,k] = sort(circ_dist(midPhases,repmat(circ_mean(midPhases),size(midPhases))));
+% % figure;
+% % [rho,pval] = corr(RTsorted(k),v);
+
+if true
+    n = 1000;
+    t = linspace(0,100,n);
+    pd = makedist('Weibull','a',60,'b',5);
+    y = pdf(pd,t);
+    sig = fliplr(y.*sin(t));
+    [env,~] = envelope(sig);
+    figure;
+    plot(t,sig,'k','lineWidth',2);
+    hold on;
+    title('RT Wave Function');
+    xticks([]);
+    xlabel('High   \leftarrow   RT (s)   \rightarrow   Low')
+    yticks([0]);
+    plot(t,env,'r','lineWidth',2);
+    set(gca,'fontSize',16);
+    legend({'\psi_{RT}','|\psi_{RT}|^2'},'location','northwest');
+    grid on;
+    set(gcf,'color','w');
+end
+    
 if doPlot2
-    colors = jet(numel(k));
+    colors = jet(numel(RTk));
     ff(1400,400);
     rows = 1;
     cols = 5;
@@ -114,8 +144,8 @@ if doPlot2
     t = linspace(-1,1,size(phaseCorr,2));
     for iTime = 1:numel(tp)
         subplot(rows,cols,iTime);
-        for iTrial = 1:5:numel(k)
-            polarplot([0 phaseCorr(iTrial,tp(iTime))],[0 v(iTrial)],'color',colors(iTrial,:));
+        for iTrial = 1:5:numel(RTk)
+            polarplot([0 phaseCorr(iTrial,tp(iTime))],[0 RTsorted(iTrial)],'color',colors(iTrial,:));
             hold on;
         end
         rticks([0.75]);
@@ -125,5 +155,5 @@ if doPlot2
         title({eventFieldnames{iEvent},['t = ',num2str(t(tp(iTime)),2),'s, ',num2str(tp(iTime)),'/101']});
         drawnow;
     end
+    set(gcf,'color','w');
 end
-set(gcf,'color','w');
