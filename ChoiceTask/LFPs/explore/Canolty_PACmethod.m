@@ -3,8 +3,10 @@
 % load('session_20180925_entrainmentSurrogates.mat', 'LFPfiles_local')
 % load('session_20180925_entrainmentSurrogates.mat', 'selectedLFPFiles')
 
+% !!! This is likely deprecated, see: Canolty_PACmethod_trialStitched.m
+
 doSetup = true;
-doSave = true;
+doSave = false;
 doPlot = false;
 doDebug = true;
 dbstop if error
@@ -49,13 +51,13 @@ for iNeuron = selectedLFPFiles(1)'
             while iSurr < nSurr
                 % try randTs
                 randTs = (maxTime-minTime) .* rand + minTime;
-                % check that randTs is not in-trial
-% %                 if ~inTrial(randTs,takeTime,trialTimeRanges)
+                randSample = round(randTs * Fs);
+                thisData = sevFilt(randSample:randSample + takeSamples - 1);
+                if isempty(strfind(diff(thisData),zeros(1,round(numel(sampleRange)*0.1))))
                     iSurr = iSurr + 1;
-                    randSample = round(randTs * Fs);
+                    data(:,iSurr) = thisData;
                     surrLog(iSurr) = randTs;
-                    data(:,iSurr) = sevFilt(randSample:randSample + takeSamples - 1);
-% %                 end
+                end
             end
             disp('Done searching!');
             tWindow_sample = round(tWindow * Fs);
