@@ -10,13 +10,15 @@
 % % load('session_20180919_NakamuraMRL.mat', 'all_ts')
 % % load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local_altLookup')
 
+% !! add back fake trial?!
+
 if ismac
     savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/PAC/canoltyMethod/bySession';
 else
     savePath = '\\172.20.138.142\RecordingsLeventhal2\ChoiceTask\MthalLFPs\CanoltySessions';
 end
 doSetup = true;
-doSave = false;
+doSave = true;
 doPlot = true;
 % dbstop if error
 % dbclear all
@@ -42,7 +44,7 @@ all_MImatrix = {};
 all_shuff_MImatrix_mean = {};
 all_shuff_MImatrix_pvals = {};
 
-for iNeuron = selectedLFPFiles(24)'
+for iNeuron = selectedLFPFiles'
     iSession = iSession + 1;
     disp(['Session #',num2str(iSession)]);
     if doSetup
@@ -101,7 +103,7 @@ for iNeuron = selectedLFPFiles(24)'
         shuff_MImatrix_mean = MImatrix;
         shuff_MImatrix_pvals = MImatrix;
         surr_ifA = NaN(numel(freqList_a),nSurr); % #save
-        for iEvent = 4%1:size(W,1)
+        for iEvent = 1:size(W,1)
             disp(['working on event #',num2str(iEvent)]);
             for ifp = 1:numel(freqList_p)
                 pIdx = ifp;%find(freqList == freqList_p(ifp));
@@ -137,12 +139,12 @@ for iNeuron = selectedLFPFiles(24)'
                         
                     [surrogate_mean,surrogate_std] = normfit(surrogate_m);
                     
-                    m_norm_length = (abs(m_raw)-surrogate_mean)/surrogate_std;
+                    m_norm_length = (abs(m_raw) - surrogate_mean) ./ surrogate_std;
                     m_norm_phase = angle(m_raw);
                     m_norm = m_norm_length*exp(1i*m_norm_phase);
                     MImatrix(iEvent,ifp,ifA) = m_norm_length;
                     
-                    shuff_m_norm_length = (abs(shuff_m_raw)-surrogate_mean)./surrogate_std;
+                    shuff_m_norm_length = (abs(shuff_m_raw) - surrogate_mean) ./ surrogate_std;
                     shuff_MImatrix_mean(iEvent,ifp,ifA) = mean(shuff_m_norm_length);
 %                     shuff_MImatrix_pvals(iEvent,ifp,ifA) = sum(abs(m_norm_length) > abs(shuff_m_norm_length)) / nShuff;
                     shuff_MImatrix_pvals(iEvent,ifp,ifA) = sum(abs(m_raw) > abs(shuff_m_raw)) / nShuff;
@@ -153,102 +155,12 @@ for iNeuron = selectedLFPFiles(24)'
         all_shuff_MImatrix_mean{iSession} = shuff_MImatrix_mean;
         all_shuff_MImatrix_pvals{iSession} = shuff_MImatrix_pvals;
     end
-    
-    if doPlot
-        pLims = [0 0.001];
-        zLims = [-26 26];
-        rows = 4;
-        cols = size(W,1);
-        h = figuree(1300,800);
-        eventFieldnames_wFake = {eventFieldnames{:} 'outTrial'};
-        for iEvent = 1:size(W,1)
-            curMat = squeeze(MImatrix(iEvent,:,:));
-            subplot(rows,cols,prc(cols,[1 iEvent]));
-            imagesc(curMat');
-            colormap(gca,jet);
-            set(gca,'ydir','normal');
-            caxis(zLims);
-            xticks(1:numel(freqList_p));
-            xticklabels(bandLabels(freqList_p(:)));
-            % xtickangle(270);
-            xlabel('phase (Hz)');
-            yticks(1:numel(freqList_a));
-            yticklabels(bandLabels(freqList_a(:)));
-            ylabel('amp (Hz)');
-            set(gca,'fontsize',10);
-            if iEvent == 1
-                title({'mean real Z',[subjectName,' s',num2str(iSession,'%02d')],eventFieldnames_wFake{iEvent}});
-            else
-                title({'mean real Z',eventFieldnames_wFake{iEvent}});
-            end
-            if iEvent == size(W,1)
-                cbAside(gca,'Z-MI','k');
-            end
-
-            % note: z = norminv(alpha/N); N = # of index values
-            pMat = normcdf(curMat,'upper')*size(freqList{:},1).^2;
-            subplot(rows,cols,prc(cols,[2 iEvent]));
-            imagesc(pMat');
-            colormap(gca,jet);
-            set(gca,'ydir','normal');
-            caxis(pLims);
-            xticks(1:numel(freqList_p));
-            xticklabels(bandLabels(freqList_p(:)));
-            % xtickangle(270);
-            xlabel('phase (Hz)');
-            yticks(1:numel(freqList_a));
-            yticklabels(bandLabels(freqList_a(:)));
-            ylabel('amp (Hz)');
-            set(gca,'fontsize',10);
-            title('mean real pval');
-            if iEvent == size(W,1)
-                cbAside(gca,'p-value','k');
-            end
-            
-            curMat = squeeze(shuff_MImatrix_mean(iEvent,:,:));
-            subplot(rows,cols,prc(cols,[3 iEvent]));
-            imagesc(curMat');
-            colormap(gca,jet);
-            set(gca,'ydir','normal');
-            caxis(zLims);
-            xticks(1:numel(freqList_p));
-            xticklabels(bandLabels(freqList_p(:)));
-            % xtickangle(270);
-            xlabel('phase (Hz)');
-            yticks(1:numel(freqList_a));
-            yticklabels(bandLabels(freqList_a(:)));
-            ylabel('amp (Hz)');
-            set(gca,'fontsize',10);
-            title('mean shuff Z');
-            if iEvent == size(W,1)
-                cbAside(gca,'Z-MI','k');
-            end
-            
-            pMat = squeeze(shuff_MImatrix_pvals(iEvent,:,:));
-            subplot(rows,cols,prc(cols,[4 iEvent]));
-            imagesc(1-pMat');
-            colormap(gca,jet);
-            set(gca,'ydir','normal');
-            caxis(pLims);
-            xticks(1:numel(freqList_p));
-            xticklabels(bandLabels(freqList_p(:)));
-            % xtickangle(270);
-            xlabel('phase (Hz)');
-            yticks(1:numel(freqList_a));
-            yticklabels(bandLabels(freqList_a(:)));
-            ylabel('amp (Hz)');
-            set(gca,'fontsize',10);
-            title('mean shuff pval');
-            if iEvent == size(W,1)
-                cbAside(gca,'p-value','k');
-            end
-        end
-        set(gcf,'color','w');
-        drawnow;
-        if doSave
-            saveFile = ['s',num2str(iSession,'%02d'),'_allEvent.png'];
-            saveas(h,fullfile(savePath,saveFile));
-            close(h);
-        end
-    end
+end
+useSessions = [1:30];
+h = CanoltyPAC_trialStitched_print(all_MImatrix,all_shuff_MImatrix_mean,all_shuff_MImatrix_pvals,useSessions,...
+eventFieldnames,freqList_p,freqList_a,freqList,bandLabels);
+if doSave
+    saveFile = ['s',num2str(iSession,'%02d'),'_allEvent.png'];
+    saveas(h,fullfile(savePath,saveFile));
+    close(h);
 end
