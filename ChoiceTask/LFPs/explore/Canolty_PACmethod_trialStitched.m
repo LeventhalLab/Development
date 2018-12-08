@@ -3,12 +3,12 @@
 % load('session_20180925_entrainmentSurrogates.mat', 'LFPfiles_local')
 % load('session_20180925_entrainmentSurrogates.mat', 'selectedLFPFiles')
 
-% % load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
-% % load('session_20180919_NakamuraMRL.mat', 'all_trials')
-% % load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local')
-% % load('session_20180919_NakamuraMRL.mat', 'selectedLFPFiles')
-% % load('session_20180919_NakamuraMRL.mat', 'all_ts')
-% % load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local_altLookup')
+% load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
+% load('session_20180919_NakamuraMRL.mat', 'all_trials')
+% load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local')
+% load('session_20180919_NakamuraMRL.mat', 'selectedLFPFiles')
+% load('session_20180919_NakamuraMRL.mat', 'all_ts')
+% load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local_altLookup')
 
 % !! add back fake trial?!
 
@@ -33,6 +33,7 @@ freqList_p = [1 2 3];
 freqList_a = [3 4 5];
 freqList = {[1 4;4 8;13 30;30 70;70 200]};
 bandLabels = {'\delta','\theta','\beta','\gamma','\gamma_H'};
+eventFieldnames_wFake = {eventFieldnames{:} 'outTrial'};
 
 nSurr = 200;
 nShuff = 100;
@@ -44,7 +45,7 @@ all_MImatrix = {};
 all_shuff_MImatrix_mean = {};
 all_shuff_MImatrix_pvals = {};
 
-for iNeuron = selectedLFPFiles'
+for iNeuron = selectedLFPFiles(1:2)'
     iSession = iSession + 1;
     disp(['Session #',num2str(iSession)]);
     if doSetup
@@ -97,6 +98,7 @@ for iNeuron = selectedLFPFiles'
         tWindow_sample = round(tWindow * Fs);
         reshapeRange = round(size(W_surr,1)/2)-tWindow_sample:round(size(W_surr,1)/2)+tWindow_sample-1;
         W_surr = W_surr(reshapeRange,:,:);
+        W(8,:,:,:) = W_surr(:,(1:size(W,3)),:); % add fake trials
         
         
         MImatrix = NaN(size(W,1),numel(freqList_p),numel(freqList_a));
@@ -156,9 +158,10 @@ for iNeuron = selectedLFPFiles'
         all_shuff_MImatrix_pvals{iSession} = shuff_MImatrix_pvals;
     end
 end
-useSessions = [1:30];
+
+useSessions = [1:2];
 h = CanoltyPAC_trialStitched_print(all_MImatrix,all_shuff_MImatrix_mean,all_shuff_MImatrix_pvals,useSessions,...
-eventFieldnames,freqList_p,freqList_a,freqList,bandLabels);
+eventFieldnames_wFake,freqList_p,freqList_a,freqList,bandLabels);
 if doSave
     saveFile = ['s',num2str(iSession,'%02d'),'_allEvent.png'];
     saveas(h,fullfile(savePath,saveFile));

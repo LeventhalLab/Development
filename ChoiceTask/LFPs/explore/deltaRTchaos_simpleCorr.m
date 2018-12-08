@@ -4,6 +4,9 @@ tWindow = 1;
 freqList = {[1 4;4 8;13 30;30 70]};
 Wlength = 400;
 
+cmapPath = '/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/LFPs/utils/magma.png';
+cmap = mycmap(cmapPath);
+
 if doSetup
     trial_Wz_power = [];
     trial_Wz_phase = [];
@@ -102,7 +105,7 @@ if true
                 if doPlot_catchRange
                     subplot(rows,cols,prc(cols,[iFreq,iEvent]));
                     imagesc(pMat);
-                    colormap(jet);
+                    colormap(magma);
                     set(gca,'ydir','normal');
                     caxis([0 .001]);
                     title([bandLabels{iFreq},'-',titleLabels{iCond},' at ',eventFieldnames{iEvent}]);
@@ -113,7 +116,7 @@ if true
                     
                     subplot(rows,cols,prc(cols,[iCond,eventCount]));
                     imagesc((100*pCollapse/numel(all_pval))');
-                    colormap(jet);
+                    colormap(magma);
                     caxis([0 100]);
                     cb = colorbar;
                     cb.Ticks = caxis;
