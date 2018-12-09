@@ -10,7 +10,7 @@
 % load('session_20180919_NakamuraMRL.mat', 'all_ts')
 % load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local_altLookup')
 
-doSetup = false;
+doSetup = true;
 doSave = true;
 doPlot = true;
 
@@ -29,8 +29,8 @@ tWindow = 0.5;
 % freqList_a = logFreqList([10 200],10);
 % freqList = unique([freqList_p freqList_a]);
 
-freqList_p = [1 2 3];
-freqList_a = [3 4 5];
+freqList_p = [1 2 3 4 5];
+freqList_a = [1 2 3 4 5];
 freqList = {[1 4;4 8;13 30;30 70;70 200]};
 bandLabels = {'\delta','\theta','\beta','\gamma','\gamma_H'};
 eventFieldnames_wFake = {eventFieldnames{:} 'outTrial'};
@@ -111,7 +111,7 @@ for iNeuron = selectedLFPFiles'
                 pIdx = ifp;%find(freqList == freqList_p(ifp));
                 phase = squeeze(angle(W(iEvent,:,:,pIdx)));
                 phase = phase(:)';
-                for ifA = 1:numel(freqList_a)
+                for ifA = ifp:numel(freqList_a)
                     aIdx = freqList_a(ifA);%find(freqList == freqList_a(ifA));
                     amplitude = squeeze(abs(W(iEvent,:,:,aIdx)).^2);
                     amplitude = amplitude(:)';
@@ -166,7 +166,7 @@ useSessions = [1:30];
 h = CanoltyPAC_trialStitched_print(all_MImatrix,all_shuff_MImatrix_mean,all_shuff_MImatrix_pvals,useSessions,...
 eventFieldnames_wFake,freqList_p,freqList_a,freqList,bandLabels);
 if doSave
-    saveFile = ['s',num2str(iSession,'%02d'),'_allEvent.png'];
+    saveFile = ['s',num2str(useSessions(1)),'-',num2str(useSessions(end)),'_allEvent.png'];
     saveas(h,fullfile(savePath,saveFile));
     close(h);
 end

@@ -19,17 +19,47 @@ else
     shuff_MImatrix_pvals = squeeze(median(v));
 end
 
+t = [];
+u = [];
+v = [];
+for ifp = 1:size(MImatrix,2)
+    for ifA = 1:size(MImatrix,3)
+        for iEvent = 1:size(MImatrix,1)
+            t(iEvent,ifA,ifp) = MImatrix(iEvent,ifp,ifA);
+            u(iEvent,ifA,ifp) = shuff_MImatrix_mean(iEvent,ifp,ifA);
+            v(iEvent,ifA,ifp) = shuff_MImatrix_pvals(iEvent,ifp,ifA);
+        end
+    end
+end
+
+MImatrix = squeeze((t));
+shuff_MImatrix_mean = squeeze((u));
+shuff_MImatrix_pvals = squeeze((v));
+
+% place NaNs in matrices
+for ifp = 1:size(MImatrix,2)
+    for ifA = 1:size(MImatrix,3)
+        if ifA < ifp
+            for iEvent = 1:size(MImatrix,1)
+                MImatrix(iEvent,ifA,ifp) = NaN;
+                shuff_MImatrix_mean(iEvent,ifA,ifp) = NaN;
+                shuff_MImatrix_pvals(iEvent,ifA,ifp) = NaN;
+            end
+        end
+    end
+end
+
 fontSize = 10;
 pLims = [0 0.001];
-zLims = [0 100];
+zLims = [0 10];
 rows = 2;
 cols = numel(eventFieldnames);
-h = figuree(1200,300);
+h = figuree(1200,350);
 
 for iEvent = 1:cols
     curMat = squeeze(MImatrix(iEvent,:,:));
     subplot(rows,cols,prc(cols,[1 iEvent]));
-    imagesc(curMat');
+    imagesc(curMat,'AlphaData',~isnan(curMat));
     colormap(gca,parula);
     set(gca,'ydir','normal');
     caxis(zLims);
@@ -72,7 +102,7 @@ for iEvent = 1:cols
 
     curMat = squeeze(shuff_MImatrix_mean(iEvent,:,:));
     subplot(rows,cols,prc(cols,[2 iEvent]));
-    imagesc(curMat');
+    imagesc(curMat,'AlphaData',~isnan(curMat));
     colormap(gca,parula);
     set(gca,'ydir','normal');
     caxis(zLims);

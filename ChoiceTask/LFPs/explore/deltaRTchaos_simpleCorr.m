@@ -1,8 +1,16 @@
-doSetup = false;
+% load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
+% load('session_20180919_NakamuraMRL.mat', 'all_trials')
+% load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local')
+% load('session_20180919_NakamuraMRL.mat', 'selectedLFPFiles')
+
+doSetup = true;
+doSave = true;
 zThresh = 5;
 tWindow = 1;
 freqList = {[1 4;4 8;13 30;30 70]};
 Wlength = 400;
+
+savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/collapse';
 
 cmapPath = '/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/LFPs/utils/magma.png';
 cmap = mycmap(cmapPath);
@@ -42,13 +50,16 @@ if doSetup
     end
 end
 
+save('deltaRTchaos_data_source_20181208','trial_Wz_power','trial_Wz_phase','compiledRTs');
+
 data_source = {trial_Wz_power trial_Wz_phase};
+
 [RTv,RTk] = sort(compiledRTs);
 bandLabels = {'\delta','\theta','\beta','\gamma'};
 titleLabels = {'power','phase'};
 
 pThresh = .001;
-intv = 20;
+intv = 100;
 useRange = intv:intv:numel(RTv);
 
 % > plots
@@ -140,6 +151,10 @@ if true
         end
         if doPlot_collapse || doPlot_catchRange
             set(gcf,'color','w');
+            if doSave
+                saveas(h,fullfile(savePath,['collapseRT_',titleLabels{iCond},'.png']));
+                close(h);
+            end
         end
     end
 end
