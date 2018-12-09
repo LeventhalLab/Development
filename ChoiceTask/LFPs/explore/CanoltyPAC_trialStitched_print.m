@@ -24,13 +24,13 @@ pLims = [0 0.001];
 zLims = [0 100];
 rows = 2;
 cols = numel(eventFieldnames);
-h = figuree(1200,400);
+h = figuree(1200,300);
 
 for iEvent = 1:cols
     curMat = squeeze(MImatrix(iEvent,:,:));
     subplot(rows,cols,prc(cols,[1 iEvent]));
     imagesc(curMat');
-    colormap(gca,magma);
+    colormap(gca,parula);
     set(gca,'ydir','normal');
     caxis(zLims);
     xticks(1:numel(freqList_p));
@@ -73,7 +73,7 @@ for iEvent = 1:cols
     curMat = squeeze(shuff_MImatrix_mean(iEvent,:,:));
     subplot(rows,cols,prc(cols,[2 iEvent]));
     imagesc(curMat');
-    colormap(gca,magma);
+    colormap(gca,parula);
     set(gca,'ydir','normal');
     caxis(zLims);
     xticks(1:numel(freqList_p));

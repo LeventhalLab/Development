@@ -18,12 +18,12 @@ if doSetup
         iSession = iSession + 1;
         disp(iSession);
         sevFile = LFPfiles_local{iNeuron};
-        disp(sevFile);
-        [~,name,~] = fileparts(sevFile);
-        subjectName = name(1:5);
         curTrials = all_trials{iNeuron};
         [trialIds,allTimes] = sortTrialsBy(curTrials,'RT');
         [sevFilt,Fs,decimateFactor] = loadCompressedSEV(sevFile,[]);
+        sevFilt = artifactThresh(sevFilt,[1],2000);
+        sevFilt = sevFilt - mean(sevFilt);
+        
         [W,all_data] = eventsLFPv2(curTrials(trialIds),sevFilt,tWindow,Fs,freqList,eventFieldnames);
         keepTrials = threshTrialData(all_data,zThresh);
         W = W(:,:,keepTrials,:);
@@ -48,7 +48,7 @@ bandLabels = {'\delta','\theta','\beta','\gamma'};
 titleLabels = {'power','phase'};
 
 pThresh = .001;
-intv = 10;
+intv = 20;
 useRange = intv:intv:numel(RTv);
 
 % > plots
@@ -56,23 +56,19 @@ if true
     doPlot_catchRange = false;
     doPlot_collapse = true;
     catchRange = closest(useRange,900); % catch ~40% of RT
-    if doPlot_collapse
-        h = ff(1500,800);
-        rows = 2;
-        cols = 3;
-    end
+
     for iCond = 1:2
-        if doPlot_catchRange
+        if doPlot_catchRange || doPlot_collapse
             h = ff(1500,800);
             rows = 4;
             cols = 7;
         end
         useData = data_source{iCond};
         eventCount = 0;
-        for iEvent = 2:4%1:7
+        for iEvent = 1:7
             eventCount = eventCount + 1;
-            for iFreq = 1%1:4
-                thisData = squeeze(useData(iEvent,:,:,iFreq));
+            for iFreq = 1:4
+                thisData = squeeze(useData(iEvent,:,RTk,iFreq)); % !! Add RTk here
                 pCollapse = NaN(numel(useRange),numel(useRange));
                 pMat = [];
                 range_log = [];
@@ -112,9 +108,9 @@ if true
                     drawnow;
                 end
                 if doPlot_collapse
-                    xInt = 11;
+                    xInt = 5;
                     
-                    subplot(rows,cols,prc(cols,[iCond,eventCount]));
+                    subplot(rows,cols,prc(cols,[iFreq,iEvent])); % eventCount
                     imagesc((100*pCollapse/numel(all_pval))');
                     colormap(magma);
                     caxis([0 100]);

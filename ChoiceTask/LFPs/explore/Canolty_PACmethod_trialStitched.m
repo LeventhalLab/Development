@@ -10,16 +10,16 @@
 % load('session_20180919_NakamuraMRL.mat', 'all_ts')
 % load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local_altLookup')
 
-% !! add back fake trial?!
+doSetup = false;
+doSave = true;
+doPlot = true;
 
 if ismac
     savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/PAC/canoltyMethod/bySession';
 else
     savePath = '\\172.20.138.142\RecordingsLeventhal2\ChoiceTask\MthalLFPs\CanoltySessions';
 end
-doSetup = true;
-doSave = true;
-doPlot = true;
+
 % dbstop if error
 % dbclear all
 
@@ -45,7 +45,7 @@ all_MImatrix = {};
 all_shuff_MImatrix_mean = {};
 all_shuff_MImatrix_pvals = {};
 
-for iNeuron = selectedLFPFiles(1:2)'
+for iNeuron = selectedLFPFiles'
     iSession = iSession + 1;
     disp(['Session #',num2str(iSession)]);
     if doSetup
@@ -159,7 +159,10 @@ for iNeuron = selectedLFPFiles(1:2)'
     end
 end
 
-useSessions = [1:2];
+save('Canolt_PAC_20181208','all_MImatrix','all_shuff_MImatrix_mean','all_shuff_MImatrix_pvals',...
+'eventFieldnames_wFake','freqList_p','freqList_a','freqList','bandLabels');
+
+useSessions = [1:30];
 h = CanoltyPAC_trialStitched_print(all_MImatrix,all_shuff_MImatrix_mean,all_shuff_MImatrix_pvals,useSessions,...
 eventFieldnames_wFake,freqList_p,freqList_a,freqList,bandLabels);
 if doSave
