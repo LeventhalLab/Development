@@ -4,6 +4,9 @@
 % load('session_20180925_entrainmentSurrogates.mat', 'all_trials')
 % load('session_20180925_entrainmentSurrogates.mat', 'eventFieldnames')
 % load('session_20181129_sub_allA.mat')
+
+savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/FFT';
+
 doSetup = false;
 doSave = false;
 
@@ -53,10 +56,10 @@ if doSetup
     fnew = equalVectors(f,zeros(1,makeLength));
 end
 xlimVals = [1 200];
-f1_idx = closest(f,xlimVals(1));
-f2_idx = closest(f,xlimVals(2));
-f3_idx = closest(f,70);
-f4_idx = closest(f,150);
+f1_idx = closest(fnew,xlimVals(1));
+f2_idx = closest(fnew,xlimVals(2));
+f3_idx = closest(fnew,70);
+f4_idx = closest(fnew,150);
 
 norm_data_out = [];
 norm_data_in = [];
@@ -78,11 +81,12 @@ hold on;
 
 norm_med_in = smooth(mean(norm_data_in),nSmooth);
 plot(usef,norm_med_in,'lineWidth',2,'color','k');
-set(gca,'xscale','log')
+% set(gca,'xscale','log');
 
 xmarks = [4 8 13 30 70];
 xticks(xmarks);
 xlim(xlimVals);
+xtickangle(270);
 for ii = 1:numel(xmarks)
     plot([xmarks(ii) xmarks(ii)],ylim,':','color',repmat(.8,[1,4]));
 end

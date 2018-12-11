@@ -1,5 +1,7 @@
 % run with doMix=true to set mix variable, then false
-doSetup = true;
+savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/ManningSpikePowerCorr';
+
+doSetup = false;
 doMix = false;
 
 freqList = logFreqList([1 200],50);
@@ -161,16 +163,21 @@ end
 ff(400,300);
 bar(all_rho,'k');
 hold on;
-bar(all_rho_mix,'r');
+% bar(all_rho_mix,'r');
 xticklabels(bandLabels);
 ylabel('rho');
-ylim([-.05 .3]);
-yticks(sort([0,ylim]));
+ylim([0 .3]);
+% yticks(sort([0,ylim]));
+yticks(ylim);
 for ii = 1:numel(all_pval)
     text(ii,abs(all_rho(ii)) + 0.02,pstar(all_pval(ii)),'color','k','horizontalAlignment','center','fontSize',12);
-    text(ii,-abs(all_rho_mix(ii)) - 0.02,pstar(all_pval_mix(ii)),'color','r','horizontalAlignment','center','fontSize',12);
+%     text(ii,-abs(all_rho_mix(ii)) - 0.02,pstar(all_pval_mix(ii)),'color','r','horizontalAlignment','center','fontSize',12);
 end
 title('Manning Method Power-Freq Corr');
-legend({'no shuffle','ts shuffled'},'location','northwest')
+% legend({'no shuffle','ts shuffled'},'location','northwest')
 set(gca,'fontSize',12);
 set(gcf,'color','w');
+if doSave
+    saveas(h,fullfile(savePath,'ManningSpikeBandCorr.png'));
+    close(h);
+end

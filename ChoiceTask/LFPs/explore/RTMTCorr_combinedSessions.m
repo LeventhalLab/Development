@@ -1,3 +1,5 @@
+% load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
+
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/crossFrequencyRTMTPowerCorr';
 doSetup = false;
 doSave = false;
@@ -49,10 +51,10 @@ if doSetup
             end
         end
     end
-    save('RMTMcorr_20181208','all_timeCorrs_power','all_timeCorrs_phase','all_timeCorrs_timing','freqList');
+    save('RTMTcorr_20181208','all_timeCorrs_power','all_timeCorrs_phase','all_timeCorrs_timing','freqList');
 end
 
-if true
+if false
     rMat_power = [];
     pMat_power = [];
     rMat_phase = [];
@@ -75,18 +77,19 @@ end
 
 rows = 4;
 cols = 7;
-cmapPath = '/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/LFPs/utils/corr_colormap.jpg';
-cmap = mycmap(cmapPath);
-climVals_rho = [-0.5 0.5];
-climVals_pval = [0 0.5];
+% cmapPath = '/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/LFPs/utils/corr_colormap.jpg';
+% cmap = mycmap(cmapPath);
+climVals_rho = [-0.3 0.3];
+climVals_pval = [0 0.05];
 t = linspace(-tWindow,tWindow,size(all_timeCorrs_timing,1));
+
 for iTiming = 1:2
     h = figuree(1400,800);
     for iEvent = 1:7
         thisRho = squeeze(rMat_power(iTiming,iEvent,:,:));
         subplot(rows,cols,prc(cols,[1,iEvent]));
         imagesc(t,1:numel(freqList),thisRho');
-        colormap(gca,cmap);
+%         colormap(gca,cmap);
         hold on;
         plot([-1 1],repmat(closest(freqList,13),[1 2]),'w-');
         plot([-1 1],repmat(closest(freqList,30),[1 2]),'w-');
@@ -128,7 +131,7 @@ for iTiming = 1:2
         thisRho = squeeze(rMat_phase(iTiming,iEvent,:,:));
         subplot(rows,cols,prc(cols,[3,iEvent]));
         imagesc(t,1:numel(freqList),thisRho');
-        colormap(gca,cmap);
+%         colormap(gca,cmap);
         hold on;
         plot([-1 1],repmat(closest(freqList,13),[1 2]),'w-');
         plot([-1 1],repmat(closest(freqList,30),[1 2]),'w-');
@@ -167,6 +170,7 @@ for iTiming = 1:2
             cbAside(gca,'pval','k');
         end
     end
+    colormap(othercolor('BuDRd_18'));
     set(gcf,'color','w');
     if doSave
         saveas(h,fullfile(savePath,['All Sessions_crossFreq',timingFields{iTiming},'.png']));
