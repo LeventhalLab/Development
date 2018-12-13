@@ -1,15 +1,18 @@
-% % load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
-% % load('session_20180919_NakamuraMRL.mat', 'all_trials')
-% % load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local')
-% % load('session_20180919_NakamuraMRL.mat', 'selectedLFPFiles')
-% % load('session_20180919_NakamuraMRL.mat', 'all_ts')
-% % load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local_altLookup')
+% load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'LFPfiles_local')
+% load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'all_ts')
+% load('session_20180919_NakamuraMRL.mat','dirSelUnitIds','ndirSelUnitIds','primSec')
+% load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'eventFieldnames')
+% load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'LFPfiles_local_altLookup')
+% load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'all_trials')
+
+% % load('session_20181212_spikePhaseHist_NewSurrogates.mat')
 
 doSetup = true;
 doSave = false;
 % freqList = logFreqList([1 200],10);
 % freqList = [3.2,19];
-freqList = {[1 4;4 7;8 12;13 30]};
+% freqList = {[1 4;4 7;8 12;13 30]};
+freqList = [3.5 8 12 20];
 if iscell(freqList)
     numelFreqs = size(freqList{:},1);
 else
@@ -19,7 +22,7 @@ savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/spike
 nBins = 12;
 binEdges = linspace(-pi,pi,nBins+1);
 loadedFile = [];
-nSurr = 100;
+nSurr = 5;
 
 if doSetup
     validUnits = [];
@@ -46,22 +49,23 @@ if doSetup
         sevFile = LFPfiles_local_altLookup{strcmp(sevFile,{LFPfiles_local_altLookup{:,1}}),2};
         disp(sevFile);
         [~,name,~] = fileparts(sevFile);
+        % only load uniques
         if isempty(loadedFile) || ~strcmp(loadedFile,sevFile)
             [sevFilt,Fs,decimateFactor,loadedFile] = loadCompressedSEV(sevFile,[]);
+            curTrials = all_trials{iNeuron};
+            [trialIds,allTimes] = sortTrialsBy(curTrials,'RT');
+            trialTimeRanges = compileTrialTimeRanges(curTrials(trialIds));
+
+            if iscell(freqList)
+                W = calculateComplexSpectrum(sevFilt,Fs,freqList);
+            else
+                W = calculateComplexScalograms_EnMasse(sevFilt','Fs',Fs,'freqList',freqList); % size: 5568092, 1, 3
+                W = squeeze(W); % size: 5568092, 3
+            end
         end
         
         ts = all_ts{iNeuron};
         ts_samples = floor(ts * Fs);
-        curTrials = all_trials{iNeuron};
-        [trialIds,allTimes] = sortTrialsBy(curTrials,'RT');
-        trialTimeRanges = compileTrialTimeRanges(curTrials(trialIds));
-
-        if iscell(freqList)
-            W = calculateComplexSpectrum(sevFilt,Fs,freqList);
-        else
-            W = calculateComplexScalograms_EnMasse(sevFilt','Fs',Fs,'freqList',freqList); % size: 5568092, 1, 3
-            W = squeeze(W); % size: 5568092, 3
-        end
         ts_samples = ts_samples(ts_samples > 0 & ts_samples <= size(W,1)); % clean conversion errors
         
         spikeAngles = [];
@@ -76,7 +80,7 @@ if doSetup
             % this is inTrial
             for iFreq = 1:numelFreqs
                 alpha = spikeAngles(:,iFreq);
-                all_spikeHist_inTrial_alphas{iNeuron,iFreq} = alpha;
+% %                 all_spikeHist_inTrial_alphas{iNeuron,iFreq} = alpha;
                 pval = circ_rtest(alpha);
                 all_spikeHist_inTrial_pvals(iNeuron,iFreq) = pval;
                 r = circ_r(alpha);
@@ -92,13 +96,21 @@ if doSetup
             all_outTrial_ids = logical(all_outTrial_ids);
             
             % surrogate code
-            outTrialIdx = find(all_outTrial_ids == 1);
+            % these need to be shuffled
+            spiketrain_duration = max(ts) * 1000; % ms
+            spiketrain_meanrate = numel(ts) / max(ts); % s/sec
+            spiketrain_gamma_order = 1; % poisson
+            [t,s] = fastgammatrain(spiketrain_duration,spiketrain_meanrate,spiketrain_gamma_order);
+            ts_poisson = t(s==1) / 1000;
+            ts_poisson_samples = floor(ts_poisson * Fs);
+            ts_poisson_samples = ts_poisson_samples(1:find(ts_poisson_samples < size(W,1),1,'last'));
             for iSurr = 1:nSurr
-                outTrialSurrIdx = randsample(outTrialIdx,numel(all_inTrial_ids));
-                spikeAngles = angle(W(ts_samples(outTrialSurrIdx),:));
+                outTrialSurrIdx = randsample(1:numel(ts_poisson_samples),numel(all_inTrial_ids));
+% %                 spikeAngles = angle(W(ts_poisson_samples(outTrialSurrIdx),:));
+                spikeAngles = angle(W(randsample(1:max(ts_poisson_samples),numel(ts_poisson_samples)),:));
                 for iFreq = 1:numelFreqs
                     alpha = spikeAngles(:,iFreq);
-                    all_spikeHist_alphas_surr{iSurr,iNeuron,iFreq} = alpha;
+% %                     all_spikeHist_alphas_surr{iSurr,iNeuron,iFreq} = alpha;
                     pval = circ_rtest(alpha);
                     all_spikeHist_pvals_surr(iSurr,iNeuron,iFreq) = pval;
                     r = circ_r(alpha);
@@ -109,11 +121,12 @@ if doSetup
                     all_spikeHist_angles_surr(iSurr,iNeuron,:,iFreq) = counts;
                 end
             end
-            
-            spikeAngles = angle(W(ts_samples(all_outTrial_ids),:));
+            % match in-trial sample count, apples to apples
+            useSamples = ts_samples(all_outTrial_ids);
+            spikeAngles = angle(W(randsample(useSamples,numel(all_inTrial_ids)),:));
             for iFreq = 1:numelFreqs
                 alpha = spikeAngles(:,iFreq);
-                all_spikeHist_alphas{iNeuron,iFreq} = alpha;
+% %                 all_spikeHist_alphas{iNeuron,iFreq} = alpha;
                 pval = circ_rtest(alpha);
                 all_spikeHist_pvals(iNeuron,iFreq) = pval;
                 r = circ_r(alpha);
