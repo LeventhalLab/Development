@@ -1,9 +1,9 @@
 close all
-doSave = true;
+doSave = false;
 savePath = '/Users/mattgaidica/Dropbox/Presentations/2018 IHMC/Supp';
 
-conds_pvals = {squeeze(all_spikeHist_pvals_surr(5,:,:,:)),all_spikeHist_inTrial_pvals,all_spikeHist_pvals};
-conds_angles = {squeeze(all_spikeHist_angles_surr(5,:,:,:)),all_spikeHist_inTrial_angles,all_spikeHist_angles};
+conds_pvals = {squeeze(all_spikeHist_pvals_surr(1,:,:,:)),all_spikeHist_inTrial_pvals,all_spikeHist_pvals};
+conds_angles = {squeeze(all_spikeHist_angles_surr(1,:,:,:)),all_spikeHist_inTrial_angles,all_spikeHist_angles};
 freqLabels = {'\delta (1-4 Hz)','\theta (4-8 Hz)','\alpha','\beta (13-30 Hz)'};
 
 pThresh = 0.05;
@@ -56,7 +56,7 @@ for iFreq = [1,2,4]
             [v,k] = max(sigMat(ii,:));
             sigBinMax(ii) = k;
         end
-        counts = histcounts(sigBinMax,12) / size(sigMat,1); % !!assumes range(nSigBinMax) is 1:12
+% %         counts = histcounts(sigBinMax,12) / size(sigMat,1); % !!assumes range(nSigBinMax) is 1:12
         plot([mean(sigMatZ) mean(sigMatZ)],'-','lineWidth',4);
         hold on;
     end

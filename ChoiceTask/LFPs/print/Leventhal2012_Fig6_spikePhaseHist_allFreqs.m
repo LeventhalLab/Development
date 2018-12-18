@@ -12,7 +12,9 @@ doSave = false;
 % freqList = logFreqList([1 200],10);
 % freqList = [3.2,19];
 % freqList = {[1 4;4 7;8 12;13 30]};
-freqList = [3.5 8 12 20];
+% freqList = [3.5 8 12 20];
+freqList = logFreqList([1 200],30);
+
 if iscell(freqList)
     numelFreqs = size(freqList{:},1);
 else
@@ -22,7 +24,7 @@ savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/spike
 nBins = 12;
 binEdges = linspace(-pi,pi,nBins+1);
 loadedFile = [];
-nSurr = 5;
+nSurr = 1;
 
 if doSetup
     validUnits = [];
