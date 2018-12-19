@@ -1,23 +1,94 @@
 close all;
 doSave = true;
-savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/entrainmentFigure';
 
+doPlot_MRLs = false;
+doPlot_MRLmontage = false;
 doPlot_mats = false;
 doPlot_bars = true;
-useLines = true;
+
+useLines = true; % for doPlot_bars
 
 conds_pvals = {squeeze(all_spikeHist_pvals_surr(1,:,:,:)),all_spikeHist_inTrial_pvals,all_spikeHist_pvals};
 conds_angles = {squeeze(all_spikeHist_angles_surr(1,:,:,:)),all_spikeHist_inTrial_angles,all_spikeHist_angles};
+conds_rs = {squeeze(all_spikeHist_rs_surr(1,:,:,:)),all_spikeHist_inTrial_rs,all_spikeHist_rs};
+conds_mus = {squeeze(all_spikeHist_mus_surr(1,:,:,:)),all_spikeHist_inTrial_mus,all_spikeHist_mus};
 
 freqList = logFreqList([1 200],30);
+dirSelRanges = {[1:366],dirSelUnitIds,ndirSelUnitIds};
+dirSelTypes = {'all','dirSel','~dirSel'};
+trialTypes = {'shuffle','IN trial','OUT trial'};
+
+if doPlot_MRLs
+    savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/entrainmentFigure/MRLs';
+    pThresh = 0.05;
+    rows = 1;
+    cols = 3;
+    rlimVals = [0 0.1];
+    colors = lines(3);
+    fontSize = 12;
+    for iFreq = 1:numel(freqList)
+        h = ff(1200,300);
+        lns = [];
+        for iTrialType = 1:3
+            for iDirSel = 1:3
+                subplot(rows,cols,iTrialType);
+                use_pvals = conds_pvals{iTrialType}(dirSelRanges{iDirSel},iFreq);
+                thetas = conds_mus{iTrialType}(dirSelRanges{iDirSel},iFreq);
+                rhos = conds_rs{iTrialType}(dirSelRanges{iDirSel},iFreq);
+                
+                thetas = thetas(use_pvals < pThresh);
+                rhos = rhos(use_pvals < pThresh);
+                
+                polar_thetas = [thetas thetas]';
+                polar_rhos = [zeros(size(rhos)) rhos]';
+                usePolarIdxs = polar_rhos(2,:) > rlimVals(2) / 10;
+                polarplot(polar_thetas(:,usePolarIdxs),polar_rhos(:,usePolarIdxs),'lineWidth',0.5,'color',[colors(iDirSel,:) 0.1]);
+                hold on;
+                thetaMean = circ_mean(thetas(~isnan(thetas)));
+                rhoMean = nanmean(rhos);
+                lns(iDirSel) = polarplot([thetaMean thetaMean],[0 rhoMean],'lineWidth',2,'color',colors(iDirSel,:));
+                polarplot(thetaMean,rhoMean,'.','markerSize',15,'color',colors(iDirSel,:));
+                ax = gca;
+                ax.ThetaDir = 'counterclockwise';
+                ax.ThetaZeroLocation = 'top';
+                ax.ThetaTick = [0 90 180 270];
+                rlim(rlimVals);
+                rticks(rlimVals);
+                title({[num2str(freqList(iFreq),'%2.1f'),' Hz'],trialTypes{iTrialType}});
+                ax.ThetaTickLabels = [];
+                set(gca,'fontsize',fontSize);
+                drawnow;
+            end
+        end
+        ax = get(gca,'Position');
+        legend(lns,dirSelTypes,'Location','NorthEastOutside','fontSize',fontSize);
+        set(gca,'Position',ax);
+        set(gcf,'color','w');
+        if doSave
+            saveas(h,fullfile(savePath,['entrainmentMRLs_f',num2str(iFreq),'_p',strrep(num2str(pThresh,'%1.2f'),'.','-'),'.png']));
+            close(h);
+        end
+    end
+end
+
+if doPlot_MRLmontage
+    savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/entrainmentFigure/MRLs';
+    pThresh = 0.05;
+    file = uigetfile(fullfile(savePath,'*.png'),'Create Montage','MultiSelect','on');
+    filenames = {};
+    for iFile = 1:numel(file)
+        filenames{iFile} = fullfile(savePath,file{iFile});
+    end
+    im = imtile(filenames,'GridSize',[numel(file) 1]);
+    if doSave
+        imwrite(im,fullfile(savePath,['all_entrainmentMRLs_p',strrep(num2str(pThresh,'%1.2f'),'.','-'),'.png']));
+    end
+end
 
 if doPlot_mats
+    savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/entrainmentFigure';
     pThresh = 1;%0.05;
     barData = [];
-    dirSelRanges = {[1:366],dirSelUnitIds,ndirSelUnitIds};
-    dirSelTypes = {'all','dirSel','~dirSel'};
-    trialTypes = {'shuffle','IN trial','OUT trial'};
-
     entMat = [];
     unitCount = [];
     for iTrialType = 1:3
@@ -110,6 +181,7 @@ if doPlot_mats
 end
 
 if doPlot_bars
+    savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/entrainmentFigure';
     pThresh = 0.05;
     rows = 3;
     cols = 2;
