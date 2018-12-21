@@ -1,10 +1,11 @@
 close all;
 doSave = true;
 
+doPlot_pvalDist = true;
 doPlot_MRLs = false;
 doPlot_MRLmontage = false;
 doPlot_mats = false;
-doPlot_bars = true;
+doPlot_bars = false;
 
 useLines = true; % for doPlot_bars
 
@@ -17,6 +18,51 @@ freqList = logFreqList([1 200],30);
 dirSelRanges = {[1:366],dirSelUnitIds,ndirSelUnitIds};
 dirSelTypes = {'all','dirSel','~dirSel'};
 trialTypes = {'shuffle','IN trial','OUT trial'};
+
+% !![ ] add kuiper pval, [ ] pval distribution, [ ] scramble trials?
+if doPlot_pvalDist
+    savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/entrainmentFigure/pvals';
+    rows = 3;
+    cols = 3;
+    nBins = 20;
+    binEdges = [0 logFreqList([1 1000],nBins)/1000];
+    useTicks = [2,closest(binEdges,0.05),nBins];
+    for iFreq = 1:numel(freqList)    
+        h = ff(600,600);
+        for iTrialType = 1:3
+            for iDirSel = 1:3
+                use_pvals = conds_pvals{iTrialType}(dirSelRanges{iDirSel},iFreq);
+                ax(iTrialType,iDirSel) = subplot(rows,cols,prc(cols,[iTrialType iDirSel]));
+                counts = histcounts(use_pvals,binEdges);
+                bar(counts);
+                title({[num2str(freqList(iFreq),'%2.1f'),' Hz'],[trialTypes{iTrialType},': ',dirSelTypes{iDirSel}]});
+                xticks(useTicks);
+                xticklabels({'0.01','0.05','1'});
+                xtickangle(30);
+                xlim([0 nBins+1]);
+                if iTrialType == 3
+                    xlabel('p-value');
+                end
+                if iDirSel == 1
+                    ylabel('count');
+                end
+            end
+        end
+        for iDirSel = 1:3
+            linkaxes(ax(:,iDirSel),'y');
+            for iTrialType = 1:3
+                subplot(rows,cols,prc(cols,[iTrialType iDirSel]));
+                yticks(ylim);
+                grid on;
+            end
+        end
+        set(gcf,'color','w');
+        if doSave
+            saveas(h,fullfile(savePath,['pvalDist_f',num2str(iFreq),'.png']));
+            close(h);
+        end
+    end
+end
 
 if doPlot_MRLs
     savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/entrainmentFigure/MRLs';
