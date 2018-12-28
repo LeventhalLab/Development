@@ -1,4 +1,5 @@
 function [Wz_power,Wz_phase] = zScoreW(W,Wlength,tWindow)
+% [ ] return t based on tWindow/2
 % this function will return half tWindow (uses first half as ref)
 % note: Wz_angle is really just to provide a phase version of Wz with the same dimensions
 if Wlength > size(W,2)
@@ -17,7 +18,7 @@ for iFreq = 1:size(W_power,4)
     for iEvent = 1:size(W_power,1)
         for iTrial = 1:size(W_power,3)
             refMean = mean(refW(:,iTrial));
-            theseW = squeeze(W_power(iEvent,resampleTs(returnRange),iTrial,iFreq));
+            theseW = squeeze(W_power(iEvent,returnRange,iTrial,iFreq));
             theseWz = (theseW - refMean) ./ refStd;
             Wz_power(iEvent,:,iTrial,iFreq) = theseWz;
         end
