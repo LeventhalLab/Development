@@ -6,17 +6,34 @@ figPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figu
 subplotMargins = [.05 .02];
 
 eventfields = {'Cue','Nose In','Tone','Nose Out','Side In','Side Out','Reward'};
+t = linspace(-1,1,size(scaloPower,2));
+scaloPower = squeeze(mean(session_Wz_power(:,:,:,:)));
+scaloPhase = squeeze(mean(session_Wz_phase(:,:,:,:)));
+scaloRayleigh = squeeze(mean(session_Wz_rayleigh_pval(:,:,:,:)));
+
+h = ff(1200,450);
+rows = 1;
+cols = 7;
+colors = jet(30);
+for iEvent = 1:7
+    for iFreq = 1:numel(freqList)
+        subplot(rows,cols,prc(cols,[1,iEvent]));
+        plot(t,squeeze(scaloPower(iEvent,:,iFreq)),'color',colors(iFreq,:));
+        hold on;
+    end
+    ylim([-1 1.5]);
+    grid on;
+    title(eventfields{iEvent});
+end
+
 h = ff(1200,450);
 rows = 2;
 cols = 7;
-caxisVals = [-0.5 1];
-scaloPower = squeeze(median(session_Wz_power(:,:,:,:)));
-scaloPhase = squeeze(median(session_Wz_phase(:,:,:,:)));
-scaloRayleigh = squeeze(median(session_Wz_rayleigh_pval(:,:,:,:)));
+caxisVals = [-1 1];
 
 for iEvent = 1:7
     subplot_tight(rows,cols,prc(cols,[1,iEvent]),subplotMargins);
-    imagesc(linspace(-1,1,size(scaloPower,2)),1:numel(freqList),squeeze(scaloPower(iEvent,:,:))');
+    imagesc(t,1:numel(freqList),squeeze(scaloPower(iEvent,:,:))');
     colormap(gca,jet);
     caxis(caxisVals);
     xlim([-1 1]);

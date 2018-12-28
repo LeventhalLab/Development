@@ -1,8 +1,9 @@
 close all;
 doSave = true;
 
-doPlot_pvalDist = true;
+doPlot_pvalDist = false;
 doPlot_MRLs = false;
+doPlot_kuiper = true;
 doPlot_MRLmontage = false;
 doPlot_mats = false;
 doPlot_bars = false;
@@ -66,12 +67,13 @@ end
 
 if doPlot_MRLs
     savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/entrainmentFigure/MRLs';
-    pThresh = 0.05;
+    pThresh = 1;
     rows = 1;
     cols = 3;
     rlimVals = [0 0.1];
     colors = lines(3);
     fontSize = 12;
+    kuiper_pvals = [];
     for iFreq = 1:numel(freqList)
         h = ff(1200,300);
         lns = [];
@@ -100,7 +102,13 @@ if doPlot_MRLs
                 ax.ThetaTick = [0 90 180 270];
                 rlim(rlimVals);
                 rticks(rlimVals);
-                title({[num2str(freqList(iFreq),'%2.1f'),' Hz'],trialTypes{iTrialType}});
+                if iDirSel == 2
+                    thetas_dir = thetas;
+                elseif iDirSel == 3
+                    kuiper_pvals(iFreq,iTrialType) = circ_kuipertest(thetas,thetas_dir);
+                    title({[num2str(freqList(iFreq),'%2.1f'),' Hz'],trialTypes{iTrialType},...
+                        ['kuiper p = ',num2str(kuiper_pvals(iFreq,iTrialType,iDirSel),2)]});
+                end
                 ax.ThetaTickLabels = [];
                 set(gca,'fontsize',fontSize);
                 drawnow;
@@ -114,6 +122,32 @@ if doPlot_MRLs
             saveas(h,fullfile(savePath,['entrainmentMRLs_f',num2str(iFreq),'_p',strrep(num2str(pThresh,'%1.2f'),'.','-'),'.png']));
             close(h);
         end
+    end
+end
+
+if doPlot_kuiper % kuiper pval plot
+    savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/entrainmentFigure/MRLs';
+    h = ff(1200,300);
+    plotColors = {'','r','k'};
+    for iTrialType = 2:3 % all shuffles == 1
+        plot(kuiper_pvals(:,iTrialType),'color',plotColors{iTrialType},'lineWidth',2);
+        hold on;
+        xticks(1:numel(freqList));
+        xticklabels(compose('%2.1f',freqList));
+        ylim([0 1.2]);
+        yticks([0 0.05 1]);
+    end
+    xtickangle(270);
+    xlabel('freq (Hz)');
+    ylabel('p-value');
+    title('Kuiper test between dirSel & ~dirSel units');
+    legend('IN trial','OUT trial','location','eastoutside');
+    set(gcf,'color','w');
+    set(gca,'fontsize',16);
+    grid on;
+    if doSave
+        saveas(h,fullfile(savePath,'all_entrainmentMRLs_kuiperPvals.png'));
+        close(h);
     end
 end
 

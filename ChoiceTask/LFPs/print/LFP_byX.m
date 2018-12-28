@@ -11,6 +11,7 @@ load('session_20180925_entrainmentSurrogates.mat', 'session_Wz_rayleigh_pval')
 %     'eventFieldnames','session_Wz_power','session_Wz_phase','session_Wz_rayleigh_pval','freqList');
 
 doSetup = true;
+doSave = false;
 zThresh = 5;
 tWindow = 1;
 freqList = logFreqList([1 200],30);
@@ -35,6 +36,11 @@ if doSetup
         W = W(:,:,keepTrials,:);
         
         [Wz_power,Wz_phase] = zScoreW(W,Wlength); % power Z-score
+        
+        if true
+            ff(600,600);
+            plot(squeeze(Wz_power(1,:,:,4)));
+        end
 
 %         session_Wz_power(iSession,:,:,:) = squeeze(mean(Wz_power,3));
         session_Wz_power(iSession,:,:,:) = squeeze(median(Wz_power,3));
@@ -226,9 +232,11 @@ if false
         title(['MRL at ',eventFieldnames{iEvent}]);
     end
     set(gcf,'color','w');
-    saveFile = 'allSubject_allSessions_PowerAndMRL_freqBands';
-    saveas(h,fullfile(savePath,[saveFile,'.png']));
-    close(h);
+    if doSave
+        saveFile = 'allSubject_allSessions_PowerAndMRL_freqBands';
+        saveas(h,fullfile(savePath,[saveFile,'.png']));
+        close(h);
+    end
 end
 
 if false
