@@ -1,9 +1,9 @@
-load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'LFPfiles_local')
-load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'all_ts')
-load('session_20180919_NakamuraMRL.mat','dirSelUnitIds','ndirSelUnitIds','primSec')
-load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'eventFieldnames')
-load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'LFPfiles_local_altLookup')
-load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'all_trials')
+% load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'LFPfiles_local')
+% load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'all_ts')
+% load('session_20180919_NakamuraMRL.mat','dirSelUnitIds','ndirSelUnitIds','primSec')
+% load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'eventFieldnames')
+% load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'LFPfiles_local_altLookup')
+% load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'all_trials')
 
 % % load('session_20181212_spikePhaseHist_NewSurrogates.mat')
 
@@ -108,8 +108,8 @@ if doSetup
             ts_poisson_samples = ts_poisson_samples(1:find(ts_poisson_samples < size(W,1),1,'last'));
             for iSurr = 1:nSurr
                 outTrialSurrIdx = randsample(1:numel(ts_poisson_samples),numel(all_inTrial_ids));
-% %                 spikeAngles = angle(W(ts_poisson_samples(outTrialSurrIdx),:));
-                spikeAngles = angle(W(randsample(1:max(ts_poisson_samples),numel(ts_poisson_samples)),:));
+                spikeAngles = angle(W(ts_poisson_samples(outTrialSurrIdx),:));
+%                 spikeAngles = angle(W(randsample(1:max(ts_poisson_samples),numel(ts_poisson_samples)),:));
                 for iFreq = 1:numelFreqs
                     alpha = spikeAngles(:,iFreq);
 % %                     all_spikeHist_alphas_surr{iSurr,iNeuron,iFreq} = alpha;

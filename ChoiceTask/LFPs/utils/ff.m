@@ -5,9 +5,9 @@ screensize = get(groot,'Screensize');
 if isempty(varargin)
     h = figure('position',screensize);
 elseif numel(varargin) == 1
-    h = figure('position',[0 0 varargin{1} screensize(4)]);
+    h = figure('position',[0 300 varargin{1} screensize(4)]);
 elseif numel(varargin) == 2
-    h = figure('position',[0 0 varargin{1} varargin{2}]);
+    h = figure('position',[0 300 varargin{1} varargin{2}]);
 else
     h_width = varargin{1};
     h_height = varargin{2};
