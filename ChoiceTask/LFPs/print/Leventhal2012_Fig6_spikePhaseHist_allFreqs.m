@@ -1,9 +1,9 @@
-% load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'LFPfiles_local')
-% load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'all_ts')
-% load('session_20180919_NakamuraMRL.mat','dirSelUnitIds','ndirSelUnitIds','primSec')
-% load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'eventFieldnames')
-% load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'LFPfiles_local_altLookup')
-% load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'all_trials')
+load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'LFPfiles_local')
+load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'all_ts')
+load('session_20180919_NakamuraMRL.mat','dirSelUnitIds','ndirSelUnitIds','primSec')
+load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'eventFieldnames')
+load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'LFPfiles_local_altLookup')
+load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'all_trials')
 
 % % load('session_20181212_spikePhaseHist_NewSurrogates.mat')
 
