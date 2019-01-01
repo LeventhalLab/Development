@@ -1,4 +1,5 @@
 % see: /print/Leventhal2012_Fig6_spikePhaseHist_allFreqs.m
+
 % load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'LFPfiles_local')
 % load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'all_ts')
 % load('session_20180919_NakamuraMRL.mat','dirSelUnitIds','ndirSelUnitIds','primSec')
@@ -8,11 +9,11 @@
 
 % save('entrainmentTrialShuffle_all_spikeAngles','all_spikeAngles');
 
-savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/spikePhaseHist';
+savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/entrainmentTrialShuffle';
 
 doSetup = false;
-doSave = false;
-doCompile = true;
+doSave = true;
+doCompile = false;
 
 freqList = logFreqList([1 200],30);
 
@@ -78,7 +79,7 @@ if doCompile
             for iEvent = 1:numel(eventFieldnames)
                 for iFreq = 1:numel(freqList)
                     try
-                        compiled_spikeAngles{iShuffle,iEvent,iFreq} = [compiled_spikeAngles{iShuffle,iEvent,iFreq} thisNeuron(iEvent,:,iFreq)];
+                        compiled_spikeAngles{iShuffle,iEvent,iFreq} = [compiled_spikeAngles{iShuffle,iEvent,iFreq} cell2mat(thisNeuron(iEvent,:,iFreq))];
                     catch
                         compiled_spikeAngles{iShuffle,iEvent,iFreq} = cell2mat(thisNeuron(iEvent,:,iFreq));
                     end
@@ -88,12 +89,39 @@ if doCompile
     end
 end
 
-iFreq = 8;
-iShuffle = 1;
-h = ff(1200,300);
-for iEvent = 1:7
-    theseAngles = compiled_spikeAngles{iShuffle,iEvent,iFreq};
-    counts = histcounts(theseAngles,binEdges);
-    subplot(1,7,iEvent);
-    bar(counts,'k');
+% close all;
+h = ff(1200,800);
+colors = lines(2);
+rows = 10;
+cols = 7;
+iSubplot = 0;
+for iFreq = 1:10
+    iSubplot = iSubplot + 1;
+    for iShuffle = 1:2
+        for iEvent = 1:7
+            theseAngles = compiled_spikeAngles{iShuffle,iEvent,iFreq};
+            counts = histcounts(theseAngles,binEdges);
+            subplot(rows,cols,prc(cols,[iSubplot,iEvent]));
+            plot([counts counts],'color',colors(iShuffle,:),'linewidth',2);
+            hold on;
+            ylim([5.2e4 7.8e4]);
+            yticks(ylim);
+            xticks([0,6.5,12.5,18.5,24]);
+            xticklabels([0 180 360 540 720]);
+            xtickangle(270);
+            grid on;
+            if iFreq == 1
+                title(eventFieldnames{iEvent});
+            end
+            if iEvent == 1
+                ylabel([num2str(freqList(iFreq),'%2.1f'),' Hz']);
+            end
+        end
+    end
+    set(gcf,'color','w');
+end
+if doSave
+    saveFile = ['entrainmentTrialShuffle_',num2str(iFreq),'.png'];
+    saveas(h,fullfile(savePath,saveFile));
+    close(h);
 end
