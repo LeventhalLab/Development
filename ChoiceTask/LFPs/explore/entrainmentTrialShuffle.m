@@ -13,7 +13,10 @@ savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/entrainm
 
 doSetup = false;
 doSave = true;
+
 doCompile = false;
+doCompile_plot = false;
+doByUnit = true;
 
 freqList = logFreqList([1 200],30);
 
@@ -70,6 +73,81 @@ if doSetup
     end
 end
 
+% analyze by unit
+if doByUnit
+    savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/entrainmentTrialShuffle/units';
+    close all;
+    useFreqs = 1:10;
+    colors = [0 0 0;1 0 0];
+    rows = numel(useFreqs);
+    cols = 7;
+    ylimVals = [-4 4];
+    for iNeuron = 1:size(all_spikeAngles,2)
+        % prepare
+        all_counts = [];
+        for iShuffle = 1:2
+            thisNeuron = all_spikeAngles{iShuffle,iNeuron};
+            iRow = 0;
+            for iFreq = useFreqs
+                iRow = iRow + 1;
+                for iEvent = 1:numel(eventFieldnames)
+                    alpha = cell2mat(thisNeuron(iEvent,:,useFreqs(iFreq)));
+                    counts = histcounts(alpha,binEdges);
+                    all_counts(iShuffle,iFreq,iEvent,:) = counts;
+                end
+            end
+        end
+        % print
+        h = ff(1200,800);
+        for iShuffle = [2 1]
+            iRow = 0;
+            for iFreq = useFreqs
+                iRow = iRow + 1;
+                for iEvent = 1:numel(eventFieldnames)
+                    counts = squeeze(all_counts(iShuffle,iFreq,iEvent,:));
+                    row_counts = squeeze(all_counts(iShuffle,iFreq,:,:));
+                    counts_z = (counts - mean(mean(row_counts))) ./ std(mean(row_counts,2));
+                    subplot(rows,cols,prc(cols,[iRow,iEvent]));
+                    plot([counts_z;counts_z],'color',colors(iShuffle,:),'linewidth',2);
+                    hold on;
+                    grid on;
+                    xlim([1 numel(counts_z)*2]);
+                    ylim(ylimVals);
+                    yticks(sort([0 ylim]));
+                    if iRow == 1 && iEvent == 1
+                        alpha = cell2mat(thisNeuron(4,:,1));
+                        FR = round(numel(alpha) / size(thisNeuron,2));
+                        title({['u',num2str(iNeuron,'%03d'),', ~',num2str(FR),'s/sec'],eventFieldnames{iEvent}});
+                    elseif iRow == 1
+                        title(eventFieldnames{iEvent});
+                    end
+                    if iEvent == 1
+                        ylabel({[num2str(freqList(iFreq),'%2.1f'),' Hz'],'Z-counts'});
+                    else
+                        yticklabels([]);
+                    end
+                    if iRow == numel(useFreqs)
+                        xticks([0,6.5,12.5,18.5,24]);
+                        xticklabels([0 180 360 540 720]);
+                        xtickangle(270);
+                        xlabel('Spike-phase');
+                    else
+                        xticks([0,6.5,12.5,18.5,24]);
+                        xticklabels([]);
+                    end
+                end
+            end
+        end
+        legend({'Normal','Shuffle'})
+        set(h,'color','w');
+        if doSave
+            saveFile = ['entrainmentTrialShuffle_u',num2str(iNeuron,'%03d'),'_f',num2str(iFreq),'.png'];
+            saveas(h,fullfile(savePath,saveFile));
+            close(h);
+        end
+    end
+end
+
 % compile
 if doCompile
     compiled_spikeAngles = {};
@@ -89,39 +167,41 @@ if doCompile
     end
 end
 
-% close all;
-h = ff(1200,800);
-colors = lines(2);
-rows = 10;
-cols = 7;
-iSubplot = 0;
-for iFreq = 1:10
-    iSubplot = iSubplot + 1;
-    for iShuffle = 1:2
-        for iEvent = 1:7
-            theseAngles = compiled_spikeAngles{iShuffle,iEvent,iFreq};
-            counts = histcounts(theseAngles,binEdges);
-            subplot(rows,cols,prc(cols,[iSubplot,iEvent]));
-            plot([counts counts],'color',colors(iShuffle,:),'linewidth',2);
-            hold on;
-            ylim([5.2e4 7.8e4]);
-            yticks(ylim);
-            xticks([0,6.5,12.5,18.5,24]);
-            xticklabels([0 180 360 540 720]);
-            xtickangle(270);
-            grid on;
-            if iFreq == 1
-                title(eventFieldnames{iEvent});
-            end
-            if iEvent == 1
-                ylabel([num2str(freqList(iFreq),'%2.1f'),' Hz']);
+if doCompile_plot
+    % close all;
+    h = ff(1200,800);
+    colors = lines(2);
+    rows = 10;
+    cols = 7;
+    iSubplot = 0;
+    for iFreq = 1:10
+        iSubplot = iSubplot + 1;
+        for iShuffle = 1:2
+            for iEvent = 1:7
+                theseAngles = compiled_spikeAngles{iShuffle,iEvent,iFreq};
+                counts = histcounts(theseAngles,binEdges);
+                subplot(rows,cols,prc(cols,[iSubplot,iEvent]));
+                plot([counts counts],'color',colors(iShuffle,:),'linewidth',2);
+                hold on;
+                ylim([5.2e4 7.8e4]);
+                yticks(ylim);
+                xticks([0,6.5,12.5,18.5,24]);
+                xticklabels([0 180 360 540 720]);
+                xtickangle(270);
+                grid on;
+                if iFreq == 1
+                    title(eventFieldnames{iEvent});
+                end
+                if iEvent == 1
+                    ylabel([num2str(freqList(iFreq),'%2.1f'),' Hz']);
+                end
             end
         end
+        set(gcf,'color','w');
     end
-    set(gcf,'color','w');
-end
-if doSave
-    saveFile = ['entrainmentTrialShuffle_',num2str(iFreq),'.png'];
-    saveas(h,fullfile(savePath,saveFile));
-    close(h);
+    if doSave
+        saveFile = ['entrainmentTrialShuffle_',num2str(iFreq),'.png'];
+        saveas(h,fullfile(savePath,saveFile));
+        close(h);
+    end
 end
