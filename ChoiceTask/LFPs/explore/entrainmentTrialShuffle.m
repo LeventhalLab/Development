@@ -13,6 +13,7 @@ savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/entrainm
 
 doSetup = false;
 doSave = true;
+doPlot = false;
 
 doCompile = false;
 doCompile_plot = false;
@@ -82,6 +83,7 @@ if doByUnit
     rows = numel(useFreqs);
     cols = 7;
     ylimVals = [-4 4];
+    unit_counts = [];
     for iNeuron = 1:size(all_spikeAngles,2)
         % prepare
         all_counts = [];
@@ -97,8 +99,11 @@ if doByUnit
                 end
             end
         end
+        
         % print
-        h = ff(1200,800);
+        if doPlot
+            h = ff(1200,800);
+        end
         for iShuffle = [2 1]
             iRow = 0;
             for iFreq = useFreqs
@@ -107,45 +112,98 @@ if doByUnit
                     counts = squeeze(all_counts(iShuffle,iFreq,iEvent,:));
                     row_counts = squeeze(all_counts(iShuffle,iFreq,:,:));
                     counts_z = (counts - mean(mean(row_counts))) ./ std(mean(row_counts,2));
-                    subplot(rows,cols,prc(cols,[iRow,iEvent]));
-                    plot([counts_z;counts_z],'color',colors(iShuffle,:),'linewidth',2);
-                    hold on;
-                    grid on;
-                    xlim([1 numel(counts_z)*2]);
-                    ylim(ylimVals);
-                    yticks(sort([0 ylim]));
-                    if iRow == 1 && iEvent == 1
-                        alpha = cell2mat(thisNeuron(4,:,1));
-                        FR = round(numel(alpha) / size(thisNeuron,2));
-                        title({['u',num2str(iNeuron,'%03d'),', ~',num2str(FR),'s/sec'],eventFieldnames{iEvent}});
-                    elseif iRow == 1
-                        title(eventFieldnames{iEvent});
-                    end
-                    if iEvent == 1
-                        ylabel({[num2str(freqList(iFreq),'%2.1f'),' Hz'],'Z-counts'});
-                    else
-                        yticklabels([]);
-                    end
-                    if iRow == numel(useFreqs)
-                        xticks([0,6.5,12.5,18.5,24]);
-                        xticklabels([0 180 360 540 720]);
-                        xtickangle(270);
-                        xlabel('Spike-phase');
-                    else
-                        xticks([0,6.5,12.5,18.5,24]);
-                        xticklabels([]);
+                    unit_counts(iNeuron,iShuffle,iFreq,iEvent,:) = counts_z; % set it here
+                    if doPlot
+                        subplot(rows,cols,prc(cols,[iRow,iEvent]));
+                        plot([counts_z;counts_z],'color',colors(iShuffle,:),'linewidth',2);
+                        hold on;
+                        grid on;
+                        xlim([1 numel(counts_z)*2]);
+                        ylim(ylimVals);
+                        yticks(sort([0 ylim]));
+                        if iRow == 1 && iEvent == 1
+                            alpha = cell2mat(thisNeuron(4,:,1));
+                            FR = round(numel(alpha) / size(thisNeuron,2));
+                            title({['u',num2str(iNeuron,'%03d'),', ~',num2str(FR),'s/sec'],eventFieldnames{iEvent}});
+                        elseif iRow == 1
+                            title(eventFieldnames{iEvent});
+                        end
+                        if iEvent == 1
+                            ylabel({[num2str(freqList(iFreq),'%2.1f'),' Hz'],'Z-counts'});
+                        else
+                            yticklabels([]);
+                        end
+                        if iRow == numel(useFreqs)
+                            xticks([0,6.5,12.5,18.5,24]);
+                            xticklabels([0 180 360 540 720]);
+                            xtickangle(270);
+                            xlabel('Spike-phase');
+                        else
+                            xticks([0,6.5,12.5,18.5,24]);
+                            xticklabels([]);
+                        end
                     end
                 end
             end
-        end
-        legend({'Normal','Shuffle'})
-        set(h,'color','w');
-        if doSave
-            saveFile = ['entrainmentTrialShuffle_u',num2str(iNeuron,'%03d'),'_f',num2str(iFreq),'.png'];
-            saveas(h,fullfile(savePath,saveFile));
-            close(h);
+
+            if doPlot
+                legend({'Shuffle','Normal'})
+                set(h,'color','w');
+                if doSave
+                    saveFile = ['entrainmentTrialShuffle_u',num2str(iNeuron,'%03d'),'_f',num2str(iFreq),'.png'];
+                    saveas(h,fullfile(savePath,saveFile));
+                    close(h);
+                end
+            end
         end
     end
+    
+    h = ff(1200,800);
+    for iShuffle = [2 1]
+        iRow = 0;
+        for iFreq = useFreqs
+            iRow = iRow + 1;
+            for iEvent = 1:numel(eventFieldnames)
+                counts_z = squeeze(mean(unit_counts(:,iShuffle,iFreq,iEvent,:)));
+                subplot(rows,cols,prc(cols,[iRow,iEvent]));
+                plot([counts_z;counts_z],'color',colors(iShuffle,:),'linewidth',2);
+                hold on;
+                grid on;
+                xlim([1 numel(counts_z)*2]);
+                ylim(ylimVals);
+                yticks(sort([0 ylim]));
+                if iRow == 1 && iEvent == 1
+                    alpha = cell2mat(thisNeuron(4,:,1));
+                    FR = round(numel(alpha) / size(thisNeuron,2));
+                    title({['all units'],eventFieldnames{iEvent}});
+                elseif iRow == 1
+                    title(eventFieldnames{iEvent});
+                end
+                if iEvent == 1
+                    ylabel({[num2str(freqList(iFreq),'%2.1f'),' Hz'],'Z-counts'});
+                else
+                    yticklabels([]);
+                end
+                if iRow == numel(useFreqs)
+                    xticks([0,6.5,12.5,18.5,24]);
+                    xticklabels([0 180 360 540 720]);
+                    xtickangle(270);
+                    xlabel('Spike-phase');
+                else
+                    xticks([0,6.5,12.5,18.5,24]);
+                    xticklabels([]);
+                end
+            end
+        end
+    end
+    legend({'Shuffle','Normal'})
+    set(h,'color','w');
+    if doSave
+        saveFile = ['entrainmentTrialShuffle_allUnits_f',num2str(iFreq),'.png'];
+        saveas(h,fullfile(savePath,saveFile));
+        close(h);
+    end
+    
 end
 
 % compile
