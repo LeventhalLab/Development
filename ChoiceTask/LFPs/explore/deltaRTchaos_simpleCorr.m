@@ -3,14 +3,12 @@
 % load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local')
 % load('session_20180919_NakamuraMRL.mat', 'selectedLFPFiles')
 
-doSetup = true;
+doSetup = false;
 doSave = true;
 zThresh = 5;
 tWindow = 1;
 freqList = {[1 4;4 8;13 30;30 70]};
 Wlength = 400;
-
-savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/collapse';
 
 cmapPath = '/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/LFPs/utils/magma.png';
 cmap = mycmap(cmapPath);
@@ -50,7 +48,7 @@ if doSetup
     end
 end
 
-save('deltaRTchaos_data_source_20181208','trial_Wz_power','trial_Wz_phase','compiledRTs');
+% % save('deltaRTchaos_data_source_20181208','trial_Wz_power','trial_Wz_phase','compiledRTs');
 
 data_source = {trial_Wz_power trial_Wz_phase};
 
@@ -63,7 +61,8 @@ intv = 100;
 useRange = intv:intv:numel(RTv);
 
 % > plots
-if true
+if false
+    savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/collapse';
     doPlot_catchRange = false;
     doPlot_collapse = true;
     catchRange = closest(useRange,900); % catch ~40% of RT
@@ -160,42 +159,40 @@ if true
 end
 
 % all phase/power peri-event plots
-if false
+if true
+    savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/LFP/allTrials';
     rows = 1;%size(trial_Wz_power,4);
     useEvents = 1:7;
     cols = numel(useEvents);
     cmaps = {'jet','parula'};
-    caxisVals = {[-3 5],[-pi pi]};
-    for iCond = 1%:2
-        ff(1400,800);
-        useData = data_source{iCond};
-        for iEvent = useEvents
-            for iFreq = 1%:size(trial_Wz_power,4)
-                subplot(rows,cols,prc(cols,[iFreq,iEvent]));
+    caxisVals = {[-2 4],[-pi pi]};
+    for iCond = 1:2
+        for iFreq = 1:size(trial_Wz_power,4)
+            h = ff(1400,800);
+            useData = data_source{iCond};
+            for iEvent = useEvents
+                subplot(rows,cols,prc(cols,[1,iEvent]));
                 thisData = squeeze(useData(iEvent,:,RTk,iFreq));
                 imagesc(linspace(-tWindow,tWindow,size(thisData,1)),1:numel(RTv),thisData');
                 colormap(gca,cmaps{iCond});
                 caxis(caxisVals{iCond});
-                if iFreq == 1
-                    title({[eventFieldnames{iEvent},' - ',titleLabels{iCond}],bandLabels{iFreq}});
-                else
-                    title(bandLabels{iFreq});
-                end
+                title({[eventFieldnames{iEvent},' - ',titleLabels{iCond}],bandLabels{iFreq}});
                 if iEvent == 1
                     ylabel('RT (s)');
                     yticklabels(compose('%1.2f',RTv(yticks)));
                 else
                     yticklabels([]);
                 end
-                if iFreq == size(trial_Wz_power,4)
-                    xticks([-tWindow,0,tWindow]);
-                    xlabel('Time (s)');
-                else
-                    xticks([]);
-                end
+                xticks([-tWindow,0,tWindow]);
+                xlabel('Time (s)');
                 grid on;
             end
+            set(gcf,'color','w');
+            if doSave
+                filename = strjoin({titleLabels{iCond},strrep(bandLabels{iFreq},'\','')},'_');
+                saveas(h,fullfile(savePath,[filename,'.png']));
+                close(h);
+            end
         end
-        set(gcf,'color','w');
     end
 end
