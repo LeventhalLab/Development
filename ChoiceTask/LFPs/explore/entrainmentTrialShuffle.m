@@ -11,11 +11,11 @@
 
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/entrainmentTrialShuffle';
 
-doSetup = false;
+doSetup = true;
 doSave = true;
-doPlot = false;
+doPlot = true;
 
-doCompile = false;
+doCompile = true;
 doCompile_plot = false;
 doByUnit = true;
 
@@ -29,7 +29,7 @@ zThresh = 5;
 
 if doSetup
     all_spikeAngles = {};
-    for iNeuron = 1:numel(all_ts)
+    for iNeuron = 1:5%numel(all_ts)
         sevFile = LFPfiles_local{iNeuron};
         % replace with alternative for LFP
         sevFile = LFPfiles_local_altLookup{strcmp(sevFile,{LFPfiles_local_altLookup{:,1}}),2};
@@ -58,8 +58,8 @@ if doSetup
             spikeAngles = {};
             for iEvent = 1:numel(eventFieldnames)
                 for iTrial = 1:numel(keepTrials)
-                    useTs = ts(ts > trialRanges(iEvent,iTrial,1) & ts < trialRanges(iEvent,iTrial,2));
-                    ts2W = linspace(trialRanges(iEvent,iTrial,1),trialRanges(iEvent,iTrial,2),size(W,2));
+                    useTs = ts(ts > trialRanges(iEvent,iTrial,1) & ts < trialRanges(iEvent,iTrial,2)) - mean(trialRanges(iEvent,iTrial,:));
+                    ts2W = linspace(-tWindow,tWindow,size(W,2));
                     for iFreq = 1:numel(freqList)
                         tsAngles = [];
                         for iTs = 1:numel(useTs)
@@ -145,19 +145,19 @@ if doByUnit
                     end
                 end
             end
-
-            if doPlot
-                legend({'Shuffle','Normal'})
-                set(h,'color','w');
-                if doSave
-                    saveFile = ['entrainmentTrialShuffle_u',num2str(iNeuron,'%03d'),'_f',num2str(iFreq),'.png'];
-                    saveas(h,fullfile(savePath,saveFile));
-                    close(h);
-                end
+        end
+        if doPlot
+            legend({'Shuffle','Normal'})
+            set(h,'color','w');
+            if doSave
+                saveFile = ['entrainmentTrialShuffle_u',num2str(iNeuron,'%03d'),'_f',num2str(iFreq),'.png'];
+                saveas(h,fullfile(savePath,saveFile));
+                close(h);
             end
         end
     end
     
+    % all units
     h = ff(1200,800);
     for iShuffle = [2 1]
         iRow = 0;

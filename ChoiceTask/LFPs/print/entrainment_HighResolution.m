@@ -20,7 +20,6 @@ dirSelRanges = {[1:366],dirSelUnitIds,ndirSelUnitIds};
 dirSelTypes = {'all','dirSel','~dirSel'};
 trialTypes = {'shuffle','IN trial','OUT trial'};
 
-% [ ] scramble trials?
 if doPlot_pvalDist
     savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/entrainmentFigure/pvals';
     rows = 3;
