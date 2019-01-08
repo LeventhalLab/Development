@@ -11,25 +11,25 @@
 
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/entrainmentTrialShuffle';
 
-doSetup = true;
+doSetup = false;
 doSave = true;
-doPlot = true;
+doPlot = false;
 
-doCompile = true;
-doCompile_plot = false;
 doByUnit = true;
+doCompile = false;
+doCompile_plot = false;
 
 freqList = logFreqList([1 200],30);
 
 nBins = 12;
 binEdges = linspace(-pi,pi,nBins+1);
 loadedFile = [];
-tWindow = 0.5;
+tWindow = 0.2;
 zThresh = 5;
 
 if doSetup
     all_spikeAngles = {};
-    for iNeuron = 1:5%numel(all_ts)
+    for iNeuron = 1:numel(all_ts)
         sevFile = LFPfiles_local{iNeuron};
         % replace with alternative for LFP
         sevFile = LFPfiles_local_altLookup{strcmp(sevFile,{LFPfiles_local_altLookup{:,1}}),2};
