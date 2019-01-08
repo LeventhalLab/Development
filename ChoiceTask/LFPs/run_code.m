@@ -11,6 +11,8 @@ cols = 3;
 colors = lines(n);
 plotMap = [1,2,4,5,7,8,10,11,13,14,16,17];
 
+rndW = W(:,:,randsample(1:size(W,3),size(W,3)),:);
+
 alpha = [];
 for iTrial = 1:size(W,3)
     if iTrial <= n
@@ -18,6 +20,7 @@ for iTrial = 1:size(W,3)
         plot(t2,angle(W2(iEvent,:,iTrial,iFreq)),'k');
         hold on;
         plot(t,angle(W(iEvent,:,iTrial,iFreq)),'k','lineWidth',4);
+        plot(t,angle(rndW(iEvent,:,iTrial,iFreq)),'r:');
         ylim([-4 4]);
         yticks([-pi 0 pi]);
         yticklabels({'-\pi','0','\pi'});
@@ -47,6 +50,7 @@ for iTrial = 1:size(W,3)
         end
     end
 end
+
 r = circ_r(alpha);
 mu = circ_mean(alpha);
 subplot(rows,cols,[3,6]);
@@ -65,11 +69,25 @@ p.ThetaTick = [0 90 180 270];
 subplot(rows,cols,[15,18]);
 counts = histcounts(alpha,'BinEdges',hp.BinEdges);
 bar([counts counts],'k');
+hold on;
 xticks(linspace(1,24,9));
 xticklabels([180 270 0 90 180 270 0 90 180]);
 yticks(ylim);
 ylabel('count');
 xtickangle(270);
 grid on;
+
+alpha = [];
+for iTrial = 1:size(W,3)
+    for iTs = 1:numel(useTs)
+        thisAngle = angle(rndW(iEvent,closest(t,useTs(iTs)),iTrial,iFreq));
+        alpha = [alpha;thisAngle];
+    end
+end
+subplot(rows,cols,[15,18]);
+counts = histcounts(alpha,'BinEdges',hp.BinEdges);
+ln = plot([counts counts],'r:','linewidth',2);
+legend(ln,'shuffle');
+legend boxoff;
 
 set(gcf,'color','w');
