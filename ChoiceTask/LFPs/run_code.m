@@ -53,7 +53,7 @@ for iNeuron = 1:numel(all_ts)
         W2 = eventsLFPv2(curTrials(trialIds),sevFilt,tWindow2,Fs,freqList,eventFieldnames);
         W2 = W2(:,:,keepTrials,:);
         
-        keepLocs = dklPeakDetect(W(:,:,:,[12,17,22]),4);
+        keepLocs = dklPeakDetect(W(:,:,:,[12,17,22]),iEvent);
     end
     all_session(iNeuron) = iSession;
 
