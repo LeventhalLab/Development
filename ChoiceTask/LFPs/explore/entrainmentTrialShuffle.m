@@ -11,7 +11,7 @@
 
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/entrainmentTrialShuffle';
 
-doSetup = false;
+doSetup = true;
 doSave = true;
 doPlot = false;
 

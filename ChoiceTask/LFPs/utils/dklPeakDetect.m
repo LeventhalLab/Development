@@ -17,7 +17,7 @@ keepLocs = {};
 for iTrial = 1:size(LFP,3)
     keepLocs{iTrial} = [];
     trialPower = abs(squeeze(LFP(iEvent,:,iTrial,2))).^2;
-    flankPower = mean([abs(sq ueeze(LFP(iEvent,:,iTrial,1))).^2;...
+    flankPower = mean([abs(squeeze(LFP(iEvent,:,iTrial,1))).^2;...
                        abs(squeeze(LFP(iEvent,:,iTrial,3))).^2]);
     cutoffPower = ref_power(2) + ref_std(2) * 2;
     ncutoffPower = max(-trialPower - min(-trialPower)) - (ref_power(2) + ref_std(2));
