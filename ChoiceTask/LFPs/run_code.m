@@ -1,9 +1,18 @@
+% load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'LFPfiles_local')
+% load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'all_ts')
+% load('session_20180919_NakamuraMRL.mat','dirSelUnitIds','ndirSelUnitIds','primSec')
+% load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'eventFieldnames')
+% load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'LFPfiles_local_altLookup')
+% load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'all_trials')
+
+
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/entrainmentTrialShuffle/wBeta';
 doSave = true;
 rows = 6;
 cols = 4;
 
 tWindow = 0.2;
+tWindow2 = 0.4;
 zThresh = 5;
 freqList = logFreqList([1 200],30);
 n = 12;
@@ -17,19 +26,20 @@ nShuff = [1,100];
 maxr = 0.5;
 
 loadedFile = [];
-all_r = [];
-all_mu = [];
-all_n = [];
+all_r = NaN(366,2,2);
+all_mu = NaN(366,2,2);
+all_n = NaN(366,2,2);
 all_session = [];
 iSession = 0;
 for iNeuron = 1:numel(all_ts)
     sevFile = LFPfiles_local{iNeuron};
     % replace with alternative for LFP
-    sevFile = LFPfiles_local_altLookup{strcmp(sevFile,{LFPfiles_local_altLookup{:,1}}),2};
-    disp(sevFile);
+%     sevFile = LFPfiles_local_altLookup{strcmp(sevFile,{LFPfiles_local_altLookup{:,1}}),2}; % dont need it for delta
+    disp(iNeuron);
     [~,name,~] = fileparts(sevFile);
     % only load uniques
     if isempty(loadedFile) || ~strcmp(loadedFile,sevFile)
+        disp('Loading new SEV...');
         iSession = iSession + 1;
         [sevFilt,Fs,decimateFactor,loadedFile] = loadCompressedSEV(sevFile,[]);
         curTrials = all_trials{iNeuron};
@@ -40,7 +50,7 @@ for iNeuron = 1:numel(all_ts)
         W = W(:,:,keepTrials,:);
         trialRanges = trialRanges(:,keepTrials,:);
         
-        W2 = eventsLFPv2(curTrials(trialIds),sevFilt,1,Fs,freqList,eventFieldnames);
+        W2 = eventsLFPv2(curTrials(trialIds),sevFilt,tWindow2,Fs,freqList,eventFieldnames);
         W2 = W2(:,:,keepTrials,:);
         
         keepLocs = dklPeakDetect(W(:,:,:,[12,17,22]),4);
@@ -52,28 +62,28 @@ for iNeuron = 1:numel(all_ts)
     h = ff(1200,800);
     set(gcf,'color','w');
     t = linspace(-tWindow,tWindow,size(W,2));
-    t2 = linspace(-1,1,size(W2,2));
+    t2 = linspace(-tWindow2,tWindow2,size(W2,2));
     
     alpha = [];
     lns = [];
     for iTrial = 1:size(W,3)
         if iTrial <= n
             subplot(rows,cols,plotMap(iTrial));
-            plot(t2,angle(W2(iEvent,:,iTrial,iFreq)),'k'); drawnow;
+            plot(t2,angle(W2(iEvent,:,iTrial,iFreq)),'k');
             hold on;
-            lns(1) = plot(t,angle(W(iEvent,:,iTrial,iFreq)),'k','lineWidth',4); drawnow;
+            lns(1) = plot(t,angle(W(iEvent,:,iTrial,iFreq)),'k','lineWidth',4);
 
             % take a look at beta events
             theseB = keepLocs{iTrial};
             for iB = 1:size(theseB,1)
                 idx = theseB(iB,2);
-                lns(3) = plot(t(idx),0,'rx','MarkerSize',10,'lineWidth',2); drawnow;
+                lns(3) = plot(t(idx),0,'rx','MarkerSize',10,'lineWidth',2);
             end
 
             ylim([-4 4]);
             yticks([-pi 0 pi]);
             yticklabels({'-\pi','0','\pi'});
-            xlim([-1 1]);
+            xlim([-tWindow2 tWindow2]);
             xticks(sort([0 -.2 .2 xlim]));
             if iTrial == 1
                 title(['u',num2str(iNeuron),'/366, s',num2str(iSession),'/30, t',num2str(iTrial),'/',num2str(size(W,3))]);
@@ -84,7 +94,7 @@ for iNeuron = 1:numel(all_ts)
             if iTrial >= n - 1
                 xlabel('time (s)');
             end
-        end    
+        end
         useTs = ts(ts > trialRanges(iEvent,iTrial,1) & ts < trialRanges(iEvent,iTrial,2)) - mean(trialRanges(iEvent,iTrial,:));
         for iTs = 1:numel(useTs)
             thisAngle = angle(W(iEvent,closest(t,useTs(iTs)),iTrial,iFreq));
@@ -104,9 +114,12 @@ for iNeuron = 1:numel(all_ts)
             end
         end
     end
-    subplot(rows,cols,plotMap(n));
-    legend(lns,{'\delta','spike','\beta'});
-    drawnow;
+    
+    if all(lns)
+        subplot(rows,cols,plotMap(n));
+        legend(lns,{'\delta','spike','\beta'});
+    end
+   
 
     for iType = 1:2 % spiking, beta
         for iShuffle = 1:2
@@ -154,7 +167,7 @@ for iNeuron = 1:numel(all_ts)
                     end
                 end
             end
-            drawnow;
+           
             
             subplot(rows,cols,histMap(1,:));
             r = circ_r(alpha);
@@ -186,7 +199,6 @@ for iNeuron = 1:numel(all_ts)
                 ln = plot([counts counts],[useColor,':'],'linewidth',2);
             end
             hold on;
-            drawnow;
         end
         subplot(rows,cols,histMap(1,:));
         p = gca;
@@ -210,11 +222,12 @@ for iNeuron = 1:numel(all_ts)
         legend(ln,'shuffle');
         legend boxoff;
         
-        drawnow;
+       
     end
     
     if doSave
-        saveFile = ['entrainment_wBeta_u',num2str(iNeuron,'%03d'),'_e',num2str(iEvent),'_f',num2str(iFreq),'.png'];
+        saveFile = ['entrainment_wBeta_u',num2str(iNeuron,'%03d'),'_s',num2str(iSession,'%02d'),...
+            '_e',num2str(iEvent),'_f',num2str(iFreq),'.png'];
         saveas(h,fullfile(savePath,saveFile));
         close(h);
     end
