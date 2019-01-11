@@ -1,3 +1,5 @@
+% [ ] how to do in-trial shuffle?
+
 close all;
 doSave = true;
 
