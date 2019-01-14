@@ -98,18 +98,21 @@ end
 
 if doCompile
     % [ ] how to easily filter by unit?
-    doDirSel = 1;
+    doDirSel = 0;
     nMs = 200;
     startIdx = round(Wlength/2)+1;
     notEmptyUnits = find(~cellfun(@isempty,all_zSDE) == 1);
     if doDirSel == 1
+        disp('dirSel units');
         useUnits = dirSelUnitIds(ismember(dirSelUnitIds,notEmptyUnits));
     elseif doDirSel == -1
+        disp('ndirSel units');
         useUnits = ndirSelUnitIds(ismember(ndirSelUnitIds,notEmptyUnits));
     else
+        disp('all units');
         useUnits = notEmptyUnits;
     end
-%     useUnits = useUnits(1:100);
+
     lag_pval = [];
     lag_rho = [];
     M = 2;
@@ -117,18 +120,23 @@ if doCompile
         disp(['Correlating ',num2str(freqList(iFreq),'%2.1f'),' Hz...']);
         for iEvent = 4%1:7
             disp(['  -> ',eventFieldnames{iEvent}]);
-            Y = [];
+            [~,~,unitTrials,~] = cellfun(@size,all_Wz_power(LFP_lookup(useUnits)));
+            Y = NaN(sum(unitTrials)*nMs,1);
             LFP_range = startIdx:startIdx + nMs - 1;
+            Yind = 1;
             for iNeuron = useUnits
                 A = squeeze(all_Wz_power{LFP_lookup(iNeuron)}(iEvent,LFP_range,:,iFreq));
-                Y = [Y;reshape(A',[numel(A) 1])];
+                Y(Yind:Yind+numel(A)-1) = reshape(A',[numel(A) 1]);
+                Yind = Yind+numel(A);
             end
             for iLag = 1:nMs+1
-                X = [];
+                X = NaN(size(Y));
                 FR_range = LFP_range + (iLag - round(nMs/2));
+                Xind = 1;
                 for iNeuron = useUnits
                     A = squeeze(all_zSDE{iNeuron}(:,iEvent,FR_range));
-                    X = [X;reshape(A',[numel(A) 1])];
+                    X(Xind:Xind+numel(A)-1) = reshape(A',[numel(A) 1]);
+                    Xind = Xind+numel(A);
                 end
                 [rho,pval] = corr(X,Y);
                 lag_pval(iLag,iEvent,iFreq) = pval;
@@ -144,7 +152,7 @@ if doPlot
     cols = 7;
     useData = {lag_rho,lag_pval};
     useColormap = {'jet','hot'};
-    useCaxis = [0.2,0.05];
+    useCaxis = [0.1,0.05];
     useLabels = {'rho','pval'};
     for iRow = 1:2
         for iEvent = 4%1:7

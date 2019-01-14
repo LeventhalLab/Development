@@ -1,3 +1,5 @@
+% [ ] run power corr for all events (use PAC code?)
+% [ ] how to do all-session power corr to assess significance?
 doSetup = true;
 doSave = true;
 doPlot = true;
