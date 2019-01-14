@@ -8,14 +8,17 @@
 % for each event? only excited units?
 doSetup = false;
 doCompile = true;
-doPlot = false;
+doPlot = true;
 
 if false
+    % if doSetup
     load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'LFPfiles_local')
     load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'all_ts')
+    load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'all_trials')
+    % if doCompile
     load('session_20180919_NakamuraMRL.mat','dirSelUnitIds','ndirSelUnitIds','primSec')
     load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'eventFieldnames')
-    load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'all_trials')
+    load('Ray_LFPspikeCorr_setup.mat')
 end
 
 freqList = logFreqList([1 200],30);
@@ -28,6 +31,7 @@ minFR = 5;
 if doSetup
     all_Wz_power = {};
     all_zSDE = {};
+    all_keepTrials = {};
     LFP_lookup = [];
     iSession = 0;
     for iNeuron = 1:numel(all_ts)
@@ -45,7 +49,7 @@ if doSetup
             all_Wz_power{iSession} = Wz_power;
         end
         LFP_lookup(iNeuron) = iSession; % find LFP in all_Wz_power
-
+        all_keepTrials{iNeuron} = keepTrials;
         tsPeths = eventsPeth(curTrials(trialIds),all_ts{iNeuron},tWindow,eventFieldnames);
         tsPeths = tsPeths(keepTrials,:);
         
@@ -68,7 +72,7 @@ if doSetup
         zSDE = (SDE - zMean) ./ zStd;
         all_zSDE{iNeuron} = zSDE;
     end
-    save('Ray_LFPspikeCorr_setup','all_Wz_power','all_zSDE','LFP_lookup');
+    save('Ray_LFPspikeCorr_setup','all_Wz_power','all_zSDE','LFP_lookup','all_keepTrials');
 end
 
 
@@ -93,40 +97,47 @@ end
 
 
 if doCompile
-    % [ ] handle emptiness (LFP)
+    % [ ] how to easily filter by unit?
+    doDirSel = 1;
     nMs = 200;
-    startIdx = round(Wlength/2) + 1;
-    useUnits = 1:5;%find(~cellfun(@isempty,all_zSDE) == 1);
+    startIdx = round(Wlength/2)+1;
+    notEmptyUnits = find(~cellfun(@isempty,all_zSDE) == 1);
+    if doDirSel == 1
+        useUnits = dirSelUnitIds(ismember(dirSelUnitIds,notEmptyUnits));
+    elseif doDirSel == -1
+        useUnits = ndirSelUnitIds(ismember(ndirSelUnitIds,notEmptyUnits));
+    else
+        useUnits = notEmptyUnits;
+    end
+%     useUnits = useUnits(1:100);
     lag_pval = [];
     lag_rho = [];
-    M = 8;
-    parfor (iFreq = 1:numel(freqList),M)
+    M = 2;
+    for iFreq = 1:numel(freqList)
         disp(['Correlating ',num2str(freqList(iFreq),'%2.1f'),' Hz...']);
-        for iEvent = 1:7
+        for iEvent = 4%1:7
             disp(['  -> ',eventFieldnames{iEvent}]);
             Y = [];
-            LFP_range = startIdx:startIdx+nMs;
-            for iNeuron = useUnits%numel(all_ts)
-                % could remove loop and flatten data (need to validate): readability
-                for iTrial = 1:size(all_Wz_power{LFP_lookup(iNeuron)},3)
-                    Y = [Y;all_Wz_power{LFP_lookup(iNeuron)}(iEvent,LFP_range,iTrial,iFreq)'];
-                end
+            LFP_range = startIdx:startIdx + nMs - 1;
+            for iNeuron = useUnits
+                A = squeeze(all_Wz_power{LFP_lookup(iNeuron)}(iEvent,LFP_range,:,iFreq));
+                Y = [Y;reshape(A',[numel(A) 1])];
             end
             for iLag = 1:nMs+1
                 X = [];
                 FR_range = LFP_range + (iLag - round(nMs/2));
-                for iNeuron = useUnits%1:numel(all_ts)
-                    for iTrial = 1:size(all_zSDE{iNeuron},1)
-                        X = [X;squeeze(all_zSDE{iNeuron}(iTrial,iEvent,FR_range))];
-                    end
+                for iNeuron = useUnits
+                    A = squeeze(all_zSDE{iNeuron}(:,iEvent,FR_range));
+                    X = [X;reshape(A',[numel(A) 1])];
                 end
-% %                 [rho,pval] = corr(X,Y);
-% %                 lag_pval(iLag,iEvent,iFreq) = pval;
-% %                 lag_rho(iLag,iEvent,iFreq) = rho;
+                [rho,pval] = corr(X,Y);
+                lag_pval(iLag,iEvent,iFreq) = pval;
+                lag_rho(iLag,iEvent,iFreq) = rho;
             end
         end
     end
 end
+
 if doPlot
     h = ff(1400,800);
     rows = 2;
@@ -136,7 +147,7 @@ if doPlot
     useCaxis = [0.2,0.05];
     useLabels = {'rho','pval'};
     for iRow = 1:2
-        for iEvent = 1:7
+        for iEvent = 4%1:7
             subplot(rows,cols,prc(cols,[iRow,iEvent]));
             imagesc(squeeze(useData{iRow}(:,iEvent,:))');
             set(gca,'ydir','normal');
