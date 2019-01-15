@@ -1,4 +1,4 @@
-% [ ] how to do in-trial shuffle?
+% [ ] how to do in-trial shuffle???
 
 close all;
 doSave = true;

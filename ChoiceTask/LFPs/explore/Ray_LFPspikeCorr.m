@@ -10,11 +10,11 @@ doSetup = false;
 doCompile = true;
 doPlot = true;
 
-if false
+if true
     % if doSetup
-    load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'LFPfiles_local')
-    load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'all_ts')
-    load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'all_trials')
+%     load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'LFPfiles_local')
+%     load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'all_ts')
+%     load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'all_trials')
     % if doCompile
     load('session_20180919_NakamuraMRL.mat','dirSelUnitIds','ndirSelUnitIds','primSec')
     load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'eventFieldnames')
@@ -98,7 +98,7 @@ end
 
 if doCompile
     % [ ] how to easily filter by unit?
-    doDirSel = 0;
+    doDirSel = -1;
     nMs = 200;
     startIdx = round(Wlength/2)+1;
     notEmptyUnits = find(~cellfun(@isempty,all_zSDE) == 1);
