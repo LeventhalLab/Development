@@ -115,10 +115,9 @@ if doCompile
 
     lag_pval = [];
     lag_rho = [];
-    M = 2;
     for iFreq = 1:numel(freqList)
         disp(['Correlating ',num2str(freqList(iFreq),'%2.1f'),' Hz...']);
-        for iEvent = 4%1:7
+        for iEvent = 1:7
             disp(['  -> ',eventFieldnames{iEvent}]);
             [~,~,unitTrials,~] = cellfun(@size,all_Wz_power(LFP_lookup(useUnits)));
             Y = NaN(sum(unitTrials)*nMs,1);
@@ -152,10 +151,10 @@ if doPlot
     cols = 7;
     useData = {lag_rho,lag_pval};
     useColormap = {'jet','hot'};
-    useCaxis = [0.1,0.05];
+    useCaxis = [-0.03 0.03;0 0.05];
     useLabels = {'rho','pval'};
     for iRow = 1:2
-        for iEvent = 4%1:7
+        for iEvent = 1:7
             subplot(rows,cols,prc(cols,[iRow,iEvent]));
             imagesc(squeeze(useData{iRow}(:,iEvent,:))');
             set(gca,'ydir','normal');
@@ -165,8 +164,8 @@ if doPlot
             yticks(linspace(min(ylim),max(ylim),numel(freqList)));
             yticklabels(compose('%3.1f',freqList));
             colormap(gca,useColormap{iRow});
-            caxis([0 useCaxis(iRow)]);
-            title(eventFieldnames{iEvent});
+            caxis(useCaxis(iRow,:));
+            title({eventFieldnames{iEvent},'xcorr'});
             if iEvent == 1
                 ylabel('Freq (Hz)');
             end
