@@ -7,7 +7,7 @@
 % (3) implies (1)->has_many->(2)
 % for each event? only excited units?
 % close all;
-doSetup = false;
+doSetup = true;
 
 doCompile = true;
 doPlot = true;
@@ -38,6 +38,7 @@ if doSetup
     all_zSDE = {};
     all_keepTrials = {};
     LFP_lookup = [];
+    all_FR = [];
     iSession = 0;
     for iNeuron = 1:numel(all_ts)
         sevFile = LFPfiles_local{iNeuron};
@@ -47,7 +48,8 @@ if doSetup
             [sevFilt,Fs,decimateFactor,loadedFile] = loadCompressedSEV(sevFile,[]);
             curTrials = all_trials{iNeuron};
             [trialIds,allTimes] = sortTrialsBy(curTrials,'RT');
-            [W,all_data] = eventsLFPv2(curTrials(trialIds),sevFilt,tWindow,Fs,freqList,eventFieldnames);
+            % must use tWindow*2 because Wz returns half window
+            [W,all_data] = eventsLFPv2(curTrials(trialIds),sevFilt,tWindow*2,Fs,freqList,eventFieldnames);
             keepTrials = threshTrialData(all_data,zThresh);
             W = W(:,:,keepTrials,:);
             [Wz_power,Wz_phase] = zScoreW(W,Wlength,tWindow); % power Z-score
@@ -58,12 +60,7 @@ if doSetup
         tsPeths = eventsPeth(curTrials(trialIds),all_ts{iNeuron},tWindow,eventFieldnames);
         tsPeths = tsPeths(keepTrials,:);
         
-        FR = numel([tsPeths{:,1}])/size(tsPeths,1);
-        if FR < minFR
-            disp('FR too low');
-            all_zSDE{iNeuron} = [];
-            continue;
-        end
+        all_FR(iNeuron) = numel([tsPeths{:,1}])/size(tsPeths,1);
 
         SDE = [];
         for iTrial = 1:size(tsPeths,1)
@@ -80,7 +77,9 @@ if doSetup
     save('Ray_LFPspikeCorr_setup','all_Wz_power','all_zSDE','LFP_lookup','all_keepTrials');
 end
 
-
+% [ ] restrict by FR/SDE flatness
+% [ ] try xcorr for comparison
+% [ ] re-implement whole-session corr
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/xcorrRayMethod';
 doDirSel = 1;
 nMs = 500;
@@ -100,7 +99,7 @@ else
 end
 useUnits = [12,174,186,188,212];
 
-for iNeuron = 188%useUnits
+for iNeuron = 133%useUnits
     [~,~,unitTrials,~] = cellfun(@size,all_Wz_power(LFP_lookup(iNeuron)));
     for iTrial = 1:unitTrials
         if doCompile
