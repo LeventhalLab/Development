@@ -4,9 +4,8 @@ function workon(openArr)
     % (open) >> workon([2,3,6,14])
     % (open) >> workon(1:7)
     
-    limitTo = 15; % # of files
+    limitTo = 35; % # of files
     
-    workingDir = pwd;
     listing = dir('**/*.m');
     [~,idx] = sort([listing.datenum],'descend');
     
@@ -47,7 +46,8 @@ function str = timeAgo(dateVector)
 end
 
 function str = pluralize(n,str)
-    if n > 1
-        str = [num2str(round(n)),' ',str,'s'];
+    str = [num2str(round(n)),' ',str];
+    if round(n) > 1
+        str = [str,'s'];
     end
 end
