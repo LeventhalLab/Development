@@ -7,7 +7,7 @@
 % (3) implies (1)->has_many->(2)
 % for each event? only excited units?
 % close all;
-doSetup = true;
+doSetup = false;
 
 doCompile = true;
 doPlot = true;
@@ -52,7 +52,7 @@ if doSetup
             [W,all_data] = eventsLFPv2(curTrials(trialIds),sevFilt,tWindow*2,Fs,freqList,eventFieldnames);
             keepTrials = threshTrialData(all_data,zThresh);
             W = W(:,:,keepTrials,:);
-            [Wz_power,Wz_phase] = zScoreW(W,Wlength,tWindow); % power Z-score
+            [Wz_power,Wz_phase] = zScoreW(W,Wlength); % power Z-score
             all_Wz_power{iSession} = Wz_power;
         end
         LFP_lookup(iNeuron) = iSession; % find LFP in all_Wz_power
@@ -77,12 +77,13 @@ if doSetup
     save('Ray_LFPspikeCorr_setup','all_Wz_power','all_zSDE','LFP_lookup','all_keepTrials');
 end
 
-% [ ] restrict by FR/SDE flatness
+% [ ] restrict by FR/SDE flatness (by trial or unit?)
 % [ ] try xcorr for comparison
 % [ ] re-implement whole-session corr
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/xcorrRayMethod';
 doDirSel = 1;
 nMs = 500;
+minFR = 10;
 startIdx = round(Wlength/2) - round(nMs/2) + 1;
 LFP_range = startIdx:startIdx + nMs - 1;
 
@@ -100,6 +101,9 @@ end
 useUnits = [12,174,186,188,212];
 
 for iNeuron = 133%useUnits
+    if all_FR(iNeuron) < minFR
+        continue;
+    end
     [~,~,unitTrials,~] = cellfun(@size,all_Wz_power(LFP_lookup(iNeuron)));
     for iTrial = 1:unitTrials
         if doCompile
