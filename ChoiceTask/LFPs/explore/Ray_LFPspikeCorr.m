@@ -9,7 +9,7 @@
 % close all;
 doSetup = false;
 
-doCompile = true;
+doCompile = false;
 doPlot = true;
 doSave = true;
 
@@ -95,7 +95,7 @@ else
     disp('all units');
     useUnits = FRunits;
 end
-% useUnits = useUnits(1:10);
+useUnits = [187,188];
 [~,~,unitTrials,~] = cellfun(@size,all_Wz_power(LFP_lookup(useUnits)));
 
 if doCompile
@@ -144,7 +144,7 @@ if doCompile
         end
     end
     disp('Done compiling.');
-    save('session_20190116_Ray_ABlags_ndirSel','A','B','acors','lag');
+% %     save('session_20190116_Ray_ABlags_allUnits','A','B','acors','lag');
 end
 
 if doPlot
@@ -164,10 +164,10 @@ if doPlot
     rows = 2;
     cols = 7;
     useData = {lag_rho,lag_pval};
-    useColormap = {'jupiter','hot'};
+    useColormap = {'jet','hot'};
 % %     useCaxis = [-0.1,0.1;0 0.05];
     useCaxis = [-500 1500;0 0.05];
-    useLabels = {'rho','pval'};
+    useLabels = {'acor','pval'};
     t = linspace(-tWindow*1000,tWindow*1000,size(all_zSDE{1},3));
     tLag = linspace(-round(nMs/2),round(nMs/2),size(lag_rho,1));
     lagLines = [min(tLag) min(tLag)];
@@ -177,6 +177,8 @@ if doPlot
     for iEvent = 1:7
         subplot(rows,cols,prc(cols,[iRow,iEvent]));
         imagesc(lag,1:numel(freqList),squeeze(mean(acors(:,iEvent,:,:))));
+        hold on;
+        plot([0,0],ylim,'k:');
         set(gca,'ydir','normal');
 % %         xticks([min(xlim) round(mean(xlim)) max(xlim)]);
 % %         xticklabels([min(tLag) 0 max(tLag)]);
@@ -238,9 +240,9 @@ if doPlot
         end
 
         hold on;
-        plot(-lagLines,ylim,'k:');
-        plot(lagLines,ylim,'k:');
-        plot([0,0],ylim,'k-');
+% %         plot(-lagLines,ylim,'k:');
+% %         plot(lagLines,ylim,'k:');
+        plot([0,0],ylim,'k:');
 
         xlabel('time (ms)');
         title('LFP');
