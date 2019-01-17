@@ -9,7 +9,7 @@
 % close all;
 doSetup = false;
 
-doCompile = false;
+doCompile = true;
 doPlot = true;
 doSave = true;
 
@@ -73,7 +73,7 @@ if doSetup
         zSDE = (SDE - zMean) ./ zStd;
         all_zSDE{iNeuron} = zSDE;
     end
-    save('Ray_LFPspikeCorr_setup','all_Wz_power','all_zSDE','LFP_lookup','all_keepTrials');
+    save('Ray_LFPspikeCorr_setup','all_Wz_power','all_zSDE','LFP_lookup','all_keepTrials','all_FR');
 end
 
 % [ ] try xcorr for comparison
@@ -95,7 +95,7 @@ else
     disp('all units');
     useUnits = FRunits;
 end
-useUnits = useUnits(1:10);
+% useUnits = useUnits(1:10);
 [~,~,unitTrials,~] = cellfun(@size,all_Wz_power(LFP_lookup(useUnits)));
 
 if doCompile
@@ -143,6 +143,8 @@ if doCompile
 % %             end
         end
     end
+    disp('Done compiling.');
+    save('session_20190116_Ray_ABlags_ndirSel','A','B','acors','lag');
 end
 
 if doPlot
