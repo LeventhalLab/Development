@@ -58,17 +58,17 @@ if doSetup
     save('Ray_LFPspikeCorr_setup','all_Wz_power','all_zSDE','LFP_lookup','all_keepTrials','all_FR');
 end
 
-doCompile = true;
+doCompile = false;
 doPlot = true;
 doSave = true;
 
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/xcorrRayMethod';
-doDirSel = 1;
 nMs = 500;
 minFR = 10;
 nShuffle = 10;
 startIdx = round(Wlength/2) - round(nMs/2) + 1;
 LFP_range = startIdx:startIdx + nMs - 1;
+doDirSel = 0;
 
 FRunits = find(all_FR > minFR);
 if doDirSel == 1
