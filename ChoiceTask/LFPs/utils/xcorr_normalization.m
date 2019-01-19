@@ -29,7 +29,8 @@ for iCol = 1:2
 
     subplot(rows,cols,prc(cols,[3,iCol]));
 %     [acor,lag] = xcorr(a,b,'coeff');
-acor = xcorr(x,y)/sqrt(sum(abs(x).^2)*sum(abs(y).^2));
+    % !! bootstrap method
+    acor = xcorr(x,y)/sqrt(sum(abs(x).^2)*sum(abs(y).^2));
     plot(lag,acor,'r','lineWidth',3);
     title("xcorr(x,y,'coeff')");
     grid on;
