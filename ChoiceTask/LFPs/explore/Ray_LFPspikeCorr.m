@@ -1,3 +1,5 @@
+% https://www.researchgate.net/post/How_can_one_calculate_normalized_cross_correlation_between_two_arrays
+% https://www.mathworks.com/matlabcentral/answers/5275-algorithm-for-coeff-scaling-of-xcorr
 doSetup = false;
 if false
     load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'LFPfiles_local')
@@ -58,9 +60,10 @@ if doSetup
     save('Ray_LFPspikeCorr_setup','all_Wz_power','all_zSDE','LFP_lookup','all_keepTrials','all_FR');
 end
 
-doCompile = false;
-doPlot = true;
-doSave = true;
+doCompile = true;
+doShuffle = false;
+doPlot = false;
+doSave = false;hr
 
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/xcorrRayMethod';
 nMs = 500;
@@ -100,42 +103,44 @@ for iNeuron = useUnits
                 for iFreq = 1:numel(freqList)
                     Y = squeeze(all_Wz_power{LFP_lookup(iNeuron)}(iEvent,:,iTrial,iFreq));
                     X = squeeze(all_zSDE{iNeuron}(iTrial,iEvent,:))';
-                    [acor,lag] = xcorr(X,Y,nMs);
+                    [acor,lag] = xcorr(X,Y,nMs,'coeff');
                     acors(iTrial,iEvent,iFreq,:) = acor;
                 end
             end
         end
         A = squeeze(mean(acors));
+        all_A(neuronCount,:,:,:) = A;
         
-        acors = NaN(size(all_zSDE{iNeuron},1),7,numel(freqList),nMs*2+1);
-        A_shuffled = NaN(nShuffle,7,numel(freqList),nMs*2+1);
-        shuff_pvals_pos = zeros(size(A));
-        shuff_pvals_neg = zeros(size(A));
-        for iShuffle = 1:nShuffle
-            disp(['  -> shuffle',num2str(iShuffle,'%03d')]);
-            randTrial = randsample(1:size(all_zSDE{iNeuron},1),size(all_zSDE{iNeuron},1));
-            for iTrial = 1:size(all_zSDE{iNeuron},1)
-                for iEvent = 1:7
-                    for iFreq = 1:numel(freqList)
-                        Y = squeeze(all_Wz_power{LFP_lookup(iNeuron)}(iEvent,:,iTrial,iFreq));
-                        X = squeeze(all_zSDE{iNeuron}(randTrial(iTrial),iEvent,:))';
-                        [acor,lag] = xcorr(X,Y,nMs);
-                        acors(iTrial,iEvent,iFreq,:) = acor;
+        if doShuffle
+            acors = NaN(size(all_zSDE{iNeuron},1),7,numel(freqList),nMs*2+1);
+            A_shuffled = NaN(nShuffle,7,numel(freqList),nMs*2+1);
+            shuff_pvals_pos = zeros(size(A));
+            shuff_pvals_neg = zeros(size(A));
+            for iShuffle = 1:nShuffle
+                disp(['  -> shuffle',num2str(iShuffle,'%03d')]);
+                randTrial = randsample(1:size(all_zSDE{iNeuron},1),size(all_zSDE{iNeuron},1));
+                for iTrial = 1:size(all_zSDE{iNeuron},1)
+                    for iEvent = 1:7
+                        for iFreq = 1:numel(freqList)
+                            Y = squeeze(all_Wz_power{LFP_lookup(iNeuron)}(iEvent,:,iTrial,iFreq));
+                            X = squeeze(all_zSDE{iNeuron}(randTrial(iTrial),iEvent,:))';
+                            [acor,lag] = xcorr(X,Y,nMs,'coeff');
+                            acors(iTrial,iEvent,iFreq,:) = acor;
+                        end
                     end
                 end
+                B = squeeze(mean(acors)); % shuffled acor
+                A_shuffled(iShuffle,:,:,:) = B;
+                shuff_pvals_pos = shuff_pvals_pos + (A > B);
+                shuff_pvals_neg = shuff_pvals_neg + (B > A);
             end
-            B = squeeze(mean(acors)); % shuffled acor
-            A_shuffled(iShuffle,:,:,:) = B;
-            shuff_pvals_pos = shuff_pvals_pos + (A > B);
-            shuff_pvals_neg = shuff_pvals_neg + (B > A);
+            shuff_pvals = zeros(size(A));
+            shuff_pvals(shuff_pvals_pos > shuff_pvals_neg) = shuff_pvals_pos(shuff_pvals_pos > shuff_pvals_neg) / nShuffle;
+            shuff_pvals(shuff_pvals_neg > shuff_pvals_pos) = -1 * shuff_pvals_neg(shuff_pvals_neg > shuff_pvals_pos) / nShuffle;
+
+            all_shuff_pvals(neuronCount,:,:,:) = shuff_pvals;
+            all_A_shuffled_mean(neuronCount,:,:,:) = squeeze(mean(A_shuffled));
         end
-        shuff_pvals = zeros(size(A));
-        shuff_pvals(shuff_pvals_pos > shuff_pvals_neg) = shuff_pvals_pos(shuff_pvals_pos > shuff_pvals_neg) / nShuffle;
-        shuff_pvals(shuff_pvals_neg > shuff_pvals_pos) = -1 * shuff_pvals_neg(shuff_pvals_neg > shuff_pvals_pos) / nShuffle;
-        
-        all_shuff_pvals(neuronCount,:,:,:) = shuff_pvals;
-        all_A(neuronCount,:,:,:) = A;
-        all_A_shuffled_mean(neuronCount,:,:,:) = squeeze(mean(A_shuffled));
     end
     
 
@@ -146,7 +151,7 @@ for iNeuron = useUnits
         set(h,'defaultAxesColorOrder',[left_color; right_color]);
         rows = 4;
         cols = 7;
-        acorCaxis = [-500 1500];
+        acorCaxis = [-.2 .2];
         useData = {A,squeeze(mean(A_shuffled))};
         t = linspace(-tWindow*1000,tWindow*1000,size(all_zSDE{1},3));
         ySDE = [-3 3];
@@ -227,7 +232,7 @@ for iNeuron = useUnits
         end
         set(gcf,'color','w');
         if doSave
-            saveas(h,fullfile(savePath,['u',num2str(iNeuron,'%03d'),'_ray_xcorr.png']));
+            saveas(h,fullfile(savePath,['u',num2str(iNeuron,'%03d'),'_ray_xcorr_norm.png']));
             close(h);
         end
     end
