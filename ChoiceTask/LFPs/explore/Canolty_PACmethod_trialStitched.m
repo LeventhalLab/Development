@@ -2,7 +2,7 @@
 % load('session_20180925_entrainmentSurrogates.mat', 'all_trials')
 % load('session_20180925_entrainmentSurrogates.mat', 'LFPfiles_local')
 % load('session_20180925_entrainmentSurrogates.mat', 'selectedLFPFiles')
-
+% 
 % load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
 % load('session_20180919_NakamuraMRL.mat', 'all_trials')
 % load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local')
@@ -12,7 +12,7 @@
 
 doSetup = true;
 doSave = true;
-doPlot = true;
+doPlot = false;
 
 if ismac
     savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/PAC/canoltyMethod/bySession';
@@ -24,20 +24,21 @@ end
 % dbclear all
 
 tWindow = 0.5;
-% freqList = logFreqList([2 200],11);
-% freqList_p = logFreqList([2 10],10);
-% freqList_a = logFreqList([10 200],10);
-% freqList = unique([freqList_p freqList_a]);
+freqList = logFreqList([1 200],30);
+% % freqList_p = logFreqList([2 10],10);
+% % freqList_a = logFreqList([10 200],10);
+% % freqList = unique([freqList_p freqList_a]);
 
-freqList_p = [1 2 3 4 5];
-freqList_a = [1 2 3 4 5];
-freqList = {[1 4;4 8;13 30;30 70;70 200]};
-bandLabels = {'\delta','\theta','\beta','\gamma','\gamma_H'};
+freqList_p = [1:numel(freqList)];
+freqList_a = [1:numel(freqList)];
+% % freqList = {[1 4;4 8;13 30;30 70;70 200]};
+% % bandLabels = {'\delta','\theta','\beta','\gamma','\gamma_H'};
+
 eventFieldnames_wFake = {eventFieldnames{:} 'outTrial'};
 
 nSurr = 200;
 nShuff = 100;
-oversampleBy = 20; % has to be high for eegfilt() (> 14,000 samples)
+oversampleBy = 5; % has to be high for eegfilt() (> 14,000 samples)
 zThresh = 5;
 
 iSession = 0;
@@ -89,12 +90,12 @@ for iNeuron = selectedLFPFiles'
         
         keepTrials = threshTrialData(data,zThresh);
         W_surr = [];
-%         W_surr = calculateComplexScalograms_EnMasse(data(:,keepTrials(1:nSurr + size(W,3))),'Fs',Fs,'freqList',freqList);
-        for iFreq = 1:size(freqList{:},1)
-            disp(['Filtering surrogates ',num2str(freqList{:}(iFreq,1)),'Hz to ',num2str(freqList{:}(iFreq,2)),'Hz']);
-            dataFilt = eegfilt(data(:,keepTrials(1:nSurr))',Fs,freqList{:}(iFreq,1),freqList{:}(iFreq,2));
-            W_surr(:,:,iFreq) = hilbert(dataFilt');
-        end
+        W_surr = calculateComplexScalograms_EnMasse(data(:,keepTrials(1:nSurr + size(W,3))),'Fs',Fs,'freqList',freqList);
+% %         for iFreq = 1:size(freqList{:},1)
+% %             disp(['Filtering surrogates ',num2str(freqList{:}(iFreq,1)),'Hz to ',num2str(freqList{:}(iFreq,2)),'Hz']);
+% %             dataFilt = eegfilt(data(:,keepTrials(1:nSurr))',Fs,freqList{:}(iFreq,1),freqList{:}(iFreq,2));
+% %             W_surr(:,:,iFreq) = hilbert(dataFilt');
+% %         end
         tWindow_sample = round(tWindow * Fs);
         reshapeRange = round(size(W_surr,1)/2)-tWindow_sample:round(size(W_surr,1)/2)+tWindow_sample-1;
         W_surr = W_surr(reshapeRange,:,:);
@@ -159,14 +160,16 @@ for iNeuron = selectedLFPFiles'
     end
 end
 
-save('Canolt_PAC_20181208','all_MImatrix','all_shuff_MImatrix_mean','all_shuff_MImatrix_pvals',...
+save('Canolt_PAC_20190120','all_MImatrix','all_shuff_MImatrix_mean','all_shuff_MImatrix_pvals',...
 'eventFieldnames_wFake','freqList_p','freqList_a','freqList','bandLabels');
 
-useSessions = [1:30];
-h = CanoltyPAC_trialStitched_print(all_MImatrix,all_shuff_MImatrix_mean,all_shuff_MImatrix_pvals,useSessions,...
-eventFieldnames_wFake,freqList_p,freqList_a,freqList,bandLabels);
-if doSave
-    saveFile = ['s',num2str(useSessions(1)),'-',num2str(useSessions(end)),'_allEvent.png'];
-    saveas(h,fullfile(savePath,saveFile));
-    close(h);
+if doPlot
+    useSessions = [1:30];
+    h = CanoltyPAC_trialStitched_print(all_MImatrix,all_shuff_MImatrix_mean,all_shuff_MImatrix_pvals,useSessions,...
+    eventFieldnames_wFake,freqList_p,freqList_a,freqList,bandLabels);
+    if doSave
+        saveFile = ['s',num2str(useSessions(1)),'-',num2str(useSessions(end)),'_allEvent.png'];
+        saveas(h,fullfile(savePath,saveFile));
+        close(h);
+    end
 end
