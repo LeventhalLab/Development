@@ -1,12 +1,14 @@
 % https://www.researchgate.net/post/How_can_one_calculate_normalized_cross_correlation_between_two_arrays
 % https://www.mathworks.com/matlabcentral/answers/5275-algorithm-for-coeff-scaling-of-xcorr
-doSetup = false;
+doSetup = true;
+
 if false
     load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'LFPfiles_local')
     load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'all_ts')
     load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'all_trials')
     load('session_20180919_NakamuraMRL.mat','dirSelUnitIds','ndirSelUnitIds','primSec')
     load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'eventFieldnames')
+    % if going straight to compile
     load('Ray_LFPspikeCorr_setup.mat')
 end
 
@@ -15,6 +17,8 @@ Wlength = 1000;
 tWindow = 0.5;
 loadedFile = [];
 zThresh = 5;
+oversampleBy = 5; % has to be high for eegfilt() (> 14,000 samples)
+nSurr = 200; % >> max # of trials for any session
 
 if doSetup
     all_Wz_power = {};
@@ -35,6 +39,37 @@ if doSetup
             [W,all_data] = eventsLFPv2(curTrials(trialIds),sevFilt,tWindow*2,Fs,freqList,eventFieldnames);
             keepTrials = threshTrialData(all_data,zThresh);
             W = W(:,:,keepTrials,:);
+            
+            % out of trial (i.e., fake trials)
+            trialTimeRanges = compileTrialTimeRanges(curTrials);
+            takeTime = tWindow * oversampleBy;
+            takeSamples = round(takeTime * Fs);
+            minTime = min(trialTimeRanges(:,2));
+            maxTime = max(trialTimeRanges(:,1)) - takeTime;
+
+            data = [];
+            iSurr = 0;
+            while iSurr < nSurr + 40 + numel(keepTrials) % add buffer for artifact removal
+                % try randTs
+                randTs = (maxTime-minTime) .* rand + minTime;
+                randSample = round(randTs * Fs);
+                sampleRange = randSample:randSample + takeSamples - 1;
+                thisData = sevFilt(sampleRange);
+                if isempty(strfind(diff(thisData),zeros(1,round(numel(sampleRange)*0.1))))
+                    iSurr = iSurr + 1;
+                    data(:,iSurr) = thisData;
+                end
+            end
+
+            keepTrials = threshTrialData(data,zThresh);
+            W_surr = [];
+            W_surr = calculateComplexScalograms_EnMasse(data(:,keepTrials(1:nSurr + size(W,3))),'Fs',Fs,'freqList',freqList);
+            tWindow_sample = size(W,2)/2;
+            reshapeRange = round(size(W_surr,1)/2)-tWindow_sample:round(size(W_surr,1)/2)+tWindow_sample-1;
+            W_surr = W_surr(reshapeRange,:,:);
+            W(8,:,:,:) = W_surr(:,(1:size(W,3)),:); % add fake trials
+        
+            % technically don't need z-score if xcorr is normalized
             [Wz_power,Wz_phase] = zScoreW(W,Wlength); % power Z-score
             all_Wz_power{iSession} = Wz_power;
         end
