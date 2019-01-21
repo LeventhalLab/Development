@@ -3,9 +3,11 @@
 doSetup = true;
 
 if false
-    load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'LFPfiles_local')
-    load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'all_ts')
-    load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'all_trials')
+    % load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
+% load('session_20180919_NakamuraMRL.mat', 'all_trials')
+% load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local')
+% load('session_20180919_NakamuraMRL.mat', 'selectedLFPFiles')
+% load('session_20180919_NakamuraMRL.mat', 'all_ts')
     load('session_20180919_NakamuraMRL.mat','dirSelUnitIds','ndirSelUnitIds','primSec')
     load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'eventFieldnames')
     % if going straight to compile
@@ -272,4 +274,5 @@ for iNeuron = useUnits
         end
     end
 end
-save('20190121_RayLFP_compiled','lag','all_A','all_shuff_pvals','all_shuff_pvals');
+save('20190121_RayLFP_compiled','lag','all_A','all_shuff_pvals',...
+    'all_shuff_pvals','unitLookup','eventFieldnames','dirSelUnitIds','ndirSelUnitIds');
