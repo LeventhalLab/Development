@@ -2,16 +2,10 @@
 % https://www.mathworks.com/matlabcentral/answers/5275-algorithm-for-coeff-scaling-of-xcorr
 doSetup = true;
 
-if false
-    % load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
-% load('session_20180919_NakamuraMRL.mat', 'all_trials')
-% load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local')
-% load('session_20180919_NakamuraMRL.mat', 'selectedLFPFiles')
-% load('session_20180919_NakamuraMRL.mat', 'all_ts')
-    load('session_20180919_NakamuraMRL.mat','dirSelUnitIds','ndirSelUnitIds','primSec')
-    load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'eventFieldnames')
-    % if going straight to compile
-    load('Ray_LFPspikeCorr_setup.mat')
+if ismac
+    dataPath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/datastore/Ray_LFPspikeCorr';
+else
+    dataPath = '';
 end
 
 freqList = logFreqList([1 200],30);
@@ -21,10 +15,9 @@ loadedFile = [];
 zThresh = 5;
 oversampleBy = 5; % has to be high for eegfilt() (> 14,000 samples)
 nSurr = 200; % >> max # of trials for any session
+eventFieldnames_wFake = {eventFieldnames{:} 'outTrial'};
 
 if doSetup
-    all_Wz_power = {};
-    all_zSDE = {};
     all_keepTrials = {};
     LFP_lookup = [];
     all_FR = [];
@@ -35,49 +28,20 @@ if doSetup
         if isempty(loadedFile) || ~strcmp(loadedFile,sevFile)
             iSession = iSession + 1;
             [sevFilt,Fs,decimateFactor,loadedFile] = loadCompressedSEV(sevFile,[]);
-            curTrials = all_trials{iNeuron};
-            [trialIds,allTimes] = sortTrialsBy(curTrials,'RT');
+            trials = all_trials{iNeuron};
+            trials = addEventToTrials(trials,'outTrial');
+            [trialIds,allTimes] = sortTrialsBy(trials,'RT');
             % must use tWindow*2 because Wz returns half window
-            [W,all_data] = eventsLFPv2(curTrials(trialIds),sevFilt,tWindow*2,Fs,freqList,eventFieldnames);
+            [W,all_data] = eventsLFPv2(trials(trialIds),sevFilt,tWindow*2,Fs,freqList,eventFieldnames_wFake);
             keepTrials = threshTrialData(all_data,zThresh);
             W = W(:,:,keepTrials,:);
-            
-            % out of trial (i.e., fake trials)
-            trialTimeRanges = compileTrialTimeRanges(curTrials);
-            takeTime = tWindow * oversampleBy;
-            takeSamples = round(takeTime * Fs);
-            minTime = min(trialTimeRanges(:,2));
-            maxTime = max(trialTimeRanges(:,1)) - takeTime;
-
-            data = [];
-            iSurr = 0;
-            while iSurr < nSurr + 40 + numel(keepTrials) % add buffer for artifact removal
-                % try randTs
-                randTs = (maxTime-minTime) .* rand + minTime;
-                randSample = round(randTs * Fs);
-                sampleRange = randSample:randSample + takeSamples - 1;
-                thisData = sevFilt(sampleRange);
-                if isempty(strfind(diff(thisData),zeros(1,round(numel(sampleRange)*0.1))))
-                    iSurr = iSurr + 1;
-                    data(:,iSurr) = thisData;
-                end
-            end
-
-            keepTrials = threshTrialData(data,zThresh);
-            W_surr = [];
-            W_surr = calculateComplexScalograms_EnMasse(data(:,keepTrials(1:nSurr + size(W,3))),'Fs',Fs,'freqList',freqList);
-            tWindow_sample = size(W,2)/2;
-            reshapeRange = round(size(W_surr,1)/2)-tWindow_sample:round(size(W_surr,1)/2)+tWindow_sample-1;
-            W_surr = W_surr(reshapeRange,:,:);
-            W(8,:,:,:) = W_surr(:,(1:size(W,3)),:); % add fake trials
-        
             % technically don't need z-score if xcorr is normalized
             [Wz_power,Wz_phase] = zScoreW(W,Wlength); % power Z-score
-            all_Wz_power{iSession} = Wz_power;
+            save(fullfile(dataPath,['Wz_power_s',num2str(iSession,'%02d')]),'Wz_power');
         end
         LFP_lookup(iNeuron) = iSession; % find LFP in all_Wz_power
         all_keepTrials{iNeuron} = keepTrials;
-        tsPeths = eventsPeth(curTrials(trialIds),all_ts{iNeuron},tWindow,eventFieldnames);
+        tsPeths = eventsPeth(trials(trialIds),all_ts{iNeuron},tWindow,eventFieldnames_wFake);
         tsPeths = tsPeths(keepTrials,:);
         
         all_FR(iNeuron) = numel([tsPeths{:,1}])/size(tsPeths,1);
@@ -92,17 +56,24 @@ if doSetup
         zMean = mean(mean(SDE(:,1,:)));
         zStd = mean(std(SDE(:,1,:),[],3));
         zSDE = (SDE - zMean) ./ zStd;
-        all_zSDE{iNeuron} = zSDE;
+        save(fullfile(dataPath,['zSDE_u',num2str(iNeuron,'%03d')]),'zSDE');
     end
-    save('Ray_LFPspikeCorr_setup','all_Wz_power','all_zSDE','LFP_lookup','all_keepTrials','all_FR');
+    save('Ray_LFPspikeCorr_setup','LFP_lookup','all_keepTrials','all_FR','eventFieldnames_wFake','all_trials',...
+        'LFPfiles_local','all_ts','dirSelUnitIds','ndirSelUnitIds','primSec');
 end
 
-doCompile = true;
+doCompile = false;
 doShuffle = false;
 doPlot = false;
 doSave = false;
+doWrite = false;
 
-savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/xcorrRayMethod';
+if ismac
+    savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/xcorrRayMethod';
+else
+    % for windows
+end
+
 nMs = 500;
 minFR = 10;
 nShuffle = 10;
@@ -122,45 +93,54 @@ else
     useUnits = FRunits;
 end
 
-all_shuff_pvals = NaN(numel(useUnits),7,numel(freqList),nMs*2+1);
-all_A_shuffled_mean = all_shuff_pvals;
-all_A = all_A_shuffled_mean;
+loadedFile = [];
 unitLookup = [];
 neuronCount = 0;
 for iNeuron = useUnits
     neuronCount = neuronCount + 1;
     unitLookup(neuronCount) = iNeuron;
+    zSDE = load(fullfile(dataPath,['zSDE_u',num2str(iNeuron,'%03d')]),'zSDE');
+    LFPfile = fullfile(dataPath,['Wz_power_s',num2str(LFP_lookup(iNeuron),'%02d')]);
+    if isempty(loadedFile) || ~strcmp(loadedFile,LFPfile)
+        Wz_power = load(LFPfile,'Wz_power');
+    end
+    
+    if neuronCount == 1
+        all_shuff_pvals = NaN(numel(useUnits),size(zSDE,2),numel(freqList),nMs*2+1);
+        all_acors_shuffled_mean = all_shuff_pvals; % same dim
+        all_acors = all_acors_shuffled_mean; % same dim
+    end
     disp(['iNeuron ',num2str(iNeuron,'%03d')]);
     
     if doCompile
-        acors = NaN(size(all_zSDE{iNeuron},1),7,numel(freqList),nMs*2+1);
-        for iTrial = 1:size(all_zSDE{iNeuron},1)
+        acors = NaN(size(zSDE,1),size(zSDE,2),numel(freqList),nMs*2+1);
+        for iTrial = 1:size(zSDE,1)
             disp(['  -> trial',num2str(iTrial,'%03d')]);
-            for iEvent = 1:7
+            for iEvent = 1:size(zSDE,2)
                 for iFreq = 1:numel(freqList)
-                    Y = squeeze(all_Wz_power{LFP_lookup(iNeuron)}(iEvent,:,iTrial,iFreq));
-                    X = squeeze(all_zSDE{iNeuron}(iTrial,iEvent,:))';
+                    Y = squeeze(Wz_power(iEvent,:,iTrial,iFreq));
+                    X = squeeze(zSDE(iTrial,iEvent,:))';
                     [acor,lag] = xcorr(X,Y,nMs,'coeff');
                     acors(iTrial,iEvent,iFreq,:) = acor;
                 end
             end
         end
         A = squeeze(mean(acors));
-        all_A(neuronCount,:,:,:) = A;
+        all_acors(neuronCount,:,:,:) = A;
         
         if doShuffle
-            acors = NaN(size(all_zSDE{iNeuron},1),7,numel(freqList),nMs*2+1);
-            A_shuffled = NaN(nShuffle,7,numel(freqList),nMs*2+1);
+            acors = NaN(size(zSDE,1),size(zSDE,2),numel(freqList),nMs*2+1);
+            A_shuffled = NaN(nShuffle,size(zSDE,2),numel(freqList),nMs*2+1);
             shuff_pvals_pos = zeros(size(A));
             shuff_pvals_neg = zeros(size(A));
             for iShuffle = 1:nShuffle
                 disp(['  -> shuffle',num2str(iShuffle,'%03d')]);
-                randTrial = randsample(1:size(all_zSDE{iNeuron},1),size(all_zSDE{iNeuron},1));
-                for iTrial = 1:size(all_zSDE{iNeuron},1)
-                    for iEvent = 1:7
+                randTrial = randsample(1:size(zSDE,1),size(zSDE,1));
+                for iTrial = 1:size(zSDE,1)
+                    for iEvent = 1:size(zSDE,2)
                         for iFreq = 1:numel(freqList)
-                            Y = squeeze(all_Wz_power{LFP_lookup(iNeuron)}(iEvent,:,iTrial,iFreq));
-                            X = squeeze(all_zSDE{iNeuron}(randTrial(iTrial),iEvent,:))';
+                            Y = squeeze(Wz_power(iEvent,:,iTrial,iFreq));
+                            X = squeeze(zSDE(randTrial(iTrial),iEvent,:))';
                             [acor,lag] = xcorr(X,Y,nMs,'coeff');
                             acors(iTrial,iEvent,iFreq,:) = acor;
                         end
@@ -176,7 +156,7 @@ for iNeuron = useUnits
             shuff_pvals(shuff_pvals_neg > shuff_pvals_pos) = -1 * shuff_pvals_neg(shuff_pvals_neg > shuff_pvals_pos) / nShuffle;
 
             all_shuff_pvals(neuronCount,:,:,:) = shuff_pvals;
-            all_A_shuffled_mean(neuronCount,:,:,:) = squeeze(mean(A_shuffled));
+            all_acors_shuffled_mean(neuronCount,:,:,:) = squeeze(mean(A_shuffled));
         end
     end
     
@@ -187,14 +167,14 @@ for iNeuron = useUnits
         right_color = [1 0 0];
         set(h,'defaultAxesColorOrder',[left_color; right_color]);
         rows = 4;
-        cols = 7;
+        cols = size(zSDE,2);
         acorCaxis = [-.2 .2];
         useData = {A,squeeze(mean(A_shuffled))};
-        t = linspace(-tWindow*1000,tWindow*1000,size(all_zSDE{1},3));
+        t = linspace(-tWindow*1000,tWindow*1000,size(zSDE,3));
         ySDE = [-3 3];
         yLFP = [-6 6];
         
-        for iEvent = 1:7
+        for iEvent = 1:size(zSDE,2)
             for iShuffle = 1:2
                 subplot(rows,cols,prc(cols,[iShuffle,iEvent]));
                 imagesc(lag,1:numel(freqList),squeeze(useData{iShuffle}(iEvent,:,:)));
@@ -212,14 +192,14 @@ for iNeuron = useUnits
                 if iShuffle == 1
                     if iEvent == 1
                         ylabel('Freq (Hz)');
-                        title({['u',num2str(iNeuron,'%03d')],eventFieldnames{iEvent},'xcorr'});
+                        title({['u',num2str(iNeuron,'%03d')],eventFieldnames_wFake{iEvent},'xcorr'});
                     else
-                        title({eventFieldnames{iEvent},'xcorr'});
+                        title({eventFieldnames_wFake{iEvent},'xcorr'});
                     end
                 else
                     title('xcorr_{shuffle}');
                 end
-                if iEvent == 7
+                if iEvent == size(zSDE,2)
                     cbAside(gca,'acor','k');
                 end
             end
@@ -237,13 +217,13 @@ for iNeuron = useUnits
             ax = gca;
             ax.YAxis.FontSize = 7;
             title(['shuff (x',num2str(nShuffle),')']);
-            if iEvent == 7
+            if iEvent == size(zSDE,2)
                 cbAside(gca,'pval','k');
             end
             
             subplot(rows,cols,prc(cols,[4,iEvent]));
             yyaxis left;
-            imagesc(t,1:numel(freqList),squeeze(mean(all_Wz_power{LFP_lookup(iNeuron)}(iEvent,:,:,:),3))');
+            imagesc(t,1:numel(freqList),squeeze(mean(Wz_power(iEvent,:,:,:),3))');
             set(gca,'ydir','normal');
             colormap(gca,jet);
             caxis(yLFP);
@@ -256,10 +236,10 @@ for iNeuron = useUnits
             end
 
             yyaxis right;
-            plot(t,squeeze(mean(all_zSDE{iNeuron}(:,iEvent,:),1)),'lineWidth',2);
+            plot(t,squeeze(mean(zSDE(:,iEvent,:),1)),'lineWidth',2);
             ylim(ySDE);
             yticks(sort([0 ylim]));
-            if iEvent == 7
+            if iEvent == size(zSDE,2)
                 ylabel('SDE (Z)');
             end
             hold on;
@@ -274,5 +254,6 @@ for iNeuron = useUnits
         end
     end
 end
-save('20190121_RayLFP_compiled','lag','all_A','all_shuff_pvals',...
-    'all_shuff_pvals','unitLookup','eventFieldnames','dirSelUnitIds','ndirSelUnitIds');
+if doWrite
+    save('20190121_RayLFP_compiled','lag','all_acors','all_shuff_pvals','all_acors_shuffled_mean','unitLookup');
+end
