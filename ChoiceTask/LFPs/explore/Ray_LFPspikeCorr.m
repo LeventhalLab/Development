@@ -63,7 +63,7 @@ end
 doCompile = true;
 doShuffle = false;
 doPlot = false;
-doSave = false;hr
+doSave = false;
 
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/xcorrRayMethod';
 nMs = 500;
@@ -237,3 +237,4 @@ for iNeuron = useUnits
         end
     end
 end
+save('20190121_RayLFP_compiled','lag','all_A','all_shuff_pvals','all_shuff_pvals');
