@@ -1,5 +1,5 @@
 function h = CanoltyPAC_trialStitched_print(all_MImatrix,all_shuff_MImatrix_mean,all_shuff_MImatrix_pvals,useSessions,...
-    eventFieldnames,freqList_p,freqList_a,freqList,bandLabels)
+    eventFieldnames,freqList_p,freqList_a,freqList)
 
 if numel(useSessions) == 1
     MImatrix = all_MImatrix{useSessions};
@@ -49,12 +49,12 @@ for ifp = 1:size(MImatrix,2)
     end
 end
 
-fontSize = 10;
+fontSize = 7;
 pLims = [0 0.001];
 zLims = [0 10];
 rows = 2;
 cols = numel(eventFieldnames);
-h = figuree(1200,350);
+h = figuree(1400,500);
 
 for iEvent = 1:cols
     curMat = squeeze(MImatrix(iEvent,:,:));
@@ -64,13 +64,14 @@ for iEvent = 1:cols
     set(gca,'ydir','normal');
     caxis(zLims);
     xticks(1:numel(freqList_p));
-    xticklabels(bandLabels(freqList_p(:)));
-    % xtickangle(270);
+    xticklabels(compose('%3.1f',freqList));
+    xtickangle(270);
     xlabel('phase (Hz)');
     yticks(1:numel(freqList_a));
-    yticklabels(bandLabels(freqList_a(:)));
+    yticklabels(compose('%3.1f',freqList));
     ylabel('amp (Hz)');
     set(gca,'fontsize',fontSize);
+    set(gca,'TitleFontSizeMultiplier',2);
     if iEvent == 1
         title({'mean real Z',[num2str(useSessions(1)),'-',num2str(useSessions(end))],eventFieldnames{iEvent}});
     else
@@ -107,13 +108,14 @@ for iEvent = 1:cols
     set(gca,'ydir','normal');
     caxis(zLims);
     xticks(1:numel(freqList_p));
-    xticklabels(bandLabels(freqList_p(:)));
-    % xtickangle(270);
+    xticklabels(compose('%3.1f',freqList));
+    xtickangle(270);
     xlabel('phase (Hz)');
     yticks(1:numel(freqList_a));
-    yticklabels(bandLabels(freqList_a(:)));
+    yticklabels(compose('%3.1f',freqList));
     ylabel('amp (Hz)');
     set(gca,'fontsize',fontSize);
+    set(gca,'TitleFontSizeMultiplier',2);
     title('mean shuff Z');
     if iEvent == cols
         cbAside(gca,'Z-MI','k');
