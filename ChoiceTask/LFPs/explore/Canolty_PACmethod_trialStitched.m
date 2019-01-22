@@ -161,7 +161,7 @@ for iNeuron = selectedLFPFiles'
 end
 
 save('Canolt_PAC_20190120','all_MImatrix','all_shuff_MImatrix_mean','all_shuff_MImatrix_pvals',...
-'eventFieldnames_wFake','freqList_p','freqList_a','freqList','bandLabels');
+'eventFieldnames_wFake','freqList_p','freqList_a','freqList');
 
 if doPlot
     useSessions = [1:30];
