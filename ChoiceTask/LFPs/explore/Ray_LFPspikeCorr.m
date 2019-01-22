@@ -1,11 +1,11 @@
 % https://www.researchgate.net/post/How_can_one_calculate_normalized_cross_correlation_between_two_arrays
 % https://www.mathworks.com/matlabcentral/answers/5275-algorithm-for-coeff-scaling-of-xcorr
-doSetup = true;
+doSetup = false;
 
 if ismac
     dataPath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/datastore/Ray_LFPspikeCorr';
 else
-    dataPath = '';
+    dataPath = 'C:\Users\dleventh\Documents\Data\ChoiceTask\LFPs\datastore\Ray_LFPspikeCorr';
 end
 
 freqList = logFreqList([1 200],30);
@@ -62,8 +62,8 @@ if doSetup
         'LFPfiles_local','all_ts','dirSelUnitIds','ndirSelUnitIds','primSec');
 end
 
-doCompile = false;
-doShuffle = false;
+doCompile = true;
+doShuffle = true;
 doPlot = false;
 doSave = false;
 doWrite = false;
@@ -76,7 +76,7 @@ end
 
 nMs = 500;
 minFR = 10;
-nShuffle = 10;
+nShuffle = 101;
 startIdx = round(Wlength/2) - round(nMs/2) + 1;
 LFP_range = startIdx:startIdx + nMs - 1;
 doDirSel = 0;
@@ -99,10 +99,10 @@ neuronCount = 0;
 for iNeuron = useUnits
     neuronCount = neuronCount + 1;
     unitLookup(neuronCount) = iNeuron;
-    zSDE = load(fullfile(dataPath,['zSDE_u',num2str(iNeuron,'%03d')]),'zSDE');
+    load(fullfile(dataPath,['zSDE_u',num2str(iNeuron,'%03d')]),'zSDE');
     LFPfile = fullfile(dataPath,['Wz_power_s',num2str(LFP_lookup(iNeuron),'%02d')]);
     if isempty(loadedFile) || ~strcmp(loadedFile,LFPfile)
-        Wz_power = load(LFPfile,'Wz_power');
+        load(LFPfile,'Wz_power');
     end
     
     if neuronCount == 1
