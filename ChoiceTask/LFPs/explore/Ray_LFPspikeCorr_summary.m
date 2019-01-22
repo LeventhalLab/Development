@@ -1,8 +1,3 @@
-% useData = {all_A,all_A_shuffled_mean};
-% % load('session_20180919_NakamuraMRL.mat','dirSelUnitIds','ndirSelUnitIds','primSec')
-% % load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'eventFieldnames')
-% % load('session_20190118_spikeCorrr_useData.mat', 'unitLookup')
-% % load('session_20180118_spikeCorrr_useData')
 freqList = logFreqList([1 200],30);
 
 doPlot_fractionBands = true;
