@@ -14,7 +14,6 @@ tWindow = 0.5;
 loadedFile = [];
 zThresh = 5;
 oversampleBy = 5; % has to be high for eegfilt() (> 14,000 samples)
-nSurr = 200; % >> max # of trials for any session
 eventFieldnames_wFake = {eventFieldnames{:} 'outTrial'};
 
 if doSetup
