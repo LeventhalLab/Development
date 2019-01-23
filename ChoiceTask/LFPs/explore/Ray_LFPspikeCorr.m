@@ -75,7 +75,7 @@ end
 
 nMs = 500;
 minFR = 10;
-nShuffle = 101;
+nShuffle = 100;
 startIdx = round(Wlength/2) - round(nMs/2) + 1;
 LFP_range = startIdx:startIdx + nMs - 1;
 doDirSel = 0;

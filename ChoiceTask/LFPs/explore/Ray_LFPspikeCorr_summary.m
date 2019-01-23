@@ -1,14 +1,20 @@
+% load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
+% load('session_20180919_NakamuraMRL.mat','dirSelUnitIds','ndirSelUnitIds','primSec')
+% load('20190121_RayLFP_compiled.mat')
+
 freqList = logFreqList([1 200],30);
+eventFieldnames_wFake = {eventFieldnames{:} 'outTrial'};
+nShuffle = 100;
 
 doPlot_fractionBands = true;
 doPlot_meanBands = false;
 doPlot_meanHeatmaps = false;
 
 if doPlot_fractionBands
-    pThresh = 0.90;
+    pThresh = 0.95;
     h = ff(1400,800);
     rows = 3;
-    cols = 7;
+    cols = 8;
     colors = [0 0 0;lines(2)];
     delta1 = closest(freqList,1);
     delta2 = closest(freqList,4);
@@ -21,10 +27,10 @@ if doPlot_fractionBands
     rowLabels = {'delta','beta','gamma_h'};
 
     for iFreq = 1:3
-        for iEvent = 1:7
+        for iEvent = 1:size(all_acors,2)
             for iDirSel = 1:3
                 subplot(rows,cols,prc(cols,[iFreq,iEvent]));
-                unitSel = 1:size(all_A,1);
+                unitSel = 1:size(all_acors,1);
                 if iDirSel == 2
                     unitSel = ismember(unitLookup,dirSelUnitIds);
                 elseif iDirSel == 3
@@ -40,15 +46,15 @@ if doPlot_fractionBands
                 yticks(ylim);
                 grid on;
                 if iFreq == 1
-                    title({eventFieldnames{iEvent},rowLabels{iFreq}});
+                    title({eventFieldnames_wFake{iEvent},rowLabels{iFreq}});
                 else
                     title(rowLabels{iFreq});
                 end
             end
             if iEvent == 1
-                ylabel(['xcorr frac < ',num2str(pThresh)]);
+                ylabel(['xcorr frac < ',num2str(1-pThresh)]);
             end
-            if iEvent == 7
+            if iEvent == 8
                 legend(legendLabels);
             end
             if iFreq == 3
@@ -62,7 +68,7 @@ end
 if doPlot_meanBands
     h = ff(1400,800);
     rows = 3;
-    cols = 7;
+    cols = 8;
     colors = [0 0 0;lines(2)];
     delta1 = closest(freqList,1);
     delta2 = closest(freqList,4);
@@ -75,10 +81,10 @@ if doPlot_meanBands
     rowLabels = {'delta','beta','gamma_h'};
 
     for iFreq = 1:3
-        for iEvent = 1:7
+        for iEvent = 1:size(all_acors,2)
             for iDirSel = 1:3
                 subplot(rows,cols,prc(cols,[iFreq,iEvent]));
-                unitSel = 1:size(all_A,1);
+                unitSel = 1:size(all_acors,1);
                 if iDirSel == 2
                     unitSel = ismember(unitLookup,dirSelUnitIds);
                 elseif iDirSel == 3
@@ -91,7 +97,7 @@ if doPlot_meanBands
                 yticks(sort([0 ylim]));
                 grid on;
                 if iFreq == 1
-                    title({eventFieldnames{iEvent},rowLabels{iFreq}});
+                    title({eventFieldnames_wFake{iEvent},rowLabels{iFreq}});
                 else
                     title(rowLabels{iFreq});
                 end
@@ -99,7 +105,7 @@ if doPlot_meanBands
             if iEvent == 1
                 ylabel('xcorr pval');
             end
-            if iEvent == 7
+            if iEvent == 8
                 legend(legendLabels);
             end
             if iFreq == 3
@@ -111,7 +117,8 @@ if doPlot_meanBands
 end
 
 if doPlot_meanHeatmaps
-    doDirSel = 1;
+    useData = {all_acors,all_acors_shuffled_mean};
+    doDirSel = -1;
     if doDirSel == 1
         noteText = 'dirSel units';
         unitSel = ismember(unitLookup,dirSelUnitIds);
@@ -120,14 +127,14 @@ if doPlot_meanHeatmaps
         unitSel = ismember(unitLookup,ndirSelUnitIds);
     else
         noteText = 'all units';
-        unitSel = 1:size(all_A,1);
+        unitSel = 1:size(all_acors,1);
     end
 
     h = ff(1400,800);
     rows = 3;
-    cols = 7;
+    cols = 8;
     acorCaxis = [-.1 .1];
-    for iEvent = 1:7
+    for iEvent = 1:size(all_acors,2)
         for iShuffle = 1:2
             subplot(rows,cols,prc(cols,[iShuffle,iEvent]));
             imagesc(lag,1:numel(freqList),squeeze(mean(useData{iShuffle}(unitSel,iEvent,:,:))));
@@ -144,14 +151,14 @@ if doPlot_meanHeatmaps
             if iShuffle == 1
                 if iEvent == 1
                     ylabel('Freq (Hz)');
-                    title({eventFieldnames{iEvent},'mean xcorr'});
+                    title({eventFieldnames_wFake{iEvent},'mean xcorr'});
                 else
-                    title({eventFieldnames{iEvent},'mean xcorr'});
+                    title({eventFieldnames_wFake{iEvent},'mean xcorr'});
                 end
             else
                 title('mean xcorr_{shuffle}');
             end
-            if iEvent == 7
+            if iEvent == 8
                 cbAside(gca,'acor','k');
             end
         end
@@ -169,7 +176,7 @@ if doPlot_meanHeatmaps
         ax = gca;
         ax.YAxis.FontSize = 7;
         title(['shuff (x',num2str(nShuffle),')']);
-        if iEvent == 7
+        if iEvent == 8
             cbAside(gca,'pval','k');
         end
     end
