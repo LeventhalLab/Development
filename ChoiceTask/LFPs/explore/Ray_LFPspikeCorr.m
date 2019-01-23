@@ -254,5 +254,6 @@ for iNeuron = useUnits
     end
 end
 if doWrite
-    save('20190121_RayLFP_compiled','lag','all_acors','all_shuff_pvals','all_acors_shuffled_mean','unitLookup');
+    save('20190121_RayLFP_compiled','lag','all_acors','all_shuff_pvals',...
+        'all_acors_shuffled_mean','unitLookup','nShuffle','freqList');
 end
