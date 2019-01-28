@@ -1,13 +1,13 @@
-% [ ] how to do in-trial shuffle???
+ % [ ] how to do in-trial shuffle???
 
 close all;
 doSave = true;
 
 doPlot_pvalDist = false;
 doPlot_MRLs = false;
-doPlot_kuiper = true;
+doPlot_kuiper = false;
 doPlot_MRLmontage = false;
-doPlot_mats = false;
+doPlot_mats = true;
 doPlot_bars = false;
 
 useLines = true; % for doPlot_bars

@@ -14,7 +14,7 @@ function workon(openArr)
         headerText = [num2str(limitTo),' MOST RECENT FILES'];
         disp(headerText);
         disp(repmat('-',[1,numel(headerText)]));
-        for iFile = 1:limitTo
+        for iFile = 1:min([numel(listing),limitTo])
             disp(['[',num2str(iFile,'%02d'),'] --> ',listing(idx(iFile)).name,...
                 ' (',timeAgo(listing(idx(iFile)).datenum),')']);
         end

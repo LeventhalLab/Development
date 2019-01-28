@@ -1,6 +1,10 @@
-useSessions = [1:30];
-% % h = CanoltyPAC_trialStitched_print(all_MImatrix,all_shuff_MImatrix_mean,all_shuff_MImatrix_pvals,useSessions,...
-% %     eventFieldnames_wFake,freqList_p,freqList_a,freqList);
+Wz_phase = linspace(-pi,pi,1000);
 
-h = Canolty_comodulogram_print(corrMatrix_rho,shuff_corrMatrix_rho_mean,useSessions,...
-    eventFieldnames_wFake,freqList);
+tsPeths = [rand(300,1) - 0.5];
+counts = logical(histcounts(tsPeths,linspace(-0.5,0.5,1001)));
+close all
+figure;
+plot(counts)
+
+figure;
+plot(Wz_phase(counts));
