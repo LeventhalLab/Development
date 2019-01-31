@@ -1,6 +1,13 @@
 % https://www.researchgate.net/post/How_can_one_calculate_normalized_cross_correlation_between_two_arrays
 % https://www.mathworks.com/matlabcentral/answers/5275-algorithm-for-coeff-scaling-of-xcorr
-doSetup = false;
+% load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
+% load('session_20180919_NakamuraMRL.mat', 'all_trials')
+% load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local')
+% load('session_20180919_NakamuraMRL.mat', 'selectedLFPFiles')
+% load('session_20180919_NakamuraMRL.mat', 'all_ts')
+% load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local_altLookup')
+
+doSetup = true;
 
 if ismac
     dataPath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/datastore/Ray_LFPspikeCorr';
@@ -36,7 +43,7 @@ if doSetup
             W = W(:,:,keepTrials,:);
             % technically don't need z-score if xcorr is normalized
             [Wz_power,Wz_phase] = zScoreW(W,Wlength); % power Z-score
-            save(fullfile(dataPath,['Wz_power_s',num2str(iSession,'%02d')]),'Wz_power');
+            save(fullfile(dataPath,['Wz_phase_s',num2str(iSession,'%02d')]),'Wz_phase');
         end
         LFP_lookup(iNeuron) = iSession; % find LFP in all_Wz_power
         all_keepTrials{iNeuron} = keepTrials;
@@ -44,21 +51,24 @@ if doSetup
         tsPeths = tsPeths(keepTrials,:);
         
         all_FR(iNeuron) = numel([tsPeths{:,1}])/size(tsPeths,1);
-
-        SDE = [];
-        for iTrial = 1:size(tsPeths,1)
-            for iEvent = 1:size(tsPeths,2)
-                ts = tsPeths{iTrial,iEvent};
-                SDE(iTrial,iEvent,:) = spikeDensityEstimate_periEvent(ts,tWindow);
-            end
-        end
-        zMean = mean(mean(SDE(:,1,:)));
-        zStd = mean(std(SDE(:,1,:),[],3));
-        zSDE = (SDE - zMean) ./ zStd;
-        save(fullfile(dataPath,['zSDE_u',num2str(iNeuron,'%03d')]),'zSDE');
+        save(fullfile(dataPath,['tsPeths_u',num2str(iNeuron,'%03d')]),'tsPeths');
+% % 
+% %         SDE = [];
+% %         for iTrial = 1:size(tsPeths,1)
+% %             for iEvent = 1:size(tsPeths,2)
+% %                 ts = tsPeths{iTrial,iEvent};
+% %                 SDE(iTrial,iEvent,:) = spikeDensityEstimate_periEvent(ts,tWindow);
+% %             end
+% %         end
+% %         zMean = mean(mean(SDE(:,1,:)));
+% %         zStd = mean(std(SDE(:,1,:),[],3));
+% %         zSDE = (SDE - zMean) ./ zStd;
+% %         save(fullfile(dataPath,['zSDE_u',num2str(iNeuron,'%03d')]),'zSDE');
     end
-    save('Ray_LFPspikeCorr_setup','LFP_lookup','all_keepTrials','all_FR','eventFieldnames_wFake','all_trials',...
+     save('entrainmentHighRes_setup','LFP_lookup','all_keepTrials','all_FR','eventFieldnames_wFake','all_trials',...
         'LFPfiles_local','all_ts','dirSelUnitIds','ndirSelUnitIds','primSec');
+% %     save('Ray_LFPspikeCorr_setup','LFP_lookup','all_keepTrials','all_FR','eventFieldnames_wFake','all_trials',...
+% %         'LFPfiles_local','all_ts','dirSelUnitIds','ndirSelUnitIds','primSec');
 end
 
 doCompile = true;
