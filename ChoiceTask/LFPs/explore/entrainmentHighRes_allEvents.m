@@ -18,7 +18,7 @@ end
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/entrainmentHighRes';
 
 doCompile = false;
-doConds = true;
+doConds = false;
 doPlot = true;
 
 nShuffle = 1;
@@ -69,11 +69,12 @@ if doCompile
 end
 
 if doConds
+    pThresh = 1;
     nBins = 12;
     binEdges = linspace(-pi,pi,nBins+1);
     allUnits = 1:366;
-    condUnits = {allUnits,dirSelUnitIds,ndirSelUnitIds,find(~ismember(allUnits,[dirSelUnitIds,ndirSelUnitIds]))};
-    condLabels = {'allUnits','dirSel','ndirSel','otherUnits'};
+    condUnits = {allUnits,find(~ismember(allUnits,[dirSelUnitIds,ndirSelUnitIds])),ndirSelUnitIds,dirSelUnitIds};
+    condLabels = {'allUnits','otherUnits','ndirSel','dirSel'};
     shuffleLabels = {'noShuffle','shuffle'};
     condHists = NaN(2,numel(condUnits),numel(eventFieldnames_wFake),numel(freqList),nBins);
     condCounts = zeros(2,numel(condUnits),numel(eventFieldnames_wFake),numel(freqList),nBins);
@@ -87,9 +88,11 @@ if doConds
                     condHists(iShuffle,iCond,iEvent,iFreq,:) = counts;
                     for iNeuron = condUnits{iCond}
                         neuronAngles = unitAngles{iShuffle,iNeuron,iEvent}(iFreq,:);
-                        counts = histcounts(neuronAngles,binEdges);
-                        [~,k] = max(counts);
-                        condCounts(iShuffle,iCond,iEvent,iFreq,k) = condCounts(iShuffle,iCond,iEvent,iFreq,k) + 1;
+                        if circ_rtest(neuronAngles) < pThresh
+                            counts = histcounts(neuronAngles,binEdges);
+                            [~,k] = max(counts);
+                            condCounts(iShuffle,iCond,iEvent,iFreq,k) = condCounts(iShuffle,iCond,iEvent,iFreq,k) + 1;
+                        end
                     end
                 end
             end
@@ -100,20 +103,20 @@ end
 if doPlot
     doCountMethod = true;
     showShuffle = true;
-    rows = 2;
+    rows = 4;
     cols = 8;
-    delta_range = 1:9;
+    delta_range = 1:8;
     gammah_range = 26:30;
+    h = ff(1400,900);
     for iCond = 1:numel(condUnits)
-        h = ff(1400,500);
-        for iShuffle = 1:2
+        for iShuffle = 1%:2
             for iEvent = 1:8
                 histMat = NaN(numel(freqList),nBins*2);
                 for iFreq = 1:numel(freqList)
                     if doCountMethod
-                        thisHist = squeeze(condCounts(iShuffle,iCond,iEvent,iFreq,:)) ./ numel(condUnits{iCond});
+                        thisHist = squeeze(condCounts(iShuffle,iCond,iEvent,iFreq,:)) ./ sum(condCounts(iShuffle,iCond,iEvent,iFreq,:)); % numel(condUnits{iCond});
                         histMat(iFreq,:) = repmat(thisHist,[2,1]);
-                        zLims = [0 0.2];
+                        zLims = [0 0.3];
                         ylabelVal = 'Frac. of Units';
                     else
                         theseHist = squeeze(condHists(iShuffle,iCond,iEvent,iFreq,:))';
@@ -128,16 +131,16 @@ if doPlot
                 delta_lines = mean(histMat(delta_range,:));
                 gammah_lines = mean(histMat(gammah_range,:));
                 if iShuffle == 1 || showShuffle
-                    subplot(rows,cols,prc(cols,[iShuffle,iEvent]));
+                    subplot(rows,cols,prc(cols,[iCond,iEvent]));
                     imagesc(histMat);
                     set(gca,'ydir','normal')
                     colormap(gca,jet);
                     caxis(zLims);
                     xticks([1,6.5,12.5,18.5,24]);
                     xticklabels([]);
-%                     xticklabels([0 180 360 540 720]);
+                    xticklabels([0 180 360 540 720]);
                     xtickangle(30);
-%                     xlabel('Spike phase (deg)');
+                    xlabel('Spike phase (deg)');
                     yticks(ylim);
                     yticklabels([freqList(1),freqList(end)]);
                     if iEvent == 1
