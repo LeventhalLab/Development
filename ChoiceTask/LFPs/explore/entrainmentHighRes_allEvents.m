@@ -3,6 +3,7 @@
 % load('session_20180919_NakamuraMRL.mat', 'all_ts')
 % load('session_20180919_NakamuraMRL.mat','dirSelUnitIds','ndirSelUnitIds','primSec')
 % load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
+% load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local_altLookup')
 freqList = logFreqList([1 200],30);
 
 tWindow = 0.5;
@@ -18,7 +19,7 @@ end
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/entrainmentHighRes';
 
 doCompile = false;
-doConds = false;
+doConds = true;
 doPlot = true;
 
 nShuffle = 1;
@@ -30,7 +31,7 @@ if doCompile
     for iNeuron = 1:numel(all_ts)
         neuronCount = neuronCount + 1;
         load(fullfile(dataPath,['tsPeths_u',num2str(iNeuron,'%03d')]),'tsPeths');
-        LFPfile = fullfile(dataPath,['Wz_phase_s',num2str(LFP_lookup(iNeuron),'%02d')]);
+        LFPfile = fullfile(dataPath,['Wz_phase_alt_s',num2str(LFP_lookup_alt(iNeuron),'%02d')]); % [ ] should be %03d
         if isempty(loadedFile) || ~strcmp(loadedFile,LFPfile)
             load(LFPfile,'Wz_phase');
         end
@@ -49,6 +50,7 @@ if doCompile
                 startIdx = ones(size(Wz_phase,4));
                 for iTrial = 1:size(tsPeths,1)
                     theseSpikes = tsPeths{trialOrder(iTrial),iEvent};
+% %                     theseSpikes(theseSpikes < 0) = []; % !! ONLY 0-0.5s
                     for iFreq = 1:size(Wz_phase,4)
                         spikeIdx = logical(histcounts(theseSpikes,linspace(-tWindow,tWindow,size(Wz_phase,2)+1)));
                         endIdx = startIdx(iFreq) + sum(spikeIdx);
@@ -88,6 +90,9 @@ if doConds
                     condHists(iShuffle,iCond,iEvent,iFreq,:) = counts;
                     for iNeuron = condUnits{iCond}
                         neuronAngles = unitAngles{iShuffle,iNeuron,iEvent}(iFreq,:);
+                        if isempty(neuronAngles)
+                            continue;
+                        end
                         if circ_rtest(neuronAngles) < pThresh
                             counts = histcounts(neuronAngles,binEdges);
                             [~,k] = max(counts);
