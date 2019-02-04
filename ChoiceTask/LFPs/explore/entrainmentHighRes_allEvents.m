@@ -18,9 +18,9 @@ else
 end
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/entrainmentHighRes';
 
-doCompile = false;
+doCompile = true;
 doConds = true;
-doPlot = true;
+doPlot = false;
 
 nShuffle = 1;
 
@@ -30,8 +30,10 @@ if doCompile
     unitAngles = {};
     for iNeuron = 1:numel(all_ts)
         neuronCount = neuronCount + 1;
-        load(fullfile(dataPath,['tsPeths_u',num2str(iNeuron,'%03d')]),'tsPeths');
-        LFPfile = fullfile(dataPath,['Wz_phase_alt_s',num2str(LFP_lookup_alt(iNeuron),'%02d')]); % [ ] should be %03d
+        tsFile = fullfile(dataPath,['tsPeths_u',num2str(iNeuron,'%03d')]);
+        load(tsFile,'tsPeths');
+%         LFPfile = fullfile(dataPath,['Wz_phase_alt_s',num2str(LFP_lookup_alt(iNeuron),'%03d')]);
+        LFPfile = fullfile(dataPath,['Wz_phase_s',num2str(LFP_lookup(iNeuron),'%03d')]);
         if isempty(loadedFile) || ~strcmp(loadedFile,LFPfile)
             load(LFPfile,'Wz_phase');
         end

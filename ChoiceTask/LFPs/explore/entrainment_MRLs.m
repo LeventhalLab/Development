@@ -12,8 +12,8 @@ useShuffle = [1,2];
 iFreq = 1:8;
 
 doCompile = false;
-doPlot_polar = false;
-doPlot_4conds = true;
+doPlot_polar = true;
+doPlot_4conds = false;
 
 if doCompile
     all_condMean = {};
@@ -44,17 +44,19 @@ end
 
 if doPlot_polar
     rows = 2;
-    cols = 2;
+    cols = 3;
     close all;
-    h = ff(900,800);
+    h = ff(1400,800);
     iShuffle = 1;
-    colors = [repmat(0.8,[1,3]);lines(2)];
-    useCond = [2:4];
+    colors = [repmat(0.2,[1,3]);repmat(0.8,[1,3]);lines(2)];
+    useCond = [1:4];
     rlimVals = [0 0.5];
     lns = [];
+    pThresh = 0.05;
     for iEvent = 1:2
-        kuiperMat = NaN(3,3);
-        for iCond = 1:3
+        statsTable = cell(3,2); % mean angle, std, pval
+        kuiperMat = NaN(numel(useCond));
+        for iCond = 1:numel(useCond)
             subplot(rows,cols,prc(cols,[iEvent 1]));
             condMean = all_condMean{useCond(iCond)};
             condPval = all_condPval{useCond(iCond)};
@@ -76,22 +78,35 @@ if doPlot_polar
             if pval < pThresh
                 polarplot(mu,r,'*','color',colors(iCond,:),'markerSize',15);
             end
+            [s,s0] = circ_std(theta');
+            statsTable{iCond,1} = [num2str(360+rad2deg(mu),'%2.1f'),char(176),' ',char(177),...
+                num2str(rad2deg(s0),'%2.1f')];
+            statsTable{iCond,2} = num2str(pval,2);
         end
         set(gca,'fontSize',16);
         legend(lns,{condLabels_wCount{useCond}},'location','southoutside');
         title(['\delta-MRL at ',eventLabels{iEvent}]);
         
+        hs = subplot(rows,cols,prc(cols,[iEvent 2]));
+        pos = get(hs,'position');
+        un = get(hs,'Units');
+        delete(hs);
+        uit = uitable(h,'Data',statsTable,'Units',un,'Position',pos,'ColumnWidth',{100});
+        uit.FontSize = 14;
+        uit.ColumnName = {['Mean ',char(177),' Std'],'P-value'};
+        uit.RowName = condLabels;
+        
         % Kuiper Test
-        for iCond = 1:3
+        for iCond = 1:numel(useCond)
             cond1Mean = all_condMean{useCond(iCond)};
             alpha1 = cond1Mean(iShuffle,:,iEvent);
-            for jCond = iCond:3
+            for jCond = iCond:numel(useCond)
                 cond2Mean = all_condMean{useCond(jCond)};
                 alpha2 = cond2Mean(iShuffle,:,iEvent);
                 kuiperMat(jCond,iCond) = circ_kuipertest(alpha1,alpha2);
             end
         end
-        subplot(rows,cols,prc(cols,[iEvent 2]));
+        subplot(rows,cols,prc(cols,[iEvent 3]));
         imagesc(kuiperMat,'AlphaData',~isnan(kuiperMat));
         caxis([0 0.05]);
         cb = colorbar;
@@ -105,8 +120,8 @@ if doPlot_polar
         title('Kuiper Test Matrix');
         set(gca,'fontSize',16);
         
-        for iCond = 1:3
-            for jCond = iCond:3
+        for iCond = 1:numel(useCond)
+            for jCond = iCond:numel(useCond)
 %                 text(iCond,jCond,[num2str(iCond),',',num2str(jCond)]);%num2str(kuiperMat(iCond,jCond),2));
                 text(iCond,jCond,num2str(kuiperMat(jCond,iCond),2),'horizontalAlignment','center');
             end
