@@ -20,24 +20,28 @@ savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/entrainm
 
 doCompile = true;
 doConds = true;
-doPlot = false;
+doPlot = true;
 
-nShuffle = 1;
-
-loadedFile = [];
-neuronCount = 0;
 if doCompile
+    nShuffle = 1;
+    loadedFile = [];
     unitAngles = {};
     for iNeuron = 1:numel(all_ts)
-        neuronCount = neuronCount + 1;
         tsFile = fullfile(dataPath,['tsPeths_u',num2str(iNeuron,'%03d')]);
         load(tsFile,'tsPeths');
 %         LFPfile = fullfile(dataPath,['Wz_phase_alt_s',num2str(LFP_lookup_alt(iNeuron),'%03d')]);
         LFPfile = fullfile(dataPath,['Wz_phase_s',num2str(LFP_lookup(iNeuron),'%03d')]);
         if isempty(loadedFile) || ~strcmp(loadedFile,LFPfile)
+            fprintf('--> loading LFP...\n');
             load(LFPfile,'Wz_phase');
+            loadedFile = LFPfile;
         end
-        disp(['Compiling iNeuron ',num2str(iNeuron,'%03d')]);
+        FR = numel([tsPeths{:,1}])/size(tsPeths,1);
+        fprintf('iNeuron: %03d, FR: %2.1f\n',iNeuron,FR);
+        
+        if size(Wz_phase,3) ~= size(tsPeths,1)
+            error('Sizes do not match');
+        end
         
         for iShuffle = 1:nShuffle+1
             disp(['iShuffle: ',num2str(iShuffle)]);
@@ -54,13 +58,14 @@ if doCompile
                     theseSpikes = tsPeths{trialOrder(iTrial),iEvent};
 % %                     theseSpikes(theseSpikes < 0) = []; % !! ONLY 0-0.5s
                     for iFreq = 1:size(Wz_phase,4)
+                        % identifies bins (1-Wlength) with spikes, uses that to fill spikeAngles
                         spikeIdx = logical(histcounts(theseSpikes,linspace(-tWindow,tWindow,size(Wz_phase,2)+1)));
                         endIdx = startIdx(iFreq) + sum(spikeIdx);
                         spikeAngles(iFreq,startIdx(iFreq):endIdx-1) = Wz_phase(iEvent,spikeIdx,iTrial,iFreq);
                         startIdx(iFreq) = endIdx;
                     end
                 end
-                if iShuffle < 3 % deprecate, redundant
+                if iShuffle < 3 % [ ] how to handle shuffle?
                     unitAngles{iShuffle,iNeuron,iEvent} = spikeAngles;
                 end
             end
@@ -68,8 +73,8 @@ if doCompile
 %             save(fullfile(shufflePath,shuffleName),'spikeAngles');
         end
     end
-    save('entrainmentHighRes_setup','unitAngles','eventFieldnames','dirSelUnitIds','ndirSelUnitIds','primSec',...
-        'LFP_lookup','all_FR','all_keepTrials','all_ts');
+% %     save('entrainmentHighRes_setup','unitAngles','eventFieldnames','dirSelUnitIds','ndirSelUnitIds','primSec',...
+% %         'LFP_lookup','all_FR','all_keepTrials','all_ts');
 end
 
 if doConds

@@ -11,7 +11,7 @@ useEvents = [4,8];
 useShuffle = [1,2];
 iFreq = 1:8;
 
-doCompile = false;
+doCompile = true;
 doPlot_polar = true;
 doPlot_4conds = false;
 
@@ -29,7 +29,7 @@ if doCompile
                     neuronAngles = unitAngles{iShuffle,iNeuron,useEvents(iEvent)}(iFreq,:);
                     neuronAngles = neuronAngles(:);
                     if isempty(neuronAngles)
-% %                         disp([num2str(iCond),'-',num2str(iNeuron)]);
+                        disp([num2str(iCond),'-',num2str(iNeuron)]);
                         continue;
                     end
                     condMean(iShuffle,neuronCount,iEvent) = circ_mean(neuronAngles);
@@ -54,7 +54,7 @@ if doPlot_polar
     lns = [];
     pThresh = 0.05;
     for iEvent = 1:2
-        statsTable = cell(3,2); % mean angle, std, pval
+        statsTable = cell(numel(useCond),2); % mean angle, std, pval
         kuiperMat = NaN(numel(useCond));
         for iCond = 1:numel(useCond)
             subplot(rows,cols,prc(cols,[iEvent 1]));
@@ -79,7 +79,7 @@ if doPlot_polar
                 polarplot(mu,r,'*','color',colors(iCond,:),'markerSize',15);
             end
             [s,s0] = circ_std(theta');
-            statsTable{iCond,1} = [num2str(360+rad2deg(mu),'%2.1f'),char(176),' ',char(177),...
+            statsTable{iCond,1} = [num2str(rad2deg(mu),'%2.1f'),char(176),' ',char(177),...
                 num2str(rad2deg(s0),'%2.1f')];
             statsTable{iCond,2} = num2str(pval,2);
         end
@@ -134,7 +134,7 @@ if doPlot_4conds
     rows = 4;
     cols = 4;
     iShuffle = 1;
-    close all;
+%     close all;
     h = ff(1400,900);
     pThresh = 0.05;
     colors = {'k','r'};
