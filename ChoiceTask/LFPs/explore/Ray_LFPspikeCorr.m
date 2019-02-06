@@ -18,12 +18,12 @@ end
 freqList = logFreqList([1 200],30);
 Wlength = 1000;
 tWindow = 0.5;
-loadedFile = [];
 zThresh = 5;
 oversampleBy = 5; % has to be high for eegfilt() (> 14,000 samples)
 eventFieldnames_wFake = {eventFieldnames{:} 'outTrial'};
 
 if doSetup
+    loadedFile = [];
     all_keepTrials = {};
     LFP_lookup = [];
     all_FR = [];
@@ -73,7 +73,7 @@ end
 
 doCompile = true;
 doShuffle = true;
-doPlot = false;
+doPlot = true;
 doSave = false;
 doWrite = false;
 

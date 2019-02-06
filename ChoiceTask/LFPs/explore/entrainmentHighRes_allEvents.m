@@ -23,6 +23,7 @@ doConds = true;
 doPlot = true;
 
 if doCompile
+    onlyFutureSpikes = true;
     nShuffle = 1;
     loadedFile = [];
     unitAngles = {};
@@ -56,7 +57,9 @@ if doCompile
                 startIdx = ones(size(Wz_phase,4));
                 for iTrial = 1:size(tsPeths,1)
                     theseSpikes = tsPeths{trialOrder(iTrial),iEvent};
-% %                     theseSpikes(theseSpikes < 0) = []; % !! ONLY 0-0.5s
+                    if onlyFutureSpikes
+                        theseSpikes(theseSpikes < 0) = []; % !! ONLY 0-0.5s
+                    end
                     for iFreq = 1:size(Wz_phase,4)
                         % identifies bins (1-Wlength) with spikes, uses that to fill spikeAngles
                         spikeIdx = logical(histcounts(theseSpikes,linspace(-tWindow,tWindow,size(Wz_phase,2)+1)));

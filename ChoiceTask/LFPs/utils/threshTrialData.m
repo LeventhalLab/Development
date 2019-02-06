@@ -1,7 +1,7 @@
 function keepTrials = threshTrialData(data,zThresh)
 fractionOfTrial = 0.95;
 if size(data,1) > 1
-    data = reshape(data,[size(data,1) * size(data,2),size(data,3)]);
+    data = reshape(permute(data,[2,1,3]),[size(data,1) * size(data,2),size(data,3)]);
 end
 
 keepTrials = [];

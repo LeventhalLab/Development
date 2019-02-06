@@ -1,3 +1,5 @@
+savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/entrainment';
+
 allUnits = 1:366;
 condUnits = {allUnits,find(~ismember(allUnits,[dirSelUnitIds,ndirSelUnitIds])),ndirSelUnitIds,dirSelUnitIds};
 condLabels = {'allUnits','other','ndirSel','dirSel'};
@@ -11,123 +13,130 @@ useEvents = [4,8];
 useShuffle = [1,2];
 iFreq = 1:8;
 
-doCompile = true;
+doCompile = false;
 doPlot_polar = true;
 doPlot_4conds = false;
+doSave = true;
 
-if doCompile
-    all_condMean = {};
-    all_condPval = {};
-    for iCond = 1:numel(condUnits)
-        condMean = NaN(2,numel(condUnits{iCond}),numel(useEvents));
-        condPval = NaN(2,numel(condUnits{iCond}),numel(useEvents));
-        for iShuffle = useShuffle
-            for iEvent = 1:numel(useEvents)
-                neuronCount = 0;
-                for iNeuron = condUnits{iCond}
-                    neuronCount = neuronCount + 1;
-                    neuronAngles = unitAngles{iShuffle,iNeuron,useEvents(iEvent)}(iFreq,:);
-                    neuronAngles = neuronAngles(:);
-                    if isempty(neuronAngles)
-                        disp([num2str(iCond),'-',num2str(iNeuron)]);
-                        continue;
-                    end
-                    condMean(iShuffle,neuronCount,iEvent) = circ_mean(neuronAngles);
-                    condPval(iShuffle,neuronCount,iEvent) = circ_rtest(neuronAngles);
-                end
-            end
-        end
-        all_condMean{iCond} = condMean;
-        all_condPval{iCond} = condPval;
-    end
-end
+% % if doCompile
+% %     all_condMean = {};
+% %     all_condPval = {};
+% %     for iCond = 1:numel(condUnits)
+% %         condMean = NaN(2,numel(condUnits{iCond}),numel(useEvents));
+% %         condPval = NaN(2,numel(condUnits{iCond}),numel(useEvents));
+% %         for iShuffle = useShuffle
+% %             for iEvent = 1:numel(useEvents)
+% %                 neuronCount = 0;
+% %                 for iNeuron = condUnits{iCond}
+% %                     neuronCount = neuronCount + 1;
+% %                     neuronAngles = unitAngles{iShuffle,iNeuron,useEvents(iEvent)}(iFreq,:);
+% %                     neuronAngles = neuronAngles(:);
+% %                     if isempty(neuronAngles)
+% %                         continue;
+% %                     end
+% %                     condMean(iShuffle,neuronCount,iEvent) = circ_mean(neuronAngles);
+% %                     condPval(iShuffle,neuronCount,iEvent) = circ_rtest(neuronAngles);
+% %                 end
+% %             end
+% %         end
+% %         all_condMean{iCond} = condMean;
+% %         all_condPval{iCond} = condPval;
+% %     end
+% % end
 
 if doPlot_polar
     rows = 2;
     cols = 3;
-    close all;
-    h = ff(1400,800);
-    iShuffle = 1;
-    colors = [repmat(0.2,[1,3]);repmat(0.8,[1,3]);lines(2)];
-    useCond = [1:4];
-    rlimVals = [0 0.5];
-    lns = [];
-    pThresh = 0.05;
-    for iEvent = 1:2
-        statsTable = cell(numel(useCond),2); % mean angle, std, pval
-        kuiperMat = NaN(numel(useCond));
-        for iCond = 1:numel(useCond)
-            subplot(rows,cols,prc(cols,[iEvent 1]));
-            condMean = all_condMean{useCond(iCond)};
-            condPval = all_condPval{useCond(iCond)};
-        
-            theta = condMean(iShuffle,:,iEvent);
-            theta(isnan(theta)) = [];
-            pval = circ_rtest(theta);
-            mu = circ_mean(theta');
-            r = circ_r(theta');
-            lns(iCond) = polarplot([mu mu],[0 r],'lineWidth',6,'color',colors(iCond,:));
-            hold on;
-            thetaticks([0 90 180 270]);
-            pax = gca;
-            pax.ThetaZeroLocation = 'top';
-            pax.ThetaDir = 'clockwise';
-            rlim(rlimVals);
-            rticks(rlim);
+    for iShuffle = 1:2    
+        h = ff(1400,800);
+        colors = [repmat(0.2,[1,3]);repmat(0.8,[1,3]);lines(2)];
+        useCond = [1:4];
+        rlimVals = [0 0.5];
+        lns = [];
+        pThresh = 0.05;
+        for iEvent = 1:2
+            statsTable = cell(numel(useCond),2); % mean angle, std, pval
+            kuiperMat = NaN(numel(useCond));
+            for iCond = 1:numel(useCond)
+                subplot(rows,cols,prc(cols,[iEvent 1]));
+                condMean = all_condMean{useCond(iCond)};
+    % %             condPval = all_condPval{useCond(iCond)};
 
-            if pval < pThresh
-                polarplot(mu,r,'*','color',colors(iCond,:),'markerSize',15);
+    % %             useUnits = condPval(iShuffle,:,iEvent) < pThresh;
+
+                theta = condMean(iShuffle,:,iEvent);
+                theta(isnan(theta)) = [];
+                pval = circ_rtest(theta);
+                mu = circ_mean(theta');
+                r = circ_r(theta');
+                lns(iCond) = polarplot([mu mu],[0 r],'lineWidth',6,'color',colors(iCond,:));
+                hold on;
+                thetaticks([0 90 180 270]);
+                pax = gca;
+                pax.ThetaZeroLocation = 'top';
+                pax.ThetaDir = 'clockwise';
+                rlim(rlimVals);
+                rticks(rlim);
+
+                if pval < pThresh
+                    polarplot(mu,r,'*','color',colors(iCond,:),'markerSize',15);
+                end
+                [s,s0] = circ_std(theta');
+                statsTable{iCond,1} = [num2str(rad2deg(mu),'%2.1f'),char(176),' ',char(177),...
+                    num2str(rad2deg(s0),'%2.1f')];
+                statsTable{iCond,2} = num2str(pval,2);
             end
-            [s,s0] = circ_std(theta');
-            statsTable{iCond,1} = [num2str(rad2deg(mu),'%2.1f'),char(176),' ',char(177),...
-                num2str(rad2deg(s0),'%2.1f')];
-            statsTable{iCond,2} = num2str(pval,2);
+            set(gca,'fontSize',16);
+            legend(lns,{condLabels_wCount{useCond}},'location','southoutside');
+            title(['\delta-MRL at ',eventLabels{iEvent}]);
+
+            hs = subplot(rows,cols,prc(cols,[iEvent 2]));
+            pos = get(hs,'position');
+            un = get(hs,'Units');
+            delete(hs);
+            uit = uitable(h,'Data',statsTable,'Units',un,'Position',pos,'ColumnWidth',{100});
+            uit.FontSize = 14;
+            uit.ColumnName = {['Mean ',char(177),' Std'],'P-value'};
+            uit.RowName = condLabels;
+
+            % Kuiper Test
+            for iCond = 1:numel(useCond)
+                cond1Mean = all_condMean{useCond(iCond)};
+                alpha1 = cond1Mean(iShuffle,:,iEvent);
+                for jCond = iCond:numel(useCond)
+                    cond2Mean = all_condMean{useCond(jCond)};
+                    alpha2 = cond2Mean(iShuffle,:,iEvent);
+                    kuiperMat(jCond,iCond) = circ_kuipertest(alpha1,alpha2);
+                end
+            end
+            subplot(rows,cols,prc(cols,[iEvent 3]));
+            imagesc(kuiperMat,'AlphaData',~isnan(kuiperMat));
+            caxis([0 0.05]);
+            cb = colorbar;
+            cb.Ticks = caxis;
+            cb.Label.String = 'p-value';
+            xticks(1:3);
+            xticklabels({condLabels{useCond}});
+            xtickangle(90);
+            yticks(1:3);
+            yticklabels({condLabels{useCond}});
+            title('Kuiper Test Matrix');
+            set(gca,'fontSize',16);
+
+            for iCond = 1:numel(useCond)
+                for jCond = iCond:numel(useCond)
+    %                 text(iCond,jCond,[num2str(iCond),',',num2str(jCond)]);%num2str(kuiperMat(iCond,jCond),2));
+                    text(iCond,jCond,num2str(kuiperMat(jCond,iCond),2),'horizontalAlignment','center');
+                end
+            end
         end
-        set(gca,'fontSize',16);
-        legend(lns,{condLabels_wCount{useCond}},'location','southoutside');
-        title(['\delta-MRL at ',eventLabels{iEvent}]);
-        
-        hs = subplot(rows,cols,prc(cols,[iEvent 2]));
-        pos = get(hs,'position');
-        un = get(hs,'Units');
-        delete(hs);
-        uit = uitable(h,'Data',statsTable,'Units',un,'Position',pos,'ColumnWidth',{100});
-        uit.FontSize = 14;
-        uit.ColumnName = {['Mean ',char(177),' Std'],'P-value'};
-        uit.RowName = condLabels;
-        
-        % Kuiper Test
-        for iCond = 1:numel(useCond)
-            cond1Mean = all_condMean{useCond(iCond)};
-            alpha1 = cond1Mean(iShuffle,:,iEvent);
-            for jCond = iCond:numel(useCond)
-                cond2Mean = all_condMean{useCond(jCond)};
-                alpha2 = cond2Mean(iShuffle,:,iEvent);
-                kuiperMat(jCond,iCond) = circ_kuipertest(alpha1,alpha2);
-            end
-        end
-        subplot(rows,cols,prc(cols,[iEvent 3]));
-        imagesc(kuiperMat,'AlphaData',~isnan(kuiperMat));
-        caxis([0 0.05]);
-        cb = colorbar;
-        cb.Ticks = caxis;
-        cb.Label.String = 'p-value';
-        xticks(1:3);
-        xticklabels({condLabels{useCond}});
-        xtickangle(90);
-        yticks(1:3);
-        yticklabels({condLabels{useCond}});
-        title('Kuiper Test Matrix');
-        set(gca,'fontSize',16);
-        
-        for iCond = 1:numel(useCond)
-            for jCond = iCond:numel(useCond)
-%                 text(iCond,jCond,[num2str(iCond),',',num2str(jCond)]);%num2str(kuiperMat(iCond,jCond),2));
-                text(iCond,jCond,num2str(kuiperMat(jCond,iCond),2),'horizontalAlignment','center');
-            end
+        set(gcf,'color','w');
+        if doSave
+            saveFile = ['entrainment_polarPlot_iShuffle',num2str(iShuffle),'.png'];
+            saveas(h,fullfile(savePath,saveFile));
+            close(h);
         end
     end
-    set(gcf,'color','w');
 end
 
 if doPlot_4conds
