@@ -15,7 +15,7 @@ function workon(openArr)
         disp(headerText);
         disp(repmat('-',[1,numel(headerText)]));
         for iFile = 1:min([numel(listing),limitTo])
-            disp(['[',num2str(iFile,'%02d'),'] --> ',listing(idx(iFile)).name,...
+            disp(['',num2str(iFile,'%02d'),'..',listing(idx(iFile)).name,...
                 ' (',timeAgo(listing(idx(iFile)).datenum),')']);
         end
     else

@@ -166,7 +166,7 @@ save('Canolt_PAC_20190120','all_MImatrix','all_shuff_MImatrix_mean','all_shuff_M
 if doPlot
     useSessions = [1:30];
     h = CanoltyPAC_trialStitched_print(all_MImatrix,all_shuff_MImatrix_mean,all_shuff_MImatrix_pvals,useSessions,...
-    eventFieldnames_wFake,freqList_p,freqList_a,freqList,bandLabels);
+    eventFieldnames_wFake,freqList_p,freqList_a,freqList);
     if doSave
         saveFile = ['s',num2str(useSessions(1)),'-',num2str(useSessions(end)),'_allEvent.png'];
         saveas(h,fullfile(savePath,saveFile));

@@ -84,13 +84,6 @@ end
 save('Canolt_comodulogram_20190122','corrMatrix_rho','corrMatrix_pval','shuff_corrMatrix_rho_mean','shuff_corrMatrix_pval',...
 'eventFieldnames_wFake','freqList','nShuff');
 
-% % % % if doPlot
-% % % %     useSessions = [1:30];
-% % % %     h = CanoltyPAC_trialStitched_print(all_corrMatrix,all_shuff_MImatrix_mean,all_corrMatrix_pvals,useSessions,...
-% % % %     eventFieldnames_wFake,freqList_p,freqList_a,freqList,bandLabels);
-% % % %     if doSave
-% % % %         saveFile = ['s',num2str(useSessions(1)),'-',num2str(useSessions(end)),'_allEvent.png'];
-% % % %         saveas(h,fullfile(savePath,saveFile));
-% % % %         close(h);
-% % % %     end
-% % % % end
+useSessions = [1:30];
+h = Canolty_comodulogram_print(corrMatrix_rho,shuff_corrMatrix_rho_mean,useSessions,...
+    eventFieldnames_wFake,freqList);

@@ -6,9 +6,9 @@ freqList = logFreqList([1 200],30);
 eventFieldnames_wFake = {eventFieldnames{:} 'outTrial'};
 nShuffle = 100;
 
-doPlot_fractionBands = true;
+doPlot_fractionBands = false;
 doPlot_meanBands = false;
-doPlot_meanHeatmaps = false;
+doPlot_meanHeatmaps = true;
 
 if doPlot_fractionBands
     pThresh = 0.95;
@@ -118,7 +118,7 @@ end
 
 if doPlot_meanHeatmaps
     useData = {all_acors,all_acors_shuffled_mean};
-    doDirSel = -1;
+    doDirSel = 1;
     if doDirSel == 1
         noteText = 'dirSel units';
         unitSel = ismember(unitLookup,dirSelUnitIds);
