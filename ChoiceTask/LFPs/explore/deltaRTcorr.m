@@ -18,7 +18,7 @@ savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/spike
 tWindow = 1;
 % freqList = {[1 4]}; % hilbert method
 % freqList = {[4 8]}; % hilbert method
-freqList = [3.44];
+freqList = [1.6];
 if strcmp(doTiming,'RT')
     plot1Event = 3;
     caxisVals = [0.1 0.3];

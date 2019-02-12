@@ -1,5 +1,5 @@
 function [all_LFP,all_data] = eventsLFPv2(trials,sevFilt,tWindow,Fs,freqList,eventFieldnames)
-eliminateData = 1; % 0 = none, -1 = before, +1 = after
+eliminateData = 0; % 0 = none, -1 = before, +1 = after
 
 nLoop = 1;
 tWindow_samples = round(Fs * tWindow);

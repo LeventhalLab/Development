@@ -3,6 +3,7 @@
 % load('session_20180925_entrainmentSurrogates.mat', 'all_trials')
 % load('session_20180925_entrainmentSurrogates.mat', 'eventFieldnames')
 
+% change t>0 data removal in eventsLFPv2.m before running
 doSetup = true;
 doTiming = 'RT';
 
