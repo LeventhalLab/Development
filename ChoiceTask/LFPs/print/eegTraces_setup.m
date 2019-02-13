@@ -2,8 +2,10 @@
 % load('session_20180919_NakamuraMRL.mat', 'all_trials')
 % load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local')
 % load('session_20180919_NakamuraMRL.mat', 'all_ts')
-doSetup = false;
-iNeuron = 133;
+doSetup = true;
+savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/eegTraces';
+iNeuron = 133; % ndir
+iNeuron = 67; % dir
 centerEvent = 4;
 freqList = [2.5,20];
 tWindow = 3;
@@ -23,7 +25,7 @@ if doSetup
 end
 
 trials_success = trials(trialIds);
-for iTrial = 10:30%numel(trials_success)
+for iTrial = 1:numel(trials_success)
     spikeTs = {tsPeths{iTrial,centerEvent}}';
     spikeTslabels = {num2str(iNeuron)};
     rawLFP = squeeze(all_data(centerEvent,:,iTrial));
@@ -38,7 +40,12 @@ for iTrial = 10:30%numel(trials_success)
     end
     eventTs = eventTs - eventTs(centerEvent);
     eventLabels = eventFieldnames;
-    eegTraces(spikeTs,spikeTslabels,rawLFP,scaloLFP,tWindow,freqA,freqAlabels,freqP,freqPlabels,eventTs,centerEvent,eventLabels);
+    h = eegTraces(spikeTs,spikeTslabels,rawLFP,scaloLFP,tWindow,freqA,freqAlabels,freqP,freqPlabels,eventTs,centerEvent,eventLabels);
+    if ~isempty(h)
+        title({sprintf('u%03d t%03d',iNeuron,iTrial),eventLabels{centerEvent}});
+        saveas(h,fullfile(savePath,[sprintf('eegTrace_u%03d_t%03d',iNeuron,iTrial),'.png']));
+        close(h);
+    end
 end
 
 % eegTraces(spikeTs,spikeTslabels,rawLFP,scaloLFP,freqA,freqAlabels,freqP,freqPlabels,tWindow,eventTs,eventLabels);

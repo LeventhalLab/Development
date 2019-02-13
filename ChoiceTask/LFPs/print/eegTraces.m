@@ -1,4 +1,4 @@
-function eegTraces(spikeTs,spikeTslabels,rawLFP,scaloLFP,tWindow,freqA,freqAlabels,freqP,freqPlabels,eventTs,centerEvent,eventLabels)
+function h = eegTraces(spikeTs,spikeTslabels,rawLFP,scaloLFP,tWindow,freqA,freqAlabels,freqP,freqPlabels,eventTs,centerEvent,eventLabels)
 % [ ] show SDE?
 % close all
 
@@ -70,6 +70,7 @@ try
     plot([0 0],ylim,'k:');
 catch
     close(h);
+    h = [];
 end
 
 % % function makeSDE(ts)
