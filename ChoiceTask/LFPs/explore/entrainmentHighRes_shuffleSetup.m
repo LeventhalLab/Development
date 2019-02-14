@@ -7,9 +7,9 @@ doCompile = true;
 
 if doSetup
     useFreqs = 1:8;
-    useEvents = [4,8];
+    useEvents = 1:8;
     onlyFutureSpikes = true;
-    nShuffle = 200;
+    nShuffle = 5;
     loadedFile = [];
     unitAngles_mean = {};
     for iNeuron = 1:numel(all_ts)
@@ -67,7 +67,7 @@ condLabels_wCount = {['allUnits (n = ',num2str(numel(condUnits{1})),')'],...
     ['dirSel (n = ',num2str(numel(condUnits{4})),')']};
 shuffleLabels = {'noShuffle','shuffle'};
 eventLabels = {'Nose Out','Inter-trial'};
-useEvents = [4,8];
+useEvents = [1:8];
 
 if doCompile
     all_condMean = {};

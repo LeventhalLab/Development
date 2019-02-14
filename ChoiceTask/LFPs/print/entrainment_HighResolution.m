@@ -1,5 +1,3 @@
- % [ ] how to do in-trial shuffle???
-
 close all;
 doSave = true;
 
@@ -29,7 +27,7 @@ if doPlot_pvalDist
     nBins = 20;
     binEdges = [0 logFreqList([1 1000],nBins)/1000];
     useTicks = [2,closest(binEdges,0.05),nBins];
-    for iFreq = 1:numel(freqList)    
+    for iFreq = 1:numel(freqList)
         h = ff(600,600);
         for iTrialType = 1:3
             for iDirSel = 1:3

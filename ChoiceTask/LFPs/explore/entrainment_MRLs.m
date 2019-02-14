@@ -1,3 +1,4 @@
+% setup with /explore/entrainmentHighRes_shuffleSetup.m
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/entrainment';
 
 allUnits = 1:366;
@@ -8,7 +9,7 @@ condLabels_wCount = {['allUnits (n = ',num2str(numel(condUnits{1})),')'],...
     ['ndirSel (n = ',num2str(numel(condUnits{3})),')'],...
     ['dirSel (n = ',num2str(numel(condUnits{4})),')']};
 shuffleLabels = {'noShuffle','shuffle'};
-eventLabels = {'Nose Out','Inter-trial'};
+eventLabels = {eventFieldnames{:},'Inter-trial'};
 useEvents = [4,8];
 useShuffle = [1,2];
 iFreq = 1:8;
@@ -16,7 +17,7 @@ iFreq = 1:8;
 doCompile = false;
 doPlot_polar = true;
 doPlot_4conds = false;
-doSave = true;
+doSave = false;
 
 % % if doCompile
 % %     all_condMean = {};
@@ -47,7 +48,7 @@ doSave = true;
 if doPlot_polar
     rows = 2;
     cols = 3;
-    for iShuffle = 1:2    
+    for iShuffle = 1%:2
         h = ff(1400,800);
         colors = [repmat(0.2,[1,3]);repmat(0.8,[1,3]);lines(2)];
         useCond = [1:4];
@@ -64,7 +65,7 @@ if doPlot_polar
 
     % %             useUnits = condPval(iShuffle,:,iEvent) < pThresh;
 
-                theta = condMean(iShuffle,:,iEvent);
+                theta = condMean(iShuffle,:,useEvents(iEvent));
                 theta(isnan(theta)) = [];
                 pval = circ_rtest(theta);
                 mu = circ_mean(theta');
@@ -88,7 +89,7 @@ if doPlot_polar
             end
             set(gca,'fontSize',16);
             legend(lns,{condLabels_wCount{useCond}},'location','southoutside');
-            title(['\delta-MRL at ',eventLabels{iEvent}]);
+            title(['\delta-MRL at ',eventLabels{useEvents(iEvent)}]);
 
             hs = subplot(rows,cols,prc(cols,[iEvent 2]));
             pos = get(hs,'position');
@@ -102,10 +103,10 @@ if doPlot_polar
             % Kuiper Test
             for iCond = 1:numel(useCond)
                 cond1Mean = all_condMean{useCond(iCond)};
-                alpha1 = cond1Mean(iShuffle,:,iEvent);
+                alpha1 = cond1Mean(iShuffle,:,useEvents(iEvent));
                 for jCond = iCond:numel(useCond)
                     cond2Mean = all_condMean{useCond(jCond)};
-                    alpha2 = cond2Mean(iShuffle,:,iEvent);
+                    alpha2 = cond2Mean(iShuffle,:,useEvents(iEvent));
                     kuiperMat(jCond,iCond) = circ_kuipertest(alpha1,alpha2);
                 end
             end

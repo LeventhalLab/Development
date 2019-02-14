@@ -4,6 +4,7 @@
 % load('session_20180919_NakamuraMRL.mat','dirSelUnitIds','ndirSelUnitIds','primSec')
 % load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
 % load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local_altLookup')
+% load('Ray_LFPspikeCorr_setup.mat', 'LFP_lookup')
 freqList = logFreqList([1 200],30);
 
 tWindow = 0.5;
@@ -116,7 +117,7 @@ if doConds
 end
 
 if doPlot
-    doCountMethod = true;
+    doCountMethod = false;
     showShuffle = true;
     rows = 4;
     cols = 8;
