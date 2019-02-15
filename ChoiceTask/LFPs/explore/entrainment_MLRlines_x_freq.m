@@ -1,11 +1,11 @@
 % use /explore/entrainmentHighRes_allEvents.m
 doSetup = false;
-
-doPlot_MRLdist = true;
-doPlot_MRL_conds = false;
-doPlot_MRL_pval = false;
-
 doSave = true;
+
+doPlot_MRL_plotSpread = false;
+doPlot_MRL_InOut = true;
+doPlot_MRL_allEvents = true;
+
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/entrainment';
 
 allUnits = 1:366;
@@ -41,11 +41,11 @@ end
 
 % close all
 
-if doPlot_MRLdist
-    iFreq = 6;
-    data_labels = {'MRL','p-value','mean angle'};
-    data_ylims = {[0 0.5],[0 0.05],[-pi pi]};
+if doPlot_MRL_plotSpread
     pThresh = 0.05;
+    iFreq = 6;
+    data_labels = {'MRL',sprintf('frac p < %1.2f',pThresh),'mean angle'};
+    data_ylims = {[0 0.5],[0 0.05],[-pi pi]};
     rows = 2;
     cols = 4;
     line_colors = lines(3);
@@ -85,10 +85,64 @@ if doPlot_MRLdist
     end
 end
 
-if doPlot_MRL_conds
-    data_labels = {'MRL','p-value','mean angle'};
-    data_ylims = {[0 0.25],[0 1],[-pi pi]};
+if doPlot_MRL_InOut
     pThresh = 0.05;
+    inOutLabels = {'In-trial','Inter-trial'};
+    data_labels = {'MRL',sprintf('frac p < %1.2f',pThresh),'mean angle'};
+    data_ylims = {[0 0.05],[0 1],[-pi pi]};
+    lineWidths = [1 1 3 3];
+    rows = 2;
+    cols = 3;
+    line_colors = lines(3);
+    colors = [0 0 0;1 0 0;line_colors([1,3],:)];
+    inOut_data_rs = {all_spikeHist_inTrial_rs,all_spikeHist_rs};
+    inOut_data_pvals = {all_spikeHist_inTrial_pvals,all_spikeHist_pvals};
+    inOut_data_mus = {all_spikeHist_inTrial_mus,all_spikeHist_mus};
+    h = ff(1200,800);
+    for iType = 1:3
+        for iInOut = 1:2
+            for iCond = 1:4
+                if iType == 1
+                    data = nanmean(inOut_data_rs{iInOut}(condUnits{iCond},:));
+                elseif iType == 2
+                    data = squeeze(sum(inOut_data_pvals{iInOut}(condUnits{iCond},:) < pThresh)) ./ ...
+                        numel(condUnits{iCond});
+                else
+                    data = nanmean(inOut_data_mus{iInOut}(condUnits{iCond},:));
+                end
+                
+                subplot(rows,cols,prc(cols,[iInOut,iType]));
+                plot(data,'lineWidth',lineWidths(iCond),'color',colors(iCond,:));
+                hold on;
+            end
+
+            ylim(data_ylims{iType});
+            yticks(ylim);
+            ylabel(data_labels{iType});
+
+            xticks(1:size(MRLs,3));
+            xticklabels(compose('%2.1f',freqList));
+            xtickangle(270);
+            xlim([1 size(MRLs,3)]);
+            xlabel('Freq (Hz)');
+
+            title({inOutLabels{iInOut},data_labels{iType}});
+            legend(condLabels_wCount,'location','northeast');
+            legend boxoff;
+            drawnow;
+        end
+    end
+    set(gcf,'color','w');
+    if doSave
+        saveas(h,fullfile(savePath,['entrainmentLines_xFreq_inOut.png']));
+        close(h);
+    end
+end
+
+if doPlot_MRL_allEvents
+    pThresh = 0.05;
+    data_labels = {'MRL',sprintf('frac p < %1.2f',pThresh),'mean angle'};
+    data_ylims = {[0 0.25],[0 1],[-pi pi]};
     lineWidths = [1 1 3 3];
     rows = 2;
     cols = 4;
@@ -134,42 +188,4 @@ if doPlot_MRL_conds
             close(h);
         end
     end
-end
-
-if doPlot_MRL_pval
-    h = ff(1400,800);
-    left_color = [0 0 0];
-    right_color = [1 0 0];
-    set(h,'defaultAxesColorOrder',[left_color; right_color]);
-
-    rows = 2;
-    cols = 4;
-    ylim_MRLs = [0 0.2];
-    ylim_pvals = [0 1];
-    pThresh = 0.05;
-    for iEvent = 1:8
-        data = squeeze(mean(MRLs(:,iEvent,:)));
-        subplot(rows,cols,iEvent);
-        yyaxis left;
-        plot(data,'lineWidth',3);
-        ylim(ylim_MRLs);
-        yticks(ylim);
-        ylabel('MRL');
-
-        data = squeeze(sum(pvals(:,iEvent,:) < pThresh)) ./ size(unitAngles,2);
-        yyaxis right;
-        plot(data,'lineWidth',3);
-        ylim(ylim_pvals);
-        yticks(ylim);
-        ylabel(sprintf('frac. p < %1.2f',pThresh));
-
-        title(eventFieldnames_wFake{iEvent});
-        xticks(1:size(MRLs,3));
-        xticklabels(compose('%2.1f',freqList));
-        xtickangle(270);
-        xlim([1 size(MRLs,3)]);
-        xlabel('Freq (Hz)');
-        drawnow;
-    end
-    set(gcf,'color','w');
 end

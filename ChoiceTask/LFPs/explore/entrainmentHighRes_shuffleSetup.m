@@ -2,14 +2,15 @@ freqList = logFreqList([1 200],30);
 tWindow = 0.5;
 eventFieldnames_wFake = {eventFieldnames{:} 'outTrial'};
 
-doSetup = false;
+doSetup = true;
 doCompile = true;
+dataPath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/datastore/Ray_LFPspikeCorr';
 
 if doSetup
-    useFreqs = 1:8;
+    useFreqs = 6;
     useEvents = 1:8;
-    onlyFutureSpikes = true;
-    nShuffle = 5;
+    onlyFutureSpikes = false;
+    nShuffle = 1;
     loadedFile = [];
     unitAngles_mean = {};
     for iNeuron = 1:numel(all_ts)

@@ -1,4 +1,7 @@
+% load('session_20180919_NakamuraMRL.mat','dirSelUnitIds','ndirSelUnitIds','primSec')
+% load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
 % setup with /explore/entrainmentHighRes_shuffleSetup.m
+
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/entrainment';
 
 allUnits = 1:366;
@@ -14,36 +17,9 @@ useEvents = [4,8];
 useShuffle = [1,2];
 iFreq = 1:8;
 
-doCompile = false;
 doPlot_polar = true;
 doPlot_4conds = false;
 doSave = false;
-
-% % if doCompile
-% %     all_condMean = {};
-% %     all_condPval = {};
-% %     for iCond = 1:numel(condUnits)
-% %         condMean = NaN(2,numel(condUnits{iCond}),numel(useEvents));
-% %         condPval = NaN(2,numel(condUnits{iCond}),numel(useEvents));
-% %         for iShuffle = useShuffle
-% %             for iEvent = 1:numel(useEvents)
-% %                 neuronCount = 0;
-% %                 for iNeuron = condUnits{iCond}
-% %                     neuronCount = neuronCount + 1;
-% %                     neuronAngles = unitAngles{iShuffle,iNeuron,useEvents(iEvent)}(iFreq,:);
-% %                     neuronAngles = neuronAngles(:);
-% %                     if isempty(neuronAngles)
-% %                         continue;
-% %                     end
-% %                     condMean(iShuffle,neuronCount,iEvent) = circ_mean(neuronAngles);
-% %                     condPval(iShuffle,neuronCount,iEvent) = circ_rtest(neuronAngles);
-% %                 end
-% %             end
-% %         end
-% %         all_condMean{iCond} = condMean;
-% %         all_condPval{iCond} = condPval;
-% %     end
-% % end
 
 if doPlot_polar
     rows = 2;

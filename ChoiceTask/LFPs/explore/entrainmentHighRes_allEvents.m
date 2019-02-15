@@ -24,7 +24,7 @@ doConds = true;
 doPlot = true;
 
 if doCompile
-    onlyFutureSpikes = true;
+    onlyFutureSpikes = false;
     nShuffle = 1;
     loadedFile = [];
     unitAngles = {};

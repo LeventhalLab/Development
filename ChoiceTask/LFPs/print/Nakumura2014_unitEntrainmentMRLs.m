@@ -1,7 +1,7 @@
 % load('session_20180919_NakamuraMRL.mat','dirSelUnitIds','ndirSelUnitIds','primSec');
 
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/entrainmentVectors';
-doSave = true;
+doSave = false;
 nBins = 12;
 binEdges = linspace(-pi,pi,nBins+1);
 binCenters = linspace(-pi,pi,nBins);
