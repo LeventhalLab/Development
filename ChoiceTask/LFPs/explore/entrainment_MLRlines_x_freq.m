@@ -1,10 +1,10 @@
 % use /explore/entrainmentHighRes_allEvents.m
 doSetup = false;
-doSave = true;
+doSave = false;
 
 doPlot_MRL_plotSpread = false;
 doPlot_MRL_InOut = true;
-doPlot_MRL_allEvents = true;
+doPlot_MRL_allEvents = false;
 
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/entrainment';
 
@@ -39,7 +39,7 @@ if doSetup
     end
 end
 
-% close all
+close all
 
 if doPlot_MRL_plotSpread
     pThresh = 0.05;
@@ -88,47 +88,67 @@ end
 if doPlot_MRL_InOut
     pThresh = 0.05;
     inOutLabels = {'In-trial','Inter-trial'};
-    data_labels = {'MRL',sprintf('frac p < %1.2f',pThresh),'mean angle'};
-    data_ylims = {[0 0.05],[0 1],[-pi pi]};
+    data_labels = {'MRL',sprintf('frac p < %1.2f',pThresh),'mean angle',sprintf('mean angle p < %1.2f',pThresh)};
+    data_ylims = {[0 0.05],[0 1],[-pi pi],[-pi pi]};
     lineWidths = [1 1 3 3];
     rows = 2;
-    cols = 3;
+    cols = 4;
     line_colors = lines(3);
     colors = [0 0 0;1 0 0;line_colors([1,3],:)];
     inOut_data_rs = {all_spikeHist_inTrial_rs,all_spikeHist_rs};
     inOut_data_pvals = {all_spikeHist_inTrial_pvals,all_spikeHist_pvals};
     inOut_data_mus = {all_spikeHist_inTrial_mus,all_spikeHist_mus};
-    h = ff(1200,800);
-    for iType = 1:3
+    h = ff(1400,800);
+    for iType = 1:4
         for iInOut = 1:2
+            data = [];
             for iCond = 1:4
+                subplot(rows,cols,prc(cols,[iInOut,iType]));
                 if iType == 1
                     data = nanmean(inOut_data_rs{iInOut}(condUnits{iCond},:));
+                    plot(data,'lineWidth',lineWidths(iCond),'color',colors(iCond,:));
+                    hold on;
                 elseif iType == 2
                     data = squeeze(sum(inOut_data_pvals{iInOut}(condUnits{iCond},:) < pThresh)) ./ ...
                         numel(condUnits{iCond});
+                    plot(data,'lineWidth',lineWidths(iCond),'color',colors(iCond,:));
+                    hold on;
+                elseif iType == 3
+                    this_data = inOut_data_mus{iInOut}(condUnits{iCond},:);
+                    for iFreq = 1:size(this_data,2)
+                        data(iCond,iFreq) = circ_mean(this_data(~isnan(this_data(:,iFreq)),iFreq));
+                    end
                 else
-                    data = nanmean(inOut_data_mus{iInOut}(condUnits{iCond},:));
+                    this_data = inOut_data_mus{iInOut}(condUnits{iCond},:);
+                    pval_idxs = inOut_data_pvals{iInOut}(condUnits{iCond},:) < pThresh;
+                    for iFreq = 1:size(this_data,2)
+                        theseAngles = this_data(pval_idxs(:,iFreq),iFreq);
+                        data(iCond,iFreq) = circ_mean(theseAngles);
+                    end
                 end
-                
-                subplot(rows,cols,prc(cols,[iInOut,iType]));
-                plot(data,'lineWidth',lineWidths(iCond),'color',colors(iCond,:));
-                hold on;
+            end
+            
+            if ismember(iType,[1,2])
+                ylim(data_ylims{iType});
+                yticks(ylim);
+                ylabel(data_labels{iType});
+                legend(condLabels_wCount,'location','northeast');
+                legend boxoff;
+            elseif ismember(iType,[3,4])
+                imagesc(data);
+                colormap(cmocean('phase'));
+                cbAside(gca,'phase','k',[-3.14 3.14]);
+                yticks(1:4);
+                yticklabels(condLabels);
             end
 
-            ylim(data_ylims{iType});
-            yticks(ylim);
-            ylabel(data_labels{iType});
-
-            xticks(1:size(MRLs,3));
+            xticks(1:size(data,2));
             xticklabels(compose('%2.1f',freqList));
             xtickangle(270);
-            xlim([1 size(MRLs,3)]);
+            xlim([1 size(data,2)]);
             xlabel('Freq (Hz)');
 
             title({inOutLabels{iInOut},data_labels{iType}});
-            legend(condLabels_wCount,'location','northeast');
-            legend boxoff;
             drawnow;
         end
     end
