@@ -1,21 +1,22 @@
 close all
 
+doSave = true;
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/entrainmentFigure';
 
 freqList = logFreqList([1 200],30);
 pThresh = 1; % 0.05;
 dirSelRanges = {[1:366],dirSelUnitIds,ndirSelUnitIds};
-dirSelTypes = {'all','dirSel','~dirSel'};
-trialTypes = {'shuffle','IN trial','OUT trial'};
+dirSelTypes = {'all','dirSel','ndirSel'};
+trialTypes = {'shuffle','In-trial','Inter-trial'};
 barData = [];
 meanZ = [];
 unitCount = [];
-iFreq = 6;
+iFreq = 7;
 rows = 3;
 cols = 3;
 
-zlimVals = [0 26];
-caxisVals = [0 25];
+zlimVals = [0 5];
+caxisVals = [0 6];
 useylims = [0.5 24.5];
 ytickVals = [1 24];
 for iDirSel = 1:3
@@ -25,17 +26,13 @@ for iDirSel = 1:3
         use_angles = conds_angles{iTrialType}(dirSelRanges{iDirSel},:,iFreq);
         sigMat = use_angles(use_pvals < pThresh,:);
         
-        if iTrialType == 1
-            sig_zMean = mean(sigMat,2);
-            sig_zStd = std(sigMat,[],2);
-        end
+        % [ ] how to standardize mean/std for Z-scores?
+        sig_zMean = mean(sigMat,2);
+        sig_zStd = std(sigMat,[],2);
 
         Z = (sigMat - sig_zMean) ./ sig_zStd;
         Z = circshift(Z,6,2);
         meanZ = [mean(Z) mean(Z)];
-            
-% %         X = 1:size(Z,2);
-% %         Y = 1:size(Z,1);
 
         [~,kZ] = sort(max(Z'));
         Z = Z(kZ,:);
@@ -99,5 +96,9 @@ for iDirSel = 1:3
         colormap(jet);
     end
     set(gcf,'color','w');
-    % [ ] save figs
+    addNote(h,[num2str(freqList(iFreq),'%1.2f'),' Hz'],20);
+    if doSave
+        saveas(h,fullfile(savePath,['3D_entrainment_',trialTypes{iTrialType},'_',dirSelTypes{iDirSel},'_f',num2str(iFreq,'%02d'),'.png']));
+        close(h);
+    end
 end
