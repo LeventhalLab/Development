@@ -1,9 +1,11 @@
 % load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
 % load('session_20180919_NakamuraMRL.mat','dirSelUnitIds','ndirSelUnitIds','primSec')
 % load('20190121_RayLFP_compiled.mat')
+% load('20190121_RayLFP_compiled.mat')
+close all
 
 freqList = logFreqList([1 200],30);
-eventFieldnames_wFake = {eventFieldnames{:} 'outTrial'};
+eventFieldnames_wFake = {eventFieldnames{:} 'Inter-trial'};
 nShuffle = 100;
 
 doPlot_fractionBands = false;
@@ -79,6 +81,7 @@ if doPlot_meanBands
     printFreqs = [delta1 delta2;beta1 beta2;gamma1 gamma2];
     legendLabels = {'allUnits','dirSel','ndirSel'};
     rowLabels = {'delta','beta','gamma_h'};
+    pThresh = 0.05;
 
     for iFreq = 1:3
         for iEvent = 1:size(all_acors,2)
@@ -131,7 +134,7 @@ if doPlot_meanHeatmaps
     end
 
     h = ff(1400,800);
-    rows = 3;
+    rows = 4;
     cols = 8;
     acorCaxis = [-.1 .1];
     for iEvent = 1:size(all_acors,2)
@@ -163,8 +166,17 @@ if doPlot_meanHeatmaps
             end
         end
 
+        pvalMat = squeeze(mean(all_shuff_pvals(unitSel,iEvent,:,:)));
+% % % %         signMat = sign(pvalMat);
+% % % %         pvalMat_inv = 1 - abs(pvalMat);
+% % % %         pvalMat_adj = [];
+% % % %         for iBin = 1:size(pvalMat_inv,2)
+% % % %             pvalMat_adj(:,iBin) = pvalMat_inv(:,iBin);%pval_adjust(pvalMat_inv(:,iBin),'holm');
+% % % %         end
+% % % %         pvalMat_adj_resigned = (1 - pvalMat_adj) .* signMat;
+        
         subplot(rows,cols,prc(cols,[3,iEvent]));
-        imagesc(lag,1:numel(freqList),squeeze(mean(all_shuff_pvals(unitSel,iEvent,:,:))));
+        imagesc(lag,1:numel(freqList),pvalMat);
         hold on;
         plot([0,0],ylim,'k:');
         set(gca,'ydir','normal');
@@ -175,7 +187,31 @@ if doPlot_meanHeatmaps
         caxis([-1 1]);
         ax = gca;
         ax.YAxis.FontSize = 7;
-        title(['shuff (x',num2str(nShuffle),')']);
+% %         title(['shuff (x',num2str(nShuffle),')']);
+        title('shuffle p-value');
+        if iEvent == 8
+            cbAside(gca,'pval','k');
+        end
+        
+        % [ ] is this working correctly?!
+        pvalMat_thresh = pvalMat;
+        signMat = sign(pvalMat);
+        pvalMat_inv = 1 - abs(pvalMat);
+        pvalMat_thresh(pvalMat_inv >= pThresh) = NaN;
+        
+        subplot(rows,cols,prc(cols,[4,iEvent]));
+        imagesc(lag,1:numel(freqList),pvalMat_thresh,'AlphaData',~isnan(pvalMat_thresh));
+        hold on;
+        plot([0,0],ylim,'k:');
+        set(gca,'ydir','normal');
+        xlabel('spike lag (ms)');
+        yticks(linspace(min(ylim),max(ylim),numel(freqList)));
+        yticklabels(compose('%3.1f',freqList));
+        colormap(gca,[0 0 1;1 0 0]);
+        caxis([-1 1]);
+        ax = gca;
+        ax.YAxis.FontSize = 7;
+        title('shuffle p-value');
         if iEvent == 8
             cbAside(gca,'pval','k');
         end

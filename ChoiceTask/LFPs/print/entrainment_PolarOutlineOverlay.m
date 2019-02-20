@@ -3,8 +3,6 @@ close all
 doSave = true;
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/entrainmentFigure';
 
-useZscore = false;
-
 freqList = logFreqList([1 200],30);
 pThresh = 1; % 0.05;
 dirSelRanges = {[1:366],dirSelUnitIds,ndirSelUnitIds};
@@ -17,17 +15,11 @@ iFreq = 6;
 rows = 3;
 cols = 3;
 
-if useZscore
-    zlimVals = [0 5];
-    caxisVals = [0 6];
-    flatylimVals = [-0.5 0.5];
-    zscoreLabel = 'zscore';
-else
-    zlimVals = [0.05 0.1];
-    caxisVals = [0.05 0.1];
-    flatylimVals = [0.075 0.09];
-     zscoreLabel = 'binfrac';
-end
+zlimVals = [0.05 0.1];
+caxisVals = [0.05 0.1];
+flatylimVals = [0.075 0.09];
+zscoreLabel = 'binfrac';
+ 
 useylims = [0.5 24.5];
 ytickVals = [1 24];
 for iDirSel = 1:3
@@ -36,37 +28,6 @@ for iDirSel = 1:3
         use_pvals = conds_pvals{iTrialType}(dirSelRanges{iDirSel},iFreq);
         use_angles = conds_angles{iTrialType}(dirSelRanges{iDirSel},:,iFreq);
         sigMat = use_angles(use_pvals < pThresh,:);
-        
-        if useZscore
-            sig_zMean = mean(sigMat,2);
-            sig_zStd = std(sigMat,[],2);
-        else
-            sig_zMean = 0;
-            sig_zStd = sum(sigMat,2);
-        end
-
-        Z = (sigMat - sig_zMean) ./ sig_zStd;
-        Z = circshift(Z,6,2);
-        meanZ = [mean(Z) mean(Z)];
-
-        [~,kZ] = sort(max(Z'));
-        Z = Z(kZ,:);
-        kBins = [];
-        for iNeuron = 1:size(Z,1)
-            [~,k] = max(Z(iNeuron,:));
-            kBins(iNeuron) = k;
-        end
-        [~,k] = sort(kBins);
-        Z = Z(k,:);
-        maxHist = histcounts(kBins,[0.5:12.5]) ./ numel(kBins);
-        
-        usexlims = [0.5 numel(dirSelRanges{iDirSel}) + 0.5];
-        xtickVals = [1 numel(dirSelRanges{iDirSel})];
-        if useZscore
-            Zdata = Z' - min(min(Z));
-        else
-            Zdata = Z';
-        end
         
         subplot(rows,cols,prc(cols,[1,iTrialType]));
         bar3color([Zdata;Zdata]);
