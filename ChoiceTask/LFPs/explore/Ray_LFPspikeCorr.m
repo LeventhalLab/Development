@@ -7,7 +7,7 @@
 % load('session_20180919_NakamuraMRL.mat', 'all_ts')
 % load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local_altLookup')
 
-doSetup = true;
+doSetup = false;
 
 if ismac
     dataPath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/datastore/Ray_LFPspikeCorr';
@@ -30,6 +30,7 @@ if doSetup
     iSession = 0;
     for iNeuron = 1:numel(all_ts)
         sevFile = LFPfiles_local{iNeuron};
+%         sevFile = LFPfiles_local_altLookup{strcmp(sevFile,{LFPfiles_local_altLookup{:,1}}),2};
         disp(iNeuron);
         if isempty(loadedFile) || ~strcmp(loadedFile,sevFile)
             iSession = iSession + 1;
@@ -43,7 +44,8 @@ if doSetup
             W = W(:,:,keepTrials,:);
             % technically don't need z-score if xcorr is normalized
             [Wz_power,Wz_phase] = zScoreW(W,Wlength); % power Z-score
-            save(fullfile(dataPath,['Wz_phase_s',num2str(iSession,'%02d')]),'Wz_phase');
+            save(fullfile(dataPath,['Wz_phase_s',num2str(iSession,'%03d')]),'Wz_phase');
+            save(fullfile(dataPath,['Wz_power_s',num2str(iSession,'%03d')]),'Wz_power');
         end
         LFP_lookup(iNeuron) = iSession; % find LFP in all_Wz_power
         all_keepTrials{iNeuron} = keepTrials;
@@ -65,8 +67,8 @@ if doSetup
 % %         zSDE = (SDE - zMean) ./ zStd;
 % %         save(fullfile(dataPath,['zSDE_u',num2str(iNeuron,'%03d')]),'zSDE');
     end
-     save('entrainmentHighRes_setup','LFP_lookup','all_keepTrials','all_FR','eventFieldnames_wFake','all_trials',...
-        'LFPfiles_local','all_ts','dirSelUnitIds','ndirSelUnitIds','primSec');
+% %      save('entrainmentHighRes_setup','LFP_lookup','all_keepTrials','all_FR','eventFieldnames_wFake','all_trials',...
+% %         'LFPfiles_local','all_ts','dirSelUnitIds','ndirSelUnitIds','primSec');
 % %     save('Ray_LFPspikeCorr_setup','LFP_lookup','all_keepTrials','all_FR','eventFieldnames_wFake','all_trials',...
 % %         'LFPfiles_local','all_ts','dirSelUnitIds','ndirSelUnitIds','primSec');
 end
@@ -85,7 +87,7 @@ end
 
 nMs = 500;
 minFR = 10;
-nShuffle = 100;
+nShuffle = 200;
 startIdx = round(Wlength/2) - round(nMs/2) + 1;
 LFP_range = startIdx:startIdx + nMs - 1;
 doDirSel = 0;
@@ -109,7 +111,7 @@ for iNeuron = useUnits
     neuronCount = neuronCount + 1;
     unitLookup(neuronCount) = iNeuron;
     load(fullfile(dataPath,['zSDE_u',num2str(iNeuron,'%03d')]),'zSDE');
-    LFPfile = fullfile(dataPath,['Wz_power_s',num2str(LFP_lookup(iNeuron),'%02d')]);
+    LFPfile = fullfile(dataPath,['Wz_power_s',num2str(LFP_lookup(iNeuron),'%03d')]);
     if isempty(loadedFile) || ~strcmp(loadedFile,LFPfile)
         load(LFPfile,'Wz_power');
     end
@@ -264,6 +266,6 @@ for iNeuron = useUnits
     end
 end
 if doWrite
-    save('20190121_RayLFP_compiled','lag','all_acors','all_shuff_pvals',...
+    save('20190220_RayLFP_compiled','lag','all_acors','all_shuff_pvals',...
         'all_acors_shuffled_mean','unitLookup','nShuffle','freqList');
 end

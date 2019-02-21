@@ -13,7 +13,7 @@ if ismac
     shufflePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/datastore/entrainmentShuffle';
 else
     dataPath = 'C:\Users\dleventh\Documents\Data\ChoiceTask\LFPs\datastore\Ray_LFPspikeCorr';
-    shufflePath = '';
+    shufflePath = 'C:\Users\dleventh\Documents\Data\ChoiceTask\LFPs\datastore\entrainmentShuffle';
 end
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/entrainmentHighRes';
 
