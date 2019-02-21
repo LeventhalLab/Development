@@ -6,8 +6,9 @@
 % load('session_20180919_NakamuraMRL.mat', 'selectedLFPFiles')
 % load('session_20180919_NakamuraMRL.mat', 'all_ts')
 % load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local_altLookup')
+% load('Ray_LFPspikeCorr_setup.mat', 'LFP_lookup')
 
-doSetup = true;
+doSetup = false;
 
 if ismac
     dataPath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/datastore/Ray_LFPspikeCorr';
@@ -71,6 +72,7 @@ if doSetup
 % %         'LFPfiles_local','all_ts','dirSelUnitIds','ndirSelUnitIds','primSec');
 end
 
+% load('Ray_LFPspikeCorr_setup.mat')
 doCompile = true;
 doShuffle = true;
 doPlot = true;
@@ -85,7 +87,7 @@ end
 
 nMs = 500;
 minFR = 10;
-nShuffle = 100;
+nShuffle = 2;
 startIdx = round(Wlength/2) - round(nMs/2) + 1;
 LFP_range = startIdx:startIdx + nMs - 1;
 doDirSel = 0;
@@ -109,7 +111,7 @@ for iNeuron = useUnits
     neuronCount = neuronCount + 1;
     unitLookup(neuronCount) = iNeuron;
     load(fullfile(dataPath,['zSDE_u',num2str(iNeuron,'%03d')]),'zSDE');
-    LFPfile = fullfile(dataPath,['Wz_power_s',num2str(LFP_lookup(iNeuron),'%02d')]);
+    LFPfile = fullfile(dataPath,['Wz_power_s',num2str(LFP_lookup(iNeuron),'%03d')]);
     if isempty(loadedFile) || ~strcmp(loadedFile,LFPfile)
         load(LFPfile,'Wz_power');
     end
