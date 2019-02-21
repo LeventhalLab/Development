@@ -5,7 +5,9 @@
 
 doSetup = true;
 doPlot1 = false;
-doPlot2 = false;
+doPlot1_companion = true;
+doSimulation = false;
+doPlot2 = true;
 doSave = false;
 doDebug = false;
 
@@ -14,9 +16,9 @@ doTiming = 'RT';
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/spikePhaseDeltaRT';
 
 tWindow = 1;
-freqList = {[1 4]}; % hilbert method
+% freqList = {[1 4]}; % hilbert method
 % freqList = {[4 8]}; % hilbert method
-% freqList = [3.4];
+freqList = [1.6];
 if strcmp(doTiming,'RT')
     plot1Event = 3;
     caxisVals = [0.1 0.3];
@@ -25,13 +27,16 @@ else
     caxisVals = [0.2 0.4];
 end
 
+n_timePoints = 1000;
+t = linspace(-tWindow,tWindow,n_timePoints);
+
 if doSetup
-    n_timePoints = 101;
     all_Times = [];
     phaseCorrs_delta = {};
     rawData_log = {};
     iSession = 0;
     dataLog = [];
+    allTimes = [];
     for iNeuron = selectedLFPFiles'
         iSession = iSession + 1;
         disp(num2str(iSession));
@@ -124,7 +129,7 @@ for iEvent = 1:7
     all_meanTimes{iEvent} = event_meanTimes;
 end
 
-if doPlot1 % companion
+if doPlot1_companion % companion
     ff(600,300);
     subplot(121);
     plot(timeCenters,all_pvals(plot1Event,:));
@@ -136,6 +141,54 @@ if doPlot1 % companion
 %     ylim([0 0.5]);
     xlabel('time (s)');
     title('rho');
+end
+
+if doSimulation
+    timePeriod = 2;
+    oscillationFreq = [2.5];
+    oscillationAmp = [1];
+    phaseCorrs_sim = [];
+    all_lfp = [];
+% %     oscillationOnOff = [1 2];
+    for iRT = 1:numel(all_Times)
+        disp(num2str(iRT));
+        oscillationOnOff = [1+all_Times(iRT) 2];
+        [lfp,t_lfp] = groundTruthLFP(timePeriod,Fs,oscillationFreq,oscillationOnOff,oscillationAmp);
+        all_lfp(iRT,:) = lfp;
+        W = calculateComplexScalograms_EnMasse(lfp,'Fs',Fs,'freqList',freqList);
+        phaseCorrs_sim(iRT,:) = W;
+    end
+    ff(1200,600);
+    plot(t_lfp,mean(all_lfp),'lineWidth',2);
+    xticks([0:timePeriod]);
+    yticks(sort([ylim,0]));
+    xlabel('Time (s)');
+    ylabel('Amplitude');
+    title('LFP signal');
+    grid on;
+    set(gca,'fontSize',16);
+    
+    sim_r = [];
+    sim_rho = [];
+    sim_pval = [];
+    for iT = 1:n_timePoints
+        phaseCorr = angle(phaseCorrs_sim(:,iT));
+        [rho,pval] = circ_corrcl(phaseCorr,all_Times);
+        r = circ_r(phaseCorr);
+        sim_r(iT) = r;
+        sim_rho(iT) = rho;
+        sim_pval(iT) = pval;
+    end
+    
+    ff(600,400);
+    subplot(121);
+    plot(t,sim_r);
+    title('pval');
+    grid on;
+    subplot(122);
+    plot(t,sim_rho);
+    title('rho');
+    grid on;
 end
 
 if doPlot2

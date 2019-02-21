@@ -1,4 +1,5 @@
 % function rtMtDist(analysisConf)
+load('session_20180516_FinishedResubmission.mat', 'analysisConf');
 doLabels = false;
 doSave = true;
 

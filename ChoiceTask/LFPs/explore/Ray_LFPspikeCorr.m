@@ -6,6 +6,7 @@
 % load('session_20180919_NakamuraMRL.mat', 'selectedLFPFiles')
 % load('session_20180919_NakamuraMRL.mat', 'all_ts')
 % load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local_altLookup')
+% load('Ray_LFPspikeCorr_setup.mat', 'LFP_lookup')
 
 doSetup = false;
 
@@ -18,12 +19,12 @@ end
 freqList = logFreqList([1 200],30);
 Wlength = 1000;
 tWindow = 0.5;
-loadedFile = [];
 zThresh = 5;
 oversampleBy = 5; % has to be high for eegfilt() (> 14,000 samples)
 eventFieldnames_wFake = {eventFieldnames{:} 'outTrial'};
 
 if doSetup
+    loadedFile = [];
     all_keepTrials = {};
     LFP_lookup = [];
     all_FR = [];
@@ -73,9 +74,10 @@ if doSetup
 % %         'LFPfiles_local','all_ts','dirSelUnitIds','ndirSelUnitIds','primSec');
 end
 
+% load('Ray_LFPspikeCorr_setup.mat')
 doCompile = true;
 doShuffle = true;
-doPlot = false;
+doPlot = true;
 doSave = false;
 doWrite = false;
 

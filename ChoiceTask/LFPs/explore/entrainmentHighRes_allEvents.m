@@ -3,6 +3,8 @@
 % load('session_20180919_NakamuraMRL.mat', 'all_ts')
 % load('session_20180919_NakamuraMRL.mat','dirSelUnitIds','ndirSelUnitIds','primSec')
 % load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
+% load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local_altLookup')
+% load('Ray_LFPspikeCorr_setup.mat', 'LFP_lookup')
 freqList = logFreqList([1 200],30);
 
 tWindow = 0.5;
@@ -18,25 +20,30 @@ end
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/entrainmentHighRes';
 
 doCompile = true;
-doConds = false;
+doConds = true;
+doPlot = true;
 
-doPlot_shuffle = false;
-doPlot_lines = true;
-
-nShuffle = 200;
-
-loadedFile = [];
-neuronCount = 0;
 if doCompile
-%     unitAngles = {};
+    onlyFutureSpikes = false;
+    nShuffle = 1;
+    loadedFile = [];
+    unitAngles = {};
     for iNeuron = 1:numel(all_ts)
-        neuronCount = neuronCount + 1;
-        load(fullfile(dataPath,['tsPeths_u',num2str(iNeuron,'%03d')]),'tsPeths');
-        LFPfile = fullfile(dataPath,['Wz_phase_s',num2str(LFP_lookup(iNeuron),'%02d')]);
+        tsFile = fullfile(dataPath,['tsPeths_u',num2str(iNeuron,'%03d')]);
+        load(tsFile,'tsPeths');
+%         LFPfile = fullfile(dataPath,['Wz_phase_alt_s',num2str(LFP_lookup_alt(iNeuron),'%03d')]);
+        LFPfile = fullfile(dataPath,['Wz_phase_s',num2str(LFP_lookup(iNeuron),'%03d')]);
         if isempty(loadedFile) || ~strcmp(loadedFile,LFPfile)
+            fprintf('--> loading LFP...\n');
             load(LFPfile,'Wz_phase');
+            loadedFile = LFPfile;
         end
-        disp(['Compiling iNeuron ',num2str(iNeuron,'%03d')]);
+        FR = numel([tsPeths{:,1}])/size(tsPeths,1);
+        fprintf('iNeuron: %03d, FR: %2.1f\n',iNeuron,FR);
+        
+        if size(Wz_phase,3) ~= size(tsPeths,1)
+            error('Sizes do not match');
+        end
         
         for iShuffle = 1:nShuffle+1
             disp(['iShuffle: ',num2str(iShuffle)]);
@@ -45,38 +52,47 @@ if doCompile
             else
                 trialOrder = randsample(1:size(tsPeths,1),size(tsPeths,1));
             end
-            spikeAngles = NaN(size(Wz_phase,1),size(Wz_phase,4),0);
+           
             for iEvent = 1:size(Wz_phase,1)
+                spikeAngles = NaN(size(Wz_phase,4),0);
                 startIdx = ones(size(Wz_phase,4));
                 for iTrial = 1:size(tsPeths,1)
                     theseSpikes = tsPeths{trialOrder(iTrial),iEvent};
+                    if onlyFutureSpikes
+                        theseSpikes(theseSpikes < 0) = []; % !! ONLY 0-0.5s
+                    end
                     for iFreq = 1:size(Wz_phase,4)
+                        % identifies bins (1-Wlength) with spikes, uses that to fill spikeAngles
                         spikeIdx = logical(histcounts(theseSpikes,linspace(-tWindow,tWindow,size(Wz_phase,2)+1)));
                         endIdx = startIdx(iFreq) + sum(spikeIdx);
-                        spikeAngles(iEvent,iFreq,startIdx(iFreq):endIdx-1) = Wz_phase(iEvent,spikeIdx,iTrial,iFreq);
+                        spikeAngles(iFreq,startIdx(iFreq):endIdx-1) = Wz_phase(iEvent,spikeIdx,iTrial,iFreq);
                         startIdx(iFreq) = endIdx;
                     end
                 end
-%                 unitAngles{iShuffle,iNeuron,iEvent} = spikeAngles;
+                if iShuffle < 3 % [ ] how to handle shuffle?
+                    unitAngles{iShuffle,iNeuron,iEvent} = spikeAngles;
+                end
             end
-            shuffleName = ['u',num2str(iNeuron,'%03d'),'_shuffle',num2str(iShuffle,'%03d')];
-            save(fullfile(shufflePath,shuffleName),'spikeAngles');
+%             shuffleName = ['u',num2str(iNeuron,'%03d'),'_shuffle',num2str(iShuffle,'%03d')];
+%             save(fullfile(shufflePath,shuffleName),'spikeAngles');
         end
     end
-    save('entrainmentHighRes_setup','eventFieldnames','dirSelUnitIds','ndirSelUnitIds','primSec',...
-        'LFP_lookup','all_FR','all_keepTrials');
+% %     save('entrainmentHighRes_setup','unitAngles','eventFieldnames','dirSelUnitIds','ndirSelUnitIds','primSec',...
+% %         'LFP_lookup','all_FR','all_keepTrials','all_ts');
 end
 
 if doConds
+    pThresh = 1;
     nBins = 12;
     binEdges = linspace(-pi,pi,nBins+1);
-    condUnits = {1:size(unitAngles,2),dirSelUnitIds,ndirSelUnitIds};
-    condLabels = {'allUnits','dirSel','ndirSel'};
+    allUnits = 1:366;
+    condUnits = {allUnits,find(~ismember(allUnits,[dirSelUnitIds,ndirSelUnitIds])),ndirSelUnitIds,dirSelUnitIds};
+    condLabels = {'allUnits','otherUnits','ndirSel','dirSel'};
     shuffleLabels = {'noShuffle','shuffle'};
     condHists = NaN(2,numel(condUnits),numel(eventFieldnames_wFake),numel(freqList),nBins);
     condCounts = zeros(2,numel(condUnits),numel(eventFieldnames_wFake),numel(freqList),nBins);
     for iShuffle = 1:2
-        for iCond = 1:3
+        for iCond = 1:numel(condUnits)
             for iEvent = 1:numel(eventFieldnames_wFake)
                 spikeAngles = [unitAngles{iShuffle,condUnits{iCond},iEvent}];
                 for iFreq = 1:numel(freqList)
@@ -85,9 +101,14 @@ if doConds
                     condHists(iShuffle,iCond,iEvent,iFreq,:) = counts;
                     for iNeuron = condUnits{iCond}
                         neuronAngles = unitAngles{iShuffle,iNeuron,iEvent}(iFreq,:);
-                        counts = histcounts(neuronAngles,binEdges);
-                        [~,k] = max(counts);
-                        condCounts(iShuffle,iCond,iEvent,iFreq,k) = condCounts(iShuffle,iCond,iEvent,iFreq,k) + 1;
+                        if isempty(neuronAngles)
+                            continue;
+                        end
+                        if circ_rtest(neuronAngles) < pThresh
+                            counts = histcounts(neuronAngles,binEdges);
+                            [~,k] = max(counts);
+                            condCounts(iShuffle,iCond,iEvent,iFreq,k) = condCounts(iShuffle,iCond,iEvent,iFreq,k) + 1;
+                        end
                     end
                 end
             end
@@ -95,23 +116,23 @@ if doConds
     end
 end
 
-if doPlot_lines
-    doCountMethod = true;
+if doPlot
+    doCountMethod = false;
     showShuffle = true;
-    h = ff(1400,800);
-    rows = 6;
+    rows = 4;
     cols = 8;
-    delta_range = 1:9;
+    delta_range = 1:8;
     gammah_range = 26:30;
-    for iCond = 1:3
-        for iShuffle = 1:2
+    h = ff(1400,900);
+    for iCond = 1:numel(condUnits)
+        for iShuffle = 1%:2
             for iEvent = 1:8
                 histMat = NaN(numel(freqList),nBins*2);
                 for iFreq = 1:numel(freqList)
                     if doCountMethod
-                        thisHist = squeeze(condCounts(iShuffle,iCond,iEvent,iFreq,:)) ./ numel(condUnits{iCond});
+                        thisHist = squeeze(condCounts(iShuffle,iCond,iEvent,iFreq,:)) ./ sum(condCounts(iShuffle,iCond,iEvent,iFreq,:)); % numel(condUnits{iCond});
                         histMat(iFreq,:) = repmat(thisHist,[2,1]);
-                        zLims = [0 0.2];
+                        zLims = [0 0.3];
                         ylabelVal = 'Frac. of Units';
                     else
                         theseHist = squeeze(condHists(iShuffle,iCond,iEvent,iFreq,:))';
@@ -126,16 +147,16 @@ if doPlot_lines
                 delta_lines = mean(histMat(delta_range,:));
                 gammah_lines = mean(histMat(gammah_range,:));
                 if iShuffle == 1 || showShuffle
-                    subplot(rows,cols,prc(cols,[iCond*2-(2-iShuffle),iEvent]));
+                    subplot(rows,cols,prc(cols,[iCond,iEvent]));
                     imagesc(histMat);
                     set(gca,'ydir','normal')
                     colormap(gca,jet);
                     caxis(zLims);
                     xticks([1,6.5,12.5,18.5,24]);
                     xticklabels([]);
-%                     xticklabels([0 180 360 540 720]);
+                    xticklabels([0 180 360 540 720]);
                     xtickangle(30);
-%                     xlabel('Spike phase (deg)');
+                    xlabel('Spike phase (deg)');
                     yticks(ylim);
                     yticklabels([freqList(1),freqList(end)]);
                     if iEvent == 1
@@ -144,7 +165,7 @@ if doPlot_lines
                     if iEvent == numel(eventFieldnames_wFake)
                         cbAside(gca,ylabelVal,'k');
                     end
-                    if iCond == 1 && iShuffle == 1
+                    if iShuffle == 1
                         title({eventFieldnames_wFake{iEvent},[condLabels{iCond}]});
                     else
                        title(condLabels{iCond});
@@ -158,7 +179,7 @@ if doPlot_lines
                 end
                 
                 if ~showShuffle
-                    subplot(rows,cols,prc(cols,[iCond*2,iEvent]));
+                    subplot(rows,cols,prc(cols,[2,iEvent]));
                     plot(delta_lines,lineStyle,'color','b','lineWidth',lineWidth);
                     hold on;
                     plot(gammah_lines,lineStyle,'color','r','lineWidth',lineWidth);
@@ -166,12 +187,9 @@ if doPlot_lines
                     if iEvent == 1
                         ylabel(ylabelVal);
                     end
-                    if iCond == 3
-                        xticklabels([0 180 360 540 720]);
-                        xlabel('Spike phase (deg)');
-                    else
-                        xticklabels([]);
-                    end
+
+                    xticklabels([0 180 360 540 720]);
+                    xlabel('Spike phase (deg)');
                     ylim(zLims);
                     yticks(sort(unique([0,ylim])));
                     grid on;
@@ -181,44 +199,6 @@ if doPlot_lines
     end
     if ~showShuffle
         legend({'delta','gamma','delta_{shuff}','gamma_{shuff}'});
-    end
-    set(gcf,'color','w');
-end
-
-if doPlot_shuffle
-    h = ff(1400,800);
-    rows = 6;
-    cols = 8;
-    zLims = [-3 3];
-    for iCond = 1:3
-        for iShuffle = 1:2
-            for iEvent = 1:8
-                subplot(rows,cols,prc(cols,[iCond*2-(2-iShuffle),iEvent]));
-                histMat = NaN(numel(freqList),nBins*2);
-                for iFreq = 1:numel(freqList)
-                    theseHist = squeeze(condHists(iShuffle,iCond,iEvent,iFreq,:))';
-                    histStd = (std(theseHist));
-                    histMean = (mean(theseHist));
-                    thisHist = (squeeze(condHists(iShuffle,iCond,iEvent,iFreq,:)) - histMean) ./ histStd;
-                    histMat(iFreq,:) = repmat(thisHist,[2,1]);
-                end
-                imagesc(histMat);
-                set(gca,'ydir','normal')
-                colormap(gca,jet);
-                caxis(zLims);
-                xticks([1,6.5,12.5,18.5,24]);
-                xticklabels([0 180 360 540 720]);
-                xtickangle(30);
-                xlabel('Spike phase (deg)');
-                yticks(ylim);
-                yticklabels([freqList(1),freqList(end)]);
-                ylabelVal('Freq. (Hz)');
-                if iEvent == numel(eventFieldnames_wFake)
-                    cbAside(gca,'Z','k');
-                end
-                title({eventFieldnames_wFake{iEvent},[condLabels{iCond},' ',shuffleLabels{iShuffle}]});
-            end
-        end
     end
     set(gcf,'color','w');
 end

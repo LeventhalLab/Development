@@ -1,8 +1,8 @@
 function h = CanoltyPAC_trialStitched_print(all_MImatrix,all_shuff_MImatrix_mean,all_shuff_MImatrix_pvals,useSessions,...
     eventFieldnames,freqList_p,freqList_a,freqList)
 
-doPlot_allEvents = false;
-doPlot_singleEvent = true;
+doPlot_allEvents = true;
+doPlot_singleEvent = false;
 
 if numel(useSessions) == 1
     MImatrix = all_MImatrix{useSessions};
