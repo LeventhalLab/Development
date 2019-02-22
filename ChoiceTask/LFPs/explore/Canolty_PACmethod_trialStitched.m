@@ -10,9 +10,9 @@
 % load('session_20180919_NakamuraMRL.mat', 'all_ts')
 % load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local_altLookup')
 
-doSetup = true;
-doSave = true;
-doPlot = false;
+doSetup = false;
+doSave = false;
+doPlot = true;
 
 if ismac
     savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/PAC/canoltyMethod/bySession';
@@ -41,15 +41,16 @@ nShuff = 100;
 oversampleBy = 5; % has to be high for eegfilt() (> 14,000 samples)
 zThresh = 5;
 
-iSession = 0;
-all_MImatrix = {};
-all_shuff_MImatrix_mean = {};
-all_shuff_MImatrix_pvals = {};
+if doSetup
+    iSession = 0;
+    all_MImatrix = {};
+    all_shuff_MImatrix_mean = {};
+    all_shuff_MImatrix_pvals = {};
 
-for iNeuron = selectedLFPFiles'
-    iSession = iSession + 1;
-    disp(['Session #',num2str(iSession)]);
-    if doSetup
+    for iNeuron = selectedLFPFiles'
+        iSession = iSession + 1;
+        disp(['Session #',num2str(iSession)]);
+    
         sevFile = LFPfiles_local{iNeuron};
         disp(sevFile);
         [~,name,~] = fileparts(sevFile);
@@ -160,8 +161,8 @@ for iNeuron = selectedLFPFiles'
     end
 end
 
-save('Canolt_PAC_20190120','all_MImatrix','all_shuff_MImatrix_mean','all_shuff_MImatrix_pvals',...
-'eventFieldnames_wFake','freqList_p','freqList_a','freqList');
+% % save('Canolt_PAC_20190120','all_MImatrix','all_shuff_MImatrix_mean','all_shuff_MImatrix_pvals',...
+% % 'eventFieldnames_wFake','freqList_p','freqList_a','freqList');
 
 if doPlot
     useSessions = [1:30];
