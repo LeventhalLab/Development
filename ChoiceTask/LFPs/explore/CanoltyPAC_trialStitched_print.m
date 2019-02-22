@@ -55,6 +55,9 @@ end
 if doPlot_allEvents
     fontSize = 7;
     pLims = [0 0.001];
+    pThresh = 0.05; % alpha
+    zThresh = -norminv(pThresh/900);
+    pxThresh = 1;
     zLims = [0 10];
     rows = 2;
     cols = numel(eventFieldnames);
@@ -64,6 +67,7 @@ if doPlot_allEvents
         curMat = squeeze(MImatrix(iEvent,:,:));
         subplot(rows,cols,prc(cols,[1 iEvent]));
         imagesc(curMat,'AlphaData',~isnan(curMat));
+        hold on;
         colormap(gca,parula);
         set(gca,'ydir','normal');
         caxis(zLims);
@@ -85,29 +89,41 @@ if doPlot_allEvents
             cbAside(gca,'Z-MI','k');
         end
 
-    % %     % note: z = norminv(alpha/N); N = # of index values
-    % %     pMat = normcdf(curMat,'upper')*size(freqList{:},1).^2;
-    % %     subplot(rows,cols,prc(cols,[2 iEvent]));
-    % %     imagesc(pMat');
-    % %     colormap(gca,magma);
-    % %     set(gca,'ydir','normal');
-    % %     caxis(pLims);
-    % %     xticks(1:numel(freqList_p));
-    % %     xticklabels(bandLabels(freqList_p(:)));
-    % %     % xtickangle(270);
-    % %     xlabel('phase (Hz)');
-    % %     yticks(1:numel(freqList_a));
-    % %     yticklabels(bandLabels(freqList_a(:)));
-    % %     ylabel('amp (Hz)');
-    % %     set(gca,'fontsize',fontSize);
-    % %     title('mean real pval');
-    % %     if iEvent == cols
-    % %         cbAside(gca,'p-value','k');
-    % %     end
+        % note: z = norminv(alpha/N); N = # of index values
+        pMat = normcdf(curMat,'upper')*numel(freqList).^2;
+        pMat_thresh = curMat > zThresh; % use z-score?
+        pMat_filled = imfill(pMat_thresh,'holes');
+        B = bwboundaries(pMat_filled);
+        stats = regionprops(pMat_thresh,'MajorAxisLength','MinorAxisLength');
+        for k = 1:length(B)
+            if stats(k).MajorAxisLength > pxThresh && stats(k).MinorAxisLength > pxThresh
+                b = B{k};
+                plot(b(:,2),b(:,1),'r','linewidth',1);
+            end
+        end
+
+% %         subplot(rows,cols,prc(cols,[2 iEvent]));
+% %         imagesc(pMat);
+% %         colormap(gca,magma);
+% %         set(gca,'ydir','normal');
+% %         caxis(pLims);
+% %         xticks(1:numel(freqList_p));
+% %         xticklabels(compose('%3.1f',freqList));
+% %         xtickangle(270);
+% %         xlabel('phase (Hz)');
+% %         yticks(1:numel(freqList_a));
+% %         yticklabels(compose('%3.1f',freqList));
+% %         ylabel('amp (Hz)');
+% %         set(gca,'fontsize',fontSize);
+% %         title('mean real pval');
+% %         if iEvent == cols
+% %             cbAside(gca,'p-value','k');
+% %         end
 
         curMat = squeeze(shuff_MImatrix_mean(iEvent,:,:));
         subplot(rows,cols,prc(cols,[2 iEvent]));
         imagesc(curMat,'AlphaData',~isnan(curMat));
+        hold on;
         colormap(gca,parula);
         set(gca,'ydir','normal');
         caxis(zLims);
@@ -125,24 +141,35 @@ if doPlot_allEvents
             cbAside(gca,'Z-MI','k');
         end
 
-    % %     pMat = squeeze(shuff_MImatrix_pvals(iEvent,:,:));
-    % %     subplot(rows,cols,prc(cols,[4 iEvent]));
-    % %     imagesc(1-pMat');
-    % %     colormap(gca,magma);
-    % %     set(gca,'ydir','normal');
-    % %     caxis(pLims);
-    % %     xticks(1:numel(freqList_p));
-    % %     xticklabels(bandLabels(freqList_p(:)));
-    % %     % xtickangle(270);
-    % %     xlabel('phase (Hz)');
-    % %     yticks(1:numel(freqList_a));
-    % %     yticklabels(bandLabels(freqList_a(:)));
-    % %     ylabel('amp (Hz)');
-    % %     set(gca,'fontsize',fontSize);
-    % %     title('mean shuff pval');
-    % %     if iEvent == cols
-    % %         cbAside(gca,'p-value','k');
-    % %     end
+%         pMat = 1 - squeeze(shuff_MImatrix_pvals(iEvent,:,:));
+        pMat_thresh = curMat > zThresh;
+        pMat_filled = imfill(pMat_thresh,'holes');
+        B = bwboundaries(pMat_filled);
+        stats = regionprops(pMat_thresh,'MajorAxisLength','MinorAxisLength');
+        for k = 1:length(B)
+            if stats(k).MajorAxisLength > pxThresh && stats(k).MinorAxisLength > pxThresh
+                b = B{k};
+                plot(b(:,2),b(:,1),'r','linewidth',1);
+            end
+        end
+        
+% %         subplot(rows,cols,prc(cols,[4 iEvent]));
+% %         imagesc(1-pMat);
+% %         colormap(gca,magma);
+% %         set(gca,'ydir','normal');
+% %         caxis(pLims);
+% %         xticks(1:numel(freqList_p));
+% %         xticklabels(compose('%3.1f',freqList));
+% %         xtickangle(270);
+% %         xlabel('phase (Hz)');
+% %         yticks(1:numel(freqList_a));
+% %         yticklabels(compose('%3.1f',freqList));
+% %         ylabel('amp (Hz)');
+% %         set(gca,'fontsize',fontSize);
+% %         title('mean shuff pval');
+% %         if iEvent == cols
+% %             cbAside(gca,'p-value','k');
+% %         end
     end
 
     set(gcf,'color','w');

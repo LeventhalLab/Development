@@ -92,11 +92,6 @@ if doSetup
         keepTrials = threshTrialData(data,zThresh);
         W_surr = [];
         W_surr = calculateComplexScalograms_EnMasse(data(:,keepTrials(1:nSurr + size(W,3))),'Fs',Fs,'freqList',freqList);
-% %         for iFreq = 1:size(freqList{:},1)
-% %             disp(['Filtering surrogates ',num2str(freqList{:}(iFreq,1)),'Hz to ',num2str(freqList{:}(iFreq,2)),'Hz']);
-% %             dataFilt = eegfilt(data(:,keepTrials(1:nSurr))',Fs,freqList{:}(iFreq,1),freqList{:}(iFreq,2));
-% %             W_surr(:,:,iFreq) = hilbert(dataFilt');
-% %         end
         tWindow_sample = round(tWindow * Fs);
         reshapeRange = round(size(W_surr,1)/2)-tWindow_sample:round(size(W_surr,1)/2)+tWindow_sample-1;
         W_surr = W_surr(reshapeRange,:,:);
@@ -123,6 +118,7 @@ if doSetup
                     
                     shuff_m_raw = [];
                     for iShuff = 1:nShuff
+                        % randomly permutes with REAL W
                         shuff_amplitude = squeeze(abs(W(iEvent,:,randperm(size(W,3),size(W,3)),ifA)).^2);
                         shuff_amplitude = shuff_amplitude(:)';
                         shuff_z = shuff_amplitude.*exp(1i*phase);
@@ -132,6 +128,7 @@ if doSetup
                     if ~any(surr_ifA(ifA,:))
                         surrVals = [];
                         for iSurr = 1:nSurr
+                            % randomly permutes with FAKE W (therefore, randomly shifted amplitude)
                             surrogate_amplitude = squeeze(abs(W_surr(:,randperm(nSurr,size(W,3)),ifA)).^2);
                             surrogate_amplitude = surrogate_amplitude(:)';
                             surrVals(iSurr) = mean(surrogate_amplitude.*exp(1i*phase));
