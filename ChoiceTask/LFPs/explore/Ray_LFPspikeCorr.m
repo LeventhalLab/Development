@@ -77,9 +77,9 @@ end
 % load('Ray_LFPspikeCorr_setup.mat')
 doCompile = true;
 doShuffle = true;
-doPlot = true;
+doPlot = false;
 doSave = false;
-doWrite = false;
+doWrite = true;
 
 if ismac
     savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/xcorrRayMethod';
@@ -112,7 +112,9 @@ neuronCount = 0;
 for iNeuron = useUnits
     neuronCount = neuronCount + 1;
     unitLookup(neuronCount) = iNeuron;
-    load(fullfile(dataPath,['zSDE_u',num2str(iNeuron,'%03d')]),'zSDE');
+% %     load(fullfile(dataPath,['zSDE_u',num2str(iNeuron,'%03d')]),'zSDE');
+    load(fullfile(dataPath,['tsPeths_u',num2str(iNeuron,'%03d')]),'tsPeths');
+    zSDE = tsPeths_to_zSDE(tsPeths);
     LFPfile = fullfile(dataPath,['Wz_power_s',num2str(LFP_lookup(iNeuron),'%03d')]);
     if isempty(loadedFile) || ~strcmp(loadedFile,LFPfile)
         load(LFPfile,'Wz_power');
