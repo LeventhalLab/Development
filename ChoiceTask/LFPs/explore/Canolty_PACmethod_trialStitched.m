@@ -1,4 +1,3 @@
-% load('session_20180925_entrainmentSurrogates.mat', 'eventFieldnames')
 % load('session_20180925_entrainmentSurrogates.mat', 'all_trials')
 % load('session_20180925_entrainmentSurrogates.mat', 'LFPfiles_local')
 % load('session_20180925_entrainmentSurrogates.mat', 'selectedLFPFiles')

@@ -55,9 +55,11 @@ end
 if doPlot_allEvents
     fontSize = 7;
     pLims = [0 0.001];
-    pThresh = 0.05; % alpha
+    pThresh = 0.001; % alpha
+    SE = strel('sphere',1);
     zThresh = -norminv(pThresh/900);
     pxThresh = 1;
+    lineWidth = 1.5;
     zLims = [0 10];
     rows = 2;
     cols = numel(eventFieldnames);
@@ -90,15 +92,16 @@ if doPlot_allEvents
         end
 
         % note: z = norminv(alpha/N); N = # of index values
-        pMat = normcdf(curMat,'upper')*numel(freqList).^2;
-        pMat_thresh = curMat > zThresh; % use z-score?
-        pMat_filled = imfill(pMat_thresh,'holes');
+% %         pMat = normcdf(curMat,'upper')*numel(freqList).^2;
+        pMat_thresh = curMat > zThresh;
+        pMat_dilated = imdilate(pMat_thresh,SE);
+        pMat_filled = imfill(pMat_dilated,'holes');
         B = bwboundaries(pMat_filled);
         stats = regionprops(pMat_thresh,'MajorAxisLength','MinorAxisLength');
         for k = 1:length(B)
             if stats(k).MajorAxisLength > pxThresh && stats(k).MinorAxisLength > pxThresh
                 b = B{k};
-                plot(b(:,2),b(:,1),'r','linewidth',1);
+                plot(b(:,2),b(:,1),'r','linewidth',lineWidth);
             end
         end
 
@@ -143,13 +146,14 @@ if doPlot_allEvents
 
 %         pMat = 1 - squeeze(shuff_MImatrix_pvals(iEvent,:,:));
         pMat_thresh = curMat > zThresh;
+        pMat_dilated = imdilate(pMat_thresh,SE);
         pMat_filled = imfill(pMat_thresh,'holes');
         B = bwboundaries(pMat_filled);
         stats = regionprops(pMat_thresh,'MajorAxisLength','MinorAxisLength');
         for k = 1:length(B)
             if stats(k).MajorAxisLength > pxThresh && stats(k).MinorAxisLength > pxThresh
                 b = B{k};
-                plot(b(:,2),b(:,1),'r','linewidth',1);
+                plot(b(:,2),b(:,1),'r','linewidth',lineWidth);
             end
         end
         
