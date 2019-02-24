@@ -1,7 +1,6 @@
 % load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
 % load('session_20180919_NakamuraMRL.mat','dirSelUnitIds','ndirSelUnitIds','primSec')
 % load('20190121_RayLFP_compiled.mat')
-% load('20190121_RayLFP_compiled.mat')
 close all
 
 freqList = logFreqList([1 200],30);
@@ -10,7 +9,7 @@ nShuffle = 100;
 
 doPlot_fractionBands = false;
 doPlot_meanBands = false;
-doPlot_meanHeatmaps = true;
+doPlot_meanHeatmaps = false;
 
 if doPlot_fractionBands
     pThresh = 0.95;

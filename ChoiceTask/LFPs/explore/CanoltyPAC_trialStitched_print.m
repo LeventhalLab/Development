@@ -63,7 +63,7 @@ if doPlot_allEvents
     zLims = [0 10];
     rows = 2;
     cols = numel(eventFieldnames);
-    h = figuree(1400,500);
+    h = figuree(1400,450);
 
     for iEvent = 1:cols
         curMat = squeeze(MImatrix(iEvent,:,:));
@@ -179,6 +179,7 @@ if doPlot_allEvents
     set(gcf,'color','w');
     drawnow;
 end
+addNote(h,sprintf('p < %1.3f',pThresh));
 
 if doPlot_singleEvent
     fontSize = 10;
@@ -234,7 +235,7 @@ if doPlot_singleEvent
             cbAside(gca,'Z-MI','k');
         end
     end
-
+    
     set(gcf,'color','w');
     drawnow;
 end

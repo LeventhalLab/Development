@@ -10,7 +10,7 @@
 % load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local_altLookup')
 
 doSetup = false;
-doSave = false;
+doSave = true;
 doPlot = true;
 
 if ismac
@@ -165,7 +165,7 @@ if doPlot
     h = CanoltyPAC_trialStitched_print(all_MImatrix,all_shuff_MImatrix_mean,all_shuff_MImatrix_pvals,useSessions,...
     eventFieldnames_wFake,freqList_p,freqList_a,freqList);
     if doSave
-        saveFile = ['s',num2str(useSessions(1)),'-',num2str(useSessions(end)),'_allEvent.png'];
+        saveFile = ['PAC_s',num2str(useSessions(1)),'-',num2str(useSessions(end)),'_allEvent.png'];
         saveas(h,fullfile(savePath,saveFile));
         close(h);
     end
