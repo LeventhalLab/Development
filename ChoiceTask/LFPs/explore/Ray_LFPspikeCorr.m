@@ -9,6 +9,7 @@
 % load('Ray_LFPspikeCorr_setup.mat', 'LFP_lookup')
 
 doSetup = false;
+doWrite = false;
 
 if ismac
     dataPath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/datastore/Ray_LFPspikeCorr';

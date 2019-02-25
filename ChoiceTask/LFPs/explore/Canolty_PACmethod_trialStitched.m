@@ -1,13 +1,10 @@
-% load('session_20180925_entrainmentSurrogates.mat', 'all_trials')
-% load('session_20180925_entrainmentSurrogates.mat', 'LFPfiles_local')
-% load('session_20180925_entrainmentSurrogates.mat', 'selectedLFPFiles')
-% 
 % load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
 % load('session_20180919_NakamuraMRL.mat', 'all_trials')
 % load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local')
 % load('session_20180919_NakamuraMRL.mat', 'selectedLFPFiles')
 % load('session_20180919_NakamuraMRL.mat', 'all_ts')
 % load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local_altLookup')
+% load('Canolt_PAC_20190120.mat')
 
 doSetup = false;
 doSave = true;

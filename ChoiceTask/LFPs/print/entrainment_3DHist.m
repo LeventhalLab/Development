@@ -1,6 +1,6 @@
 close all
 
-doSave = true;
+doSave = false;
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/entrainmentFigure';
 
 useZscore = false;
@@ -8,10 +8,11 @@ useZscore = false;
 freqList = logFreqList([1 200],30);
 pThresh = 1; % 0.05;
 dirSelRanges = {[1:366],dirSelUnitIds,ndirSelUnitIds};
+inOut_data_mus = {all_spikeHist_inTrial_mus,all_spikeHist_mus};
 dirSelTypes = {'all','dirSel','ndirSel'};
 trialTypes = {'shuffle','In-trial','Inter-trial'};
 iFreq = 6;
-rows = 3;
+rows = 4;
 cols = 3;
 
 if useZscore
@@ -23,15 +24,22 @@ else
     zlimVals = [0.05 0.1];
     caxisVals = [0.05 0.1];
     flatylimVals = [0.075 0.09];
-     zscoreLabel = 'binfrac';
+    zscoreLabel = 'binfrac';
 end
 useylims = [0.5 24.5];
 ytickVals = [1 24];
-for iDirSel = 1:3
+for iDirSel = 2:3
     h = ff(1400,800);
     for iTrialType = 1:3
         use_pvals = conds_pvals{iTrialType}(dirSelRanges{iDirSel},iFreq);
         use_angles = conds_angles{iTrialType}(dirSelRanges{iDirSel},:,iFreq);
+        if iTrialType ~= 1
+            use_mus = inOut_data_mus{iTrialType-1}(dirSelRanges{iDirSel},iFreq);
+            use_mus(isnan(use_mus)) = [];
+            mu_mean = circ_mean(use_mus);
+            mu_pval = circ_rtest(use_mus);
+        end
+        
         sigMat = use_angles(use_pvals < pThresh,:);
         
         if useZscore
@@ -107,10 +115,19 @@ for iDirSel = 1:3
         xlim([1 24]);
         xticks([1 12.5 24]);
         xticklabels([0 360 720]);
-        title('flattened');
         ylim([0 0.3]);
         yticks(ylim);
         grid on;
+        
+        if iTrialType ~= 1
+            subplot(rows,cols,prc(cols,[4,iTrialType]));
+            hp = polarhistogram(use_mus,12,'FaceColor','k','normalization','pdf');
+            hold on;
+            polarplot([mu_mean mu_mean],[0 1],'linewidth',2,'color','r');
+            rlim([0 0.4]);
+            rticks(rlim);
+            title([num2str(rad2deg(mu_mean),'%3.2f'),char(176),', p = ',num2str(mu_pval,2)]);
+        end
         
         colormap(jet);
     end
@@ -122,3 +139,16 @@ for iDirSel = 1:3
         close(h);
     end
 end
+dirSel_inTrial = inOut_data_mus{1}(dirSelRanges{2},iFreq);
+dirSel_outTrial = inOut_data_mus{2}(dirSelRanges{2},iFreq);
+kuiper_pval_inOut = circ_kuipertest(dirSel_inTrial,dirSel_outTrial);
+disp(['Kuiper p-value in/out trial (dirSel only): ',num2str(kuiper_pval_inOut,2)]);
+ndirSel_inTrial = inOut_data_mus{1}(dirSelRanges{3},iFreq);
+kuiper_pval_dirSel = circ_kuipertest(dirSel_inTrial,ndirSel_inTrial);
+disp(['Kuiper p-value in trial (dir vs. ndir): ',num2str(kuiper_pval_dirSel,2)]);
+
+all_inTrial = inOut_data_mus{1}(dirSelRanges{1},iFreq);
+dirSel_inTrial = inOut_data_mus{1}(dirSelRanges{2},iFreq);
+ndirSel_inTrial = inOut_data_mus{1}(dirSelRanges{3},iFreq);
+kuiper_pval_inOut = circ_kuipertest(dirSel_inTrial,all_inTrial);
+kuiper_pval_inOut = circ_kuipertest(ndirSel_inTrial,all_inTrial);

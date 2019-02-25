@@ -1,7 +1,7 @@
 % use /explore/entrainmentHighRes_allEvents.m
-% load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
-% load('session_20180919_NakamuraMRL.mat','dirSelUnitIds','ndirSelUnitIds','primSec')
-% load('session_20181218_highresEntrainment.mat')
+load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
+load('session_20180919_NakamuraMRL.mat','dirSelUnitIds','ndirSelUnitIds','primSec')
+load('session_20181218_highresEntrainment.mat')
 close all
 
 doSetup = false;
@@ -68,7 +68,7 @@ if doPlot_MRL_pval
                 plot(pt,real_MRL(pt),'*','color',colors(iCond,:),'markersize',12);
             end
         end
-        xticks(1:size(data,2));
+        xticks(1:numel(freqList));
         xticklabels(compose('%2.1f',freqList));
         xtickangle(270);
         xlim([1 numel(freqList)]);

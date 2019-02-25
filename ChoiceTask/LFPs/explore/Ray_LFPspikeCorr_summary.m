@@ -1,15 +1,177 @@
-% load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
-% load('session_20180919_NakamuraMRL.mat','dirSelUnitIds','ndirSelUnitIds','primSec')
 % load('20190121_RayLFP_compiled.mat')
-close all
+% load('20190220_RayLFP_compiled.mat')
+
+% close all
 
 freqList = logFreqList([1 200],30);
 eventFieldnames_wFake = {eventFieldnames{:} 'Inter-trial'};
-nShuffle = 100;
+nShuffle = 1000;
 
+doPlots_dirSelSignifiance = true;
+doPlots_spectrum = false;
 doPlot_fractionBands = false;
 doPlot_meanBands = false;
 doPlot_meanHeatmaps = false;
+
+if doPlots_dirSelSignifiance
+    units_dirSel = ismember(unitLookup,dirSelUnitIds);
+    units_ndirSel = ismember(unitLookup,ndirSelUnitIds);
+    nShuffle = 1000;
+    if false
+        pval_mat = [];
+        for iDirSel = 1:2
+            if iDirSel == 1
+                unitSel = find(ismember(unitLookup,dirSelUnitIds));
+            else
+                unitSel = find(ismember(unitLookup,ndirSelUnitIds));
+            end
+            for iEvent = 1:8
+                for iFreq = 1:30
+                    real_acor = mean(squeeze(all_acors(unitSel,iEvent,iFreq,:)));
+                    for iShuffle = 1:nShuffle
+                        randSel = randsample(1:size(all_acors,1),numel(unitSel));
+                        shuff_acor(iShuffle,:) = mean(squeeze(all_acors(randSel,iEvent,iFreq,:)));
+                    end
+                    pvals = sum(shuff_acor > real_acor) / nShuffle;
+                    pval_mat(iDirSel,iEvent,iFreq,:) = pvals;
+                end
+            end
+        end
+    end
+    % plot
+%     pval_thresh(iDirSel,iEvent,iFreq,:) = pvals < pThresh | pvals > 1 - pThresh;
+    dirSelTypes = {'dirSel','ndirSel'};
+    rows = 2;
+    cols = 8 ;
+    tWindow = 0.5;
+    pThresh = 0.05;
+    SE = strel('sphere',1);
+    pxThresh = 1;
+    lineWidth = 1.5;
+    t = linspace(-tWindow,tWindow,size(all_acors,4));
+    h = ff(1400,450);
+    for iDirSel = 1:2
+        if iDirSel == 1
+            unitSel = find(ismember(unitLookup,dirSelUnitIds));
+        else
+            unitSel = find(ismember(unitLookup,ndirSelUnitIds));
+        end
+        for iEvent = 1:8
+            real_acor = squeeze(mean(all_acors(unitSel,iEvent,:,:)));
+            subplot(rows,cols,prc(cols,[iDirSel,iEvent]));
+            imagesc(t,1:numel(freqList),real_acor);
+            hold on;
+            colormap(gca,parula);
+            caxis([-.1 .1]);
+            set(gca,'ydir','normal');
+            xticks([-tWindow,0,tWindow]);
+            xlabel('phase (Hz)');
+            yticks(1:numel(freqList_a));
+            yticklabels(compose('%3.1f',freqList));
+            ylabel('Freq (Hz)');
+            set(gca,'fontsize',6);
+            set(gca,'TitleFontSizeMultiplier',2);
+            if iDirSel == 1
+                title({'xcorr',eventFieldnames_wFake{iEvent},dirSelTypes{iDirSel}});
+            else
+                title(dirSelTypes{iDirSel});
+            end
+            
+            pval_colors = ['r','k'];
+            for iPval = 1:2
+                pvals = squeeze(pval_mat(iDirSel,iEvent,:,:));
+%                 pMat_thresh = pvals < pThresh | pvals > 1 - pThresh;
+                if iPval == 1
+                    pMat_thresh = pvals < pThresh;
+                else
+                    pMat_thresh = pvals > 1 - pThresh;
+                end
+                pMat_dilated = imdilate(pMat_thresh,SE);
+                pMat_filled = imfill(pMat_dilated,'holes');
+                B = bwboundaries(pMat_filled);
+                stats = regionprops(pMat_thresh,'MajorAxisLength','MinorAxisLength');
+                for k = 1:length(B)
+                    if stats(k).MajorAxisLength > pxThresh && stats(k).MinorAxisLength > pxThresh
+                        b = B{k};
+                        plot(t(b(:,2)),b(:,1),pval_colors(iPval),'linewidth',lineWidth);
+                    end
+                end
+            end
+        end
+    end
+    addNote(h,{sprintf('p < %1.2f',pThresh),'red: real signal > chance','black: real signal < chance'});
+    set(gcf,'color','w');
+end
+
+if doPlots_spectrum
+    dirSelTypes = {'all','dirSel','ndirSel'};
+    h = ff(1400,900);
+    rows = 4;
+    cols = 8 ;
+    colors = magma(30);
+    tWindow = 0.5;
+    t = linspace(-tWindow,tWindow,size(all_acors,4));
+    useRow = 0;
+    for iDirSel = 2:3
+        unitSel = 1:size(all_acors,1);
+        if iDirSel == 2
+            unitSel = ismember(unitLookup,dirSelUnitIds);
+        elseif iDirSel == 3
+            unitSel = ismember(unitLookup,ndirSelUnitIds);
+        end
+        for iPval = 1:2
+            if iPval == 1
+                use_acors = all_acors; % rows 1,3
+                ylimVals = [-0.1 0.1];
+                shuffLabel = '';
+                ylabelVal = 'r';
+            else
+                use_acors = all_shuff_pvals; % rows 2,4
+                ylimVals = [-1 1];
+                shuffLabel = ' shuffled';
+                ylabelVal = 'p-value';
+            end
+            useRow = useRow + 1;
+            for iEvent = 1:8
+                subplot(rows,cols,prc(cols,[useRow,iEvent]));
+                for iFreq = 1:30
+                    data = mean(squeeze(use_acors(unitSel,iEvent,iFreq,:)));
+                    plot(t,data,'color',colors(iFreq,:));
+                    hold on;
+                end
+                xlim([-tWindow tWindow]);
+                xticks(sort([xlim,0]));
+                ylim(ylimVals);
+                yticks(sort([ylim 0]));
+                if iEvent == 1
+                    ylabel(ylabelVal);
+                end
+                if useRow == 4
+                    xlabel('Time (s)');
+                end
+                if useRow == 1
+                    title({'LFP x SDE',eventFieldnames_wFake{iEvent},[dirSelTypes{iDirSel},shuffLabel]},'color','w');
+                else
+                    title([dirSelTypes{iDirSel},shuffLabel],'color','w');
+                end
+                set(gca,'color','k');
+                set(gca,'XColor','w');
+                set(gca,'YColor','w');
+                grid on;
+                if iEvent == 8
+                    cb = cbAside(gca,'Freq (Hz)');
+                    colormap(colors);
+                    cb.Limits = [0 1];
+                    cb.Ticks = linspace(0,1,numel(freqList));
+                    cb.TickLabels = compose('%2.1f',freqList);
+                    cb.Color = 'w';
+                    cb.FontSize = 6;
+                end
+            end
+        end
+    end
+    set(gcf,'color','k');
+end
 
 if doPlot_fractionBands
     pThresh = 0.95;
@@ -136,10 +298,11 @@ if doPlot_meanHeatmaps
     rows = 4;
     cols = 8;
     acorCaxis = [-.1 .1];
+    pThresh = 0.05;
     for iEvent = 1:size(all_acors,2)
-        for iShuffle = 1:2
-            subplot(rows,cols,prc(cols,[iShuffle,iEvent]));
-            imagesc(lag,1:numel(freqList),squeeze(mean(useData{iShuffle}(unitSel,iEvent,:,:))));
+        for iPval = 1:2
+            subplot(rows,cols,prc(cols,[iPval,iEvent]));
+            imagesc(lag,1:numel(freqList),squeeze(mean(useData{iPval}(unitSel,iEvent,:,:))));
             hold on;
             plot([0,0],ylim,'k:');
             set(gca,'ydir','normal');
@@ -150,7 +313,7 @@ if doPlot_meanHeatmaps
             caxis(acorCaxis);
             ax = gca;
             ax.YAxis.FontSize = 7;
-            if iShuffle == 1
+            if iPval == 1
                 if iEvent == 1
                     ylabel('Freq (Hz)');
                     title({eventFieldnames_wFake{iEvent},'mean xcorr'});

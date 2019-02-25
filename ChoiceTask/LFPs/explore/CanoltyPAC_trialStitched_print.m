@@ -55,7 +55,7 @@ end
 if doPlot_allEvents
     fontSize = 7;
     pLims = [0 0.001];
-    pThresh = 0.001; % alpha
+    pThresh = 0.05; % alpha
     SE = strel('sphere',1);
     zThresh = -norminv(pThresh/900);
     pxThresh = 1;
