@@ -7,7 +7,7 @@
 % load('Canolt_PAC_20190120.mat')
 
 doSetup = false;
-doSave = true;
+doSave = false;
 doPlot = true;
 
 if ismac

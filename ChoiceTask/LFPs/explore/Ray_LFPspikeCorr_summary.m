@@ -41,7 +41,7 @@ if doPlots_dirSelSignifiance
     % plot
 %     pval_thresh(iDirSel,iEvent,iFreq,:) = pvals < pThresh | pvals > 1 - pThresh;
     dirSelTypes = {'dirSel','ndirSel'};
-    rows = 2;
+    rows = 4;
     cols = 8 ;
     tWindow = 0.5;
     pThresh = 0.05;
@@ -49,7 +49,8 @@ if doPlots_dirSelSignifiance
     pxThresh = 1;
     lineWidth = 1.5;
     t = linspace(-tWindow,tWindow,size(all_acors,4));
-    h = ff(1400,450);
+    fontSize = 6;
+    h = ff(1400,800);
     for iDirSel = 1:2
         if iDirSel == 1
             unitSel = find(ismember(unitLookup,dirSelUnitIds));
@@ -57,27 +58,32 @@ if doPlots_dirSelSignifiance
             unitSel = find(ismember(unitLookup,ndirSelUnitIds));
         end
         for iEvent = 1:8
+            % real xcorr with circled p-values
             real_acor = squeeze(mean(all_acors(unitSel,iEvent,:,:)));
-            subplot(rows,cols,prc(cols,[iDirSel,iEvent]));
+            subplot(rows,cols,prc(cols,[iDirSel*2-1,iEvent]));
             imagesc(t,1:numel(freqList),real_acor);
             hold on;
+            plot([0,0],ylim,'k:');
             colormap(gca,parula);
             caxis([-.1 .1]);
             set(gca,'ydir','normal');
             xticks([-tWindow,0,tWindow]);
-            xlabel('phase (Hz)');
+            xlabel('spike lag (s)');
             yticks(1:numel(freqList_a));
             yticklabels(compose('%3.1f',freqList));
             ylabel('Freq (Hz)');
-            set(gca,'fontsize',6);
+            set(gca,'fontsize',fontSize);
             set(gca,'TitleFontSizeMultiplier',2);
             if iDirSel == 1
                 title({'xcorr',eventFieldnames_wFake{iEvent},dirSelTypes{iDirSel}});
             else
                 title(dirSelTypes{iDirSel});
             end
+            if iEvent == 8
+                cbAside(gca,'r (xcorr)','k');
+            end
             
-            pval_colors = ['r','k'];
+            pval_colors = ['r','b'];
             for iPval = 1:2
                 pvals = squeeze(pval_mat(iDirSel,iEvent,:,:));
 %                 pMat_thresh = pvals < pThresh | pvals > 1 - pThresh;
@@ -97,9 +103,29 @@ if doPlots_dirSelSignifiance
                     end
                 end
             end
+            
+            % shuffled trial p-values
+            pvalMat = squeeze(mean(all_shuff_pvals(unitSel,iEvent,:,:)));
+            subplot(rows,cols,prc(cols,[iDirSel*2,iEvent]));
+            imagesc(t,1:numel(freqList),pvalMat);
+            hold on;
+            plot([0,0],ylim,'k:');
+            set(gca,'ydir','normal');
+            xlabel('spike lag (s)');
+            yticks(linspace(min(ylim),max(ylim),numel(freqList)));
+            yticklabels(compose('%3.1f',freqList));
+            colormap(gca,jupiter);
+            caxis([-1 1]);
+            set(gca,'fontsize',fontSize);
+            title('shuffle p-value');
+            if iEvent == 8
+                cb = cbAside(gca,'pval','k');
+                cb.Ticks = sort([caxis,0]);
+                cb.TickLabels = {'0 (+)','1','0 (-)'};
+            end
         end
     end
-    addNote(h,{sprintf('p < %1.2f',pThresh),'red: real signal > chance','black: real signal < chance'});
+    addNote(h,{sprintf('p < %1.2f',pThresh),'red: real signal > chance','blue: real signal < chance'});
     set(gcf,'color','w');
 end
 
@@ -147,7 +173,7 @@ if doPlots_spectrum
                     ylabel(ylabelVal);
                 end
                 if useRow == 4
-                    xlabel('Time (s)');
+                    xlabel('spike lags LFP (s)');
                 end
                 if useRow == 1
                     title({'LFP x SDE',eventFieldnames_wFake{iEvent},[dirSelTypes{iDirSel},shuffLabel]},'color','w');
