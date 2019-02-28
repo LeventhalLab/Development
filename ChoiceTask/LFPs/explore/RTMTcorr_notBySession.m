@@ -1,7 +1,7 @@
 if ismac
     savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/RTMTCorr';
 else
-     savePath = '';
+     savePath = 'C:\Users\dleventh\Documents\MATLAB\Development\ChoiceTask\LFPs';
 end
 
 doSetup = true;
@@ -11,7 +11,6 @@ tWindow = 1;
 freqList = logFreqList([1 200],30);
 Wlength = 200;
 zThresh = 5;
-
 
 if doSetup
     all_powerCorrs = [];
@@ -26,7 +25,7 @@ if doSetup
         startIdx = ones(2,1);
         for iNeuron = selectedLFPFiles'
             iSession = iSession + 1;
-            disp(num2str(iNeuron));
+            fprintf('iFreq: %02d, iNeuron: %03d\n',iFreq,iNeuron);
             sevFile = LFPfiles_local{iNeuron};
             [~,name,~] = fileparts(sevFile);
 
@@ -35,7 +34,7 @@ if doSetup
 
             for iTiming = 1:2
                 [trialIds,allTimes] = sortTrialsBy(curTrials,timingFields{iTiming});
-                [W,all_data] = eventsLFPv2(curTrials(trialIds),sevFilt,tWindow,Fs,freqList,eventFieldnames);
+                [W,all_data] = eventsLFPv2(curTrials(trialIds),sevFilt,tWindow*2,Fs,freqList(iFreq),eventFieldnames);
 
                 keepTrials = threshTrialData(all_data,zThresh);
                 W = W(:,:,keepTrials,:);
@@ -44,8 +43,8 @@ if doSetup
                 xTimes(iTiming,startIdx(iTiming):startIdx(iTiming) + numel(allTimes) - 1) = allTimes;
                 for iTime = 1:size(Wz,2)
                     for iEvent = 1:7
-                        yPower(iTiming,iTime,iEvent,startIdx(iTiming):startIdx(iTiming) + numel(allTimes) - 1) = squeeze(squeeze(Wz(iEvent,iTime,:,iFreq)));
-                        yPhase(iTiming,iTime,iEvent,startIdx(iTiming):startIdx(iTiming) + numel(allTimes) - 1) = squeeze(squeeze(Wz_angle(iEvent,iTime,:,iFreq)));
+                        yPower(iTiming,iTime,iEvent,startIdx(iTiming):startIdx(iTiming) + numel(allTimes) - 1) = squeeze(squeeze(Wz(iEvent,iTime,:)));
+                        yPhase(iTiming,iTime,iEvent,startIdx(iTiming):startIdx(iTiming) + numel(allTimes) - 1) = squeeze(squeeze(Wz_angle(iEvent,iTime,:)));
                     end
                 end
 
