@@ -1,6 +1,6 @@
 close all
-load('20190227_RTMTcorr.mat');
-load('session_20180919_NakamuraMRL.mat', 'eventFieldnames');
+% load('20190227_RTMTcorr.mat');
+% load('session_20180919_NakamuraMRL.mat', 'eventFieldnames');
 
 timingFields = {'RT','MT'};
 tWindow = 1;
