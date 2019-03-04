@@ -1,3 +1,8 @@
+% load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
+% load('session_20180919_NakamuraMRL.mat', 'all_trials')
+% load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local')
+% load('session_20180919_NakamuraMRL.mat', 'selectedLFPFiles')
+
 if ismac
     savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/RTMTCorr';
 else
@@ -11,6 +16,7 @@ tWindow = 1;
 freqList = logFreqList([1 200],30);
 Wlength = 200;
 zThresh = 5;
+useSessions = 1;
 
 if doSetup
     all_powerCorrs = [];
@@ -23,7 +29,7 @@ if doSetup
         yPower = [];
         yPhase = [];
         startIdx = ones(2,1);
-        for iNeuron = selectedLFPFiles'
+        for iNeuron = selectedLFPFiles(useSessions)'
             iSession = iSession + 1;
             fprintf('iFreq: %02d, iNeuron: %03d\n',iFreq,iNeuron);
             sevFile = LFPfiles_local{iNeuron};
@@ -61,7 +67,7 @@ if doSetup
             for iEvent = 1:7
                 for iTime = 1:size(yPower,2)
                     thisPower = squeeze(yPower(iTiming,iTime,iEvent,:));
-                    [rho,pval] = corr(theseTimes',thisPower);
+                    [rho,pval] = corr(theseTimes',thisPower,'Type','Spearman');
                     powerCorrs(iTiming,iEvent,iTime) = rho;
                     powerPvals(iTiming,iEvent,iTime) = pval;
 
@@ -79,7 +85,7 @@ if doSetup
     end
 end
 
-save(fullfile(savePath,'20190227_RTMTcorr'),'all_powerCorrs','all_powerPvals','all_phaseCorrs','all_phasePvals');
+save(fullfile(savePath,['201903_RTMTcorr_',num2str(iSession,'%02d')]),'all_powerCorrs','all_powerPvals','all_phaseCorrs','all_phasePvals');
 
 
 % plot
