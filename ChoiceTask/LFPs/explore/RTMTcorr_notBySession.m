@@ -85,7 +85,8 @@ if doSetup
     end
 end
 
-save(fullfile(savePath,['201903_RTMTcorr_',num2str(iSession,'%02d')]),'all_powerCorrs','all_powerPvals','all_phaseCorrs','all_phasePvals');
+save(fullfile(savePath,['201903_RTMTcorr_iSession',num2str(iSession,'%02d'),'_nSessions',num2str(numel(useSessions),'%02d')]),...
+    'all_powerCorrs','all_powerPvals','all_phaseCorrs','all_phasePvals');
 
 
 % plot
