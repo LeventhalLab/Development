@@ -16,8 +16,9 @@ tWindow = 1;
 freqList = logFreqList([1 200],30);
 Wlength = 200;
 zThresh = 5;
-useSessions = 1;
+% % useSessions = 1;
 
+for useSessions = 1:30
 if doSetup
     all_powerCorrs = [];
     all_powerPvals = [];
@@ -84,10 +85,9 @@ if doSetup
         all_phasePvals(:,:,:,iFreq) = phasePvals;
     end
 end
-
-save(fullfile(savePath,['201903_RTMTcorr_iSession',num2str(iSession,'%02d'),'_nSessions',num2str(numel(useSessions),'%02d')]),...
+save(fullfile(savePath,['201903_RTMTcorr_iSession',num2str(useSessions,'%02d'),'_nSessions',num2str(numel(useSessions),'%02d')]),...
     'all_powerCorrs','all_powerPvals','all_phaseCorrs','all_phasePvals');
-
+end
 
 % plot
 % % h = ff(1400,800);
