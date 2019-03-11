@@ -1,9 +1,11 @@
 % function rtMtDist(analysisConf)
-load('session_20180516_FinishedResubmission.mat', 'analysisConf');
-doLabels = false;
-doSave = true;
+% load('session_20180516_FinishedResubmission.mat', 'analysisConf');
+doSetup = false;
 
-if true
+doLabels = false;
+doSave = false;
+
+if doSetup
     all_rt = [];
     all_rt_c = {};
     all_mt = [];
@@ -12,11 +14,11 @@ if true
     lastSession = '';
     iSession = 0;
     for iNeuron = 1:size(analysisConf.neurons,1)
-        iSession = iSession + 1;
         sessionConf = analysisConf.sessionConfs{iNeuron};
         if strcmp(sessionConf.sessions__name,lastSession)
             continue;
         end
+        iSession = iSession + 1;
         lastSession = sessionConf.sessions__name;
         logFile = getLogPath(sessionConf.leventhalPaths.rawdata);
         logData = readLogData(logFile);
@@ -48,6 +50,9 @@ if true
     end
 end
 
+expressRT = 0.05;
+ordinaryRT = 0.35;
+ordinaryMT = 0.45;
 
 rtDataPrct = numel(find(all_rt > expressRT & all_rt < ordinaryRT)) / numel(all_rt);
 mtDataPrct = numel(find(all_mt < ordinaryMT)) / numel(all_mt);
@@ -60,7 +65,7 @@ xlimVals = [0 1];
 subjects__ids = unique(all_subjects__id);
 RTcounts = [];
 MTcounts = [];
-nSmooth = 5;
+nSmooth = 1;
 for iSubject = 1:numel(subjects__ids)
     curSubject = subjects__ids(iSubject);
     curRTsessions = all_rt_c(all_subjects__id == curSubject);
@@ -74,13 +79,22 @@ for iSubject = 1:numel(subjects__ids)
 end
 
 % looks like trash, deprecate
-% % figure;
-% % plot(RTcounts','lineWidth',2);
-% % 
-% % figure;
-% % plot(MTcounts','lineWidth',2);
+lineLabels = {'R0088','R0117','R0142','R0154','R0182'};
+t = linspace(0,1,size(RTcounts,2));
+figure;
+plot(t,RTcounts','lineWidth',2);
+title('RT dist');
+ylabel('norm dist');
+xlabel('RT');
+legend(lineLabels)
+
+figure;
+plot(t,MTcounts','lineWidth',2);
 useMeanColors = false;
 grayColor = [.8 .8 .8];
+title('MT dist');
+ylabel('norm dist');
+xlabel('RT');
 
 nSmooth = 5;
 lineWidth = 2;
