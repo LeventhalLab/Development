@@ -1,58 +1,47 @@
-% load('201903_RTMTcorr_iSession30_nSessions30.mat')
-% load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
-freqList = logFreqList([1 200],30);
-% % % % showFreqs = [2,6,18.6,55,120];
-iTiming = 1;
-iFreq = 17;
+rows = 3;
+cols = 4;
+h = ff(1400,800);
 
-% close all
+for iFreq = 1:12
+    subplot(rows,cols,iFreq);
+    data_power = squeeze(all_powerCorrs(1,3,:,iFreq));
+    data_power_pval = squeeze(all_powerPvals(1,3,:,iFreq));
+    data_phase = squeeze(all_phaseCorrs(1,3,:,iFreq));
+    data_phase_pval = squeeze(all_phasePvals(1,3,:,iFreq));
 
-h = ff(1400,400);
-rows = 2;
-cols = 2;
-colors = cool(nRT);
-nSmooth = 10;
-useEvents = 3:4;
-for iRT = 1:nRT
-    all_powerCorrs = all_RT_powerCorrs{iRT};
-    all_powerPvals = all_RT_powerPvals{iRT};
-    all_phaseCorrs = all_RT_phaseCorrs{iRT};
-    all_phasePvals = all_RT_phasePvals{iRT};
-    
-    timeCorrs_power_rho = squeeze((all_powerCorrs(iTiming,:,:,:)));
-    timeCorrs_power_pval = squeeze((all_powerPvals(iTiming,:,:,:)));%*30;
-    timeCorrs_phase_rho = squeeze((all_phaseCorrs(iTiming,:,:,:)));
-    timeCorrs_phase_pval = squeeze((all_phasePvals(iTiming,:,:,:)));%*30;
-    t = linspace(-1,1,size(timeCorrs_phase_pval,2));
-    iSubplot = 1;
-    for iEvent = useEvents
-        data_rho = squeeze(timeCorrs_power_rho(iEvent,:,iFreq));
-        subplot(rows,cols,prc(cols,[1,iSubplot]));
-        plot(t,smooth(data_rho,nSmooth),'color',colors(iRT,:),'linewidth',2);
-        hold on;
-        ylabel('rho');
-        ylim([-0.5 0.5]);
-        yticks(sort([0,ylim]));
-        xlim([-1 1]);
-        xticks([-1 0 1]);
-        title(eventFieldnames{iEvent});
-        colorbar;
-        grid on;
+    colors = lines(2);
 
-        data_pval = pval_adjust(squeeze(timeCorrs_power_pval(iEvent,:,iFreq)),'bonferroni');
-        subplot(rows,cols,prc(cols,[2,iSubplot]));
-        plot(t,smooth(data_pval,nSmooth),'color',colors(iRT,:),'linewidth',1);
-        hold on;
-        ylabel('p-value');
-        ylim([0 1]);
-        yticks(ylim);
-        xlim([-1 1]);
-        xticks([-1 0 1]);
-        colorbar;
-        colormap(colors);
-        grid on;
-        
-        iSubplot = iSubplot + 1;
-    end
+
+    t = linspace(-1,1,size(all_powerCorrs,3));
+
+    timePeriod = 2;
+    Fs = 1000;
+    oscillationFreq = [freqList(iFreq)];
+    oscillationOnOff = [1.1 2];
+    [lfp,~] = groundTruthLFP(timePeriod,Fs,oscillationFreq,oscillationOnOff);
+    W = calculateComplexScalograms_EnMasse(lfp,'Fs',Fs,'freqList',freqList(iFreq));
+    tW = linspace(-1,1,size(W,1));
+
+    yyaxis left;
+    plot(t,data_power,'-','color',colors(1,:));
+    hold on;
+    plot(t,data_phase,'-','color',colors(2,:));
+    plot(tW,real(W),'k-');
+    ylabel('rho');
+    ylim([-.2 .4]);
+    yticks(sort([ylim,0]));
+
+    yyaxis right;
+    plot(t,data_power_pval,':','color',colors(1,:));
+    hold on;
+    plot(t,data_phase_pval,':','color',colors(2,:));
+    plot([-1 1],[0.05 0.05],'r-');
+    ylabel('p-value');
+    ylim([0 1]);
+    yticks(ylim);
+
+    xlim([-1 1]);
+    xticks([-1 0 1]);
+    legend({'\delta-power','\delta-phase'});
+    title(sprintf('%1.2f Hz',freqList(iFreq)));
 end
-set(gcf,'color','w');

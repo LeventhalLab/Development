@@ -1,14 +1,18 @@
 % load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
-doSetup = false;
-doSave = true;
+doSetup = true;
+doSave = false;
 
-savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/RTMTCorr';
+savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/RTMTCorr/bySession';
 
-corrFiles = {'201903_RTMTcorr_R0182_nSessions01.mat',...
-'201903_RTMTcorr_R0154_nSessions05.mat',...
-'201903_RTMTcorr_R0142_nSessions13.mat',...
-'201903_RTMTcorr_R0117_nSessions07.mat',...
-'201903_RTMTcorr_R0088_nSessions04.mat'};
+% corrFiles = {'201903_RTMTcorr_R0182_nSessions01.mat',...
+% '201903_RTMTcorr_R0154_nSessions05.mat',...
+% '201903_RTMTcorr_R0142_nSessions13.mat',...
+% '201903_RTMTcorr_R0117_nSessions07.mat',...
+% '201903_RTMTcorr_R0088_nSessions04.mat'};
+
+% corrFiles = {'201903_RTMTcorr_R0142_nSessions13.mat','201903_RTMTcorr_R0142_nSessions13.mat'};
+dirFiles = dir(fullfile(savePath,'*.mat'));
+corrFiles = {dirFiles.name};
 
 if doSetup
     all_pow_rho = [];

@@ -13,9 +13,9 @@ else
 end
 
 doSetup = true;
-doWrite = true;
+doWrite = false;
 
-timingFields = {'RT','MT'};
+timingFields = {'pretone','MT'};
 tWindow = 1;
 freqList = logFreqList([1 200],30);
 Wlength = 200;
@@ -23,10 +23,10 @@ zThresh = 5;
 % useSessions = 1:4; % R0088
 % useSessions = 5:11; % R0117
 % useSessions = 12:24; % R0142
-% useSessions = 25:29; % R0154
-useSessions = 30; % R0182
+useSessions = 25:29; % R0154
+% useSessions = 30; % R0182
 useFreqs = 1:numel(freqList);
-useTiming = 1:2;
+useTiming = 1%:2;
 
 % % % % nRT = 5;
 % % % % rtBrackets = floor(linspace(1,numel(all_rt),nRT+1));
@@ -53,7 +53,8 @@ if doSetup
         startIdx = ones(2,1);
         for iNeuron = selectedLFPFiles(useSessions)'
             iSession = iSession + 1;
-            fprintf('iRT: %02d, iFreq: %02d, iNeuron: %03d\n',iRT,iFreq,iNeuron);
+% % % %             fprintf('iRT: %02d, iFreq: %02d, iNeuron: %03d\n',iRT,iFreq,iNeuron);
+            fprintf('iFreq: %02d, iNeuron: %03d\n',iFreq,iNeuron);
             sevFile = LFPfiles_local{iNeuron};
             [~,name,~] = fileparts(sevFile);
 

@@ -4,19 +4,20 @@
 % load('201903_RTMTcorr_iSession30_nSessions30.mat')
 
 % close all;
-doSave = true;
+doSave = false;
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/RTMTCorr';
 baseName = 'RTMTcorr_R0182_wPvalLines_actualTiming';
 
 tWindow = 1;
 freqList = logFreqList([1 200],30);
 
-timingFields = {'RT','MT'};
+timingFields = {'pretone','MT'};
 
 rows = 4;
 cols = 1;
 pets = repmat(0.5,[2,7]);
 pets(1,3) = 1;
+pets(1,2) = 1;
 pets(2,5) = 1;
 rInt = 10;
 titleLabels = {'power','phase'};
@@ -26,7 +27,7 @@ climVals = [-0.5 0.5];
 cmap = jupiter;
 nSmooth = 20;
 lineWidth = 2;
-showFreqs = [2,6,18.6,55,120];
+showFreqs = [2.5,6,18.6,55,120];
 colors = lines(numel(showFreqs));
 pThresh = 0.001;
 pMarks = linspace(0.4,0.5,numel(showFreqs));
@@ -38,7 +39,7 @@ pMarks = linspace(0.4,0.5,numel(showFreqs));
 % % % %     sevFile = LFPfiles_local{selectedLFPFiles(iSession)};
 % % % %     [~,name,~] = fileparts(sevFile);
     
-for iTiming = 1:2
+for iTiming = 1%:2
     % pc = pval_adjust(data_pval,'bonferroni'); % same as multiplying by 30 and bounding to [0..1]
     timeCorrs_power_rho = squeeze((all_powerCorrs(iTiming,:,:,:)));
     timeCorrs_power_pval = squeeze((all_powerPvals(iTiming,:,:,:)))*30;
