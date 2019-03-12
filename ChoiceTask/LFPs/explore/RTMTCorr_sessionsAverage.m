@@ -31,7 +31,7 @@ end
 
 timingFields = {'RT','MT'};
 powerLabel = {'power','phase'};
-climVals = [-0.5 0.5;0 0.5];
+climVals = [-0.3 0.3;0.1 0.5];
 cmap = jupiter;
 cmaps = {cmap(1:size(cmap,1),:);cmap(round(size(cmap,1)/2):size(cmap,1),:)};
 h = ff(1400,800);
@@ -61,7 +61,7 @@ for iPP = 1:2
         end
     end
 end
-addNote(gcf,'per-subject average (n = 5)');
+addNote(gcf,'per-session average (n = 5)');
 set(gcf,'color','w');
 if doSave
     saveas(h,fullfile(savePath,'RTMTcorr_perSubject_average_n5.png'));
