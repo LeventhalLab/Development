@@ -21,6 +21,7 @@ tWindow = 1;
 freqList = logFreqList([1 200],30);
 Wlength = 200;
 zThresh = 5;
+
 % useSessions = 1:4; % R0088
 % useSessions = 5:11; % R0117
 useSessions = 12:24; % R0142
