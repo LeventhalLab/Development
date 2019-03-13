@@ -16,7 +16,7 @@ tWindow = 1;
 freqList = logFreqList([1 200],30);
 Wlength = 200;
 zThresh = 5;
-useSessions = 1;
+useSessions = 1:30;
 
 if doSetup
     all_powerCorrs = [];
