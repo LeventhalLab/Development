@@ -1,116 +1,121 @@
-% load('session_20180919_NakamuraMRL.mat', 'selectedLFPFiles')
-% load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local')
-
-close all
-doSave = true;
+% close all
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/RTMTCorr';
 
-tWindow = 1;
-showFreqs = [2,20,55,120];
+doSave = true;
+doRho = false;
 
-nSmooth = 20;
-colors = lines(4);
-lineWidth = 3;
-timingFields = {'RT','MT'};
+iTiming = 2;
+t = linspace(-1,1,size(all_pha_rho,4));
+pThresh = 0.05;
+freqList = logFreqList([1 200],30);
+useFreqs = [4,6,17,18,19];
+useSessions = 1:30;
+nSmooth = 10;
 
+h = ff(1400,800);
 rows = 4;
-cols = 2;
-pets = repmat(0.5,[2,7]);
-pets(1,3) = 1;
-pets(2,5) = 1;
-rInt = 10;
-titleLabels = {'power','phase'};
-
-for iTiming = 1:2
-    h = ff(1400,800);
-    timeCorrs_power_rho = squeeze((all_powerCorrs(iTiming,:,:,:)));
-    timeCorrs_power_pval = squeeze((all_powerPvals(iTiming,:,:,:)));
-    timeCorrs_phase_rho = squeeze((all_phaseCorrs(iTiming,:,:,:)));
-    timeCorrs_phase_pval = squeeze((all_phasePvals(iTiming,:,:,:)));
-    for iPval = 1:2
-        if iPval == 1
-            useCorrs = {timeCorrs_power_rho,timeCorrs_phase_rho};
-            ylimVals = [-0.5 0.5;0 0.5];
-            climVals = [-0.5 0.5];
-            cmap = jupiter;
-        else
-            useCorrs = {timeCorrs_power_pval,timeCorrs_phase_pval};
-            ylimVals = [0 0.001;0 0.001];
-            climVals = [0 0.001];
-            cmap = hot;
-        end
-        t = linspace(-tWindow,tWindow,size(timeCorrs_power_rho,2));
-
-        % imagesc
-        subIdxs = [1,3];
-        for iPlot = 1:2
-            subplot(rows,cols,prc(cols,[subIdxs(iPlot),iPval]));
-            corrMat = [];
-            rIdx = 1;
-            for iEvent = 1:7
-                data = squeeze(useCorrs{iPlot}(iEvent,:,:));
-                startIdx = closest(t,-pets(iTiming,iEvent));
-                endIdx = closest(t,pets(iTiming,iEvent));
-                corrMat(rIdx:rIdx+(endIdx-startIdx),:) = data(startIdx:endIdx,:);
-                rIdx = rIdx + (endIdx-startIdx) + rInt;
-            end
-            imagesc(corrMat');
-            colormap(gca,cmap);
-            set(gca,'ydir','normal');
-            caxis(climVals);
-            xticks([]);
-            yticks([]);
+cols = 7;
+use_pvals = {all_pow_pval,all_pha_pval};
+use_rhos = {all_pow_rho;all_pha_rho};
+typeLabel = {'power','phase'};
+climVals = [-0.3 0.3;0.1 0.5];
+cmap = jupiter;
+cmaps = {cmap(1:size(cmap,1),:);cmap(round(size(cmap,1)/2):size(cmap,1),:)};
+colors = magma(30);
+for iRow = 1:2
+    for iEvent = 1:7
+        subplot(rows,cols,prc(cols,[iRow*2-1,iEvent]));
+        data = squeeze(mean(use_rhos{iRow}(:,iTiming,iEvent,:,:)));
+        imagesc(data');
+        colormap(gca,cmaps{iRow});
+        set(gca,'ydir','normal');
+        caxis(climVals(iRow,:));
+        xticks([]);
+        yticks([]);
+        title({eventFieldnames{iEvent},[timingFields{iTiming},' - ',powerLabel{iRow}]});
+        if iEvent == 1
             ylabel('Freq (Hz)');
-            title([timingFields{iTiming},' ',titleLabels{iPlot}]);
-            box off;
-            cbAside(gca,'','k');
         end
+        if iEvent == 7
+            cbAside(gca,'rho','k');
+        end
+            
+        subplot(rows,cols,prc(cols,[iRow*2,iEvent]));
+        for iFreq = 1:numel(freqList)
+            data = squeeze(use_pvals{iRow}(useSessions,iTiming,iEvent,:,iFreq));
+            pval_thresh = sum(data < pThresh) / size(all_pha_rho,1);
+            plot(t,smooth(pval_thresh,nSmooth),'color',colors(iFreq,:),'lineWidth',1);
+            hold on;
+        end
+        set(gca,'color','k');
+        set(gca,'XColor','k');
+        set(gca,'YColor','k');
+        if iEvent == 1
+            ylabel(sprintf('frac. sess. p < %1.2f',pThresh));
+        end
+        if iEvent == 7
+            cb = colorbar;
+            colormap(gca,colors);
+            cb.Label.String = 'freq (Hz)';
+            cb.Limits = [0 1];
+            cb.Ticks = linspace(0,1,numel(freqList));
+            cb.TickLabels = compose('%2.1f',freqList);
+            cb.Color = 'k';
+        end
+        ylim([0 0.3]);
+        yticks(ylim);
+        xlim([-1 1]);
+        xticks([-1 0 1]);
+        grid on;
+    end
+end
+set(gcf,'color','w');
+addNote(h,{'all sessions (n = 30) averages','*not by subject*'});
+if doSave
+    h.InvertHardcopy = 'off';
+    saveas(h,fullfile(savePath,['RMTM_fracSessPval_allSessions_',timingFields{iTiming},'.png']));
+    close(h);
+end
 
-        % line plot
-        subIdxs = [2,4];
-        for iPlot = 1:2
-            subplot(rows,cols,prc(cols,[subIdxs(iPlot),iPval]));
-            lns = [];
-
-            for iFreq = 1:numel(showFreqs)
-                rIdx = 1;
-                for iEvent = 1:7
-                    data = smooth(squeeze(useCorrs{iPlot}(iEvent,:,closest(freqList,showFreqs(iFreq)))),nSmooth);
-                    startIdx = closest(t,-pets(iTiming,iEvent));
-                    endIdx = closest(t,pets(iTiming,iEvent));
-                    lns(iFreq) = plot(rIdx:rIdx+(endIdx-startIdx),data(startIdx:endIdx),'linewidth',lineWidth,'color',colors(iFreq,:));
-                    hold on;
-                    % lines/labels
-                    if iFreq == 1
-                        centerIdx = rIdx + round((endIdx-startIdx)/2);
-                        plot([centerIdx,centerIdx],ylimVals(iPlot,:),':','color',repmat(0.5,[1,3]));
-                        yLabel = 0.2;
-                        text(centerIdx,-yLabel,eventFieldnames{iEvent},'horizontalAlignment','center');
-                        if iEvent == 1 && iPlot == 1
-                            plot([rIdx+2,rIdx+(endIdx-startIdx)-2],[yLabel,yLabel],'k-','lineWidth',5);
-                            text((endIdx-startIdx)+2,yLabel,'1 second');
-                        end
-                    end
-                    rIdx = rIdx + (endIdx-startIdx) + rInt;
-                end
+if doRho
+    h = ff(1400,800);
+    rows = 2;
+    cols = 7;
+    use_pvals = {all_pow_rho,all_pha_rho};
+    typeLabel = {'power','phase'};
+    colors = magma(30);
+    ylimVals = [-.3 .3;.1 .4];
+    for iRow = 1:2
+        for iEvent = 1:7
+            subplot(rows,cols,prc(cols,[iRow,iEvent]));
+            for iFreq = 1:numel(freqList)
+                data = squeeze(use_pvals{iRow}(useSessions,iTiming,iEvent,:,iFreq));
+                pval_thresh = mean(data);% / size(all_pha_rho,1);
+                plot(t,smooth(pval_thresh,10),'color',colors(iFreq,:),'lineWidth',1);
+                hold on;
             end
-            xlim([1 rIdx-rInt]);
-            xticks([]);
-            ylim(ylimVals(iPlot,:));
-            yticks(sort(unique([0,ylim])));
-            ylabel('r');
-            box off;
-            if iPlot == 2
-                legend(lns,{'\delta','\beta','\gamma_L','\gamma_h'});
+            set(gca,'color','k');
+            set(gca,'XColor','k');
+            set(gca,'YColor','k');
+            if iEvent == 1
+                ylabel(sprintf('frac p < %1.2f',pThresh));
             end
+            if iEvent == 7
+                cb = colorbar;
+                colormap(colors);
+                cb.Limits = [0 1];
+                cb.Ticks = linspace(0,1,numel(freqList));
+                cb.TickLabels = compose('%2.1f',freqList);
+                cb.Color = 'k';
+            end
+            ylim(ylimVals(iRow,:));
+            yticks(ylim);
+            xlim([-1 1]);
+            xticks([-1 0 1]);
+            title({eventFieldnames{iEvent},[typeLabel{iRow}]});
+            grid on;
         end
     end
-    %     tightfig;
+
     set(gcf,'color','w');
-    saveFile = ['RTMTcorr_allSessions_wPvals_',timingFields{iTiming}];
-    addNote(h,saveFile);
-    if doSave
-        saveas(h,fullfile(savePath,[saveFile,'.jpg']));
-        close(h);
-    end
 end

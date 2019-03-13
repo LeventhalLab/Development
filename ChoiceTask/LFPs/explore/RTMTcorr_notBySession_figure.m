@@ -1,20 +1,23 @@
 % load('session_20180919_NakamuraMRL.mat', 'selectedLFPFiles')
 % load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local')
+% load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
+% load('201903_RTMTcorr_iSession30_nSessions30.mat')
 
-close all;
+% close all;
 doSave = false;
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/RTMTCorr';
+baseName = 'RTMTcorr_R0182_wPvalLines_actualTiming';
 
 tWindow = 1;
+freqList = logFreqList([1 200],30);
 
-colors = lines(4);
-lineWidth = 3;
-timingFields = {'RT','MT'};
+timingFields = {'pretone','MT'};
 
 rows = 4;
 cols = 1;
 pets = repmat(0.5,[2,7]);
 pets(1,3) = 1;
+pets(1,2) = 1;
 pets(2,5) = 1;
 rInt = 10;
 titleLabels = {'power','phase'};
@@ -24,11 +27,20 @@ climVals = [-0.5 0.5];
 cmap = jupiter;
 nSmooth = 20;
 lineWidth = 2;
-showFreqs = [2,18.6,55,120];
+showFreqs = [2.5,6,18.6,55,120];
+colors = lines(numel(showFreqs));
 pThresh = 0.001;
-pMarks = linspace(0.4,0.5,4);
+pMarks = linspace(0.4,0.5,numel(showFreqs));
 
-for iTiming = 1:2
+% load('201903_RTMTcorr_iSession30_nSessions30.mat');
+
+% % % % for iSession = 1:30
+% % % %     load(fullfile(savePath,['201903_RTMTcorr_iSession',num2str(iSession,'%02d'),'_nSessions01.mat']));
+% % % %     sevFile = LFPfiles_local{selectedLFPFiles(iSession)};
+% % % %     [~,name,~] = fileparts(sevFile);
+    
+for iTiming = 1%:2
+    % pc = pval_adjust(data_pval,'bonferroni'); % same as multiplying by 30 and bounding to [0..1]
     timeCorrs_power_rho = squeeze((all_powerCorrs(iTiming,:,:,:)));
     timeCorrs_power_pval = squeeze((all_powerPvals(iTiming,:,:,:)))*30;
     timeCorrs_phase_rho = squeeze((all_phaseCorrs(iTiming,:,:,:)));
@@ -109,15 +121,23 @@ for iTiming = 1:2
         ylabel('r');
         box off;
         if iPlot == 2
-            legend(lns,{'\delta','\beta','\gamma_L','\gamma_h'});
+% %             legend(lns,{'\delta','\theta','\beta','\gamma_L','\gamma_h'});
+            legend(lns,{'\delta',...
+                '\theta',...
+                '\beta',...
+                '\gamma_L',...
+                '\gamma_h'});
         end
     end
     %     tightfig;
     set(gcf,'color','w');
-    saveFile = ['RTMTcorr_allSessions_wPvalLines_',timingFields{iTiming}];
+% % % %     saveFile = ['RTMTcorr_',name(1:5),'_iSession',num2str(iSession,'%02d'),'_wPvalLines_',timingFields{iTiming}];
+    saveFile = [baseName,timingFields{iTiming}];
     addNote(h,saveFile);
     if doSave
-        saveas(h,fullfile(savePath,[saveFile,'.jpg']));
+        saveas(h,fullfile(savePath,[saveFile,'.png']));
         close(h);
-    end    
+    end
 end
+
+% % % % end
