@@ -16,7 +16,7 @@ end
 doSetup = true;
 doWrite = false;
 
-timingFields = {'pretone','MT'};
+timingFields = {'RT','MT'};
 tWindow = 1;
 freqList = logFreqList([1 200],30);
 Wlength = 200;
@@ -28,7 +28,7 @@ useSessions = 12:24; % R0142
 % useSessions = 25:29; % R0154
 % useSessions = 30; % R0182
 useFreqs = 1:numel(freqList);
-useTiming = 1;%:2;
+useTiming = 1:2;
 
 % % % % nRT = 5;
 % % % % rtBrackets = floor(linspace(1,numel(all_rt),nRT+1));

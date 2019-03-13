@@ -6,11 +6,7 @@
 % load('session_20180919_NakamuraMRL.mat', 'selectedLFPFiles')
 % load('session_20180919_NakamuraMRL.mat', 'all_ts')
 % load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local_altLookup')
-% load('entrainmentHighRes_setup.mat', 'LFP_lookup_alt')
 % load('Ray_LFPspikeCorr_setup.mat', 'LFP_lookup')
-% load('entrainmentHighRes_setup.mat', 'all_FR')
-% load('entrainmentHighRes_setup.mat', 'ndirSelUnitIds')
-% load('entrainmentHighRes_setup.mat', 'dirSelUnitIds')
 
 doSetup = false;
 doWrite = false;
@@ -85,7 +81,6 @@ doShuffle = true;
 doPlot = true;
 doSave = false;
 doWrite = false;
-doAlt = false;
 
 if ismac
     savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/xcorrRayMethod';
@@ -95,7 +90,7 @@ end
 
 nMs = 500;
 minFR = 10;
-nShuffle = 2;
+nShuffle = 200;
 startIdx = round(Wlength/2) - round(nMs/2) + 1;
 LFP_range = startIdx:startIdx + nMs - 1;
 doDirSel = 0;
@@ -115,19 +110,13 @@ end
 loadedFile = [];
 unitLookup = [];
 neuronCount = 0;
-for iNeuron = 92%useUnits
+for iNeuron = useUnits
     neuronCount = neuronCount + 1;
     unitLookup(neuronCount) = iNeuron;
 % %     load(fullfile(dataPath,['zSDE_u',num2str(iNeuron,'%03d')]),'zSDE');
-    if doAlt
-        disp('Using alternative LFPs...');
-        LFPfile = fullfile(dataPath,['Wz_power_alt_s',num2str(LFP_lookup_alt(iNeuron),'%03d')]);
-        load(fullfile(dataPath,['tsPeths_alt_u',num2str(iNeuron,'%03d')]),'tsPeths');
-    else
-        LFPfile = fullfile(dataPath,['Wz_power_s',num2str(LFP_lookup(iNeuron),'%03d')]);
-        load(fullfile(dataPath,['tsPeths_u',num2str(iNeuron,'%03d')]),'tsPeths');
-    end
+    load(fullfile(dataPath,['tsPeths_u',num2str(iNeuron,'%03d')]),'tsPeths');
     zSDE = tsPeths_to_zSDE(tsPeths);
+    LFPfile = fullfile(dataPath,['Wz_power_s',num2str(LFP_lookup(iNeuron),'%03d')]);
     if isempty(loadedFile) || ~strcmp(loadedFile,LFPfile)
         load(LFPfile,'Wz_power');
     end
@@ -275,9 +264,6 @@ for iNeuron = 92%useUnits
             title('LFP');
         end
         set(gcf,'color','w');
-        if doAlt
-            addNote(h,'alternative LFP wire');
-        end
         if doSave
             saveas(h,fullfile(savePath,['u',num2str(iNeuron,'%03d'),'_ray_xcorr_norm.png']));
             close(h);
