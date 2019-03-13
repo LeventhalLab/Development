@@ -78,9 +78,9 @@ end
 % load('Ray_LFPspikeCorr_setup.mat')
 doCompile = true;
 doShuffle = true;
-doPlot = false;
+doPlot = true;
 doSave = false;
-doWrite = true;
+doWrite = false;
 
 if ismac
     savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/xcorrRayMethod';

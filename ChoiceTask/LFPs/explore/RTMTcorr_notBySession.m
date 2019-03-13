@@ -2,9 +2,10 @@
 % load('session_20180919_NakamuraMRL.mat', 'all_trials')
 % load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local')
 % load('session_20180919_NakamuraMRL.mat', 'selectedLFPFiles')
+% load('session_20181218_highresEntrainment.mat', 'LFPfiles_local_altLookup')
 % load('RTMT_rawData.mat')
 
-baseName = '201903_RTMTcorr_R0182_nSessions';
+baseName = '201903_RTMTcorr_R0142_altLookup';
 
 if ismac
     savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/RTMTCorr';
@@ -22,11 +23,11 @@ Wlength = 200;
 zThresh = 5;
 % useSessions = 1:4; % R0088
 % useSessions = 5:11; % R0117
-% useSessions = 12:24; % R0142
-useSessions = 25:29; % R0154
+useSessions = 12:24; % R0142
+% useSessions = 25:29; % R0154
 % useSessions = 30; % R0182
 useFreqs = 1:numel(freqList);
-useTiming = 1%:2;
+useTiming = 1;%:2;
 
 % % % % nRT = 5;
 % % % % rtBrackets = floor(linspace(1,numel(all_rt),nRT+1));
@@ -56,6 +57,7 @@ if doSetup
 % % % %             fprintf('iRT: %02d, iFreq: %02d, iNeuron: %03d\n',iRT,iFreq,iNeuron);
             fprintf('iFreq: %02d, iNeuron: %03d\n',iFreq,iNeuron);
             sevFile = LFPfiles_local{iNeuron};
+            sevFile = LFPfiles_local_altLookup{strcmp(sevFile,{LFPfiles_local_altLookup{:,1}}),2};
             [~,name,~] = fileparts(sevFile);
 
             [sevFilt,Fs,decimateFactor] = loadCompressedSEV(sevFile,[]);
