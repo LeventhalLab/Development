@@ -7,11 +7,11 @@ freqList = logFreqList([1 200],30);
 eventFieldnames_wFake = {eventFieldnames{:} 'Inter-trial'};
 nShuffle = 1000;
 
-doPlots_dirSelSignifiance = true;
+doPlots_dirSelSignifiance = false;
 doPlots_spectrum = false;
 doPlot_fractionBands = false;
 doPlot_meanBands = false;
-doPlot_meanHeatmaps = false;
+doPlot_meanHeatmaps = true;
 
 if doPlots_dirSelSignifiance
     units_dirSel = ismember(unitLookup,dirSelUnitIds);

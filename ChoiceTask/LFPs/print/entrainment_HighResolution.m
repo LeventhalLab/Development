@@ -1,12 +1,12 @@
-close all;
+% close all;
 doSave = false;
 
 doPlot_pvalDist = false;
 doPlot_MRLs = false;
 doPlot_kuiper = false;
 doPlot_MRLmontage = false;
-doPlot_mats = true;
-doPlot_bars = false;
+doPlot_mats = false;
+doPlot_bars = true;
 
 useLines = true; % for doPlot_bars
 

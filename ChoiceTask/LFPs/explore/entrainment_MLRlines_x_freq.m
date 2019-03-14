@@ -1,7 +1,8 @@
+% MRLXFREQ
 % use /explore/entrainmentHighRes_allEvents.m
-load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
-load('session_20180919_NakamuraMRL.mat','dirSelUnitIds','ndirSelUnitIds','primSec')
-load('session_20181218_highresEntrainment.mat')
+% load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
+% load('session_20180919_NakamuraMRL.mat','dirSelUnitIds','ndirSelUnitIds','primSec')
+% load('session_20181218_highresEntrainment.mat')
 close all
 
 doSetup = false;

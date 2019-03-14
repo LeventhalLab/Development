@@ -25,7 +25,7 @@ h = ff(1000,800);
 
 for iTrialType = 1:3
     for iDirSel = 1:3
-        use_pvals = conds_pvals{iTrialType}(dirSelRanges{iDirSel},iFreq);
+% % % %         use_pvals = conds_pvals{iTrialType}(dirSelRanges{iDirSel},iFreq);
         sigMat = conds_angles{iTrialType}(dirSelRanges{iDirSel},:,iFreq);
         if iTrialType ~= 1
             use_mus = inOut_data_mus{iTrialType-1}(dirSelRanges{iDirSel},iFreq);
@@ -36,7 +36,7 @@ for iTrialType = 1:3
         
         Z = sigMat ./ sum(sigMat,2);
         Z = circshift(Z,6,2);
-        meanZ = [mean(Z) mean(Z)];
+        meanZ = [nanmean(Z) nanmean(Z)];
 
         [~,kZ] = sort(max(Z'));
         Z = Z(kZ,:);
@@ -92,6 +92,6 @@ end
 set(gcf,'color','w');
 addNote(h,[num2str(freqList(iFreq),'%1.2f'),' Hz'],20);
 if doSave
-    saveas(h,fullfile(savePath,['3D_entrainment_stacked_f',num2str(iFreq,'%02d'),'.png']));
+    saveas(h,fullfile(savePath,['3D_entrainment_stacked_f',num2str(iFreq,'%02d'),'_alt.png']));
     close(h);
 end

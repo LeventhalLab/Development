@@ -9,6 +9,7 @@
 
 doSetup = true;
 doSave = false;
+doAlt = false;
 % freqList = logFreqList([1 200],10);
 % freqList = [3.2,19];
 % freqList = {[1 4;4 7;8 12;13 30]};
@@ -48,7 +49,9 @@ if doSetup
     for iNeuron = 1:numel(all_ts)
         sevFile = LFPfiles_local{iNeuron};
         % replace with alternative for LFP
-        sevFile = LFPfiles_local_altLookup{strcmp(sevFile,{LFPfiles_local_altLookup{:,1}}),2};
+        if doAlt
+            sevFile = LFPfiles_local_altLookup{strcmp(sevFile,{LFPfiles_local_altLookup{:,1}}),2};
+        end
         disp(sevFile);
         [~,name,~] = fileparts(sevFile);
         % only load uniques

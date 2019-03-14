@@ -82,9 +82,9 @@ end
 % load('Ray_LFPspikeCorr_setup.mat')
 doCompile = true;
 doShuffle = true;
-doPlot = true;
+doPlot = false;
 doSave = false;
-doWrite = false;
+doWrite = true;
 doAlt = false;
 
 if ismac
@@ -115,7 +115,7 @@ end
 loadedFile = [];
 unitLookup = [];
 neuronCount = 0;
-for iNeuron = 92%useUnits
+for iNeuron = useUnits
     neuronCount = neuronCount + 1;
     unitLookup(neuronCount) = iNeuron;
 % %     load(fullfile(dataPath,['zSDE_u',num2str(iNeuron,'%03d')]),'zSDE');
@@ -285,6 +285,6 @@ for iNeuron = 92%useUnits
     end
 end
 if doWrite
-    save('20190220_RayLFP_compiled','lag','all_acors','all_shuff_pvals',...
+    save('20190314_RayLFP_compiled_altWires','lag','all_acors','all_shuff_pvals',...
         'all_acors_shuffled_mean','unitLookup','nShuffle','freqList');
 end
