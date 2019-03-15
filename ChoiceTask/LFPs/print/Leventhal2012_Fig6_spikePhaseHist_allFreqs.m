@@ -9,7 +9,7 @@
 
 doSetup = true;
 doSave = false;
-doAlt = false;
+doAlt = true;
 % freqList = logFreqList([1 200],10);
 % freqList = [3.2,19];
 % freqList = {[1 4;4 7;8 12;13 30]};
@@ -46,6 +46,13 @@ if doSetup
     all_spikeHist_inTrial_mus = NaN(numel(all_ts),numelFreqs);
     all_spikeHist_inTrial_angles = NaN(numel(all_ts),nBins,numelFreqs);
     all_spikeHist_inTrial_alphas = cell(numel(all_ts),numelFreqs);
+    
+    all_spikeHist_inTrial_pvals_surr = NaN(numel(all_ts),numelFreqs);
+    all_spikeHist_inTrial_rs_surr = NaN(numel(all_ts),numelFreqs);
+    all_spikeHist_inTrial_mus_surr = NaN(numel(all_ts),numelFreqs);
+    all_spikeHist_inTrial_angles_surr = NaN(numel(all_ts),nBins,numelFreqs);
+    all_spikeHist_inTrial_alphas_surr = cell(numel(all_ts),numelFreqs);
+    
     for iNeuron = 1:numel(all_ts)
         sevFile = LFPfiles_local{iNeuron};
         % replace with alternative for LFP
