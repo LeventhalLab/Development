@@ -28,7 +28,7 @@ eventFieldnames_wFake = {eventFieldnames{:} 'inter-trial'};
 
 
 if doPlot_MRL_pval
-    % we want to show that the mean MRL for dirSel condition is a significant departure from chance (shuffled units)
+    % we want to show that the mean MRL for dirSel condition is a significant departure from all unit scramble
     nShuffle = 1000;
     pThresh = 0.05;
     inOut_data_rs = {all_spikeHist_inTrial_rs,all_spikeHist_rs};
