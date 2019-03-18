@@ -40,18 +40,18 @@ if doSetup
 end
 
 if doFig
-    % requires doSetup
+    doSave = false;
+    doSetup = false;
     close all
     iTrial = 3;
     eventFieldnames_wFake = {eventFieldnames{:} 'interTrial'};
-    doSave = true;
-    useEvents = [2:4];
+    useEvents = [1:8];
     rows = 5;
     cols = numel(useEvents);
     lineWidth = 1;
     xlimVals = [-1 1];
     nSmooth = 200;
-    if false
+    if doSetup
         for iSession = 30 % 30 -> u344-366, dir: 348,349,356,357,361,363,364
             iNeuron = selectedLFPFiles(iSession);
             disp(num2str(iSession));
