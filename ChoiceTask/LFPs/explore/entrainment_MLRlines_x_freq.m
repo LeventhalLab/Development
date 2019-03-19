@@ -1,4 +1,4 @@
-% MRLXFREQ
+% MRLXFREQ - DEPRECATED
 % use /explore/entrainmentHighRes_allEvents.m
 % load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
 % load('session_20180919_NakamuraMRL.mat','dirSelUnitIds','ndirSelUnitIds','primSec')

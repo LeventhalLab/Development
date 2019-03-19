@@ -7,12 +7,38 @@
 
 doSetup = true;
 doAlt = true;
+doWrite = true;
+doDebug = false;
 
 freqList = logFreqList([1 200],30);
 nBins = 12;
 binEdges = linspace(-pi,pi,nBins+1);
 loadedFile = [];
 nSurr = 200;
+
+if doDebug
+    spiketrain_gamma_order = 0.5; % poisson
+    [t,s] = fastgammatrain(spiketrain_duration,spiketrain_meanrate,spiketrain_gamma_order);
+    tsp = t(s==1)' / 1000;
+    
+    h = ff(1000,600);
+    rows = 2;
+    cols = 2;
+    binEdges = linspace(0,1,100);
+    useTs = {ts,tsp};
+    tsLabels = {'ts','tsp'};
+    for iTs = 1:2
+        subplot(rows,cols,prc(cols,[1 iTs]));
+        histogram(diff(useTs{iTs}),binEdges);
+        title(tsLabels{iTs});
+        
+        subplot(rows,cols,prc(cols,[2 iTs]));
+        plot(diff(useTs{iTs}));
+        xlim([1 numel(useTs{iTs})]);
+        ylim([0 2]);
+        title('diff');
+    end
+end
 
 if doSetup
     entrainmentUnits = [];
@@ -48,6 +74,7 @@ if doSetup
         
         for iSurr = 1:nSurr + 1
             if iSurr > 1 % replace ts
+                ts = all_ts{iNeuron};
                 spiketrain_duration = max(ts) * 1000; % ms
                 spiketrain_meanrate = numel(ts) / max(ts); % s/sec
                 spiketrain_gamma_order = 1; % poisson
@@ -63,7 +90,7 @@ if doSetup
                     inTrial_ids = [];
                     for ii = 1:size(trialTimeRanges,1)
                         theseIds = find(ts > trialTimeRanges(ii,1) & ts <= trialTimeRanges(ii,2));
-                        inTrial_ids = [inTrial_ids;theseIds];
+                        inTrial_ids = [inTrial_ids;theseIds]; % compile for inter-trial
                         spikeAngles = [spikeAngles;angle(W(floor(ts(theseIds)*Fs),:))]; % compiling inTrial spikeAngles
                     end
                 else % INTER-TRIAL
@@ -73,7 +100,8 @@ if doSetup
                     
                     % match in-trial sample count
                     useSamples = ts_samples(interTrial_ids);
-                    spikeAngles = angle(W(randsample(useSamples,numel(inTrial_ids)),:));
+                    limitSamples = randsample(useSamples,numel(inTrial_ids));
+                    spikeAngles = angle(W(limitSamples,:));
                 end
                 for iFreq = 1:numel(freqList)
                     alpha = spikeAngles(:,iFreq);
@@ -86,6 +114,6 @@ if doSetup
         end
     end
     if doWrite
-        save('20190315_entrain','entrain_pvals','entrain_rs','entrain_mus','entrain_hist','binEdges','entrainmentUnits');
+        save('20190318_entrain','entrain_pvals','entrain_rs','entrain_mus','entrain_hist','binEdges','entrainmentUnits');
     end
 end

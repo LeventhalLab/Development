@@ -1,8 +1,19 @@
+% MRLXFREQ
 % load('session_20181218_highresEntrainment.mat','dirSelUnitIds','ndirSelUnitIds','primSec')
 % load('session_20181218_highresEntrainment.mat', 'eventFieldnames')
 
-doSave = true;
+% format
+% % entrainmentUnits = [];
+% % entrain_pvals = NaN(nSurr,2,numel(all_ts),numel(freqList)); % pos2(1) = In-trial, (2) = Inter-trial
+% % entrain_rs = NaN(nSurr,2,numel(all_ts),numel(freqList));
+% % entrain_mus = NaN(nSurr,2,numel(all_ts),numel(freqList));
+% % entrain_hist = NaN(nSurr,2,numel(all_ts),nBins,numel(freqList));
+
+doSave = false;
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/entrainmentFigure';
+
+do_3Dhistograms = false;
+do_entrain_pvalsMRLs_dirUnits = true;
 
 freqList = logFreqList([1 200],30);
 nSurr = 200;
@@ -16,114 +27,272 @@ dirLabels_wCount = {['allUnits (n = ',num2str(numel(dirUnits{1})),')'],...
 inLabels = {'IN Trial','INTER Trial'};
 surrLabels = {'Real Spikes','Poisson Spikes'};
 
-close all
-h = ff(1000,800);
-rows = 3;
-cols = 2;
-% format: entrain_pvals(iSurr,iIn,iNeuron,iFreq)
-pThresh = 0.05;
-colors = [0 0 0;lines(2)];
-poissonAlpha = [1 0.25];
-linewidths = [1 2 2];
-lns = [];
-for iPoisson = 1:2
+if do_3Dhistograms
+    iFreq = 6;
+    
+    close all
+    h = ff(1400,800);
+    rows = 4;
+    cols = 4;
+    linewidths = [0.5,2,2];
+    linecolors = [0 0 0;lines(2)];
+    iRow = 0;
+    for iIn = 1:2
+        for iPoisson = 1:2
+            iRow = iRow + 1;
+            for iDir = 1:3
+                subplot(rows,cols,prc(cols,[iRow iDir]));
+                if iPoisson == 1
+                    data = squeeze(entrain_hist(1,iIn,dirUnits{iDir},:,iFreq));
+                    norm_sum = sum(data,2);
+                    useIds = find(~isnan(norm_sum));
+                    Z = data(useIds,:) ./ norm_sum(useIds);
+                    Z = circshift(Z,6,2);
+                    meanZ = [nanmean(Z) nanmean(Z)];
+                else
+                    all_meanZ = [];
+                    all_Z = [];
+                    for iSurr = 1:nSurr
+                        data = squeeze(entrain_hist(iSurr,iIn,dirUnits{iDir},:,iFreq));
+                        norm_sum = sum(data,2);
+                        useIds = find(~isnan(norm_sum));
+                        Z = data(useIds,:) ./ norm_sum(useIds);
+                        all_Z(iSurr,:,:) = circshift(Z,6,2);
+                        all_meanZ(iSurr,:) = [nanmean(Z) nanmean(Z)];
+                    end
+                    meanZ = mean(all_meanZ);
+                    Z = squeeze(mean(all_Z));
+                end
+                [~,kZ] = sort(max(Z'));
+                Z = Z(kZ,:);
+                kBins = [];
+                for iNeuron = 1:size(Z,1)
+                    [~,k] = max(Z(iNeuron,:));
+                    kBins(iNeuron) = k;
+                end
+                [~,k] = sort(kBins);
+                Z = Z(k,:);
+
+                imagesc([Z';Z']);
+                caxis([0.05 .1])
+                usexlims = [0.5 size(Z,1) + 0.5];
+                xtickVals = [1 size(Z,1)];
+                xlim(usexlims);
+                xticks(xtickVals);
+                xticklabels([]);
+                xlabel('units');
+                yticks([0.5 12.5 24.5]);
+                yticklabels([0 360 720]);
+                ylabel('\phi');
+                colormap(jet);
+                title({inLabels{iIn},surrLabels{iPoisson},dirLabels{iDir}});
+
+                subplot(rows,cols,prc(cols,[iRow 4]));
+                plot(meanZ,'linewidth',linewidths(iDir),'color',linecolors(iDir,:));
+                hold on;
+                xlim([1 numel(meanZ)]);
+                xticks([1 12 24]);
+                xticklabels([0 360 720]);
+                xlabel('\phi');
+                ylabel('mean');
+                ylim([.08 .09]);
+                yticks(ylim);
+            end
+            legend(dirLabels_wCount,'fontsize',8);
+        end
+    end
+    set(gcf,'color','w');
+    if doSave
+        saveas(h,fullfile(savePath,'entrain_coloredMatrixWLines.png'));
+        close(h);
+    end
+end
+
+if do_entrain_pvalsMRLs_dirUnits
+    close all
+    h = ff(1000,800);
+    rows = 2;
+    cols = 2;
+    pThresh = 0.05;
+    colors = [0 0 0;lines(2)];
+    poissonAlpha = [1 0.25];
+    linewidths = [1 2 2];
+    lns = [];
+    pThresh = 0.05;
+    fromChanceYs = [.98 .95 .92];
+    fromShuffleYs = [NaN .85 .82];
+    fromLabels = {'diff all','diff poisson'};
+    nShuffle = 1000;
+    allUnits = find(ismember(dirUnits{1},entrainmentUnits));
+    
     for iIn = 1:2
         subplot(rows,cols,prc(cols,[1 iIn]));
         for iDir = 1:3
-            pMat_surr = [];
             pMat = [];
-            for iFreq = 1:numel(freqList)
-                if iPoisson == 1
-                    data = squeeze(entrain_pvals(1,iIn,dirUnits{iDir},iFreq));
-                    pMat(iFreq) = sum(data < pThresh) ./ sum(ismember(dirUnits{iDir},entrainmentUnits));
-                else
-                    for iSurr = 1:nSurr
-                        data = squeeze(entrain_pvals(iSurr+1,iIn,dirUnits{iDir},iFreq));
-                        pMat_surr(iSurr,iFreq) = sum(data < pThresh) ./ sum(ismember(dirUnits{iDir},entrainmentUnits));
+            for iPoisson = 1:2
+                all_pMat = [];
+                shuffMat = [];
+                for iFreq = 1:numel(freqList)
+                    useUnits = ismember(dirUnits{iDir},entrainmentUnits);
+                    if iPoisson == 1
+                        data = squeeze(entrain_pvals(1,iIn,dirUnits{iDir}(useUnits),iFreq));
+                        pMat(iFreq) = sum(data < pThresh) ./ sum(useUnits);
+                        
+                        for iShuffle = 1:nShuffle
+                            shuffUnits = randsample(allUnits,sum(useUnits));
+                            data = squeeze(entrain_pvals(1,iIn,shuffUnits,iFreq));
+                            shuffMat(iShuffle,iFreq) = sum(data < pThresh) ./ sum(useUnits);
+                        end
+                    else
+                        for iSurr = 1:nSurr
+                            data = squeeze(entrain_pvals(iSurr+1,iIn,dirUnits{iDir},iFreq));
+                            all_pMat(iSurr,iFreq) = sum(data < pThresh) ./ sum(useUnits);
+                        end
                     end
-                    pMat = mean(pMat_surr);
+                end
+                if ~isempty(all_pMat)
+                    diffFromChance = [];
+                    for iFreq = 1:numel(freqList)
+                        diffFromChance(iFreq) = sum(pMat(iFreq) < all_pMat(:,iFreq)) / nSurr;
+                    end
+                    pIdx = find(diffFromChance < pThresh);
+                    plot(pIdx,repmat(fromChanceYs(iDir),[1,numel(pIdx)]),'s','markerfacecolor',colors(iDir,:),'MarkerEdgeColor','none');
+                    hold on;
+                    pMat = mean(all_pMat);
+                end
+                ln = plot(pMat,'color',[colors(iDir,:) poissonAlpha(iPoisson)],'linewidth',linewidths(iDir));
+                hold on;
+                if iPoisson == 1
+                    lns(iDir) = ln;
+                    if iDir > 1
+                        diffFromShuff = [];
+                        for iFreq = 1:numel(freqList)
+                            diffFromShuff(iFreq) = sum(pMat(iFreq) < shuffMat(:,iFreq)) / nShuffle;
+                        end
+                        pIdx = find(diffFromShuff < pThresh | diffFromShuff >= 1-pThresh);
+                        plot(pIdx,repmat(fromShuffleYs(iDir),[1,numel(pIdx)]),'s','markerfacecolor',colors(iDir,:),'MarkerEdgeColor','none');
+                    end
                 end
             end
-            plot(pMat,'color',[colors(iDir,:) poissonAlpha(iPoisson)],'linewidth',linewidths(iDir));
-            hold on;
         end
+        xlim([0 numel(freqList)+1]);
         xticks(1:numel(freqList));
         xticklabels(compose('%1.1f',freqList));
         xtickangle(270);
         xlabel('freq. (Hz)');
         ylim([0 1]);
-        yticks(ylim);
+        yticks(sort([ylim,mean(fromChanceYs),nanmean(fromShuffleYs)]));
+        yticklabels({'0',fromLabels{:},'1'});
         ylabel(sprintf('frac. p < %1.2f',pThresh));
-        legend(dirLabels_wCount);
         title([inLabels{iIn}]);
+        if iPoisson == 2
+            legend(lns(1:3),dirLabels_wCount,'location','northoutside');
+        end
+        
         
         subplot(rows,cols,prc(cols,[2 iIn]));
+        maxY = 0.05;
         for iDir = 1:3
-            pMat_surr = [];
             pMat = [];
-            for iFreq = 1:numel(freqList)
-                if iPoisson == 1
-% %                     useUnits = squeeze(entrain_pvals(1,iIn,dirUnits{iDir},iFreq)) < pThresh;
-% %                     data = squeeze(entrain_rs(1,iIn,dirUnits{iDir}(useUnits),iFreq));
-                    data = squeeze(entrain_rs(1,iIn,dirUnits{iDir},iFreq));
-                    pMat(iFreq) = nanmean(data);
-                else
-                    for iSurr = 1:nSurr
-                        data = squeeze(entrain_rs(iSurr+1,iIn,dirUnits{iDir},iFreq));
-                        pMat_surr(iSurr,iFreq) = mean(data);
+            for iPoisson = 1:2
+                all_pMat = [];
+                shuffMat = [];
+                for iFreq = 1:numel(freqList)
+                    useUnits = ismember(dirUnits{iDir},entrainmentUnits);
+                    if iPoisson == 1
+                        data = squeeze(entrain_rs(1,iIn,dirUnits{iDir}(useUnits),iFreq));
+                        pMat(iFreq) = nanmean(data);
+                        
+                        for iShuffle = 1:nShuffle
+                            shuffUnits = randsample(allUnits,sum(useUnits));
+                            data = squeeze(entrain_rs(1,iIn,shuffUnits,iFreq));
+                            shuffMat(iShuffle,iFreq) = nanmean(data);
+                        end
+                    else
+                        for iSurr = 1:nSurr
+                            data = squeeze(entrain_rs(iSurr+1,iIn,dirUnits{iDir},iFreq));
+                            all_pMat(iSurr,iFreq) = nanmean(data);
+                        end
                     end
-                    pMat = nanmean(pMat_surr);
+                end
+                if ~isempty(all_pMat)
+                    diffFromChance = [];
+                    for iFreq = 1:numel(freqList)
+                        diffFromChance(iFreq) = sum(pMat(iFreq) < all_pMat(:,iFreq)) / nSurr;
+                    end
+                    pIdx = find(diffFromChance < pThresh);
+                    plot(pIdx,repmat(fromChanceYs(iDir)*maxY,[1,numel(pIdx)]),'s','markerfacecolor',colors(iDir,:),'MarkerEdgeColor','none');
+                    hold on;
+                    pMat = mean(all_pMat);
+                end
+                ln = plot(pMat,'color',[colors(iDir,:) poissonAlpha(iPoisson)],'linewidth',linewidths(iDir));
+                hold on;
+                if iPoisson == 1
+                    lns(iDir) = ln;
+                    if iDir > 1
+                        diffFromShuff = [];
+                        for iFreq = 1:numel(freqList)
+                            diffFromShuff(iFreq) = sum(pMat(iFreq) < shuffMat(:,iFreq)) / nShuffle;
+                        end
+                        pIdx = find(diffFromShuff < pThresh | diffFromShuff >= 1-pThresh);
+                        plot(pIdx,repmat(fromShuffleYs(iDir)*maxY,[1,numel(pIdx)]),'s','markerfacecolor',colors(iDir,:),'MarkerEdgeColor','none');
+                    end
                 end
             end
-            plot(pMat,'color',[colors(iDir,:) poissonAlpha(iPoisson)],'linewidth',linewidths(iDir));
-            hold on;
         end
+        xlim([0 numel(freqList)+1]);
         xticks(1:numel(freqList));
         xticklabels(compose('%1.1f',freqList));
         xtickangle(270);
         xlabel('freq. (Hz)');
-        ylim([0 0.07]);
-        yticks(ylim);
-        ylabel(sprintf('mean MRL',pThresh));
-        legend(dirLabels_wCount);
+        ylim([0 maxY]);
+        yticks(sort([ylim,mean(fromChanceYs)*maxY,nanmean(fromShuffleYs)*maxY]));
+        yticklabels({'0',fromLabels{:},'1'});
+        ylabel('mean MRL');
         title([inLabels{iIn}]);
-        
-        subplot(rows,cols,prc(cols,[3 iIn]));
-        for iDir = 1:3
-            pMat_surr = [];
-            pMat = [];
-            for iFreq = 1:numel(freqList)
-                if iPoisson == 1
-                    useUnits = squeeze(entrain_pvals(1,iIn,dirUnits{iDir},iFreq)) < pThresh;
-                    data = squeeze(entrain_rs(1,iIn,dirUnits{iDir}(useUnits),iFreq));
-% %                     data = squeeze(entrain_rs(1,iIn,dirUnits{iDir},iFreq));
-                    pMat(iFreq) = nanmean(data);
-                else
-                    for iSurr = 1:nSurr
-                        data = squeeze(entrain_rs(iSurr+1,iIn,dirUnits{iDir},iFreq));
-                        pMat_surr(iSurr,iFreq) = mean(data);
-                    end
-                    pMat = nanmean(pMat_surr);
-                end
-            end
-            plot(pMat,'color',[colors(iDir,:) poissonAlpha(iPoisson)],'linewidth',linewidths(iDir));
-            hold on;
+        if iPoisson == 2
+            legend(lns(1:3),dirLabels_wCount,'location','northoutside');
         end
-        xticks(1:numel(freqList));
-        xticklabels(compose('%1.1f',freqList));
-        xtickangle(270);
-        xlabel('freq. (Hz)');
-        ylim([0 0.07]);
-        yticks(ylim);
-        ylabel(sprintf('mean MRL for p < %1.2f units',pThresh));
-        legend(dirLabels_wCount);
-        title([inLabels{iIn}]);
+
+% %         subplot(rows,cols,prc(cols,[2 iIn]));
+% %         for iDir = 1:3
+% %             for iPoisson = 1:2
+% %                 pMat = [];
+% %                 for iFreq = 1:numel(freqList)
+% %                     if iPoisson == 1
+% %                         data = squeeze(entrain_rs(1,iIn,dirUnits{iDir},iFreq));
+% %                         pMat(iFreq) = nanmean(data);
+% %                     else
+% %                         for iSurr = 1:nSurr
+% %                             data = squeeze(entrain_rs(iSurr+1,iIn,dirUnits{iDir},iFreq));
+% %                             pMat(iSurr,iFreq) = nanmean(data);
+% %                         end
+% %                     end
+% %                 end
+% %                 if size(pMat,1) > 1
+% %                     pMat = mean(pMat);
+% %                 end
+% %                 plot(pMat,'color',[colors(iDir,:) poissonAlpha(iPoisson)],'linewidth',linewidths(iDir));
+% %                 hold on;
+% %             end
+% %         end
+% %         xlim([0 numel(freqList)+1]);
+% %         xticks(1:numel(freqList));
+% %         xticklabels(compose('%1.1f',freqList));
+% %         xtickangle(270);
+% %         xlabel('freq. (Hz)');
+% %         ylim([0 0.05]);
+% %         yticks(ylim);
+% %         ylabel('mean MRL');
+% %         title([inLabels{iIn}]);
+
     end
-end
-addNote(h,{'light colors indicate firing-rate-matached Poisson spiking',...
-    'averaged over 200 "Poisson-simulated" sessions'});
-set(gcf,'color','w');
-if doSave
-    saveas(h,fullfile(savePath,'entrain_pvalsMRLs_dirUnits.png'));
-    close(h);
+
+    addNote(h,{'light colors indicate firing-rate-matached Poisson spiking',...
+        'averaged over 200 "Poisson-simulated" sessions'});
+    set(gcf,'color','w');
+    if doSave
+        saveas(h,fullfile(savePath,'entrain_pvalsMRLs_dirUnits.png'));
+        close(h);
+    end
 end
