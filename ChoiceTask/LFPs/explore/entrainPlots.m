@@ -1,4 +1,5 @@
 % MRLXFREQ
+% load('20190318_entrain.mat')
 % load('session_20181218_highresEntrainment.mat','dirSelUnitIds','ndirSelUnitIds','primSec')
 % load('session_20181218_highresEntrainment.mat', 'eventFieldnames')
 
@@ -247,45 +248,12 @@ if do_entrain_pvalsMRLs_dirUnits
         xlabel('freq. (Hz)');
         ylim([0 maxY]);
         yticks(sort([ylim,mean(fromChanceYs)*maxY,nanmean(fromShuffleYs)*maxY]));
-        yticklabels({'0',fromLabels{:},'1'});
+        yticklabels({'0',fromLabels{:},num2str(maxY,2)});
         ylabel('mean MRL');
         title([inLabels{iIn}]);
         if iPoisson == 2
             legend(lns(1:3),dirLabels_wCount,'location','northoutside');
         end
-
-% %         subplot(rows,cols,prc(cols,[2 iIn]));
-% %         for iDir = 1:3
-% %             for iPoisson = 1:2
-% %                 pMat = [];
-% %                 for iFreq = 1:numel(freqList)
-% %                     if iPoisson == 1
-% %                         data = squeeze(entrain_rs(1,iIn,dirUnits{iDir},iFreq));
-% %                         pMat(iFreq) = nanmean(data);
-% %                     else
-% %                         for iSurr = 1:nSurr
-% %                             data = squeeze(entrain_rs(iSurr+1,iIn,dirUnits{iDir},iFreq));
-% %                             pMat(iSurr,iFreq) = nanmean(data);
-% %                         end
-% %                     end
-% %                 end
-% %                 if size(pMat,1) > 1
-% %                     pMat = mean(pMat);
-% %                 end
-% %                 plot(pMat,'color',[colors(iDir,:) poissonAlpha(iPoisson)],'linewidth',linewidths(iDir));
-% %                 hold on;
-% %             end
-% %         end
-% %         xlim([0 numel(freqList)+1]);
-% %         xticks(1:numel(freqList));
-% %         xticklabels(compose('%1.1f',freqList));
-% %         xtickangle(270);
-% %         xlabel('freq. (Hz)');
-% %         ylim([0 0.05]);
-% %         yticks(ylim);
-% %         ylabel('mean MRL');
-% %         title([inLabels{iIn}]);
-
     end
 
     addNote(h,{'light colors indicate firing-rate-matached Poisson spiking',...

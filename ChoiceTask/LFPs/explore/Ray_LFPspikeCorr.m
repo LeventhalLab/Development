@@ -84,7 +84,7 @@ doCompile = true;
 doShuffle = true;
 doPlot = false;
 doSave = false;
-doWrite = true;
+doWrite = false;
 doAlt = false;
 
 if ismac

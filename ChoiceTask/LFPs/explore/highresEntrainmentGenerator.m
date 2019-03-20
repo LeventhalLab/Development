@@ -8,37 +8,13 @@
 doSetup = true;
 doAlt = true;
 doWrite = true;
-doDebug = false;
 
 freqList = logFreqList([1 200],30);
 nBins = 12;
 binEdges = linspace(-pi,pi,nBins+1);
 loadedFile = [];
 nSurr = 200;
-
-if doDebug
-    spiketrain_gamma_order = 0.5; % poisson
-    [t,s] = fastgammatrain(spiketrain_duration,spiketrain_meanrate,spiketrain_gamma_order);
-    tsp = t(s==1)' / 1000;
-    
-    h = ff(1000,600);
-    rows = 2;
-    cols = 2;
-    binEdges = linspace(0,1,100);
-    useTs = {ts,tsp};
-    tsLabels = {'ts','tsp'};
-    for iTs = 1:2
-        subplot(rows,cols,prc(cols,[1 iTs]));
-        histogram(diff(useTs{iTs}),binEdges);
-        title(tsLabels{iTs});
-        
-        subplot(rows,cols,prc(cols,[2 iTs]));
-        plot(diff(useTs{iTs}));
-        xlim([1 numel(useTs{iTs})]);
-        ylim([0 2]);
-        title('diff');
-    end
-end
+minFR = 5;
 
 if doSetup
     entrainmentUnits = [];
@@ -51,7 +27,7 @@ if doSetup
         disp(['--> iNeuron ',num2str(iNeuron)]);
         ts = all_ts{iNeuron};
         FR = numel(ts) / max(ts);
-        if FR < 5
+        if FR < minFR
             disp(['skipping at ',num2str(FR,2),' Hz']);
             continue;
         end
@@ -60,16 +36,16 @@ if doSetup
         if doAlt
             sevFile = LFPfiles_local_altLookup{strcmp(sevFile,{LFPfiles_local_altLookup{:,1}}),2};
         end
-        [~,name,~] = fileparts(sevFile);
-        % only load uniques
+        % only load unique sessions
         if isempty(loadedFile) || ~strcmp(loadedFile,sevFile)
             [sevFilt,Fs,decimateFactor,loadedFile] = loadCompressedSEV(sevFile,[]);
-            curTrials = all_trials{iNeuron};
-            [trialIds,allTimes] = sortTrialsBy(curTrials,'RT');
-            trialTimeRanges = compileTrialTimeRanges(curTrials(trialIds));
+            trials = all_trials{iNeuron};
+            [trialIds,allTimes] = sortTrialsBy(trials,'RT');
+            % [ ] UPDATE AND RERUN WITH INCORR TRIALS
+            trialTimeRanges = compileTrialTimeRanges(trials(trialIds));
 
             W = calculateComplexScalograms_EnMasse(sevFilt','Fs',Fs,'freqList',freqList); % size: 5568092, 1, 3
-            W = squeeze(W); % size: 5568092, 3
+            W = squeeze(W);
         end
         
         for iSurr = 1:nSurr + 1
