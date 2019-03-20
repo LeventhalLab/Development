@@ -41,8 +41,7 @@ if doSetup
             [sevFilt,Fs,decimateFactor,loadedFile] = loadCompressedSEV(sevFile,[]);
             trials = all_trials{iNeuron};
             [trialIds,allTimes] = sortTrialsBy(trials,'RT');
-            % [ ] UPDATE AND RERUN WITH INCORR TRIALS
-            trialTimeRanges = compileTrialTimeRanges(trials(trialIds));
+            intrialTimeRanges = compileTrialTimeRanges(trials(trialIds));
 
             W = calculateComplexScalograms_EnMasse(sevFilt','Fs',Fs,'freqList',freqList); % size: 5568092, 1, 3
             W = squeeze(W);

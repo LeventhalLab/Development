@@ -35,20 +35,14 @@ if doSetup
             [sevFilt,Fs,decimateFactor,loadedFile] = loadCompressedSEV(sevFile,[]);
             trials = all_trials{iNeuron};
             [trialIds,allTimes] = sortTrialsBy(trials,'RT');
-            [intrialTimeRanges,intertrialTimeRanges] = compileTrialTimeRanges(trials,maxTrialTime);
-            intrialTimeRanges = intrialTimeRanges(trialIds,:);
-            intrialTimeRanges(isnan(sum(intrialTimeRanges,2)),:) = []; % clear NaNs
-            intertrialTimeRanges(isnan(sum(intertrialTimeRanges,2)),:) = []; % clear NaNs
+            intrialTimeRanges = compileTrialTimeRanges(trials(trialIds));
             
             W = calculateComplexScalograms_EnMasse(sevFilt','Fs',Fs,'freqList',freqList); % size: 5568092, 1, 3
             W = squeeze(W);
         end
         % build or load SDE here
         
-        [~,k] = sort(diff(intrialTimeRanges,1,2));
-        intrialTimeRanges = intrialTimeRanges(k,:);
-        [~,k] = sort(diff(intertrialTimeRanges,1,2));
-        intertrialTimeRanges = intertrialTimeRanges(k,:);
+        
         
         % sort time ranges (in and inter)
         % convert trial time to samples
