@@ -1,14 +1,15 @@
-% load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'LFPfiles_local')
-% load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'all_ts')
-% load('session_20180919_NakamuraMRL.mat','dirSelUnitIds','ndirSelUnitIds','primSec')
-% load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'eventFieldnames')
-% load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'LFPfiles_local_altLookup')
-% load('session_20181212_spikePhaseHist_NewSurrogates.mat', 'all_trials')
+% load('session_20181218_highresEntrainment.mat', 'LFPfiles_local')
+% load('session_20181218_highresEntrainment.mat','dirSelUnitIds','ndirSelUnitIds','primSec')
+% load('session_20181218_highresEntrainment.mat', 'eventFieldnames')
+% load('session_20181218_highresEntrainment.mat', 'LFPfiles_local_altLookup')
+% load('session_20180919_NakamuraMRL.mat', 'all_trials')
+% load('session_20180919_NakamuraMRL.mat', 'all_ts')
 
 % % load('session_20181212_spikePhaseHist_NewSurrogates.mat')
 
 doSetup = true;
 doSave = false;
+doAlt = true;
 % freqList = logFreqList([1 200],10);
 % freqList = [3.2,19];
 % freqList = {[1 4;4 7;8 12;13 30]};
@@ -45,10 +46,19 @@ if doSetup
     all_spikeHist_inTrial_mus = NaN(numel(all_ts),numelFreqs);
     all_spikeHist_inTrial_angles = NaN(numel(all_ts),nBins,numelFreqs);
     all_spikeHist_inTrial_alphas = cell(numel(all_ts),numelFreqs);
+    
+    all_spikeHist_inTrial_pvals_surr = NaN(numel(all_ts),numelFreqs);
+    all_spikeHist_inTrial_rs_surr = NaN(numel(all_ts),numelFreqs);
+    all_spikeHist_inTrial_mus_surr = NaN(numel(all_ts),numelFreqs);
+    all_spikeHist_inTrial_angles_surr = NaN(numel(all_ts),nBins,numelFreqs);
+    all_spikeHist_inTrial_alphas_surr = cell(numel(all_ts),numelFreqs);
+    
     for iNeuron = 1:numel(all_ts)
         sevFile = LFPfiles_local{iNeuron};
         % replace with alternative for LFP
-        sevFile = LFPfiles_local_altLookup{strcmp(sevFile,{LFPfiles_local_altLookup{:,1}}),2};
+        if doAlt
+            sevFile = LFPfiles_local_altLookup{strcmp(sevFile,{LFPfiles_local_altLookup{:,1}}),2};
+        end
         disp(sevFile);
         [~,name,~] = fileparts(sevFile);
         % only load uniques

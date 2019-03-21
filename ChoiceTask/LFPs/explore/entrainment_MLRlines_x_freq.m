@@ -1,7 +1,8 @@
+% MRLXFREQ - DEPRECATED
 % use /explore/entrainmentHighRes_allEvents.m
-load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
-load('session_20180919_NakamuraMRL.mat','dirSelUnitIds','ndirSelUnitIds','primSec')
-load('session_20181218_highresEntrainment.mat')
+% load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
+% load('session_20180919_NakamuraMRL.mat','dirSelUnitIds','ndirSelUnitIds','primSec')
+% load('session_20181218_highresEntrainment.mat')
 close all
 
 doSetup = false;
@@ -27,7 +28,7 @@ eventFieldnames_wFake = {eventFieldnames{:} 'inter-trial'};
 
 
 if doPlot_MRL_pval
-    % we want to show that the mean MRL for dirSel condition is a significant departure from chance (shuffled units)
+    % we want to show that the mean MRL for dirSel condition is a significant departure from all unit scramble
     nShuffle = 1000;
     pThresh = 0.05;
     inOut_data_rs = {all_spikeHist_inTrial_rs,all_spikeHist_rs};
@@ -54,11 +55,12 @@ if doPlot_MRL_pval
     line_colors = lines(3);
     colors = [0 0 0;1 0 0;line_colors([1,3],:)];
     ylimVals = [0 0.05];
+    useConds = [1,3,4];
     rows = 1;
     cols = 2;
     for iInOut = 1:2
         lns = [];
-        for iCond = [1,3,4]
+        for iCond = useConds
             subplot(rows,cols,prc(cols,[1,iInOut]));
             real_MRL = nanmean(inOut_data_rs{iInOut}(condUnits{iCond},:));
             lns(numel(lns)+1) = plot(real_MRL,'lineWidth',lineWidths(iCond),'color',colors(iCond,:));
@@ -76,7 +78,7 @@ if doPlot_MRL_pval
         ylim(ylimVals);
         yticks(ylim);
         ylabel('MRL');
-        legend(lns,condLabels_wCount,'location','northeast');
+        legend(lns,condLabels_wCount{useConds},'location','northeast');
         legend boxoff;
         title(inOutLabels{iInOut});
     end

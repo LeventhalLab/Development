@@ -14,34 +14,31 @@ doPlot_meanBands = false;
 doPlot_meanHeatmaps = false;
 
 if doPlots_dirSelSignifiance
+    doSetup = true;
     units_dirSel = ismember(unitLookup,dirSelUnitIds);
     units_ndirSel = ismember(unitLookup,ndirSelUnitIds);
+    unitSel = {true(size(units_dirSel)),units_dirSel,units_ndirSel};
     nShuffle = 1000;
-    if false
+    if doSetup
         pval_mat = [];
-        for iDirSel = 1:2
-            if iDirSel == 1
-                unitSel = find(ismember(unitLookup,dirSelUnitIds));
-            else
-                unitSel = find(ismember(unitLookup,ndirSelUnitIds));
-            end
+        for iDir = 1:3
             for iEvent = 1:8
                 for iFreq = 1:30
-                    real_acor = mean(squeeze(all_acors(unitSel,iEvent,iFreq,:)));
+                    real_acor = mean(squeeze(all_acors(unitSel{iDir},iEvent,iFreq,:)));
                     for iShuffle = 1:nShuffle
-                        randSel = randsample(1:size(all_acors,1),numel(unitSel));
+                        randSel = randsample(1:size(all_acors,1),numel(unitSel{iDir}));
                         shuff_acor(iShuffle,:) = mean(squeeze(all_acors(randSel,iEvent,iFreq,:)));
                     end
                     pvals = sum(shuff_acor > real_acor) / nShuffle;
-                    pval_mat(iDirSel,iEvent,iFreq,:) = pvals;
+                    pval_mat(iDir,iEvent,iFreq,:) = pvals;
                 end
             end
         end
     end
     % plot
 %     pval_thresh(iDirSel,iEvent,iFreq,:) = pvals < pThresh | pvals > 1 - pThresh;
-    dirSelTypes = {'dirSel','ndirSel'};
-    rows = 4;
+    dirSelTypes = {'all','dirSel','ndirSel'};
+    rows = 6;
     cols = 8 ;
     tWindow = 0.5;
     pThresh = 0.05;
@@ -51,16 +48,11 @@ if doPlots_dirSelSignifiance
     t = linspace(-tWindow,tWindow,size(all_acors,4));
     fontSize = 6;
     h = ff(1400,800);
-    for iDirSel = 1:2
-        if iDirSel == 1
-            unitSel = find(ismember(unitLookup,dirSelUnitIds));
-        else
-            unitSel = find(ismember(unitLookup,ndirSelUnitIds));
-        end
+    for iDir = 1:3
         for iEvent = 1:8
             % real xcorr with circled p-values
-            real_acor = squeeze(mean(all_acors(unitSel,iEvent,:,:)));
-            subplot(rows,cols,prc(cols,[iDirSel*2-1,iEvent]));
+            real_acor = squeeze(mean(all_acors(unitSel{iDir},iEvent,:,:)));
+            subplot(rows,cols,prc(cols,[iDir*2-1,iEvent]));
             imagesc(t,1:numel(freqList),real_acor);
             hold on;
             plot([0,0],ylim,'k:');
@@ -69,15 +61,15 @@ if doPlots_dirSelSignifiance
             set(gca,'ydir','normal');
             xticks([-tWindow,0,tWindow]);
             xlabel('spike lag (s)');
-            yticks(1:numel(freqList_a));
+            yticks(1:numel(freqList));
             yticklabels(compose('%3.1f',freqList));
             ylabel('Freq (Hz)');
             set(gca,'fontsize',fontSize);
-            set(gca,'TitleFontSizeMultiplier',2);
-            if iDirSel == 1
-                title({'xcorr',eventFieldnames_wFake{iEvent},dirSelTypes{iDirSel}});
+            set(gca,'TitleFontSizeMultiplier',1.5);
+            if iDir == 1
+                title({'xcorr',eventFieldnames_wFake{iEvent},dirSelTypes{iDir}});
             else
-                title(dirSelTypes{iDirSel});
+                title(dirSelTypes{iDir});
             end
             if iEvent == 8
                 cbAside(gca,'r (xcorr)','k');
@@ -85,7 +77,7 @@ if doPlots_dirSelSignifiance
             
             pval_colors = ['r','b'];
             for iPval = 1:2
-                pvals = squeeze(pval_mat(iDirSel,iEvent,:,:));
+                pvals = squeeze(pval_mat(iDir,iEvent,:,:));
 %                 pMat_thresh = pvals < pThresh | pvals > 1 - pThresh;
                 if iPval == 1
                     pMat_thresh = pvals < pThresh;
@@ -105,8 +97,8 @@ if doPlots_dirSelSignifiance
             end
             
             % shuffled trial p-values
-            pvalMat = squeeze(mean(all_shuff_pvals(unitSel,iEvent,:,:)));
-            subplot(rows,cols,prc(cols,[iDirSel*2,iEvent]));
+            pvalMat = squeeze(mean(all_shuff_pvals(unitSel{iDir},iEvent,:,:)));
+            subplot(rows,cols,prc(cols,[iDir*2,iEvent]));
             imagesc(t,1:numel(freqList),pvalMat);
             hold on;
             plot([0,0],ylim,'k:');
@@ -116,7 +108,7 @@ if doPlots_dirSelSignifiance
             yticklabels(compose('%3.1f',freqList));
             colormap(gca,jupiter);
             caxis([-1 1]);
-            set(gca,'fontsize',fontSize);
+            set(gca,'TitleFontSizeMultiplier',1.5);
             title('shuffle p-value');
             if iEvent == 8
                 cb = cbAside(gca,'pval','k');
@@ -138,11 +130,11 @@ if doPlots_spectrum
     tWindow = 0.5;
     t = linspace(-tWindow,tWindow,size(all_acors,4));
     useRow = 0;
-    for iDirSel = 2:3
+    for iDir = 2:3
         unitSel = 1:size(all_acors,1);
-        if iDirSel == 2
+        if iDir == 2
             unitSel = ismember(unitLookup,dirSelUnitIds);
-        elseif iDirSel == 3
+        elseif iDir == 3
             unitSel = ismember(unitLookup,ndirSelUnitIds);
         end
         for iPval = 1:2
@@ -176,9 +168,9 @@ if doPlots_spectrum
                     xlabel('spike lags LFP (s)');
                 end
                 if useRow == 1
-                    title({'LFP x SDE',eventFieldnames_wFake{iEvent},[dirSelTypes{iDirSel},shuffLabel]},'color','w');
+                    title({'LFP x SDE',eventFieldnames_wFake{iEvent},[dirSelTypes{iDir},shuffLabel]},'color','w');
                 else
-                    title([dirSelTypes{iDirSel},shuffLabel],'color','w');
+                    title([dirSelTypes{iDir},shuffLabel],'color','w');
                 end
                 set(gca,'color','k');
                 set(gca,'XColor','w');
@@ -217,19 +209,19 @@ if doPlot_fractionBands
 
     for iFreq = 1:3
         for iEvent = 1:size(all_acors,2)
-            for iDirSel = 1:3
+            for iDir = 1:3
                 subplot(rows,cols,prc(cols,[iFreq,iEvent]));
                 unitSel = 1:size(all_acors,1);
-                if iDirSel == 2
+                if iDir == 2
                     unitSel = ismember(unitLookup,dirSelUnitIds);
-                elseif iDirSel == 3
+                elseif iDir == 3
                     unitSel = ismember(unitLookup,ndirSelUnitIds);
                 end
                 thisData = squeeze(all_shuff_pvals(unitSel,iEvent,printFreqs(iFreq,1),:));
                 pvalSum = sum(thisData > pThresh | thisData < -pThresh);
                 pvalFrac = pvalSum / size(thisData,1);
                 
-                plot(lag,smooth(pvalFrac,20),'color',colors(iDirSel,:),'lineWidth',2);
+                plot(lag,smooth(pvalFrac,20),'color',colors(iDir,:),'lineWidth',2);
                 hold on;
                 ylim([0 0.7]);
                 yticks(ylim);
@@ -272,16 +264,16 @@ if doPlot_meanBands
 
     for iFreq = 1:3
         for iEvent = 1:size(all_acors,2)
-            for iDirSel = 1:3
+            for iDir = 1:3
                 subplot(rows,cols,prc(cols,[iFreq,iEvent]));
                 unitSel = 1:size(all_acors,1);
-                if iDirSel == 2
+                if iDir == 2
                     unitSel = ismember(unitLookup,dirSelUnitIds);
-                elseif iDirSel == 3
+                elseif iDir == 3
                     unitSel = ismember(unitLookup,ndirSelUnitIds);
                 end
                 thisData = mean(squeeze(mean(all_shuff_pvals(unitSel,iEvent,printFreqs(iFreq,1):printFreqs(iFreq,2),:))));
-                plot(lag,thisData,'color',colors(iDirSel,:),'lineWidth',2);
+                plot(lag,thisData,'color',colors(iDir,:),'lineWidth',2);
                 hold on;
                 ylim([-.7,.7]);
                 yticks(sort([0 ylim]));

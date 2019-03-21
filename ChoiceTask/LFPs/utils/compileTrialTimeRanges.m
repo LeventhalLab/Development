@@ -1,5 +1,5 @@
-function trialTimeRanges = compileTrialTimeRanges(trials)
-maxTrialTime = 20;
+function trialTimeRanges = compileTrialTimeRanges(trials,maxTrialTime)
+% maxTrialTime = 5;
 trialTimeRanges = [];
 trialCount = 0;
 for iTrial = 1:numel(trials)
