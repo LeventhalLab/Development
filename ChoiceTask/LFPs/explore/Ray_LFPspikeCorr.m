@@ -8,7 +8,7 @@
 % load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local_altLookup')
 % load('Ray_LFPspikeCorr_setup.mat', 'LFP_lookup')
 
-doSetup = false;
+doSetup = true;
 doWrite = false;
 
 if ismac
@@ -32,7 +32,7 @@ if doSetup
     iSession = 0;
     for iNeuron = 1:numel(all_ts)
         sevFile = LFPfiles_local{iNeuron};
-%         sevFile = LFPfiles_local_altLookup{strcmp(sevFile,{LFPfiles_local_altLookup{:,1}}),2};
+        sevFile = LFPfiles_local_altLookup{strcmp(sevFile,{LFPfiles_local_altLookup{:,1}}),2};
         disp(iNeuron);
         if isempty(loadedFile) || ~strcmp(loadedFile,sevFile)
             iSession = iSession + 1;
@@ -46,16 +46,16 @@ if doSetup
             W = W(:,:,keepTrials,:);
             % technically don't need z-score if xcorr is normalized
             [Wz_power,Wz_phase] = zScoreW(W,Wlength); % power Z-score
-            save(fullfile(dataPath,['Wz_phase_s',num2str(iSession,'%03d')]),'Wz_phase');
-            save(fullfile(dataPath,['Wz_power_s',num2str(iSession,'%03d')]),'Wz_power');
+            save(fullfile(dataPath,['Wz_phase_alt_s',num2str(iSession,'%03d')]),'Wz_phase');
+            save(fullfile(dataPath,['Wz_power_alt_s',num2str(iSession,'%03d')]),'Wz_power');
         end
-        LFP_lookup(iNeuron) = iSession; % find LFP in all_Wz_power
-        all_keepTrials{iNeuron} = keepTrials;
-        tsPeths = eventsPeth(trials(trialIds),all_ts{iNeuron},tWindow,eventFieldnames_wFake);
-        tsPeths = tsPeths(keepTrials,:);
-        
-        all_FR(iNeuron) = numel([tsPeths{:,1}])/size(tsPeths,1);
-        save(fullfile(dataPath,['tsPeths_u',num2str(iNeuron,'%03d')]),'tsPeths');
+% %         LFP_lookup(iNeuron) = iSession; % find LFP in all_Wz_power
+% %         all_keepTrials{iNeuron} = keepTrials;
+% %         tsPeths = eventsPeth(trials(trialIds),all_ts{iNeuron},tWindow,eventFieldnames_wFake);
+% %         tsPeths = tsPeths(keepTrials,:);
+% %         
+% %         all_FR(iNeuron) = numel([tsPeths{:,1}])/size(tsPeths,1);
+% %         save(fullfile(dataPath,['tsPeths_u',num2str(iNeuron,'%03d')]),'tsPeths');
 % % 
 % %         SDE = [];
 % %         for iTrial = 1:size(tsPeths,1)
