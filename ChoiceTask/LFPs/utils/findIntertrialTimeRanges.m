@@ -8,9 +8,12 @@ function [intrialSamples,intertrialSamples] = findIntertrialTimeRanges(intrialTi
         disp(['--> t',num2str(iTrial,'%03d'),', searching for ',num2str(thisRange/Fs,3),'s intertrial']);
         doSearch = true;
         while doSearch
-            testStart = (maxSample-minSample).*rand + minSample;
+            testStart = round((maxSample-minSample).*rand + minSample);
             testEnd = testStart + thisRange - 1;
-            doSearch = ~any(testStart > intrialSamples(:,1) & testEnd < intrialSamples(:,2));
+            if testEnd < maxSample
+                doSearch = any((testStart >= intrialSamples(:,1) & testStart <= intrialSamples(:,2)) | ...
+                    (testEnd >= intrialSamples(:,1) & testEnd <= intrialSamples(:,2)));
+            end
         end
         intertrialSamples(iTrial,:) = [testStart,testEnd];
     end
