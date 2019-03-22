@@ -5,7 +5,7 @@ function [intrialSamples,intertrialSamples] = findIntertrialTimeRanges(intrialTi
     maxSample = max(intrialSamples(:,2));
     for iTrial = 1:size(intrialTimeRanges,1)
         thisRange = diff(intrialSamples(iTrial,:));
-        disp(['--> t',num2str(iTrial,'%03d'),', searching for ',num2str(thisRange/Fs,3),'s intertrial']);
+% %         disp(['--> t',num2str(iTrial,'%03d'),', searching for ',num2str(thisRange/Fs,3),'s intertrial']);
         doSearch = true;
         while doSearch
             testStart = round((maxSample-minSample).*rand + minSample);
