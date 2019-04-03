@@ -9,11 +9,12 @@
 % load('session_20180919_NakamuraMRL.mat', 'all_ts')
 
 doSetup = false;
+doDebug = false;
 doAlt = true;
 doWrite = true;
 doLoad = false;
 doShuffle = false;
-doSave = false;
+doSave = true;
 doPlot1 = false;
 doPlot2 = true;
 dataPath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/datastore/xcorr';
@@ -28,8 +29,8 @@ maxTrialTime = 20; % seconds
 tXcorr = 1; % seconds
 inLabels = {'in-trial','inter-trial'};
 
-doTrialOrder = true;
-doPoisson = false;
+doTrialOrder = false;
+doPoisson = true;
 nPoisson = 20;
 if doSetup
     xcorrUnits = [];
@@ -73,11 +74,32 @@ if doSetup
             acors = [];%NaN(2,size(intrialSamples,1),size(Wz,2));
             for iIn = 1:2
                 for iTrial = 1:size(intrialSamples,1)
-                    X = squeeze(SDE(useSamples{iIn}(iTrial,1):useSamples{iIn}(iTrial,2)));
+                    XSDE = squeeze(SDE(useSamples{iIn}(iTrial,1):useSamples{iIn}(iTrial,2)));
+                    X = XSDE - mean(XSDE);
                     for iFreq = 1:size(Wz,2)
-                        Y = squeeze(W(useSamples{iIn}(iTrial,1):useSamples{iIn}(iTrial,2),iFreq));
+                        YW = squeeze(W(useSamples{iIn}(iTrial,1):useSamples{iIn}(iTrial,2),iFreq));
+                        Y = (YW - mean(YW)) ./ std(W(:,iFreq));
                         [acor,lag] = xcorr(X,Y,round(tXcorr*Fs),'coeff');
                         acors(iIn,iTrial,iFreq,:) = acor;
+                        
+                        if doDebug && iIn == 1 && iFreq == 6
+                            debugPath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/datastore/xcorr/debug';
+                            h = ff(800,500);
+                            subplot(211);
+                            yyaxis left;
+                            plot(X);
+                            xlim([1 numel(X)]);
+                            yyaxis right;
+                            plot(Y);
+                            legend({'SDE','W'});
+                            subplot(212);
+                            plot(lag,acor,'k-');
+                            xlim([min(lag) max(lag)]);
+                            legend({'XCORR'});
+                            saveas(h,fullfile(debugPath,['xcorrDebug_u',num2str(iNeuron,'%03d'),...
+                                '_f',num2str(iFreq,'%02d'),'_t',num2str(iTrial,'%03d'),'_i',num2str(iIn),'.png']));
+                            close(h);
+                        end
                     end
                 end
             end
@@ -100,9 +122,11 @@ if doSetup
                 SDEz = (SDE - mean(SDE)) ./ std(SDE);
                 for iIn = 1:2
                     for iTrial = 1:size(intrialSamples,1)
-                        X = squeeze(SDEz(useSamples{iIn}(iTrial,1):useSamples{iIn}(iTrial,2)));
+                        XSDE = squeeze(SDE(useSamples{iIn}(iTrial,1):useSamples{iIn}(iTrial,2)));
+                        X = XSDE - mean(XSDE);
                         for iFreq = 1:size(Wz,2)
-                            Y = squeeze(Wz(useSamples{iIn}(iTrial,1):useSamples{iIn}(iTrial,2),iFreq));
+                            YW = squeeze(W(useSamples{iIn}(iTrial,1):useSamples{iIn}(iTrial,2),iFreq));
+                            Y = (YW - mean(YW)) ./ std(W(:,iFreq));
                             [acor,lag] = xcorr(X,Y,round(tXcorr*Fs),'coeff');
                             acors_poisson(iIn,iTrial,iFreq,:) = acor;
                         end
@@ -122,24 +146,34 @@ if doSetup
     end
 end
 
+% % % % xcorrFiles = dir(fullfile(dataPath,'*.mat'));
+% % % % xcorrUnits = [];
+% % % % for iFile = 1:numel(xcorrFiles)
+% % % %     disp(['loading ',xcorrFiles(iFile).name]);
+% % % %     iNeuron = str2num(xcorrFiles(iFile).name(end-6:end-4));
+% % % %     xcorrUnits = [xcorrUnits iNeuron];
+% % % % end
+    
 if doLoad
     xcorrFiles = dir(fullfile(dataPath,'*.mat'));
     all_acors = [];
     xcorrUnits = [];
     unitCount = 0;
     for iFile = 1:numel(xcorrFiles)
-        unitCount = unitCount + 1;
         disp(['loading ',xcorrFiles(iFile).name]);
         load(fullfile(xcorrFiles(iFile).folder,xcorrFiles(iFile).name));
-        iNeuron = str2num(xcorrFiles(iFile).name(17:19));
-        xcorrUnits = [xcorrUnits iNeuron];
-        for iIn = 1:2
-%             all_acors(unitCount,iIn,:,:) = squeeze(median(acors(iIn,:,:,:),2));
-            all_acors(unitCount,iIn,:,:) = squeeze(mean(acors(iIn,:,:,:),2));
+        iNeuron = str2num(xcorrFiles(iFile).name(end-6:end-4));
+        if sum(isnan(acors(:))) == 0
+            unitCount = unitCount + 1;
+            xcorrUnits = [xcorrUnits iNeuron];
+            for iIn = 1:2
+    %             all_acors(unitCount,iIn,:,:) = squeeze(median(acors(iIn,:,:,:),2));
+                all_acors(unitCount,iIn,:,:) = squeeze(mean(acors(iIn,:,:,:),2));
+            end
         end
     end
     if doWrite
-        save('20190329_xcorr','all_acors','xcorrUnits');
+        save('20190402_xcorr','all_acors','xcorrUnits');
     end
 end
 
@@ -158,13 +192,14 @@ if doShuffle
         end
     end
     if doWrite
-        save('20190322_xcorr','-append','all_acor_shuffle');
+        save('20190402_xcorr','-append','all_acor_shuffle');
     end
 end
 
 tlag = linspace(-tXcorr,tXcorr,numel(lag));
+condLabels = {'allUnits','dirSel','ndirSel'};
+
 if doPlot1
-    condLabels = {'allUnits','dirSel','ndirSel'};
     h = ff(800,500);
     rows = 2;
     cols = 3;
@@ -172,7 +207,7 @@ if doPlot1
         for iDir = 1:3
             subplot(rows,cols,prc(cols,[iIn,iDir]));
             useUnits = ismember(xcorrUnits,condUnits{iDir});
-            data = squeeze(mean(all_acors(useUnits,iIn,:,:)));
+            data = squeeze(nanmean(all_acors(useUnits,iIn,:,:)));
             imagesc(tlag,1:numel(freqList),data);
             hold on;
             plot([0,0],ylim,'k:');
@@ -183,7 +218,7 @@ if doPlot1
             yticks(linspace(min(ylim),max(ylim),numel(freqList)));
             yticklabels(compose('%3.1f',freqList));
             colormap(gca,jet);
-            caxis([-0.05,0.05]);
+            caxis([-0.02,0.05]);
             title({inLabels{iIn},condLabels{iDir}});
         end
     end
@@ -193,6 +228,7 @@ if doPlot1
         close(h);
     end
 end
+
 if doPlot2
 %     close all
     useFreqs = [6;17;22;29];
@@ -207,25 +243,25 @@ if doPlot2
         useUnits = ismember(xcorrUnits,condUnits{iDir});
         for iFreq = 1:size(useFreqs,1)
             for iIn = 1:2
-                data = squeeze(mean(all_acors(useUnits,iIn,useFreqs(iFreq),:)));
+                data = squeeze(nanmean(all_acors(useUnits,iIn,useFreqs(iFreq),:)));
                 subplot(rows,cols,prc(cols,[iFreq,iDir]));
                 plot(tlag,data,'color',colors{iIn}(iFreq,:),'linewidth',2);
                 hold on;
-% % % %                 poisson_data = squeeze(mean(all_acors_poisson_median(:,condUnits{iDir},iIn,iFreq,:),2));
-% % % %                 plot(tlag,poisson_data','color',[colors{iIn}(iFreq,:) 0.8]);
+% %                 poisson_data = squeeze(mean(all_acors_poisson_median(:,condUnits{iDir},iIn,iFreq,:),2));
+% %                 plot(tlag,poisson_data','color',[colors{iIn}(iFreq,:) 0.8]);
                 
-%                 if iDir > 1
-%                     shuff_data = squeeze(all_acor_shuffle(:,iIn,iDir,useFreqs(iFreq),:));
-%                     diffFromShuff = sum(data' < shuff_data) / nShuffle;
-%                     pIdx = find(diffFromShuff < pThresh);% | diffFromShuff >= 1-pThresh);
-%                     plot(tlag(pIdx),ones(size(pIdx))*max(ylimVals)-(iIn*.005),'.','color',colors{iIn}(iFreq,:),'linewidth',2);
-%                     pIdx = find(diffFromShuff >= 1-pThresh);
-%                     plot(tlag(pIdx),ones(size(pIdx))*min(ylimVals)+(iIn*.005),'.','color',colors{iIn}(iFreq,:),'linewidth',2);
-%                 else
-%                     if iIn == 2
-%                         legend({'in-trial','inter-trial'},'location','northwest');
-%                     end
-%                 end
+                if iDir > 1
+                    shuff_data = squeeze(all_acor_shuffle(:,iIn,iDir,useFreqs(iFreq),:));
+                    diffFromShuff = sum(data' < shuff_data) / nShuffle;
+                    pIdx = find(diffFromShuff < pThresh);% | diffFromShuff >= 1-pThresh);
+                    plot(tlag(pIdx),ones(size(pIdx))*max(ylimVals)-(iIn*.005),'.','color',colors{iIn}(iFreq,:),'linewidth',2);
+                    pIdx = find(diffFromShuff >= 1-pThresh);
+                    plot(tlag(pIdx),ones(size(pIdx))*min(ylimVals)+(iIn*.005),'.','color',colors{iIn}(iFreq,:),'linewidth',2);
+                else
+                    if iIn == 2
+                        legend({'in-trial','inter-trial'},'location','northwest');
+                    end
+                end
             end
             xlim([min(tlag) max(tlag)]);
             xticks(sort([0,xlim]));
