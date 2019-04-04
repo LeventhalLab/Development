@@ -1,6 +1,8 @@
 % SPIKEXCORR, XCORRLINES
+% [ ] remove debug figures
 
 % load('20190322_xcorr');
+
 % load('session_20181218_highresEntrainment.mat', 'LFPfiles_local')
 % load('session_20181218_highresEntrainment.mat','dirSelUnitIds','ndirSelUnitIds','primSec')
 % load('session_20181218_highresEntrainment.mat', 'eventFieldnames')
@@ -8,21 +10,23 @@
 % load('session_20180919_NakamuraMRL.mat', 'all_trials')
 % load('session_20180919_NakamuraMRL.mat', 'all_ts')
 
-doSetup = false;
+% load('20190321_xcorrSDE_u001.mat', 'lag')
+
+doSetup = true;
 doDebug = false;
 doAlt = true;
 doWrite = true;
 doLoad = false;
 doShuffle = false;
-doSave = true;
+doSave = false;
 doPlot1 = false;
 doPlot2 = true;
 dataPath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/datastore/xcorr';
 dataPath_shuff = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/datastore/xcorr_shuffle';
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/xcorr';
 
-freqList = logFreqList([1 200],30);
-% freqList = [2.5,20,55,180];
+% freqList = logFreqList([1 200],30);
+freqList = [2.5,20,55,180];
 loadedFile = [];
 minFR = 5;
 maxTrialTime = 20; % seconds
@@ -119,7 +123,7 @@ if doSetup
                 [t,s] = fastgammatrain(spiketrain_duration,spiketrain_meanrate,spiketrain_gamma_order);
                 ts = t(s==1)' / 1000;
                 SDE = equalVectors(spikeDensityEstimate(ts,numel(sevFilt)/Fs),size(Wz,1))';
-                SDEz = (SDE - mean(SDE)) ./ std(SDE);
+% %                 SDEz = (SDE - mean(SDE)) ./ std(SDE);
                 for iIn = 1:2
                     for iTrial = 1:size(intrialSamples,1)
                         XSDE = squeeze(SDE(useSamples{iIn}(iTrial,1):useSamples{iIn}(iTrial,2)));
@@ -138,10 +142,12 @@ if doSetup
                 end
             end
 
-% % % %             if doWrite
-% % % %                 save(fullfile(dataPath_shuff,['20190321_xcorr_poisson_u',num2str(iNeuron,'%03d')]),...
-% % % %                     'all_acors_poisson_median','all_acors_poisson_mean','lag','tXcorr');
-% % % %             end
+            if doWrite
+                save(fullfile(dataPath_shuff,['20190321_xcorr_poisson_u',num2str(iNeuron,'%03d')]),...
+                    'all_acors_poisson_median','all_acors_poisson_mean','lag','tXcorr');
+                save(fullfile(dataPath_shuff,'20190321_xcorr_poisson_u001-206'),...
+                    'all_acors_poisson_median','all_acors_poisson_mean','lag','tXcorr');
+            end
         end
     end
 end
@@ -230,7 +236,7 @@ if doPlot1
 end
 
 if doPlot2
-%     close all
+    close all
     useFreqs = [6;17;22;29];
     freqLabels = {'\delta','\beta','\gamma_L','\gamma_H'};
     h = ff(900,800);
@@ -247,6 +253,14 @@ if doPlot2
                 subplot(rows,cols,prc(cols,[iFreq,iDir]));
                 plot(tlag,data,'color',colors{iIn}(iFreq,:),'linewidth',2);
                 hold on;
+                
+                % display
+                disp([condLabels{iDir},' ',inLabels{iIn},', ',num2str(iFreq)]);
+                [v,k] = min(data);
+                disp(['--> MIN: r = ',num2str(v,3),', t = ',num2str(tlag(k)*1000,3)]);
+                [v,k] = max(data);
+                disp(['--> MAX: r = ',num2str(v,3),', t = ',num2str(tlag(k)*1000,3)]);
+                
 % %                 poisson_data = squeeze(mean(all_acors_poisson_median(:,condUnits{iDir},iIn,iFreq,:),2));
 % %                 plot(tlag,poisson_data','color',[colors{iIn}(iFreq,:) 0.8]);
                 
