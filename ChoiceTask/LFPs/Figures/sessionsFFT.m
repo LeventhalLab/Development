@@ -3,22 +3,17 @@
 % load('session_20180925_entrainmentSurrogates.mat', 'selectedLFPFiles')
 % load('session_20180925_entrainmentSurrogates.mat', 'all_trials')
 % load('session_20180925_entrainmentSurrogates.mat', 'eventFieldnames')
-% load('session_20181129_sub_allA.mat')
 
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/FFT';
 
 doSetup = false;
 doSave = false;
 
+maxTrialTime = 20; % s
 makeLength = 400000;
-nSmooth = makeLength / 1000;
+nSmooth = makeLength / 500;
 if doSetup
     for iInOut = 1:2
-        if iInOut == 1
-            useInTrial = true;
-        else
-            useInTrial = false;
-        end
         iSession = 0;
         all_A = [];
         for iNeuron = selectedLFPFiles'
@@ -29,20 +24,15 @@ if doSetup
             sevFilt = artifactThresh(sevFilt,[1],2000);
             sevFilt = sevFilt - mean(sevFilt);
 
-            curTrials = all_trials{iNeuron};
-            trialTimeRanges = compileTrialTimeRanges(curTrials);
-            trialTimeRanges_s = round(trialTimeRanges*Fs);
-            sample_range = [];
-            if useInTrial
-                for iTrial = 2:size(trialTimeRanges,1)-1
-                    sample_range = [sample_range trialTimeRanges_s(iTrial,1):trialTimeRanges_s(iTrial,2)];
-                end
-            else
-                for iTrial = 2:size(trialTimeRanges,1)-1
-                    sample_range = [sample_range (trialTimeRanges_s(iTrial,1):trialTimeRanges_s(iTrial,2))+round((rand-0.5)*10*Fs)];
-                end
+            trials = all_trials{iNeuron};
+            intrialTimeRanges = compileTrialTimeRanges(trials,maxTrialTime);
+            [intrialSamples,intertrialSamples] = findIntertrialTimeRanges(intrialTimeRanges,Fs);
+            sampleData = {intrialSamples,intertrialSamples};
+            sampleRange = [];
+            for iTrial = 1:size(intrialSamples,1)
+                sampleRange = [sampleRange sampleData{iInOut}(iTrial,1):sampleData{iInOut}(iTrial,2)];
             end
-            sevFilt = sevFilt(sample_range) - mean(sevFilt(sample_range));
+            sevFilt = sevFilt(sampleRange) - mean(sevFilt(sampleRange));
             [A,f] = getFFT(sevFilt,Fs);
             Anew = equalVectors(A,zeros(1,makeLength));
             all_A(iSession,:) = Anew;
@@ -55,6 +45,7 @@ if doSetup
     end
     fnew = equalVectors(f,zeros(1,makeLength));
 end
+% % save('20190404_sessionFFT_setup','all_A_in','all_A_out','fnew');
 xlimVals = [1 200];
 f1_idx = closest(fnew,xlimVals(1));
 f2_idx = closest(fnew,xlimVals(2));
@@ -90,7 +81,7 @@ xtickangle(270);
 for ii = 1:numel(xmarks)
     plot([xmarks(ii) xmarks(ii)],ylim,':','color',repmat(.8,[1,4]));
 end
-bandLabels = {'\delta','\theta','\alpha','\beta','\gamma','\gamma_h'};
+bandLabels = {'\delta','\theta','\alpha','\beta','\gamma_L','\gamma_H'};
 bandLocs = [2,5.5,10,21.5,50,135];
 for ii = 1:numel(bandLabels)
     text(bandLocs(ii),min(ylim) + mean(ylim)/4,bandLabels{ii},'color','k','fontSize',16,'horizontalAlignment','center');

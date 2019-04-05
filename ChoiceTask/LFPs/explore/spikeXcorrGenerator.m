@@ -1,24 +1,24 @@
 % SPIKEXCORR, XCORRLINES
 % [ ] remove debug figures
 
-% load('20190322_xcorr');
-
 % load('session_20181218_highresEntrainment.mat', 'LFPfiles_local')
-% load('session_20181218_highresEntrainment.mat','dirSelUnitIds','ndirSelUnitIds','primSec')
-% load('session_20181218_highresEntrainment.mat', 'eventFieldnames')
+if ~exist('primSec')
+    load('session_20181218_highresEntrainment.mat','dirSelUnitIds','ndirSelUnitIds','primSec');
+    load('session_20181218_highresEntrainment.mat', 'eventFieldnames');
+end
 % load('session_20181218_highresEntrainment.mat', 'LFPfiles_local_altLookup')
 % load('session_20180919_NakamuraMRL.mat', 'all_trials')
 % load('session_20180919_NakamuraMRL.mat', 'all_ts')
 
-% load('20190321_xcorrSDE_u001.mat', 'lag')
+% load('20190402_xcorr.mat') % instead of setup/load/shuffle
 
-doSetup = true;
+doSetup = false;
 doDebug = false;
 doAlt = true;
-doWrite = true;
+doWrite = false;
 doLoad = false;
 doShuffle = false;
-doSave = false;
+doSave = true;
 doPlot1 = false;
 doPlot2 = true;
 dataPath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/datastore/xcorr';
@@ -40,7 +40,7 @@ if doSetup
     xcorrUnits = [];
     all_acors_poisson_median = [];
     all_acors_poisson_mean = [];
-    for iNeuron = 1:numel(all_ts)
+    for iNeuron = 207:numel(all_ts)
         sevFile = LFPfiles_local{iNeuron};
         disp(['--> iNeuron ',num2str(iNeuron)]);
         ts = all_ts{iNeuron};
@@ -143,10 +143,7 @@ if doSetup
             end
 
             if doWrite
-                save(fullfile(dataPath_shuff,['20190321_xcorr_poisson_u',num2str(iNeuron,'%03d')]),...
-                    'all_acors_poisson_median','all_acors_poisson_mean','lag','tXcorr');
-                save(fullfile(dataPath_shuff,'20190321_xcorr_poisson_u001-206'),...
-                    'all_acors_poisson_median','all_acors_poisson_mean','lag','tXcorr');
+                save('20190321_xcorr_poisson_allUnits','all_acors_poisson_median','all_acors_poisson_mean','lag','tXcorr');
             end
         end
     end
@@ -261,8 +258,9 @@ if doPlot2
                 [v,k] = max(data);
                 disp(['--> MAX: r = ',num2str(v,3),', t = ',num2str(tlag(k)*1000,3)]);
                 
-% %                 poisson_data = squeeze(mean(all_acors_poisson_median(:,condUnits{iDir},iIn,iFreq,:),2));
-% %                 plot(tlag,poisson_data','color',[colors{iIn}(iFreq,:) 0.8]);
+                poisson_data = squeeze(nanmean(all_acors_poisson_mean(:,condUnits{iDir},iIn,iFreq,:),2));
+                plot(tlag,min(poisson_data)','color',[colors{iIn}(iFreq,:) 0.8]);
+                plot(tlag,max(poisson_data)','color',[colors{iIn}(iFreq,:) 0.8]);
                 
                 if iDir > 1
                     shuff_data = squeeze(all_acor_shuffle(:,iIn,iDir,useFreqs(iFreq),:));
