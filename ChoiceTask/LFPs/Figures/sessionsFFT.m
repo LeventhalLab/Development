@@ -8,6 +8,7 @@ savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/FFT';
 
 doSetup = false;
 doSave = false;
+doPlot = false;
 
 maxTrialTime = 20; % s
 makeLength = 400000;
@@ -46,6 +47,7 @@ if doSetup
     fnew = equalVectors(f,zeros(1,makeLength));
 end
 % % save('20190404_sessionFFT_setup','all_A_in','all_A_out','fnew');
+
 xlimVals = [1 200];
 f1_idx = closest(fnew,xlimVals(1));
 f2_idx = closest(fnew,xlimVals(2));
@@ -64,43 +66,44 @@ for ii = 1:size(all_A_out,1)
 % %     hold on;
 end
 usef = linspace(xlimVals(1),xlimVals(2),size(norm_data_in,2));
-% save('session_20181129_sub_allA','all_A_in','all_A_out','fnew');
-h = figure;
-norm_med_out = smooth(mean(norm_data_out),nSmooth);
-plot(usef,norm_med_out,'lineWidth',2,'color','r');
-hold on;
 
-norm_med_in = smooth(mean(norm_data_in),nSmooth);
-plot(usef,norm_med_in,'lineWidth',2,'color','k');
-% set(gca,'xscale','log');
+if doPlot
+    h = figure;
+    norm_med_out = smooth(mean(norm_data_out),nSmooth);
+    plot(usef,norm_med_out,'lineWidth',2,'color','r');
+    hold on;
 
-xmarks = [4 8 13 30 70];
-xticks(xmarks);
-xlim(xlimVals);
-xtickangle(270);
-for ii = 1:numel(xmarks)
-    plot([xmarks(ii) xmarks(ii)],ylim,':','color',repmat(.8,[1,4]));
+    norm_med_in = smooth(mean(norm_data_in),nSmooth);
+    plot(usef,norm_med_in,'lineWidth',2,'color','k');
+    % set(gca,'xscale','log');
+
+    xmarks = [4 8 13 30 70];
+    xticks(xmarks);
+    xlim(xlimVals);
+    xtickangle(270);
+    for ii = 1:numel(xmarks)
+        plot([xmarks(ii) xmarks(ii)],ylim,':','color',repmat(.8,[1,4]));
+    end
+    bandLabels = {'\delta','\theta','\alpha','\beta','\gamma_L','\gamma_H'};
+    bandLocs = [2,5.5,10,21.5,50,135];
+    for ii = 1:numel(bandLabels)
+        text(bandLocs(ii),min(ylim) + mean(ylim)/4,bandLabels{ii},'color','k','fontSize',16,'horizontalAlignment','center');
+    end
+
+    xlabel('freq. (Hz)');
+    % ylim([0.035 0.2]);
+    yticks([]);
+    ylabel('power (uv^2)');
+    title('Mean Spectrum All Sessions');
+    legend({'OUT trial','IN trial'});
+    set(gca,'fontSize',16);
+    set(gcf,'color','w');
+
+    if doSave
+        saveas(h,fullfile(savePath,'sessionsFFT.png'));
+        close(h);
+    end
 end
-bandLabels = {'\delta','\theta','\alpha','\beta','\gamma_L','\gamma_H'};
-bandLocs = [2,5.5,10,21.5,50,135];
-for ii = 1:numel(bandLabels)
-    text(bandLocs(ii),min(ylim) + mean(ylim)/4,bandLabels{ii},'color','k','fontSize',16,'horizontalAlignment','center');
-end
-
-xlabel('freq. (Hz)');
-% ylim([0.035 0.2]);
-yticks([]);
-ylabel('power (uv^2)');
-title('Mean Spectrum All Sessions');
-legend({'OUT trial','IN trial'});
-set(gca,'fontSize',16);
-set(gcf,'color','w');
-
-if doSave
-    saveas(h,fullfile(savePath,'sessionsFFT.png'));
-    close(h);
-end
-
 function [A,f] = getFFT(data,Fs)
     T = 1/Fs; % Sample time
     L = length(data); % Length of signal
