@@ -1,6 +1,6 @@
 function trials = addEventToTrials(trials,eventName)
 
-trialTimeRanges = compileTrialTimeRanges(trials);
+trialTimeRanges = compileTrialTimeRanges(trials,20);
 minTime = min(trialTimeRanges(:,2));
 maxTime = max(trialTimeRanges(:,1));
 
