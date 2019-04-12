@@ -11,7 +11,7 @@ baseName = 'RTMTcorr_R0182_wPvalLines_actualTiming';
 tWindow = 1;
 freqList = logFreqList([1 200],30);
 
-timingFields = {'pretone','MT'};
+timingFields = {'RT','MT'};
 
 rows = 4;
 cols = 1;
@@ -39,7 +39,7 @@ pMarks = linspace(0.4,0.5,numel(showFreqs));
 % % % %     sevFile = LFPfiles_local{selectedLFPFiles(iSession)};
 % % % %     [~,name,~] = fileparts(sevFile);
     
-for iTiming = 1%:2
+for iTiming = 1:2
     % pc = pval_adjust(data_pval,'bonferroni'); % same as multiplying by 30 and bounding to [0..1]
     timeCorrs_power_rho = squeeze((all_powerCorrs(iTiming,:,:,:)));
     timeCorrs_power_pval = squeeze((all_powerPvals(iTiming,:,:,:)))*30;
