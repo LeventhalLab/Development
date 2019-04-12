@@ -1,17 +1,75 @@
-% load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
-% load('session_20180919_NakamuraMRL.mat', 'all_trials')
-% load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local')
-% load('session_20180919_NakamuraMRL.mat', 'selectedLFPFiles')
+if ~exist('selectedLFPFiles')
+    load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
+    load('session_20180919_NakamuraMRL.mat', 'all_trials')
+    load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local')
+    load('session_20180919_NakamuraMRL.mat', 'selectedLFPFiles')
+end
+savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/LFP/allTrials';
 
 doSetup = false;
+doSetup2 = false;
 doSave = true;
 zThresh = 5;
 tWindow = 1;
 freqList = {[1 4;4 8;13 30;30 70]};
+freqList = 2.5;
 Wlength = 400;
+midId = round(Wlength/2);
+eventFieldnames_wFake = {eventFieldnames{:} 'interTrial'};
 
 cmapPath = '/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/LFPs/utils/magma.png';
 cmap = mycmap(cmapPath);
+
+if false
+    cueNoseOut = [];
+    trialCount = 0;
+    for iNeuron = selectedLFPFiles'
+        sevFile = LFPfiles_local{iNeuron};
+        trials = all_trials{iNeuron};
+        [trialIds,allTimes] = sortTrialsBy(trials,'RT');
+        trials = trials(trialIds);
+        for iTrial = 1:numel(trials)
+            trialCount = trialCount + 1;
+            cueNoseOut(trialCount) = trials(iTrial).timestamps.centerOut - trials(iTrial).timestamps.cueOn;
+        end
+    end
+    disp(['Cue to Nose Out -> mean: ',num2str(mean(cueNoseOut),2),', std: ',num2str(std(cueNoseOut),2)]);
+end
+
+if doSetup2
+    nSurr = 20;
+    allMids = [];
+    for iSurr = 1:nSurr
+        trial_Wz_phase = [];
+        trialCount = 0;
+        iSession = 0;
+        for iNeuron = selectedLFPFiles'
+            iSession = iSession + 1;
+            disp(iSession);
+            sevFile = LFPfiles_local{iNeuron};
+            trials = all_trials{iNeuron};
+            trials = addEventToTrials(trials,'interTrial');
+            [trialIds,allTimes] = sortTrialsBy(trials,'RT');
+            [sevFilt,Fs,decimateFactor] = loadCompressedSEV(sevFile,[]);
+            sevFilt = artifactThresh(sevFilt,[1],2000);
+            sevFilt = sevFilt - mean(sevFilt);
+
+            [W,all_data] = eventsLFPv2(trials(trialIds),sevFilt,tWindow*2,Fs,freqList,{eventFieldnames_wFake{8}});
+            keepTrials = threshTrialData(all_data,zThresh);
+            W = W(:,:,keepTrials,:);
+            [Wz_power,Wz_phase] = zScoreW(W,Wlength); % power Z-score
+            
+            trialCount = trialCount + size(Wz_power,3);
+            % iEvent, iTrial, iTime, iFreq
+            if iSession == 1
+                trial_Wz_phase = Wz_phase;
+            else
+                trial_Wz_phase(:,:,size(trial_Wz_phase,3)+1:trialCount,:) = Wz_phase;
+            end
+        end
+        allMids(iSurr) = circ_r(squeeze(trial_Wz_phase(1,midId,:)));
+    end
+end
 
 if doSetup
     trial_Wz_power = [];
@@ -24,13 +82,14 @@ if doSetup
         iSession = iSession + 1;
         disp(iSession);
         sevFile = LFPfiles_local{iNeuron};
-        curTrials = all_trials{iNeuron};
-        [trialIds,allTimes] = sortTrialsBy(curTrials,'RT');
+        trials = all_trials{iNeuron};
+        trials = addEventToTrials(trials,'interTrial');
+        [trialIds,allTimes] = sortTrialsBy(trials,'RT');
         [sevFilt,Fs,decimateFactor] = loadCompressedSEV(sevFile,[]);
         sevFilt = artifactThresh(sevFilt,[1],2000);
         sevFilt = sevFilt - mean(sevFilt);
         
-        [W,all_data] = eventsLFPv2(curTrials(trialIds),sevFilt,tWindow,Fs,freqList,eventFieldnames);
+        [W,all_data] = eventsLFPv2(trials(trialIds),sevFilt,tWindow*2,Fs,freqList,eventFieldnames_wFake);
         keepTrials = threshTrialData(all_data,zThresh);
         W = W(:,:,keepTrials,:);
         compiledRTs = [compiledRTs allTimes(keepTrials)];
@@ -46,11 +105,10 @@ if doSetup
             trial_Wz_phase(:,:,size(trial_Wz_phase,3)+1:trialCount,:) = Wz_phase;
         end
     end
+    data_source = {trial_Wz_power trial_Wz_phase};
 end
 
 % % save('deltaRTchaos_data_source_20181208','trial_Wz_power','trial_Wz_phase','compiledRTs');
-
-data_source = {trial_Wz_power trial_Wz_phase};
 
 [RTv,RTk] = sort(compiledRTs);
 bandLabels = {'\delta','\theta','\beta','\gamma'};
@@ -166,7 +224,7 @@ if true
     cols = numel(useEvents);
     cmaps = {'jet','parula'};
     caxisVals = {[-2 4],[-pi pi]};
-    for iCond = 1:2
+    for iCond = 2%1:2
         for iFreq = 1:size(trial_Wz_power,4)
             h = ff(1400,800);
             useData = data_source{iCond};
@@ -194,5 +252,36 @@ if true
                 close(h);
             end
         end
+    end
+end
+
+if false
+    iCond = 2;
+    iFreq = 1;
+    allStds = [];
+    for iEvent = 1:8
+        useData = data_source{iCond};
+        thisData = squeeze(useData(iEvent,:,RTk,iFreq));
+        allStds(iEvent) = circ_r(thisData(midId,:)');
+    end
+    h = ff(500,300);
+    bar(allStds,'k');
+    hold on
+    for iEvent = 1:numel(allStds)
+        text(iEvent,allStds(iEvent)+0.05,num2str(allStds(iEvent),2),'horizontalAlignment','center');
+    end
+    plot(xlim,[min(allMids) min(allMids)],'r-');
+    lns = plot(xlim,[max(allMids) max(allMids)],'r-');
+    set(gcf,'color','w');
+    xticklabels(eventFieldnames_wFake);
+    xtickangle(30);
+    ylim([0 0.6]);
+    yticks(ylim);
+    ylabel('MRL');
+    title('MRL at t = 0');
+    legend(lns,{'chance (n = 20)'});
+    if doSave
+        saveas(h,fullfile(savePath,['deltaMRL_wChanceLines.png']));
+        close(h);
     end
 end
