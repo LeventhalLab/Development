@@ -1,6 +1,8 @@
-% load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
-doSetup = false;
-doSave = true;
+if ~exist('eventFieldnames')
+    load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
+end
+doSetup = true;
+doSave = false;
 
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/RTMTCorr/bySession';
 
@@ -67,7 +69,7 @@ for iPower = 1:2
         end
     end
     set(gcf,'color','w');
-    if doSave
+     if doSave
         saveas(h,fullfile(savePath,['RTMTcorr_fracSessions_',powerLabel{iPower},'.png']));
         close(h);
     end

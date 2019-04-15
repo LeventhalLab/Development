@@ -11,7 +11,7 @@ savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/delta/s30';
 
 doSetup = false;
 
-doFig = true;
+% % % % doFig = true; % see /Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/LFPs/Figures/SUASESSTRIAL.m
 doRaw = false;
 doSession = false;
 doTrials = false;
@@ -39,139 +39,123 @@ if doSetup
     end
 end
 
-if doFig
-    doSave = false;
-    doSetup = false;
-    close all
-    iTrial = 3;
-    eventFieldnames_wFake = {eventFieldnames{:} 'interTrial'};
-    useEvents = [1:8];
-    rows = 5;
-    cols = numel(useEvents);
-    lineWidth = 1;
-    xlimVals = [-1 1];
-    nSmooth = 200;
-    if doSetup
-        for iSession = 30 % 30 -> u344-366, dir: 348,349,356,357,361,363,364
-            iNeuron = selectedLFPFiles(iSession);
-            disp(num2str(iSession));
-            sevFile = LFPfiles_local{iNeuron};
-            [sevFilt,Fs,decimateFactor] = loadCompressedSEV(sevFile,[]);
-            trials = all_trials{iNeuron};
-            trials = addEventToTrials(trials,'interTrial');
-            
-            [trialIds,allTimes] = sortTrialsBy(trials,'RT');
-            [W,all_data] = eventsLFPv2(trials(trialIds),sevFilt,tWindow*2,Fs,freqList,eventFieldnames_wFake);
-            keepTrials = threshTrialData(all_data,zThresh);
-            W = W(:,:,keepTrials,:);
-            [Wz,Wz_angle] = zScoreW(W,Wlength); % power Z-score
-            all_data = all_data(:,:,keepTrials);
-            allTimes = allTimes(keepTrials);
-        end
-    end
-    
-    t = linspace(-tWindow*2,tWindow*2,size(all_data,2));
-    tz = linspace(-tWindow,tWindow,Wlength);
-    
-    iNeuron = 361;
-    tsPeths = eventsPeth(trials(trialIds),all_ts{iNeuron},tWindow,eventFieldnames_wFake);
-    tsPeths = tsPeths(keepTrials,:);
-    
-    h = ff(1000,800);
-    for iEvent = 1:numel(useEvents)
-        subplot(rows,cols,prc(cols,[1 iEvent]));
-        data = squeeze(Wz(useEvents(iEvent),:,:));
-        imagesc(t,1:size(Wz,3),data');
-        colormap(gca,jet);
-        caxis([-2 5]);
-        xlim(xlimVals);
-        xticks(sort([0,xlim]));
-        if iEvent == 1
-            ylabel('trials by RT');
-            yticks([1 size(Wz,3)]);
-            title({['S',num2str(iSession,'%02d'),', ',num2str(freqList,'%1.2f'),'Hz'],eventFieldnames_wFake{useEvents(iEvent)},'power'});
-        else
-            yticks([]);
-            title({'',eventFieldnames_wFake{useEvents(iEvent)},'session power'});
-        end
-        grid on;
-        
-        subplot(rows,cols,prc(cols,[2 iEvent]));
-        data = squeeze(Wz_angle(useEvents(iEvent),:,:));
-        imagesc(t,1:size(Wz_angle,3),data');
-        colormap(gca,parula);
-        caxis([-pi pi]);
-        xlim(xlimVals);
-        xticks(sort([0,xlim]));
-        title('session phase');
-        yticks([1 size(Wz,3)])
-        if iEvent == 1
-            ylabel('trials by RT');
-        end
-        grid on;
-        
-        subplot(rows,cols,prc(cols,[3 iEvent]));
-        yyaxis left;
-        plot(t,all_data(useEvents(iEvent),:,iTrial),'k-','lineWidth',lineWidth);
-        ylim([-250 250]);
-        yticks(sort([ylim,0]));
-        ylabel('uV');
-        yyaxis right;
-        plot(t,smooth(all_data(useEvents(iEvent),:,iTrial),nSmooth),'r-','lineWidth',2);
-        ylim([-50 50]);
-        yticks(sort([ylim,0]));
-        xlim(xlimVals);
-        xticks(sort([xlim,0]));
-        title(['Wideband trial ',num2str(iTrial),', RT = ',num2str(allTimes(iTrial),3),'s']);
-        grid on;
-        
-        subplot(rows,cols,prc(cols,[4 iEvent]));
-        yyaxis left;
-        plot(tz,Wz(useEvents(iEvent),:,iTrial),'lineWidth',lineWidth);
-        xlim(xlimVals);
-        xticks(sort([xlim,0]));
-        ylabel('z-power');
-        ylim([-5 10]);
-        yticks(sort([0,ylim]));
-        yyaxis right;
-        plot(tz,Wz_angle(useEvents(iEvent),:,iTrial),'lineWidth',lineWidth);
-        hold on;
-        ts = tsPeths{iTrial,useEvents(iEvent)};
-        for iTs = 1:numel(ts)
-            plot([ts(iTs),ts(iTs)],[-1 1],'-','color','k');
-        end
-        xlim(xlimVals);
-        xticks(sort([xlim,0]));
-        ylabel('phase');
-        yticks([-pi,0,pi]);
-        yticklabels({'-\pi','0','\pi'});
-        ylim([-4 4]);
-        xlabel('time (s)');
-        title(['\delta trial ',num2str(iTrial),', unit ',num2str(iNeuron)]);
-        grid on;
-        
-        % add spike MRL
-        subplot(rows,cols,prc(cols,[5 iEvent]));
-        theta = [];
-        for iTs = 1:numel(ts)
-            tIdx = closest(tz,ts(iTs));
-            theta(iTs) = Wz_angle(useEvents(iEvent),tIdx,iTrial);
-        end
-        polarhistogram(theta,12);
-        pax = gca;
-        pax.ThetaZeroLocation = 'top';
-        thetaticks([0,90,180,270]);
-        rlim([0 12]);
-        rticks(rlim);
-        title(['MRL trial ',num2str(iTrial),', unit ',num2str(iNeuron)]);
-    end
-    
-    set(gcf,'color','w');
-    if doSave
-        saveas(h,fullfile(savePath,['deltaSessTrialFig_s',num2str(iSession,'%02d'),'_t',num2str(iTrial,'%03d'),'.png']));
-        close(h);
-    end
-end
+% see /Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/LFPs/Figures/SUASESSTRIAL.m
+% % % % if doFig
+% % % %     doSave = false;
+% % % %     doSetup = true;
+% % % %     close all
+% % % %     iTrial = 3;
+% % % %     eventFieldnames_wFake = {eventFieldnames{:} 'interTrial'};
+% % % %     useEvents = [1:8];
+% % % %     rows = 5;
+% % % %     cols = numel(useEvents);
+% % % %     lineWidth = 1;
+% % % %     xlimVals = [-1 1];
+% % % %     nSmooth = 200;
+% % % %     if doSetup
+% % % %         for iSession = 30 % 30 -> u344-366, dir: 348,349,356,357,361,363,364
+% % % %             iNeuron = selectedLFPFiles(iSession);
+% % % %             disp(num2str(iSession));
+% % % %             sevFile = LFPfiles_local{iNeuron};
+% % % %             [sevFilt,Fs,decimateFactor] = loadCompressedSEV(sevFile,[]);
+% % % %             trials = all_trials{iNeuron};
+% % % %             trials = addEventToTrials(trials,'interTrial');
+% % % %             
+% % % %             [trialIds,allTimes] = sortTrialsBy(trials,'RT');
+% % % %             [W,all_data] = eventsLFPv2(trials(trialIds),sevFilt,tWindow*2,Fs,freqList,eventFieldnames_wFake);
+% % % %             keepTrials = threshTrialData(all_data,zThresh);
+% % % %             W = W(:,:,keepTrials,:);
+% % % %             [Wz,Wz_angle] = zScoreW(W,Wlength); % power Z-score
+% % % %             all_data = all_data(:,:,keepTrials);
+% % % %             allTimes = allTimes(keepTrials);
+% % % %         end
+% % % %     end
+% % % %     
+% % % %     t = linspace(-tWindow*2,tWindow*2,size(all_data,2));
+% % % %     tz = linspace(-tWindow,tWindow,Wlength);
+% % % %     
+% % % %     iNeuron = 361;
+% % % %     tsPeths = eventsPeth(trials(trialIds),all_ts{iNeuron},tWindow,eventFieldnames_wFake);
+% % % %     tsPeths = tsPeths(keepTrials,:);
+% % % %     
+% % % %     h = ff(1000,800);
+% % % %     for iEvent = 1:numel(useEvents)
+% % % %         subplot(rows,cols,prc(cols,[1 iEvent]));
+% % % %         data = squeeze(Wz_angle(useEvents(iEvent),:,:));
+% % % %         imagesc(t,1:size(Wz_angle,3),data');
+% % % %         colormap(gca,parula);
+% % % %         caxis([-pi pi]);
+% % % %         xlim(xlimVals);
+% % % %         xticks(sort([0,xlim]));
+% % % %         title('session phase');
+% % % %         yticks([1 size(Wz,3)])
+% % % %         if iEvent == 1
+% % % %             ylabel('trials by RT');
+% % % %         end
+% % % %         grid on;
+% % % %         
+% % % %         subplot(rows,cols,prc(cols,[2 iEvent]));
+% % % %         yyaxis left;
+% % % %         plot(t,all_data(useEvents(iEvent),:,iTrial),'k-','lineWidth',lineWidth);
+% % % %         ylim([-250 250]);
+% % % %         yticks(sort([ylim,0]));
+% % % %         ylabel('uV');
+% % % %         yyaxis right;
+% % % %         plot(t,smooth(all_data(useEvents(iEvent),:,iTrial),nSmooth),'r-','lineWidth',2);
+% % % %         ylim([-50 50]);
+% % % %         yticks(sort([ylim,0]));
+% % % %         xlim(xlimVals);
+% % % %         xticks(sort([xlim,0]));
+% % % %         title(['Wideband trial ',num2str(iTrial),', RT = ',num2str(allTimes(iTrial),3),'s']);
+% % % %         grid on;
+% % % %         
+% % % %         subplot(rows,cols,prc(cols,[3 iEvent]));
+% % % %         yyaxis left;
+% % % %         plot(tz,Wz(useEvents(iEvent),:,iTrial),'lineWidth',lineWidth);
+% % % %         xlim(xlimVals);
+% % % %         xticks(sort([xlim,0]));
+% % % %         ylabel('z-power');
+% % % %         ylim([-5 10]);
+% % % %         yticks(sort([0,ylim]));
+% % % %         yyaxis right;
+% % % %         plot(tz,Wz_angle(useEvents(iEvent),:,iTrial),'lineWidth',lineWidth);
+% % % %         hold on;
+% % % %         ts = tsPeths{iTrial,useEvents(iEvent)};
+% % % %         for iTs = 1:numel(ts)
+% % % %             plot([ts(iTs),ts(iTs)],[-1 1],'-','color','k');
+% % % %         end
+% % % %         xlim(xlimVals);
+% % % %         xticks(sort([xlim,0]));
+% % % %         ylabel('phase');
+% % % %         yticks([-pi,0,pi]);
+% % % %         yticklabels({'-\pi','0','\pi'});
+% % % %         ylim([-4 4]);
+% % % %         xlabel('time (s)');
+% % % %         title(['\delta trial ',num2str(iTrial),', unit ',num2str(iNeuron)]);
+% % % %         grid on;
+% % % %         
+% % % %         % add spike MRL
+% % % %         subplot(rows,cols,prc(cols,[5 iEvent]));
+% % % %         theta = [];
+% % % %         for iTs = 1:numel(ts)
+% % % %             tIdx = closest(tz,ts(iTs));
+% % % %             theta(iTs) = Wz_angle(useEvents(iEvent),tIdx,iTrial);
+% % % %         end
+% % % %         polarhistogram(theta,12);
+% % % %         pax = gca;
+% % % %         pax.ThetaZeroLocation = 'top';
+% % % %         thetaticks([0,90,180,270]);
+% % % %         rlim([0 12]);
+% % % %         rticks(rlim);
+% % % %         title(['MRL trial ',num2str(iTrial),', unit ',num2str(iNeuron)]);
+% % % %     end
+% % % %     
+% % % %     set(gcf,'color','w');
+% % % %     if doSave
+% % % %         saveas(h,fullfile(savePath,['deltaSessTrialFig_s',num2str(iSession,'%02d'),'_t',num2str(iTrial,'%03d'),'.png']));
+% % % %         close(h);
+% % % %     end
+% % % % end
 
 if doRaw
     doSave = false;
