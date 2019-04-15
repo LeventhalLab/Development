@@ -7,7 +7,7 @@ if ~exist('selectedLFPFiles')
 end
 
 figPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
-subplotMargins = [.05 .02];
+subplotMargins = [.02 .02];
 
 doSetup = false;
 doSave = true;
@@ -143,7 +143,7 @@ for iEvent = 1:numel(useEvents)
         tIdx = closest(tz,ts(iTs));
         theta(iTs) = Wz_phase(useEvents(iEvent),tIdx,iTrial);
     end
-    polarhistogram(theta,13);
+    polarhistogram(theta,13,'FaceColor',repmat(.314z,[1,3]));
     pax = gca;
     pax.ThetaZeroLocation = 'top';
     thetaticks([0,90,180,270]);
@@ -165,9 +165,9 @@ for iEvent = 1:numel(useEvents)
     hold on;
     plot([0,0],ylim,'k:'); % center line
     if useEvents(iEvent) == 3
-        plot(compiledRTs(rtk),1:numel(compiledRTs),'r-','linewidth',1);
+        plot(compiledRTs(rtk),1:numel(compiledRTs),'k-','linewidth',1);
     elseif useEvents(iEvent) == 4
-        plot(-compiledRTs(rtk),1:numel(compiledRTs),'r-','linewidth',1);
+        plot(-compiledRTs(rtk),1:numel(compiledRTs),'k-','linewidth',1);
     end
     xlim(xlimVals);
     xticks(sort([0,xlim]));
@@ -186,7 +186,7 @@ end
 tightfig;
 set(gcf,'color','w');
 if doSave
-    setFig('','',[1.5,2]);
+    setFig('','',[1.5,1.25]);
     print(gcf,'-painters','-depsc',fullfile(figPath,'SUASESSTRIAL.eps'));
 % % % %     saveas(h,fullfile(savePath,['SUASESSTRIAL.png']));
     close(h);

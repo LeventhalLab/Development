@@ -4,7 +4,7 @@
 close all
 
 figPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
-subplotMargins = [.05 .02];
+subplotMargins = [.03 .02];
 
 doSave = true;
 doLabels = false;

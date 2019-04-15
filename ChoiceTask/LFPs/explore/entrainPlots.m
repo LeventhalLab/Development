@@ -10,11 +10,14 @@
 % % entrain_mus = NaN(nSurr,2,numel(all_ts),numel(freqList));
 % % entrain_hist = NaN(nSurr,2,numel(all_ts),nBins,numel(freqList));
 
-doSave = false;
-savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/entrainmentFigure';
+doSave = true;
 
-do_3Dhistograms = false;
-do_entrain_pvalsMRLs_dirUnits = true;
+figPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
+subplotMargins = [.03 .02;];
+
+do_3Dhistograms = true;
+do_entrain_pvalsMRLs_dirUnits = false;
+doLabels = false;
 
 freqList = logFreqList([1 200],30);
 nSurr = 200;
@@ -32,24 +35,25 @@ if do_3Dhistograms
     iFreq = 6;
     
     close all
-    h = ff(1400,800);
+    h = ff(750,800);
     rows = 4;
     cols = 4;
-    linewidths = [0.5,2,2];
+    linewidths = [0.5,1,1];
     linecolors = [0 0 0;lines(2)];
-    iRow = 0;
-    for iIn = 1:2
-        for iPoisson = 1:2
-            iRow = iRow + 1;
-            for iDir = 1:3
-                subplot(rows,cols,prc(cols,[iRow iDir]));
+    meanZ = [];
+    for iDir = 1:3
+        iCol = 0;
+        for iIn = 1:2
+            for iPoisson = 1:2
+                iCol = iCol + 1;
+                subplot_tight(rows,cols,prc(cols,[iDir iCol]),subplotMargins);
                 if iPoisson == 1
                     data = squeeze(entrain_hist(1,iIn,dirUnits{iDir},:,iFreq));
                     norm_sum = sum(data,2);
                     useIds = find(~isnan(norm_sum));
                     Z = data(useIds,:) ./ norm_sum(useIds);
                     Z = circshift(Z,6,2);
-                    meanZ = [nanmean(Z) nanmean(Z)];
+                    meanZ(iCol,iDir,:) = [nanmean(Z) nanmean(Z)];
                 else
                     all_meanZ = [];
                     all_Z = [];
@@ -61,7 +65,7 @@ if do_3Dhistograms
                         all_Z(iSurr,:,:) = circshift(Z,6,2);
                         all_meanZ(iSurr,:) = [nanmean(Z) nanmean(Z)];
                     end
-                    meanZ = mean(all_meanZ);
+                    meanZ(iCol,iDir,:) = mean(all_meanZ);
                     Z = squeeze(mean(all_Z));
                 end
                 [~,kZ] = sort(max(Z'));
@@ -75,36 +79,56 @@ if do_3Dhistograms
                 Z = Z(k,:);
 
                 imagesc([Z';Z']);
-                caxis([0.05 .1])
+                hold on;
+                caxis([0.05 .10])
                 usexlims = [0.5 size(Z,1) + 0.5];
                 xtickVals = [1 size(Z,1)];
                 xlim(usexlims);
                 xticks(xtickVals);
                 xticklabels([]);
-                xlabel('units');
                 yticks([0.5 12.5 24.5]);
-                yticklabels([0 360 720]);
-                ylabel('\phi');
+                plot(xlim,[12.5 12.5],'k:');
                 colormap(jet);
-                title({inLabels{iIn},surrLabels{iPoisson},dirLabels{iDir}});
-
-                subplot(rows,cols,prc(cols,[iRow 4]));
-                plot(meanZ,'linewidth',linewidths(iDir),'color',linecolors(iDir,:));
-                hold on;
-                xlim([1 numel(meanZ)]);
-                xticks([1 12 24]);
-                xticklabels([0 360 720]);
-                xlabel('\phi');
-                ylabel('mean');
-                ylim([.08 .09]);
-                yticks(ylim);
+                if doLabels
+                    xlabel('units');
+                    yticklabels([0 360 720]);
+                    ylabel('\phi');
+                    title({inLabels{iIn},surrLabels{iPoisson},dirLabels{iDir}});
+                else
+                    yticklabels([]);
+                    xticklabels([]);
+                end
             end
-            legend(dirLabels_wCount,'fontsize',8);
         end
     end
+    
+    for iCol = 1:4
+        subplot_tight(rows,cols,prc(cols,[4 iCol]),subplotMargins);
+        for iDir = 1:3
+            plot(squeeze(meanZ(iCol,iDir,:)),'linewidth',linewidths(iDir),'color',linecolors(iDir,:));
+            hold on;
+            xlim([1 24]);
+            xticks([1 12 24]);
+            xticklabels([0 360 720]);
+            ylim([.08 .09]);
+            yticks(ylim);
+            plot([12 12],ylim,'k:');
+            if doLabels
+                xlabel('\phi');
+                ylabel('mean');
+                legend(dirLabels_wCount,'fontsize',8);
+            else
+                yticklabels([]);
+                xticklabels([]);
+            end
+        end
+    end
+    tightfig;
     set(gcf,'color','w');
     if doSave
-        saveas(h,fullfile(savePath,'entrain_coloredMatrixWLines.png'));
+        setFig('','',[1.5,1.5]);
+        print(gcf,'-painters','-depsc',fullfile(figPath,['PHASEBINS.eps']));
+        % % % %     saveas(h,fullfile(savePath,['SUASESSTRIAL.png']));
         close(h);
     end
 end
