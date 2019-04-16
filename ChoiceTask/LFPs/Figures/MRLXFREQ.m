@@ -34,6 +34,8 @@ poissonAlpha = [1 0.25];
 linewidths = [0.5 1 1];
 lns = [];
 pThresh = 0.05;
+fromChanceYs = [.98 .95 .92];
+fromShuffleYs = [NaN .85 .82];
 fromLabels = {'diff all','diff poisson'};
 nShuffle = 1000;
 allUnits = find(ismember(dirUnits{1},entrainmentUnits));
@@ -69,13 +71,13 @@ for iIn = 1:2
                 end
             end
             if ~isempty(all_pMat)
-% % %                 diffFromChance = [];
-% % %                 for iFreq = 1:numel(freqList)
-% % %                     diffFromChance(iFreq) = sum(pMat(iFreq) < all_pMat(:,iFreq)) / nSurr;
-% % %                 end
-% % %                 pIdx = find(diffFromChance < pThresh);
-% % %                 plot(pIdx,repmat(fromChanceYs(iDir),[1,numel(pIdx)]),'s','markerfacecolor',colors(iDir,:),'MarkerEdgeColor','none');
-% % %                 hold on;
+                diffFromChance = [];
+                for iFreq = 1:numel(freqList)
+                    diffFromChance(iFreq) = sum(pMat(iFreq) < all_pMat(:,iFreq)) / nSurr;
+                end
+                pIdx = find(diffFromChance < pThresh);
+                plot(pIdx,repmat(fromChanceYs(iDir),[1,numel(pIdx)]),'s','markerfacecolor',colors(iDir,:),'MarkerEdgeColor','none');
+                hold on;
                 pMat = mean(all_pMat);
             end
             ln = plot(pMat,'color',[colors(iDir,:) poissonAlpha(iPoisson)],'linewidth',linewidths(iDir));

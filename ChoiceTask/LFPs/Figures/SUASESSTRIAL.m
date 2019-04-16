@@ -1,4 +1,5 @@
-if ~exist('selectedLFPFiles')
+% SUASESSTRIAL, still using doSetup to init values, !!consider saving structures
+if ~exist('all_ts')
     load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
     load('session_20180919_NakamuraMRL.mat', 'all_trials')
     load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local')
@@ -143,7 +144,7 @@ for iEvent = 1:numel(useEvents)
         tIdx = closest(tz,ts(iTs));
         theta(iTs) = Wz_phase(useEvents(iEvent),tIdx,iTrial);
     end
-    polarhistogram(theta,13,'FaceColor',repmat(.314z,[1,3]));
+    polarhistogram(theta,13,'FaceColor',repmat(.314,[1,3]));
     pax = gca;
     pax.ThetaZeroLocation = 'top';
     thetaticks([0,90,180,270]);

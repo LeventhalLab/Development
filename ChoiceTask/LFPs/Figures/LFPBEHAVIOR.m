@@ -9,7 +9,7 @@ do_linePlot = false;
 
 doSave = true;
 figPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
-subplotMargins = [.03 .02];
+subplotMargins = [.03 .01];
 
 eventfields = {'Cue','Nose In','Tone','Nose Out','Side In','Side Out','Reward'};
 scaloPower = squeeze(mean(session_Wz_power(:,:,:,:)));
@@ -80,7 +80,7 @@ if do_linePlot
     end
 end
 
-h = ff(1000,450);
+h = ff(1000,350);
 rows = 2;
 cols = 7;
 caxisVals = [-1 4];
@@ -88,26 +88,30 @@ caxisVals = [-1 4];
 for iEvent = 1:7
     subplot_tight(rows,cols,prc(cols,[1,iEvent]),subplotMargins);
     imagesc(t,1:numel(freqList),squeeze(scaloPower(iEvent,:,:))');
+    hold on;
     colormap(gca,jet);
     caxis(caxisVals);
     xlim([-1 1]);
     xticks(0);
     xticklabels([]);
     yticks([]);
+    plot([0,0],ylim,'k:'); % center line
     set(gca,'YDir','normal');
     
     subplot_tight(rows,cols,prc(cols,[2,iEvent]),subplotMargins);
     imagesc(linspace(-1,1,size(scaloPhase,2)),1:numel(freqList),squeeze(scaloPhase(iEvent,:,:))');
+    hold on;
     colormap(gca,hot);
     caxis([0 1]);
     xlim([-1 1]);
     xticks(0);
     xticklabels([]);
     yticks([]);
+    plot([0,0],ylim,'k:'); % center line
     set(gca,'YDir','normal');
 end
 tightfig;
-setFig('','',[2,4]);
+setFig('','',[2,3.5]);
 if doSave
     print(gcf,'-painters','-depsc',fullfile(figPath,'LFPBEHAVIOR.eps'));
     close(h);

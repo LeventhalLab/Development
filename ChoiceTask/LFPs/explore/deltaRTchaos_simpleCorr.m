@@ -7,8 +7,8 @@ end
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/LFP/allTrials';
 
 doSetup = false;
-doSetup2 = false;
-doSave = true;
+doSetup2 = true;
+doSave = false;
 zThresh = 5;
 tWindow = 1;
 freqList = {[1 4;4 8;13 30;30 70]};
