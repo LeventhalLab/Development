@@ -1,7 +1,9 @@
 % MRLXFREQ
-% load('20190318_entrain.mat')
-% load('session_20181218_highresEntrainment.mat','dirSelUnitIds','ndirSelUnitIds','primSec')
-% load('session_20181218_highresEntrainment.mat', 'eventFieldnames')
+if ~exist('entrain_hist')
+    load('20190318_entrain.mat')
+    load('session_20181218_highresEntrainment.mat','dirSelUnitIds','ndirSelUnitIds','primSec')
+    load('session_20181218_highresEntrainment.mat', 'eventFieldnames')
+end
 
 % format
 % % entrainmentUnits = [];
@@ -10,13 +12,13 @@
 % % entrain_mus = NaN(nSurr,2,numel(all_ts),numel(freqList));
 % % entrain_hist = NaN(nSurr,2,numel(all_ts),nBins,numel(freqList));
 
-doSave = true;
+doSave = false;
 
 figPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
 subplotMargins = [.03 .02;];
 
-do_3Dhistograms = true;
-do_entrain_pvalsMRLs_dirUnits = false;
+do_3Dhistograms = false;
+do_entrain_pvalsMRLs_dirUnits = true;
 doLabels = false;
 
 freqList = logFreqList([1 200],30);

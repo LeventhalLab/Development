@@ -15,7 +15,7 @@ condUnits = {1:366,dirSelUnitIds,ndirSelUnitIds};
 freqList = logFreqList([1 200],30);
 inLabels = {'in-trial','inter-trial'};
 
-h = ff(500,600);
+h = ff(400,575);
 rows = 3;
 cols = 2;
 for iIn = 1:2
@@ -49,7 +49,7 @@ end
 tightfig;
 set(gcf,'color','w');
 if doSave
-    setFig('','',[1,1.5]);
+    setFig('','',[1,3]);
     print(gcf,'-painters','-depsc',fullfile(figPath,'SPIKEXCORR.eps'));
 % % % %     saveas(h,fullfile(savePath,'SPIKEXCORR.png'));
     close(h);

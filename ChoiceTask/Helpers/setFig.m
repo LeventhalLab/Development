@@ -46,4 +46,3 @@ if exist('cols','var')
 end
 
 set(findall(gcf,'-property','FontSize'),'FontSize',10);
-box off;

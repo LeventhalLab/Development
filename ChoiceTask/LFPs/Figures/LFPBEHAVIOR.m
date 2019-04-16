@@ -1,4 +1,7 @@
-% load('fig__spectrum_MRL_20181108');
+% LFPBEHAVIOR
+if ~exist('session_Wz_power')
+    load('fig__spectrum_MRL_20181108');
+end
 % raw data was compiled with LFP_byX.m (doSetup = true)
 % freqList = logFreqList([1 200],30);
 
@@ -6,7 +9,7 @@ do_linePlot = false;
 
 doSave = true;
 figPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
-subplotMargins = [.05 .02];
+subplotMargins = [.03 .02];
 
 eventfields = {'Cue','Nose In','Tone','Nose Out','Side In','Side Out','Reward'};
 scaloPower = squeeze(mean(session_Wz_power(:,:,:,:)));
@@ -15,7 +18,7 @@ scaloRayleigh = squeeze(mean(session_Wz_rayleigh_pval(:,:,:,:)));
 t = linspace(-1,1,size(scaloPower,2));
 
 if do_linePlot
-    h = ff(1400,500);
+    h = ff(1200,500);
     rows = 2;
     cols = 7;
     colors = magma(30);
@@ -46,7 +49,7 @@ if do_linePlot
             cb.TickLabels = compose('%2.1f',freqList);
             cb.Color = 'w';
         end
-
+        
         for iFreq = 1:numel(freqList)
             subplot(rows,cols,prc(cols,[2,iEvent]));
             plot(t,smooth(squeeze(scaloPhase(iEvent,:,iFreq))),'color',colors(iFreq,:));
@@ -72,12 +75,12 @@ if do_linePlot
             cb.TickLabels = compose('%2.1f',freqList);
             cb.Color = 'w';
         end
-
+        
         set(gcf,'color','k');
     end
 end
 
-h = ff(1200,450);
+h = ff(1000,450);
 rows = 2;
 cols = 7;
 caxisVals = [-1 4];
@@ -92,8 +95,6 @@ for iEvent = 1:7
     xticklabels([]);
     yticks([]);
     set(gca,'YDir','normal');
-    box off;
-    grid on;
     
     subplot_tight(rows,cols,prc(cols,[2,iEvent]),subplotMargins);
     imagesc(linspace(-1,1,size(scaloPhase,2)),1:numel(freqList),squeeze(scaloPhase(iEvent,:,:))');
@@ -104,13 +105,11 @@ for iEvent = 1:7
     xticklabels([]);
     yticks([]);
     set(gca,'YDir','normal');
-    box off;
-    grid on;
 end
 tightfig;
 setFig('','',[2,4]);
 if doSave
-    print(gcf,'-painters','-depsc',fullfile(figPath,'spectrum_MRL.eps'));
+    print(gcf,'-painters','-depsc',fullfile(figPath,'LFPBEHAVIOR.eps'));
     close(h);
 end
 
@@ -120,13 +119,13 @@ if doSave
     colormap(gca,jet);
     cb = colorbar;
     cb.Ticks = [];
-
+    
     subplot_tight(rows,cols,14,subplotMargins);
     colormap(gca,hot);
     cb = colorbar;
     cb.Ticks = [];
     if doSave
-        print(gcf,'-painters','-depsc',fullfile(figPath,'spectrum_MRL_colorbars.eps'));
+        print(gcf,'-painters','-depsc',fullfile(figPath,'LFPBEHAVIOR_legends.eps'));
         close(h);
     end
 end
