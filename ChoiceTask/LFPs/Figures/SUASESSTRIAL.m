@@ -189,6 +189,5 @@ set(gcf,'color','w');
 if doSave
     setFig('','',[1.5,1.25]);
     print(gcf,'-painters','-depsc',fullfile(figPath,'SUASESSTRIAL.eps'));
-% % % %     saveas(h,fullfile(savePath,['SUASESSTRIAL.png']));
     close(h);
 end

@@ -31,10 +31,9 @@ rows = 2;
 cols = 2;
 colors = [0 0 0;lines(2)];
 poissonAlpha = [1 0.25];
-linewidths = [0.5 1 1];
 lns = [];
 pThresh = 0.05;
-fromChanceYs = [.98 .95 .92];
+fromChanceYs = [.95 .98 .92];
 fromShuffleYs = [NaN .85 .82];
 fromLabels = {'diff all','diff poisson'};
 nShuffle = 1000;
@@ -75,13 +74,16 @@ for iIn = 1:2
                 for iFreq = 1:numel(freqList)
                     diffFromChance(iFreq) = sum(pMat(iFreq) < all_pMat(:,iFreq)) / nSurr;
                 end
-                pIdx = find(diffFromChance < pThresh);
-                plot(pIdx,repmat(fromChanceYs(iDir),[1,numel(pIdx)]),'s','markerfacecolor',colors(iDir,:),'MarkerEdgeColor','none');
+                pIdx = double(diffFromChance < pThresh);
+                pIdx(pIdx == 0) = NaN;
+                plot(1:numel(pIdx),fromChanceYs(iDir)*pIdx,'color',colors(iDir,:),'linewidth',1);
                 hold on;
                 pMat = mean(all_pMat);
             end
-            ln = plot(pMat,'color',[colors(iDir,:) poissonAlpha(iPoisson)],'linewidth',linewidths(iDir));
-            hold on;
+            if iPoisson == 1 % !! not plotting poisson lines
+                ln = plot(pMat,'color',[colors(iDir,:) poissonAlpha(iPoisson)],'linewidth',1);
+                hold on;
+            end
 % % %             if iPoisson == 1
 % % %                 lns(iDir) = ln;
 % % %                 if iDir > 1
@@ -107,6 +109,7 @@ for iIn = 1:2
         xticks(usexticks);
         yticklabels([]);
         xticklabels([]);
+        box off;
     end
     
     subplot_tight(rows,cols,prc(cols,[2 iIn]),subplotMargins);
@@ -135,17 +138,20 @@ for iIn = 1:2
                 end
             end
             if ~isempty(all_pMat)
-% % %                 diffFromChance = [];
-% % %                 for iFreq = 1:numel(freqList)
-% % %                     diffFromChance(iFreq) = sum(pMat(iFreq) < all_pMat(:,iFreq)) / nSurr;
-% % %                 end
-% % %                 pIdx = find(diffFromChance < pThresh);
-% % %                 plot(pIdx,repmat(fromChanceYs(iDir)*maxY,[1,numel(pIdx)]),'s','markerfacecolor',colors(iDir,:),'MarkerEdgeColor','none');
-% % %                 hold on;
+                diffFromChance = [];
+                for iFreq = 1:numel(freqList)
+                    diffFromChance(iFreq) = sum(pMat(iFreq) < all_pMat(:,iFreq)) / nSurr;
+                end
+                pIdx = double(diffFromChance < pThresh);
+                pIdx(pIdx == 0) = NaN;
+                plot(1:numel(pIdx),fromChanceYs(iDir)*pIdx*maxY,'color',colors(iDir,:),'linewidth',1);
+                hold on;
                 pMat = mean(all_pMat);
             end
-            ln = plot(pMat,'color',[colors(iDir,:) poissonAlpha(iPoisson)],'linewidth',linewidths(iDir));
-            hold on;
+            if iPoisson == 1 % !! not plotting poisson lines
+                ln = plot(pMat,'color',[colors(iDir,:) poissonAlpha(iPoisson)],'linewidth',1);
+                hold on;
+            end
 % % %             if iPoisson == 1
 % % %                 lns(iDir) = ln;
 % % %                 if iDir > 1
@@ -171,6 +177,7 @@ for iIn = 1:2
         xticks(usexticks);
         yticklabels([]);
         xticklabels([]);
+        box off;
     end
 end
 
