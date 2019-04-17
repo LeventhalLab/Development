@@ -113,6 +113,8 @@ for iCol = 1:4
         else
             yticklabels([]);
             xticklabels([]);
+            ax = gca;
+            ax.Position = ax.Position .* [1 1 1 0.95];
         end
     end
 end

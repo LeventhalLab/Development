@@ -144,11 +144,12 @@ for iEvent = 1:numel(useEvents)
         tIdx = closest(tz,ts(iTs));
         theta(iTs) = Wz_phase(useEvents(iEvent),tIdx,iTrial);
     end
-    polarhistogram(theta,13,'FaceColor',repmat(.314,[1,3]));
+    colors = lines(2);
+    polarhistogram(theta,10,'FaceColor',colors(2,:),'normalization','probability','FaceAlpha',1);
     pax = gca;
-    pax.ThetaZeroLocation = 'top';
+    pax.ThetaZeroLocation = 'left';
     thetaticks([0,90,180,270]);
-    rlim([0 12]);
+    rlim([0 0.3]);
     rticks(rlim);
     if doLabels
         title({eventFieldnames{useEvents(iEvent)},['MRL trial ',num2str(iTrial),', unit ',num2str(iNeuron)]});
@@ -187,7 +188,7 @@ end
 tightfig;
 set(gcf,'color','w');
 if doSave
-    setFig('','',[1.5,1.25]);
+    setFig('','',[1.5,1.4]);
     print(gcf,'-painters','-depsc',fullfile(figPath,'SUASESSTRIAL.eps'));
     close(h);
 end

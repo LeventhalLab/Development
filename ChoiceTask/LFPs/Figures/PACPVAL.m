@@ -17,7 +17,7 @@ SE = strel('sphere',1);
 zThresh = -norminv(pThresh/(30*30));
 pxThresh = 1;
 lineWidth = 0.5;
-zLims = [0 10];
+zLims = [0 13];
 rows = 2;
 cols = numel(eventFieldnames_wFake);
 
@@ -26,7 +26,7 @@ for iEvent = 1:cols
     subplot_tight(rows,cols,prc(cols,[1 iEvent]),subplotMargins);
     imagesc(curMat,'AlphaData',~isnan(curMat));
     hold on;
-    colormap(gca,parula);
+    colormap(gca,jet);
     set(gca,'ydir','normal');
     caxis(zLims);
     xticks([]);
@@ -50,7 +50,7 @@ for iEvent = 1:cols
     subplot_tight(rows,cols,prc(cols,[2 iEvent]),subplotMargins);
     imagesc(curMat,'AlphaData',~isnan(curMat));
     hold on;
-    colormap(gca,parula);
+    colormap(gca,jet);
     set(gca,'ydir','normal');
     caxis(zLims);
     xticks([]);
