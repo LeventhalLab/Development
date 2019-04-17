@@ -3,10 +3,11 @@ if ~exist('eventFieldnames')
 end
 doSetup = false;
 doLabels = false;
-doSave = true;
+doSave = false;
 close all
 
 figPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
+savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/RTMTCorr/bySession';
 subplotMargins = [.03 .02;];
 
 dirFiles = dir(fullfile(savePath,'*.mat'));
@@ -43,7 +44,7 @@ pThresh = 0.05;
 t = linspace(-1,1,size(all_pha_pval,4));
 iRow = 0;
 for iTiming = 1:2
-    h = ff(800,450);
+    h = ff(800,480);
     for iPower = 1:2
         iRow = iRow + 1;
         for iEvent = 1:size(useEvents,2)
@@ -84,7 +85,7 @@ for iTiming = 1:2
     tightfig;
     set(gcf,'color','w');
     if doSave
-        setFig('','',[1.5,2.9]);
+        setFig('','',[1.5,3.4]);
         print(gcf,'-painters','-depsc',fullfile(figPath,['RTMTCORR_sessionLines',timingFields{iTiming},'.eps']));
         % % % %     saveas(h,fullfile(savePath,['SUASESSTRIAL.png']));
         close(h);

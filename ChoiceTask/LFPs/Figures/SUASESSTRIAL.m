@@ -10,8 +10,8 @@ end
 figPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
 subplotMargins = [.02 .02];
 
-doSetup = false;
-doSave = true;
+doSave1 = false;
+doSave2 = true;
 doLabels = false;
 
 close all
@@ -29,7 +29,7 @@ topRows = [10 16;11 17;12 18];
 zThresh = 5;
 % % reshape(1:6*3,[6,3]); % design
 
-if doSetup
+if ~exist('trial_Wz_power')
     trial_Wz_power = [];
     trial_Wz_phase = [];
     session_Wz_rayleigh_pval = [];
@@ -160,6 +160,10 @@ for iEvent = 1:numel(useEvents)
     
     % %     subplot_tight(rows,cols,prc(cols,[1 iEvent]));
     subplot_tight(rows,cols,[topRows(iEvent,1) topRows(iEvent,2)],subplotMargins);
+    set(gca,'Visible','off')
+    
+    % export phases individually to deal with vector/print issue
+    hh = ff(250,400);
     data = squeeze(trial_Wz_phase(useEvents(iEvent),:,rtk));
     imagesc(t,1:size(trial_Wz_phase,3),data');
     colormap(gca,parula);
@@ -173,7 +177,7 @@ for iEvent = 1:numel(useEvents)
     end
     xlim(xlimVals);
     xticks(sort([0,xlim]));
-    ylim([1 size(trial_Wz_phase,3)]);
+    ylim([1 size(trial_Wz_phase,3)]-11); % minus trials to handle vector/print issue
     yticks(ylim);
     box on;
     if doLabels
@@ -183,11 +187,18 @@ for iEvent = 1:numel(useEvents)
         yticklabels({});
         xticklabels({});
     end
+    tightfig;
+    set(gcf,'color','w');
+    if doSave2
+        setFig('','',[3.2,0]);
+        print(gcf,'-painters','-depsc',fullfile(figPath,['SUASESSTRIAL_subplot',num2str(iEvent),'.eps']));
+        close(hh);
+    end
 end
 
 tightfig;
 set(gcf,'color','w');
-if doSave
+if doSave1
     setFig('','',[1.5,1.4]);
     print(gcf,'-painters','-depsc',fullfile(figPath,'SUASESSTRIAL.eps'));
     close(h);

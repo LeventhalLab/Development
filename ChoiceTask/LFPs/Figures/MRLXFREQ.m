@@ -74,7 +74,7 @@ for iIn = 1:2
                 for iFreq = 1:numel(freqList)
                     diffFromChance(iFreq) = sum(pMat(iFreq) < all_pMat(:,iFreq)) / nSurr;
                 end
-                pIdx = double(diffFromChance < pThresh);
+                pIdx = double(diffFromChance < .001);
                 pIdx(pIdx == 0) = NaN;
                 plot(1:numel(pIdx),fromChanceYs(iDir)*pIdx,'color',colors(iDir,:),'linewidth',1);
                 hold on;
@@ -142,7 +142,7 @@ for iIn = 1:2
                 for iFreq = 1:numel(freqList)
                     diffFromChance(iFreq) = sum(pMat(iFreq) < all_pMat(:,iFreq)) / nSurr;
                 end
-                pIdx = double(diffFromChance < pThresh);
+                pIdx = double(diffFromChance < .001);
                 pIdx(pIdx == 0) = NaN;
                 plot(1:numel(pIdx),fromChanceYs(iDir)*pIdx*maxY,'color',colors(iDir,:),'linewidth',1);
                 hold on;
