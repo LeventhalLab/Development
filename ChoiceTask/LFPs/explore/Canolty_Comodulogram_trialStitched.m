@@ -81,8 +81,8 @@ for iNeuron = selectedLFPFiles'
     end
 end
 
-save('Canolt_comodulogram_20190122','corrMatrix_rho','corrMatrix_pval','shuff_corrMatrix_rho_mean','shuff_corrMatrix_pval',...
-'eventFieldnames_wFake','freqList','nShuff');
+% save('Canolt_comodulogram_20190122','corrMatrix_rho','corrMatrix_pval','shuff_corrMatrix_rho_mean','shuff_corrMatrix_pval',...
+% 'eventFieldnames_wFake','freqList','nShuff');
 
 useSessions = [1:30];
 h = Canolty_comodulogram_print(corrMatrix_rho,shuff_corrMatrix_rho_mean,useSessions,...

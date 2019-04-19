@@ -5,7 +5,8 @@ if ~exist('entrain_hist')
     load('session_20181218_highresEntrainment.mat', 'eventFieldnames')
 end
 
-% format
+% init
+nBins = 12;
 % % entrainmentUnits = [];
 % % entrain_pvals = NaN(nSurr,2,numel(all_ts),numel(freqList)); % pos2(1) = In-trial, (2) = Inter-trial
 % % entrain_rs = NaN(nSurr,2,numel(all_ts),numel(freqList));

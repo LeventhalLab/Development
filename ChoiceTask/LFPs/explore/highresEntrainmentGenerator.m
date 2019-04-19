@@ -13,7 +13,7 @@ freqList = logFreqList([1 200],30);
 nBins = 12;
 binEdges = linspace(-pi,pi,nBins+1);
 loadedFile = [];
-nSurr = 200;
+nSurr = 1000;
 minFR = 5;
 
 if doSetup
@@ -41,7 +41,7 @@ if doSetup
             [sevFilt,Fs,decimateFactor,loadedFile] = loadCompressedSEV(sevFile,[]);
             trials = all_trials{iNeuron};
             [trialIds,allTimes] = sortTrialsBy(trials,'RT');
-            intrialTimeRanges = compileTrialTimeRanges(trials(trialIds));
+            trialTimeRanges = compileTrialTimeRanges(trials(trialIds),20);
 
             W = calculateComplexScalograms_EnMasse(sevFilt','Fs',Fs,'freqList',freqList); % size: 5568092, 1, 3
             W = squeeze(W);
@@ -89,6 +89,6 @@ if doSetup
         end
     end
     if doWrite
-        save('20190318_entrain','entrain_pvals','entrain_rs','entrain_mus','entrain_hist','binEdges','entrainmentUnits');
+        save('20190418_entrain','entrain_pvals','entrain_rs','entrain_mus','entrain_hist','binEdges','entrainmentUnits');
     end
 end

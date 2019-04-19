@@ -1,4 +1,4 @@
-% COMODULO
+% COMODULO, see: Canolty_Comodulogram_trialStitched.m
 if ~exist('corrMatrix_rho')
     load('Canolt_comodulogram_20190122.mat')
     load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
@@ -14,7 +14,7 @@ subplotMargins = [.03 .01];
 doSave = true;
 
 h = ff(1200,285);
-cLims = [0 0.4];
+cLims = [-.4 0.4];
 rows = 2;
 cols = numel(eventFieldnames_wFake);
 
@@ -44,4 +44,4 @@ if doSave
     setFig('','',[2,1.75]);
     print(gcf,'-painters','-depsc',fullfile(figPath,'COMODULO.eps'));
     close(h);
-    endz
+end

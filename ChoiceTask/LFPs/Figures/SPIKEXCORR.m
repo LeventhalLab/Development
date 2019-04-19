@@ -1,3 +1,4 @@
+% see /Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/LFPs/explore/spikeXcorrGenerator.m
 % load('20190402_xcorr');
 % load('20190321_xcorr_poisson_allUnits.mat', 'tXcorr', 'lag')
 % load('session_20181218_highresEntrainment.mat','dirSelUnitIds','ndirSelUnitIds','primSec');

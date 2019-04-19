@@ -6,14 +6,22 @@ if ~exist('entrain_hist')
     load('session_20181218_highresEntrainment.mat', 'eventFieldnames')
 end
 
-doSave = true;
+% init
+nBins = 12;
+nSurr = 200;
+% % entrainmentUnits = [];
+% entrain_pvals = NaN(nSurr+1,2,366,numel(freqList)); % pos2(1) = In-trial, (2) = Inter-trial
+% entrain_rs = NaN(nSurr+1,2,366,numel(freqList));
+% entrain_mus = NaN(nSurr+1,2,366,numel(freqList));
+% entrain_hist = NaN(nSurr+1,2,366,nBins,numel(freqList));
+
+doSave = false;
 doLabels = false;
 
 figPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
 subplotMargins = [.03 .02;];
 
 freqList = logFreqList([1 200],30);
-nSurr = 200;
 
 allUnits = 1:366;
 dirUnits = {allUnits,dirSelUnitIds,ndirSelUnitIds};
