@@ -69,6 +69,8 @@ if ~exist('trial_Wz_power')
     tsPeths = eventsPeth(trials(trialIds),all_ts{iNeuron},tWindow,eventFieldnames_wFake);
     tsPeths = tsPeths(keepTrials,:);
     [~,rtk] = sort(compiledRTs);
+    % for iTrial == 3, session 30
+    yTrialMark = rtk(end-91);
     t = linspace(-tWindow*2,tWindow*2,size(all_data,2));
     tz = linspace(-tWindow,tWindow,Wlength);
 end
@@ -88,8 +90,10 @@ for iEvent = 1:numel(useEvents)
         yticklabels({});
     end
     yyaxis right;
-    plot(t,smooth(all_data(useEvents(iEvent),:,iTrial),nSmooth),'r-','lineWidth',1);
-    ylim([-50 50]);
+    realSignal = squeeze(real(W(useEvents(iEvent),:,iTrial)));
+    plot(t,realSignal,'r-','lineWidth',1);
+% %     plot(t,smooth(all_data(useEvents(iEvent),:,iTrial),nSmooth),'r-','lineWidth',1);
+    ylim([-5 5]);
     yticks(sort([ylim,0]));
     xlim(xlimVals);
     xticks(sort([xlim,0]));
@@ -169,6 +173,7 @@ for iEvent = 1:numel(useEvents)
     colormap(gca,parula);
     caxis([-pi pi]);
     hold on;
+    plot(-1,yTrialMark,'k>','markersize',2);
     plot([0,0],ylim,'k:'); % center line
     if useEvents(iEvent) == 3
         plot(compiledRTs(rtk),1:numel(compiledRTs),'k-','linewidth',1);
@@ -192,8 +197,8 @@ for iEvent = 1:numel(useEvents)
     if doSave2
         setFig('','',[3.2,0]);
         print(gcf,'-painters','-depsc',fullfile(figPath,['SUASESSTRIAL_subplot',num2str(iEvent),'.eps']));
-        close(hh);
     end
+    close(hh);
 end
 
 tightfig;

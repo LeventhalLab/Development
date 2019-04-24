@@ -15,7 +15,7 @@ nSurr = 200;
 % entrain_mus = NaN(nSurr+1,2,366,numel(freqList));
 % entrain_hist = NaN(nSurr+1,2,366,nBins,numel(freqList));
 
-doSave = false;
+doSave = true;
 doLabels = false;
 
 figPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
@@ -88,21 +88,21 @@ for iIn = 1:2
                 hold on;
                 pMat = mean(all_pMat);
             end
-            if iPoisson == 1 % !! not plotting poisson lines
-                ln = plot(pMat,'color',[colors(iDir,:) poissonAlpha(iPoisson)],'linewidth',1);
-                hold on;
-            end
-% % %             if iPoisson == 1
-% % %                 lns(iDir) = ln;
-% % %                 if iDir > 1
-% % %                     diffFromShuff = [];
-% % %                     for iFreq = 1:numel(freqList)
-% % %                         diffFromShuff(iFreq) = sum(pMat(iFreq) < shuffMat(:,iFreq)) / nShuffle;
-% % %                     end
-% % %                     pIdx = find(diffFromShuff < pThresh | diffFromShuff >= 1-pThresh);
-% % %                     plot(pIdx,repmat(fromShuffleYs(iDir),[1,numel(pIdx)]),'s','markerfacecolor',colors(iDir,:),'MarkerEdgeColor','none');
-% % %                 end
-% % %             end
+
+            ln = plot(pMat,'color',[colors(iDir,:) poissonAlpha(iPoisson)],'linewidth',1);
+            hold on;
+
+% % % %             if iPoisson == 1
+% % % %                 lns(iDir) = ln;
+% % % %                 if iDir > 1
+% % % %                     diffFromShuff = [];
+% % % %                     for iFreq = 1:numel(freqList)
+% % % %                         diffFromShuff(iFreq) = sum(pMat(iFreq) < shuffMat(:,iFreq)) / nShuffle;
+% % % %                     end
+% % % %                     pIdx = find(diffFromShuff < pThresh | diffFromShuff >= 1-pThresh);
+% % % %                     plot(pIdx,repmat(fromShuffleYs(iDir),[1,numel(pIdx)]),'s','markerfacecolor',colors(iDir,:),'MarkerEdgeColor','none');
+% % % %                 end
+% % % %             end
         end
     end
     xlim([1 numel(freqList)]);
@@ -156,10 +156,8 @@ for iIn = 1:2
                 hold on;
                 pMat = mean(all_pMat);
             end
-            if iPoisson == 1 % !! not plotting poisson lines
-                ln = plot(pMat,'color',[colors(iDir,:) poissonAlpha(iPoisson)],'linewidth',1);
-                hold on;
-            end
+            ln = plot(pMat,'color',[colors(iDir,:) poissonAlpha(iPoisson)],'linewidth',1);
+            hold on;
 % % %             if iPoisson == 1
 % % %                 lns(iDir) = ln;
 % % %                 if iDir > 1

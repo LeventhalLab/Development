@@ -42,7 +42,8 @@ for iEvent = 1:cols
     for k = 1:length(B)
         if stats(k).MajorAxisLength > pxThresh && stats(k).MinorAxisLength > pxThresh
             b = B{k};
-            plot(b(:,2),b(:,1),'r','linewidth',lineWidth);
+            % -/+ for x,y was added to fix eps export alignment issue
+            plot(b(:,2)-1,b(:,1)+1,'r','linewidth',lineWidth);
         end
     end
     
@@ -65,7 +66,8 @@ for iEvent = 1:cols
     for k = 1:length(B)
         if stats(k).MajorAxisLength > pxThresh && stats(k).MinorAxisLength > pxThresh
             b = B{k};
-            plot(b(:,2),b(:,1),'r','linewidth',lineWidth);
+            % -/+ for x,y was added to fix eps export alignment issue
+            plot(b(:,2)-1,b(:,1)+1,'r','linewidth',lineWidth);
         end
     end
 end
