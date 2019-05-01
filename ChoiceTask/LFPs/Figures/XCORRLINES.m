@@ -12,7 +12,7 @@ figPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figu
 subplotMargins = [.05 .02];
 nShuffle = 1000;
 
-doSave = true;
+doSave = false;
 doLabels = false;
 
 tlag = linspace(-tXcorr,tXcorr,numel(lag));
