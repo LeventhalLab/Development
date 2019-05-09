@@ -84,6 +84,11 @@ h = ff(1000,350);
 rows = 2;
 cols = 7;
 caxisVals = [-1 4];
+xmarks = round(logFreqList([1 200],6),0);
+usexticks = [];
+for ii = 1:numel(xmarks)
+    usexticks(ii) = closest(freqList,xmarks(ii));
+end
 
 for iEvent = 1:7
     subplot_tight(rows,cols,prc(cols,[1,iEvent]),subplotMargins);
@@ -94,7 +99,8 @@ for iEvent = 1:7
     xlim([-1 1]);
     xticks(0);
     xticklabels([]);
-    yticks([]);
+    yticks(usexticks);
+    yticklabels([]);
     plot([0,0],ylim,'k:'); % center line
     set(gca,'YDir','normal');
     
@@ -106,7 +112,8 @@ for iEvent = 1:7
     xlim([-1 1]);
     xticks(0);
     xticklabels([]);
-    yticks([]);
+    yticks(usexticks);
+    yticklabels([]);
     plot([0,0],ylim,'k:'); % center line
     set(gca,'YDir','normal');
 end

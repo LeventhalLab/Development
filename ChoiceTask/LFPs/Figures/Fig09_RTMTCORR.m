@@ -3,7 +3,7 @@ if ~exist('eventFieldnames')
 end
 doSetup = false;
 doLabels = false;
-doSave = false;
+doSave = true;
 close all
 
 figPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
@@ -43,8 +43,14 @@ freqLabels = {'\beta','\delta'};
 pThresh = 0.05;
 t = linspace(-1,1,size(all_pha_pval,4));
 iRow = 0;
+
+xmarks = round(logFreqList([1 200],6),0);
+usexticks = [];
+for ii = 1:numel(xmarks)
+    usexticks(ii) = closest(freqList,xmarks(ii));
+end
 for iTiming = 1:2
-    h = ff(800,480);
+    h = ff(850,450);
     for iPower = 1:2
         iRow = iRow + 1;
         for iEvent = 1:size(useEvents,2)
@@ -67,7 +73,10 @@ for iTiming = 1:2
             % % % %             ylim([0 30]);
             
             ylim([1 size(data,1)]);
-            yticks(ylim);
+            yticks(usexticks);
+            yticklabels([]);
+            set(gca,'XColor','w');
+            set(gca,'YColor','w');
             
             if doLabels
                 ylabel('Freq (Hz)');
@@ -85,7 +94,7 @@ for iTiming = 1:2
     tightfig;
     set(gcf,'color','w');
     if doSave
-        setFig('','',[1.5,3.4]);
+        setFig('','',[1.5,2.4]);
         print(gcf,'-painters','-depsc',fullfile(figPath,['RTMTCORR_sessionLines',timingFields{iTiming},'.eps']));
         % % % %     saveas(h,fullfile(savePath,['SUASESSTRIAL.png']));
         close(h);

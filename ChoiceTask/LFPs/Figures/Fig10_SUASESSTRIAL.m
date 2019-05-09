@@ -10,7 +10,7 @@ end
 figPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
 subplotMargins = [.02 .02];
 
-doSave1 = false;
+doSave1 = true;
 doSave2 = true;
 doLabels = false;
 
@@ -22,7 +22,7 @@ useEvents = 2:4;
 rows = 6;
 cols = numel(useEvents);
 xlimVals = [-1 1];
-nSmooth = 200;
+nSmooth = 153; % 153 points = 50ms
 freqList = 2.5;
 Wlength = 1000;
 topRows = [10 16;11 17;12 18];
@@ -79,7 +79,11 @@ h = ff(800,800);
 for iEvent = 1:numel(useEvents)
     subplot_tight(rows,cols,prc(cols,[1 iEvent]),subplotMargins);
     yyaxis left;
+    x = all_data(useEvents(iEvent),:,iTrial);
     plot(t,all_data(useEvents(iEvent),:,iTrial),'k-','lineWidth',0.5);
+    
+    
+    
     hold on;
     plot([0,0],ylim,'k:'); % center line
     ylim([-250 250]);
@@ -91,9 +95,9 @@ for iEvent = 1:numel(useEvents)
     end
     yyaxis right;
     realSignal = squeeze(real(W(useEvents(iEvent),:,iTrial)));
-    plot(t,realSignal,'r-','lineWidth',1);
-% %     plot(t,smooth(all_data(useEvents(iEvent),:,iTrial),nSmooth),'r-','lineWidth',1);
-    ylim([-5 5]);
+% %     plot(t,realSignal,'r-','lineWidth',1); % real signal
+    plot(t,smooth(all_data(useEvents(iEvent),:,iTrial),nSmooth),'r-','lineWidth',1); % smoothed signal
+    ylim([-50 50]);
     yticks(sort([ylim,0]));
     xlim(xlimVals);
     xticks(sort([xlim,0]));
@@ -105,11 +109,22 @@ for iEvent = 1:numel(useEvents)
         xticklabels({});
     end
     
+% % % %     % TEST
+% % % %     Wx = calculateComplexScalograms_EnMasse(x','Fs',Fs,'freqList',freqList);
+% % % %     figure;
+% % % %     yyaxis left;
+% % % %     plot(t,x);
+% % % %     yyaxis right;
+% % % %     plot(t,real(Wx),'k-');
+% % % %     hold on;
+% % % %     plot(t,realSignal,'r--');
+% % % %     legend({'raw','real','real recalc'});
+% % % % % %     plot(abs(W(useEvents(iEvent),:,iTrial)).^2,'b-');
+    
     subplot_tight(rows,cols,prc(cols,[2 iEvent]),subplotMargins);
     yyaxis left;
     plot(tz,Wz_power(useEvents(iEvent),:,iTrial),'lineWidth',1);
     hold on;
-    plot([0,0],ylim,'k:'); % center line
     xlim(xlimVals);
     xticks(sort([xlim,0]));
     ylim([-5 10]);
@@ -119,6 +134,7 @@ for iEvent = 1:numel(useEvents)
     else
         yticklabels({});
     end
+    plot([0,0],ylim,'k:'); % center line
     yyaxis right;
     plot(tz,Wz_phase(useEvents(iEvent),:,iTrial),'lineWidth',1);
     hold on;

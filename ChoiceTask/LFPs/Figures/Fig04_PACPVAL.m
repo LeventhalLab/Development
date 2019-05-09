@@ -20,6 +20,12 @@ lineWidth = 0.5;
 zLims = [0 13];
 rows = 2;
 cols = numel(eventFieldnames_wFake);
+xmarks = round(logFreqList([1 200],6),0);
+usexticks = [];
+for ii = 1:numel(xmarks)
+    usexticks(ii) = closest(freqList,xmarks(ii));
+end
+
 
 for iEvent = 1:cols
     curMat = squeeze(MImatrix(iEvent,:,:));
@@ -29,8 +35,10 @@ for iEvent = 1:cols
     colormap(gca,jet);
     set(gca,'ydir','normal');
     caxis(zLims);
-    xticks([]);
-    yticks([]);
+    xticks(usexticks);
+    xticklabels([]);
+    yticks(usexticks);
+    yticklabels([]);
     
     % note: z = norminv(alpha/N); N = # of index values
     % %         pMat = normcdf(curMat,'upper')*numel(freqList).^2;
@@ -54,8 +62,10 @@ for iEvent = 1:cols
     colormap(gca,jet);
     set(gca,'ydir','normal');
     caxis(zLims);
-    xticks([]);
-    yticks([]);
+    xticks(usexticks);
+    xticklabels([]);
+    yticks(usexticks);
+    yticklabels([]);
     
     %         pMat = 1 - squeeze(shuff_MImatrix_pvals(iEvent,:,:));
     pMat_thresh = curMat > zThresh;

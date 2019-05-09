@@ -17,6 +17,11 @@ h = ff(1200,285);
 cLims = [-.4 0.4];
 rows = 2;
 cols = numel(eventFieldnames_wFake);
+xmarks = round(logFreqList([1 200],6),0);
+usexticks = [];
+for ii = 1:numel(xmarks)
+    usexticks(ii) = closest(freqList,xmarks(ii));
+end
 
 for iEvent = 1:cols
     curMat = squeeze(corrMatrix(iEvent,:,:))';
@@ -25,8 +30,10 @@ for iEvent = 1:cols
     colormap(gca,jet);
     set(gca,'ydir','normal');
     caxis(cLims);
-    xticks([]);
-    yticks([]);
+    xticks(usexticks);
+    xticklabels([]);
+    yticks(usexticks);
+    yticklabels([]);
     
     curMat = squeeze(corrMatrix_shuf(iEvent,:,:))';
     subplot_tight(rows,cols,prc(cols,[2 iEvent]),subplotMargins);
@@ -34,8 +41,10 @@ for iEvent = 1:cols
     colormap(gca,jet);
     set(gca,'ydir','normal');
     caxis(cLims);
-    xticks([]);
-    yticks([]);
+    xticks(usexticks);
+    xticklabels([]);
+    yticks(usexticks);
+    yticklabels([]);
 end
 
 tightfig;

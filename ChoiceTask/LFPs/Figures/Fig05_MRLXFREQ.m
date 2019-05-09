@@ -1,4 +1,4 @@
-% MRLXFREQ
+ % MRLXFREQ
 % came from: /Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/LFPs/explore/entrainPlots.m
 if ~exist('entrain_hist')
     load('20190318_entrain.mat')
@@ -46,7 +46,7 @@ fromShuffleYs = [NaN .85 .82];
 fromLabels = {'diff all','diff poisson'};
 nShuffle = 1000;
 allUnits = find(ismember(dirUnits{1},entrainmentUnits));
-xmarks = [1 4 7 13 30 70 200];
+xmarks = round(logFreqList([1 200],6),0); %[1 4 7 13 30 70 200];
 usexticks = [];
 for ii = 1:numel(xmarks)
     usexticks(ii) = closest(freqList,xmarks(ii));
@@ -84,8 +84,9 @@ for iIn = 1:2
                 end
                 pIdx = double(diffFromChance < .001);
                 pIdx(pIdx == 0) = NaN;
-                plot(1:numel(pIdx),fromChanceYs(iDir)*pIdx,'color',colors(iDir,:),'linewidth',1);
-                hold on;
+                % NOT PLOTTING TOP LINES ON BOTTOM
+% %                 plot(1:numel(pIdx),fromChanceYs(iDir)*pIdx,'color',colors(iDir,:),'linewidth',1);
+% %                 hold on;
                 pMat = mean(all_pMat);
             end
 
@@ -119,6 +120,7 @@ for iIn = 1:2
         xticklabels([]);
         box off;
     end
+    plot([6 6],ylim,':','color',repmat(0.1,[1,3])); % mark where values are taken from
     
     subplot_tight(rows,cols,prc(cols,[2 iIn]),subplotMargins);
     maxY = 0.05;
@@ -152,8 +154,9 @@ for iIn = 1:2
                 end
                 pIdx = double(diffFromChance < .001);
                 pIdx(pIdx == 0) = NaN;
-                plot(1:numel(pIdx),fromChanceYs(iDir)*pIdx*maxY,'color',colors(iDir,:),'linewidth',1);
-                hold on;
+                % NOT PLOTTING TOP LINES ON BOTTOM
+% %                 plot(1:numel(pIdx),fromChanceYs(iDir)*pIdx*maxY,'color',colors(iDir,:),'linewidth',1);
+% %                 hold on;
                 pMat = mean(all_pMat);
             end
             ln = plot(pMat,'color',[colors(iDir,:) poissonAlpha(iPoisson)],'linewidth',1);
@@ -185,6 +188,7 @@ for iIn = 1:2
         xticklabels([]);
         box off;
     end
+    plot([6 6],ylim,':','color',repmat(0.1,[1,3])); % mark where values are taken from
 end
 
 tightfig;
