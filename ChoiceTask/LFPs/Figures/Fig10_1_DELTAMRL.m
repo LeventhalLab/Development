@@ -17,7 +17,7 @@ midId = round(Wlength/2);
 eventFieldnames_wFake = {eventFieldnames{:} 'interTrial'};
 
 if doSetup
-    nSurr = 100;
+    nSurr = 2;
     allMids = [];
     for iSurr = 1:nSurr
         trial_Wz_phase = [];
