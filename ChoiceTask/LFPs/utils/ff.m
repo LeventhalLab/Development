@@ -15,3 +15,4 @@ else
     rnd2 = screensize(4) - h_height;
     h = figure('position',[randi([0 rnd1]) randi([0 rnd2]) h_width h_height]);
 end
+set(gcf,'color','w');
