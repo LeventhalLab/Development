@@ -1,6 +1,6 @@
 % [ ] do all sessions
 savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/delta/unwrap';
-doSetup = false;
+doSetup = true;
 doSave = false;
 doDebug = false;
 
@@ -50,7 +50,8 @@ if doSetup
                 if iEvent == 1
                     timeArr(trialCount(iEvent)) = allTimes(iTrial);
                 end
-                data = diff(unwrap(angle(squeeze(W(iEvent,:,iTrial)))),2);
+                trialPhase = angle(squeeze(W(iEvent,:,iTrial)));
+                data = diff(unwrap(trialPhase),2);
                 [locs,pks] = peakseek(data,minpeakdist,minpeakh);
                 locsCell{iEvent} = [locsCell{iEvent} locs];
                 dataArr(iEvent,trialCount(iEvent),:) = data;
@@ -58,6 +59,18 @@ if doSetup
         end
     end
 end
+close all;
+t = linspace(-tWindow,tWindow,size(dataArr,3));
+h = ff(1400,300);
+rows = 1;
+cols = 8;
+for iEvent = 1:8
+    subplot(rows,cols,prc(cols,[1,iEvent]));
+    thisData = median(squeeze(dataArr(iEvent,:,:)));
+    plot(thisData,'-','color','k');
+    ylim([-.00001 .00001]);
+end
+
 % debug
 if doDebug
     a = angle(squeeze(W(iEvent,:,iTrial)));
@@ -81,57 +94,59 @@ end
 % save('20190410_unwrapDelta','dataArr','timeArr','dataLabel');
 % save('20190410_unwrapDelta_notR0142','dataArr','timeArr','dataLabel');
 % save('20190410_unwrapDelta_onlyR0142','dataArr','timeArr','dataLabel');
+doArchive = false;
+if doArchive
+    % close all
+    h = ff(1400,600);
+    rows = 2;
+    cols = 8;
+    t = linspace(-tWindow,tWindow,size(dataArr,3));
+    nTimes = 1;
+    colors = copper(nTimes);
+    timeMarks = round(linspace(1,numel(timeArr),nTimes+1));
+    sorted_timeArr = sort(timeArr);
+    timeValues = sorted_timeArr(timeMarks);
+    nSmooth = 100;
+    timeLabels = {};
+    lns = [];
+    for iTime = 1:nTimes
+        useTrials = timeArr > timeValues(iTime) & timeArr < timeValues(iTime+1);
+        timeLabels{iTime} = sprintf('%1.3f - %1.3f s',timeValues(iTime),timeValues(iTime+1));
+        for iEvent = 1:cols
+            subplot(rows,cols,prc(cols,[1 iEvent]));
+            medn = mean(squeeze(dataArr(iEvent,useTrials,:)));% - mean(median(squeeze(dataArr(8,useTrials,:))));
+            lns(iTime) = plot(t,smooth(medn,nSmooth),'-','linewidth',2,'color',colors(iTime,:));
+            hold on;
+    %         ylim([-6e-7 6e-7]);
+            yticks(sort([ylim,0]));
+            xticks(sort([xlim,0]));
+            title(eventFieldnames_wFake{iEvent});
+            plot([0 0],ylim,'k:');
+            grid on;
+            if iEvent == 1
+                ylabel('median diff(phase,2)');
+            end
 
-% close all
-h = ff(1400,600);
-rows = 2;
-cols = 8;
-t = linspace(-tWindow,tWindow,size(dataArr,3));
-nTimes = 1;
-colors = copper(nTimes);
-timeMarks = round(linspace(1,numel(timeArr),nTimes+1));
-sorted_timeArr = sort(timeArr);
-timeValues = sorted_timeArr(timeMarks);
-nSmooth = 100;
-timeLabels = {};
-lns = [];
-for iTime = 1:nTimes
-    useTrials = timeArr > timeValues(iTime) & timeArr < timeValues(iTime+1);
-    timeLabels{iTime} = sprintf('%1.3f - %1.3f s',timeValues(iTime),timeValues(iTime+1));
-    for iEvent = 1:cols
-        subplot(rows,cols,prc(cols,[1 iEvent]));
-        medn = mean(squeeze(dataArr(iEvent,useTrials,:)));% - mean(median(squeeze(dataArr(8,useTrials,:))));
-        lns(iTime) = plot(t,smooth(medn,nSmooth),'-','linewidth',2,'color',colors(iTime,:));
-        hold on;
-%         ylim([-6e-7 6e-7]);
-        yticks(sort([ylim,0]));
-        xticks(sort([xlim,0]));
-        title(eventFieldnames_wFake{iEvent});
-        plot([0 0],ylim,'k:');
-        grid on;
-        if iEvent == 1
-            ylabel('median diff(phase,2)');
+            subplot(rows,cols,prc(cols,[2 iEvent]));
+            nBins = 21;
+            counts = histcounts(locsCell{iEvent},nBins);
+            bar(linspace(-1,1,nBins),counts,'k');
+            ylabel('# phase shifts');
+            ylim([0 60]);
+            grid on;
+            hold on;
+            yticks(ylim);
+            plot([0 0],ylim,'k:');
         end
-        
-        subplot(rows,cols,prc(cols,[2 iEvent]));
-        nBins = 21;
-        counts = histcounts(locsCell{iEvent},nBins);
-        bar(linspace(-1,1,nBins),counts,'k');
-        ylabel('# phase shifts');
-        ylim([0 60]);
-        grid on;
-        hold on;
-        yticks(ylim);
-        plot([0 0],ylim,'k:');
-    end
-    
-end
-legend(lns,timeLabels);
 
-addNote(h,{'all sessions (2.5 Hz)','1. unwrap phase','2. Take diff(phase,2)','3. Plot median for all trials',...
-    '','sorted by RT'});
-set(gcf,'color','w');
-if doSave
-    saveas(h,fullfile(savePath,[dataLabel,'_deltaPhaseUnwrapped_n',num2str(nTimes),'.png']));
-    close(h);
+    end
+    legend(lns,timeLabels);
+
+    addNote(h,{'all sessions (2.5 Hz)','1. unwrap phase','2. Take diff(phase,2)','3. Plot median for all trials',...
+        '','sorted by RT'});
+    set(gcf,'color','w');
+    if doSave
+        saveas(h,fullfile(savePath,[dataLabel,'_deltaPhaseUnwrapped_n',num2str(nTimes),'.png']));
+        close(h);
+    end
 end

@@ -1,5 +1,9 @@
 % PACPVAL
 % from /Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/LFPs/explore/CanoltyPAC_trialStitched_print.m
+eventFieldnames = {'cueOn';'centerIn';'tone';'centerOut';'sideIn';'sideOut';'foodRetrieval'};
+eventFieldnames_wFake = {eventFieldnames{:} 'interTrial'};
+freqList = logFreqList([1 200],10);
+
 if ~exist('MImatrix')
     load('20190416_PACPVAL');
 end
@@ -9,7 +13,7 @@ close all
 figPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
 subplotMargins = [.03 .01];
 
-doSave = true;
+doSave = false;
 
 h = figuree(1200,285);
 pThresh = 0.05; % alpha
