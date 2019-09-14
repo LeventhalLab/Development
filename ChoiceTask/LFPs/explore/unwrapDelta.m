@@ -1,7 +1,7 @@
 savePath = '/Users/matt/Documents/Data/ChoiceTask/LFPs/delta/unwrap';
 
 doSetup = false;
-doSave = false;
+doSave = true;
 doDebug = false;
 
 if ~exist('selectedLFPFiles')
@@ -66,19 +66,30 @@ if doSetup
 end
 
 % per session
+doAllSessions = false;
+if doAllSessions
+    useSessions = 1;
+else
+    useSessions = 1:numel(phaseSessions);
+end
 close all;
-h = ff(800,700);
 useEvents = [3,4,8];
 rows = 4;
 cols = numel(useEvents);
-iCol = 0;
 lw = 0.5;
-maxr = 0.2;
-lightColor = repmat(0.5,[1 4]);
-for iSession = 1%:numel(phaseSessions)
+maxr = 0.3;
+lightColor = [repmat(0.5,[1 3]),0.1];
+for iSession = useSessions
+    h = ff(1200,800);
+    iCol = 0;
+    lns = [];
     for iEvent = useEvents
         iCol = iCol + 1;
-        thisPhase = squeeze(phaseSessions{iSession}(iEvent,:,:))';
+        if doAllSessions
+            thisPhase = squeeze(dataPhase(iEvent,:,:));
+        else
+            thisPhase = squeeze(phaseSessions{iSession}(iEvent,:,:))';
+        end
         t = linspace(-tWindow,tWindow,size(thisPhase,2));
         
         subplot(rows,cols,prc(cols,[1,iCol]));
@@ -92,8 +103,17 @@ for iSession = 1%:numel(phaseSessions)
         ylim([-4 4]);
         yticks([-pi 0 pi]);
         yticklabels({'-\pi','0','\pi'});
-        title({[eventFieldnames_wFake{iEvent},', ',num2str(size(thisPhase,1)),' trials'],'Phase'});
+        if iCol == 1
+            if doAllSessions
+                title({['allSessions, ',num2str(size(thisPhase,1)),' trials'],eventFieldnames_wFake{iEvent},'Phase'});
+            else
+                title({['session ',num2str(iSession),', ',num2str(size(thisPhase,1)),' trials'],eventFieldnames_wFake{iEvent},'Phase'});
+            end
+        else
+            title({eventFieldnames_wFake{iEvent},'Phase'});
+        end
         xlabel('Time (s)');
+        grid on;
         
         subplot(rows,cols,prc(cols,[2,iCol]));
         t0 = round(size(thisPhase,2)/2);
@@ -115,6 +135,7 @@ for iSession = 1%:numel(phaseSessions)
         yticks(sort([0,ylim]));
         title('Phase Unwrapped');
         xlabel('Time (s)');
+        grid on;
         
         t = linspace(-tWindow,tWindow,size(thisPhase,2)-1);
         subplot(rows,cols,prc(cols,[4,iCol]));
@@ -124,16 +145,26 @@ for iSession = 1%:numel(phaseSessions)
             plot(t,trialData(iTrial,:),'color',lightColor,'lineWidth',lw);
             hold on;
         end
-        plot(t,mean(trialData),'color','r','lineWidth',2);
-        plot(t,median(trialData),'color','b','lineWidth',2);
+        lns(1) = plot(t,mean(trialData),'color','r','lineWidth',2);
+        lns(2) = plot(t,median(trialData),'color','b','lineWidth',2);
         xticks([-tWindow 0 tWindow]);
         xlim([-tWindow tWindow]);
         ylim([0 0.025]);
         yticks(ylim);
         title('Diff(Phase Unwrapped)');
         xlabel('Time (s)');
+        grid on;
     end
     % add median and mean labels
+    legend(lns,{'mean','median'});
+    if doSave
+        if doAllSessions
+            saveas(h,fullfile(savePath,['deltaUnwrapped_allSessions.png']));
+        else
+            saveas(h,fullfile(savePath,['deltaUnwrapped_','session',num2str(iSession,'%02d'),'.png']));
+        end
+        close(h);
+    end
 end
 
 % single example
