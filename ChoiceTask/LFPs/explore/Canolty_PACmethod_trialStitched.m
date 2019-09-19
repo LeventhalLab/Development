@@ -1,26 +1,27 @@
-% load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
-% load('session_20180919_NakamuraMRL.mat', 'all_trials')
-% load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local')
-% load('session_20180919_NakamuraMRL.mat', 'selectedLFPFiles')
-% load('session_20180919_NakamuraMRL.mat', 'all_ts')
-% load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local_altLookup')
+load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
+load('session_20180919_NakamuraMRL.mat', 'all_trials')
+load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local')
+load('session_20180919_NakamuraMRL.mat', 'selectedLFPFiles')
+load('session_20180919_NakamuraMRL.mat', 'all_ts')
+load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local_altLookup')
 % load('Canolt_PAC_20190120.mat')
 
-doSetup = false;
+doSetup = true;
 doSave = false;
 doPlot = true;
 
 if ismac
-    savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/PAC/canoltyMethod/bySession';
+    savePath = '/Users/matt/Documents/Data/ChoiceTask/LFPs/PAC/canoltyMethod/bySession';
 else
     savePath = '\\172.20.138.142\RecordingsLeventhal2\ChoiceTask\MthalLFPs\CanoltySessions';
 end
+load('LFPfiles_local_matt');
 
 % dbstop if error
 % dbclear all
 
 tWindow = 0.5;
-freqList = logFreqList([1 200],30);
+freqList = logFreqList([1 2000],30);
 % % freqList_p = logFreqList([2 10],10);
 % % freqList_a = logFreqList([10 200],10);
 % % freqList = unique([freqList_p freqList_a]);
@@ -33,9 +34,10 @@ freqList_a = [1:numel(freqList)];
 eventFieldnames_wFake = {eventFieldnames{:} 'outTrial'};
 
 nSurr = 200;
-nShuff = 100;
+nShuff = 5;
 oversampleBy = 5; % has to be high for eegfilt() (> 14,000 samples)
 zThresh = 5;
+maxTrialTime = 5;
 
 if doSetup
     iSession = 0;
@@ -43,7 +45,7 @@ if doSetup
     all_shuff_MImatrix_mean = {};
     all_shuff_MImatrix_pvals = {};
 
-    for iNeuron = selectedLFPFiles'
+    for iNeuron = selectedLFPFiles(12)'
         iSession = iSession + 1;
         disp(['Session #',num2str(iSession)]);
     
@@ -61,7 +63,7 @@ if doSetup
         W = W(:,:,keepTrials,:);
         
         % surrogates
-        trialTimeRanges = compileTrialTimeRanges(curTrials);
+        trialTimeRanges = compileTrialTimeRanges(curTrials,maxTrialTime);
         takeTime = tWindow * oversampleBy;
         takeSamples = round(takeTime * Fs);
         minTime = min(trialTimeRanges(:,2));
@@ -158,7 +160,7 @@ end
 % % 'eventFieldnames_wFake','freqList_p','freqList_a','freqList');
 
 if doPlot
-    useSessions = [1:30];
+    useSessions = [1]; % [1:30]
     h = CanoltyPAC_trialStitched_print(all_MImatrix,all_shuff_MImatrix_mean,all_shuff_MImatrix_pvals,useSessions,...
     eventFieldnames_wFake,freqList_p,freqList_a,freqList);
     if doSave
