@@ -21,7 +21,7 @@ load('LFPfiles_local_matt');
 % dbclear all
 
 tWindow = 0.5;
-freqList = logFreqList([1 2000],30);
+freqList = logFreqList([1 200],30);
 % % freqList_p = logFreqList([2 10],10);
 % % freqList_a = logFreqList([10 200],10);
 % % freqList = unique([freqList_p freqList_a]);
@@ -34,7 +34,7 @@ freqList_a = [1:numel(freqList)];
 eventFieldnames_wFake = {eventFieldnames{:} 'outTrial'};
 
 nSurr = 200;
-nShuff = 5;
+nShuff = 2;
 oversampleBy = 5; % has to be high for eegfilt() (> 14,000 samples)
 zThresh = 5;
 maxTrialTime = 5;
@@ -45,7 +45,7 @@ if doSetup
     all_shuff_MImatrix_mean = {};
     all_shuff_MImatrix_pvals = {};
 
-    for iNeuron = selectedLFPFiles(12)'
+    for iNeuron = selectedLFPFiles(1)'
         iSession = iSession + 1;
         disp(['Session #',num2str(iSession)]);
     
@@ -55,7 +55,10 @@ if doSetup
         subjectName = name(1:5);
         curTrials = all_trials{iNeuron};
         [trialIds,allTimes] = sortTrialsBy(curTrials,'RT');
-        [sevFilt,Fs,decimateFactor] = loadCompressedSEV(sevFile,[]);
+        
+% %         [sevFilt,Fs,decimateFactor] = loadCompressedSEV(sevFile,[]);
+        % use despiked LFP here!
+        
         sevFilt = artifactThresh(sevFilt,[1],2000);
         sevFilt = sevFilt - mean(sevFilt);
         [W,all_data] = eventsLFPv2(curTrials(trialIds),sevFilt,tWindow,Fs,freqList,eventFieldnames);
@@ -100,7 +103,7 @@ if doSetup
         shuff_MImatrix_mean = MImatrix;
         shuff_MImatrix_pvals = MImatrix;
         surr_ifA = NaN(numel(freqList_a),nSurr); % #save
-        for iEvent = 1:size(W,1)
+        for iEvent = [1,4,8]%:size(W,1)
             disp(['working on event #',num2str(iEvent)]);
             for ifp = 1:numel(freqList_p)
                 pIdx = ifp;%find(freqList == freqList_p(ifp));

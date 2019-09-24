@@ -1,6 +1,11 @@
 function [sevDespiked,header] = despikeLFP(sevFile,ts,waveformBounds)
 doDebug = false;
 [sev,header] = read_tdt_sev(sevFile);
+% handle input as "spike length in ms"
+if numel(waveformBounds) == 1
+    rmSamples = round(header.Fs * (waveformBounds/1000) / 2);
+    waveformBounds = [-rmSamples,rmSamples];
+end
 ts_samples = round(ts*header.Fs);
 
 f = waitbar(0,'setting up inerpolation...');
