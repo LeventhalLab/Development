@@ -33,8 +33,8 @@ freqList_a = [1:numel(freqList)];
 
 eventFieldnames_wFake = {eventFieldnames{:} 'outTrial'};
 
-nSurr = 200;
-nShuff = 2;
+nSurr = 200; % 200
+nShuff = 100; % 100
 oversampleBy = 5; % has to be high for eegfilt() (> 14,000 samples)
 zThresh = 5;
 maxTrialTime = 5;
@@ -56,8 +56,10 @@ if doSetup
         curTrials = all_trials{iNeuron};
         [trialIds,allTimes] = sortTrialsBy(curTrials,'RT');
         
-% %         [sevFilt,Fs,decimateFactor] = loadCompressedSEV(sevFile,[]);
+        [sevFilt,Fs,decimateFactor] = loadCompressedSEV(sevFile,[]);
+        
         % use despiked LFP here!
+% %         load(LFPfiles_local_despiked{iNeuron});
         
         sevFilt = artifactThresh(sevFilt,[1],2000);
         sevFilt = sevFilt - mean(sevFilt);
@@ -103,12 +105,13 @@ if doSetup
         shuff_MImatrix_mean = MImatrix;
         shuff_MImatrix_pvals = MImatrix;
         surr_ifA = NaN(numel(freqList_a),nSurr); % #save
-        for iEvent = [1,4,8]%:size(W,1)
+        for iEvent = 1:size(W,1)
             disp(['working on event #',num2str(iEvent)]);
             for ifp = 1:numel(freqList_p)
                 pIdx = ifp;%find(freqList == freqList_p(ifp));
                 phase = squeeze(angle(W(iEvent,:,:,pIdx)));
                 phase = phase(:)';
+                
                 for ifA = ifp:numel(freqList_a)
                     aIdx = freqList_a(ifA);%find(freqList == freqList_a(ifA));
                     amplitude = squeeze(abs(W(iEvent,:,:,aIdx)).^2);

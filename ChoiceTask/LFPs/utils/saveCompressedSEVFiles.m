@@ -1,7 +1,7 @@
 load('/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/session_20180516_FinishedResubmission.mat', 'all_ts');
 load('session_20180901_SpikePhaseAllFreq.mat', 'LFPfiles_local');
 % savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/LFPfiles/x16_despiked';
-savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/LFPfiles/x16';
+savePath = '/Users/matt/Documents/Data/ChoiceTask/LFPs/LFPfiles/x16';
 decimateFactor = 16;
 
 for iNeuron = 1:numel(all_ts)

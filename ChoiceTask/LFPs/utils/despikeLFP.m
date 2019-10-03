@@ -1,5 +1,6 @@
 function [sevDespiked,header] = despikeLFP(sevFile,ts,waveformBounds)
-doDebug = false;
+doDebug = true;
+
 [sev,header] = read_tdt_sev(sevFile);
 % handle input as "spike length in ms"
 if numel(waveformBounds) == 1
@@ -22,7 +23,7 @@ v = 1:numel(sevNaN);
 xq = v;
 v = v(~isnan(sevNaN));
 sevNaN = sevNaN(~isnan(sevNaN));
-sevDespiked = interp1(v,sevNaN,xq,'linear');
+sevDespiked = interp1(v,sevNaN,xq,'linear'); % linear or pchip
 close(f);
 
 if doDebug
