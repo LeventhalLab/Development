@@ -21,7 +21,7 @@ load('LFPfiles_local_matt');
 % dbclear all
 
 tWindow = 0.5;
-freqList = logFreqList([1 200],30);
+freqList = logFreqList([1 2000],30);
 % % freqList_p = logFreqList([2 10],10);
 % % freqList_a = logFreqList([10 200],10);
 % % freqList = unique([freqList_p freqList_a]);
@@ -34,10 +34,11 @@ freqList_a = [1:numel(freqList)];
 eventFieldnames_wFake = {eventFieldnames{:} 'outTrial'};
 
 nSurr = 200; % 200
-nShuff = 100; % 100
+nShuff = 10; % 100
 oversampleBy = 5; % has to be high for eegfilt() (> 14,000 samples)
 zThresh = 5;
 maxTrialTime = 5;
+nPower = 2;
 
 if doSetup
     iSession = 0;
@@ -45,7 +46,7 @@ if doSetup
     all_shuff_MImatrix_mean = {};
     all_shuff_MImatrix_pvals = {};
 
-    for iNeuron = selectedLFPFiles(1)'
+    for iNeuron = selectedLFPFiles(12)'
         iSession = iSession + 1;
         disp(['Session #',num2str(iSession)]);
     
@@ -56,8 +57,8 @@ if doSetup
         curTrials = all_trials{iNeuron};
         [trialIds,allTimes] = sortTrialsBy(curTrials,'RT');
         
-        [sevFilt,Fs,decimateFactor] = loadCompressedSEV(sevFile,[]);
-        
+%         [sevFilt,Fs,decimateFactor] = loadCompressedSEV(sevFile,[]);
+        load('/Users/matt/Documents/Data/ChoiceTask/LFPs/LFPfiles/x16_filt/R0088_20151030_R0088_20151030-1_data_ch10_u010.mat');
         % use despiked LFP here!
 % %         load(LFPfiles_local_despiked{iNeuron});
         
@@ -100,21 +101,19 @@ if doSetup
         W_surr = W_surr(reshapeRange,:,:);
         W(8,:,:,:) = W_surr(:,(1:size(W,3)),:); % add fake trials
         
-        
         MImatrix = NaN(size(W,1),numel(freqList_p),numel(freqList_a));
         shuff_MImatrix_mean = MImatrix;
         shuff_MImatrix_pvals = MImatrix;
         surr_ifA = NaN(numel(freqList_a),nSurr); % #save
-        for iEvent = 1:size(W,1)
+        for iEvent = [4] % 1:size(W,1)
             disp(['working on event #',num2str(iEvent)]);
             for ifp = 1:numel(freqList_p)
                 pIdx = ifp;%find(freqList == freqList_p(ifp));
                 phase = squeeze(angle(W(iEvent,:,:,pIdx)));
                 phase = phase(:)';
-                
                 for ifA = ifp:numel(freqList_a)
                     aIdx = freqList_a(ifA);%find(freqList == freqList_a(ifA));
-                    amplitude = squeeze(abs(W(iEvent,:,:,aIdx)).^2);
+                    amplitude = squeeze(abs(W(iEvent,:,:,aIdx)).^nPower);
                     amplitude = amplitude(:)';
                     
                     z = amplitude.*exp(1i*phase);
@@ -123,7 +122,7 @@ if doSetup
                     shuff_m_raw = [];
                     for iShuff = 1:nShuff
                         % randomly permutes with REAL W
-                        shuff_amplitude = squeeze(abs(W(iEvent,:,randperm(size(W,3),size(W,3)),ifA)).^2);
+                        shuff_amplitude = squeeze(abs(W(iEvent,:,randperm(size(W,3),size(W,3)),ifA)).^nPower);
                         shuff_amplitude = shuff_amplitude(:)';
                         shuff_z = shuff_amplitude.*exp(1i*phase);
                         shuff_m_raw(iShuff) = mean(shuff_z);
@@ -133,7 +132,7 @@ if doSetup
                         surrVals = [];
                         for iSurr = 1:nSurr
                             % randomly permutes with FAKE W (therefore, randomly shifted amplitude)
-                            surrogate_amplitude = squeeze(abs(W_surr(:,randperm(nSurr,size(W,3)),ifA)).^2);
+                            surrogate_amplitude = squeeze(abs(W_surr(:,randperm(nSurr,size(W,3)),ifA)).^nPower);
                             surrogate_amplitude = surrogate_amplitude(:)';
                             surrVals(iSurr) = mean(surrogate_amplitude.*exp(1i*phase));
                             surrogate_m(iSurr) = abs(mean(surrogate_amplitude.*exp(1i*phase)));

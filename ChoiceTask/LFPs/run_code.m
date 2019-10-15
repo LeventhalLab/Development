@@ -1,20 +1,30 @@
-pIdx = 8;
-aIdx = 17;
-phase = squeeze(angle(W(iEvent,:,:,pIdx)));
-phase = phase(:)';
+% load('20190318_entrain.mat')
+freqList = logFreqList([1 200],30);
+nSurr = 200;
 
-amplitude = squeeze(abs(W(iEvent,:,:,aIdx)).^2);
-amplitude = amplitude(:)';
+trialTime = 2;
+pLess = [];
+pThresh = 0.001;
+for iFreq = 1:30
+    these_ps = squeeze(entrain_pvals(1,trialTime,:,iFreq));
+    pLess(iFreq) = sum(these_ps < pThresh) / 366;
+end
 
-close all
-figure;
-yyaxis left;
-plot(phase);
-phase = circshift(phase,randi(numel(phase)));
-hold on;
-plot(phase,'r-');
-yyaxis right;
-plot(amplitude);
-% polarhistogram(phase,11);
 
-% phase = circshift(phase,randi(numel(phase)));
+these_rs = squeeze(entrain_rs(1,trialTime,:,:));
+ff(900,500);
+subplot(211);
+plot(freqList,these_rs);
+xticks([1 3 8 25 70 200]);
+xlim([1 200]);
+set(gca, 'XScale', 'log')
+xlabel('Freq (Hz)');
+ylabel('MRL');
+
+subplot(212);
+plot(freqList,pLess);
+xticks([1 3 8 25 70 200]);
+xlim([1 200]);
+set(gca, 'XScale', 'log')
+xlabel('Freq (Hz)');
+ylabel(['p < ',num2str(pThresh,'%0.4d')]);
