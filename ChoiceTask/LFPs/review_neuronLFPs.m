@@ -1,3 +1,6 @@
+% load('analysisConf.mat')
+% load('session_20180919_NakamuraMRL.mat', 'all_trials')
+
 nTrials = 7;
 cols = 7;
 ylimVals = [-2 2]; % mV
@@ -5,14 +8,18 @@ decimateFactor = 10;
 tWindow = 2;
 fpass = [1 100];
 freqList = logFreqList(fpass,30);
-savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/reviewLFPs';
+savePath = '/Users/matt/Documents/Data/ChoiceTask/LFPs/reviewLFPs';
+dataPath = '/Users/matt/Documents/Data/ChoiceTask/LFPs/reviewLFPs/data';
 
-for iNeuron = 1:numel(analysisConf.neurons)
+eventFieldlabels = {'Cue','Nose In','Tone','Nose Out','Side In','Side Out','Reward'};
+
+for iNeuron = 1%:numel(analysisConf.neurons)
     neuronName = analysisConf.neurons{iNeuron};
     disp(['--- Working on ',neuronName]);
     [electrodeName,electrodeSite,electrodeChannels] = getElectrodeInfo(neuronName);
     curTrials = all_trials{iNeuron};
-    curTrialIds = all_trialIds{iNeuron};
+    curTrialIds = [curTrials.valid] == 1;
+% % % %     curTrialIds = all_trialIds{iNeuron}; % not sure where all_trialIds is made
     
     h = figuree(1300,800);
     legendText = {};
@@ -20,10 +27,17 @@ for iNeuron = 1:numel(analysisConf.neurons)
     for iChannel = 1:numel(electrodeChannels)
         legendText{iChannel} = ['Ch',num2str(electrodeChannels(iChannel))];
         sevFile = analysisConf.sessionConfs{iNeuron,1}.sevFiles{electrodeChannels(iChannel)};
+        
+        parts = strsplit(sevFile,filesep);
+        disp(parts{end});
+        disp(electrodeChannels);
+%         break;
+        sevFile = fullfile(dataPath,parts{end});
+        
         [sev,header] = read_tdt_sev(sevFile);
         sevFilt = decimate(double(sev),decimateFactor);
         Fs = header.Fs / decimateFactor;
-        [allW,allLfp] = eventsLFP(curTrials(curTrialIds),sevFilt,tWindow,Fs,freqList,eventFieldnames);
+        [allW,allLfp] = eventsLFPv2(curTrials(curTrialIds),sevFilt,tWindow,Fs,freqList,eventFieldnames);
         
         t = linspace(-tWindow,tWindow,size(allLfp,2));
         for iTrial = 1:nTrials

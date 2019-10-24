@@ -1,4 +1,5 @@
 function ffp()
+% format plot
 if ismember(0,xlim)
     xticks(xlim);
 else

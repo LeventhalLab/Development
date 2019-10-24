@@ -1,13 +1,14 @@
 if ~exist('eventFieldnames')
     load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
 end
-doSetup = false;
+freqList = logFreqList([1 200],30);
+doSetup = true;
 doLabels = false;
-doSave = true;
+doSave = false;
 close all
 
-figPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
-savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/perievent/RTMTCorr/bySession';
+figPath = '/Users/matt/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
+savePath = '/Users/matt/Documents/Data/ChoiceTask/LFPs/perievent/RTMTCorr/bySession';
 subplotMargins = [.03 .02;];
 
 dirFiles = dir(fullfile(savePath,'*.mat'));
@@ -32,7 +33,8 @@ timingFields = {'RT','MT'};
 powerLabel = {'power','phase'};
 climVals = [-0.5 0.5;0.15 0.5];
 useEvents = [2:4;4:6];
-cmap = jupiter;
+% cmap = jupiter;
+cmap = jet; % resubmission
 cmaps = {cmap(1:size(cmap,1),:);cmap(round(size(cmap,1)/2):size(cmap,1),:)};
 rows = 2;
 cols = size(useEvents,2);
