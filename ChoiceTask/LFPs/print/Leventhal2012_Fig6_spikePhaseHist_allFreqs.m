@@ -17,7 +17,6 @@ doAlt = true;
 % freqList = {[1 4;4 7;8 12;13 30]};
 % freqList = [3.5 8 12 20];
 freqList = logFreqList([1 200],30);
-freqList = logFreqList([1 2000],30); % RESUBMISSION
 
 if iscell(freqList)
     numelFreqs = size(freqList{:},1);
@@ -56,7 +55,7 @@ if doSetup
     all_spikeHist_inTrial_angles_surr = NaN(numel(all_ts),nBins,numelFreqs);
     all_spikeHist_inTrial_alphas_surr = cell(numel(all_ts),numelFreqs);
     
-    for iNeuron = 122%1:numel(all_ts)
+    for iNeuron = 1:numel(all_ts)
         sevFile = LFPfiles_local{iNeuron};
         % replace with alternative for LFP
         if doAlt
@@ -66,17 +65,8 @@ if doSetup
         [~,name,~] = fileparts(sevFile);
         % only load uniques
         if isempty(loadedFile) || ~strcmp(loadedFile,sevFile)
-%             [sevFilt,Fs,decimateFactor,loadedFile] = loadCompressedSEV(sevFile,[]);
-
-    decimateFactor = 10;
-    sevFile = '/Users/matt/Documents/Data/ChoiceTask/LFPs/LFPfiles/R0142_20161207a_R0142_20161207a-1_data_ch44.sev';
-    [sev,header] = read_tdt_sev(sevFile);
-    sevFilt = decimate(double(sev),decimateFactor);
-    Fs = header.Fs / decimateFactor;
+            [sevFilt,Fs,decimateFactor,loadedFile] = loadCompressedSEV(sevFile,[]);
     
-    
-    
-% %             load('/Users/matt/Documents/Data/ChoiceTask/LFPs/LFPfiles/x16_despiked/R0142_20161207a_R0142_20161207a-1_data_ch15_u122.mat');
             curTrials = all_trials{iNeuron};
             [trialIds,allTimes] = sortTrialsBy(curTrials,'RT');
             trialTimeRanges = compileTrialTimeRanges(curTrials(trialIds),20);

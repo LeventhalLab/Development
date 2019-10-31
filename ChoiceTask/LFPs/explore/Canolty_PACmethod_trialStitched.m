@@ -57,8 +57,8 @@ if doSetup
         curTrials = all_trials{iNeuron};
         [trialIds,allTimes] = sortTrialsBy(curTrials,'RT');
         
-%         [sevFilt,Fs,decimateFactor] = loadCompressedSEV(sevFile,[]);
-        load('/Users/matt/Documents/Data/ChoiceTask/LFPs/LFPfiles/x16_filt/R0088_20151030_R0088_20151030-1_data_ch10_u010.mat');
+        [sevFilt,Fs,decimateFactor] = loadCompressedSEV(sevFile,[]);
+%         load('/Users/matt/Documents/Data/ChoiceTask/LFPs/LFPfiles/x16_filt/R0088_20151030_R0088_20151030-1_data_ch10_u010.mat');
         % use despiked LFP here!
 % %         load(LFPfiles_local_despiked{iNeuron});
         

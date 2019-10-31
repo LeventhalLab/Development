@@ -18,12 +18,13 @@ nSurr = 200;
 doSave = true;
 doLabels = false;
 
-figPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
+figPath = '/Users/matt/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
 subplotMargins = [.03 .02;];
 
 freqList = logFreqList([1 200],30);
 
 allUnits = 1:366;
+% allUnits = allUnits(~ismember(allUnits,[dirSelUnitIds,ndirSelUnitIds]));
 dirUnits = {allUnits,dirSelUnitIds,ndirSelUnitIds};
 dirLabels = {'allUnits','ndirSel','dirSel'};
 dirLabels_wCount = {['allUnits (n = ',num2str(numel(dirUnits{1})),')'],...
@@ -42,7 +43,7 @@ poissonAlpha = [1 0.25];
 lns = [];
 pThresh = 0.05;
 fromChanceYs = [.95 .98 .92];
-fromShuffleYs = [NaN .85 .82];
+fromShuffleYs = [NaN .97 .92];
 fromLabels = {'diff all','diff poisson'};
 nShuffle = 1000;
 allUnits = find(ismember(dirUnits{1},entrainmentUnits));
@@ -85,25 +86,26 @@ for iIn = 1:2
                 pIdx = double(diffFromChance < .001);
                 pIdx(pIdx == 0) = NaN;
                 % NOT PLOTTING TOP LINES ON BOTTOM
-% %                 plot(1:numel(pIdx),fromChanceYs(iDir)*pIdx,'color',colors(iDir,:),'linewidth',1);
-% %                 hold on;
+%                 plot(1:numel(pIdx),fromChanceYs(iDir)*pIdx,'color',colors(iDir,:),'linewidth',1);
+%                 hold on;
                 pMat = mean(all_pMat);
             end
 
             ln = plot(pMat,'color',[colors(iDir,:) poissonAlpha(iPoisson)],'linewidth',1);
             hold on;
 
-% % % %             if iPoisson == 1
-% % % %                 lns(iDir) = ln;
-% % % %                 if iDir > 1
-% % % %                     diffFromShuff = [];
-% % % %                     for iFreq = 1:numel(freqList)
-% % % %                         diffFromShuff(iFreq) = sum(pMat(iFreq) < shuffMat(:,iFreq)) / nShuffle;
-% % % %                     end
-% % % %                     pIdx = find(diffFromShuff < pThresh | diffFromShuff >= 1-pThresh);
-% % % %                     plot(pIdx,repmat(fromShuffleYs(iDir),[1,numel(pIdx)]),'s','markerfacecolor',colors(iDir,:),'MarkerEdgeColor','none');
-% % % %                 end
-% % % %             end
+            if iPoisson == 1
+                lns(iDir) = ln;
+                if iDir > 1
+                    diffFromShuff = [];
+                    for iFreq = 1:numel(freqList)
+                        diffFromShuff(iFreq) = sum(pMat(iFreq) < shuffMat(:,iFreq)) / nShuffle;
+                    end
+                    pIdx = find(diffFromShuff < pThresh | diffFromShuff >= 1-pThresh);
+                    plot(pIdx,repmat(fromShuffleYs(iDir),[1,numel(pIdx)]),'*','markerfacecolor',...
+                        colors(iDir,:),'MarkerEdgeColor','none','markersize',4);
+                end
+            end
         end
     end
     xlim([1 numel(freqList)]);
@@ -155,23 +157,24 @@ for iIn = 1:2
                 pIdx = double(diffFromChance < .001);
                 pIdx(pIdx == 0) = NaN;
                 % NOT PLOTTING TOP LINES ON BOTTOM
-% %                 plot(1:numel(pIdx),fromChanceYs(iDir)*pIdx*maxY,'color',colors(iDir,:),'linewidth',1);
-% %                 hold on;
+%                 plot(1:numel(pIdx),fromChanceYs(iDir)*pIdx*maxY,'color',colors(iDir,:),'linewidth',1);
+%                 hold on;
                 pMat = mean(all_pMat);
             end
             ln = plot(pMat,'color',[colors(iDir,:) poissonAlpha(iPoisson)],'linewidth',1);
             hold on;
-% % %             if iPoisson == 1
-% % %                 lns(iDir) = ln;
-% % %                 if iDir > 1
-% % %                     diffFromShuff = [];
-% % %                     for iFreq = 1:numel(freqList)
-% % %                         diffFromShuff(iFreq) = sum(pMat(iFreq) < shuffMat(:,iFreq)) / nShuffle;
-% % %                     end
-% % %                     pIdx = find(diffFromShuff < pThresh | diffFromShuff >= 1-pThresh);
-% % %                     plot(pIdx,repmat(fromShuffleYs(iDir)*maxY,[1,numel(pIdx)]),'s','markerfacecolor',colors(iDir,:),'MarkerEdgeColor','none');
-% % %                 end
-% % %             end
+            if iPoisson == 1
+                lns(iDir) = ln;
+                if iDir > 1
+                    diffFromShuff = [];
+                    for iFreq = 1:numel(freqList)
+                        diffFromShuff(iFreq) = sum(pMat(iFreq) < shuffMat(:,iFreq)) / nShuffle;
+                    end
+                    pIdx = find(diffFromShuff < pThresh | diffFromShuff >= 1-pThresh);
+                    plot(pIdx,repmat(fromShuffleYs(iDir)*maxY,[1,numel(pIdx)]),'*','markerfacecolor',...
+                        colors(iDir,:),'MarkerEdgeColor','none','markersize',4);
+                end
+            end
         end
     end
     xlim([1 numel(freqList)]);
@@ -191,7 +194,9 @@ for iIn = 1:2
     plot([6 6],ylim,':','color',repmat(0.1,[1,3])); % mark where values are taken from
 end
 
-tightfig;
+if ~doLabels
+    tightfig;
+end
 set(gcf,'color','w');
 if doSave
     setFig('','',[1.5,1.5]);
