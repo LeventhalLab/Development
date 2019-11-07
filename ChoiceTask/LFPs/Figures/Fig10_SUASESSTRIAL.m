@@ -6,12 +6,13 @@ if ~exist('all_ts')
     load('session_20180919_NakamuraMRL.mat', 'selectedLFPFiles')
     load('session_20180919_NakamuraMRL.mat', 'all_ts')
 end
+load('LFPfiles_local_matt');
 
-figPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
+figPath = '/Users/matt/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
 subplotMargins = [.02 .02];
 
-doSave1 = true;
-doSave2 = true;
+doSave1 = false;
+doSave2 = false;
 doLabels = false;
 
 close all

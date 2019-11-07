@@ -1,8 +1,9 @@
 savePath = '/Users/matt/Documents/Data/ChoiceTask/LFPs/delta/unwrap';
 
-doSetup = false;
+figPath = '/Users/matt/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
+subplotMargins = [.02 .02];
+doLabels = false;
 doSave = true;
-doDebug = false;
 
 if ~exist('selectedLFPFiles')
     load('session_20181106_entrainmentData.mat', 'selectedLFPFiles');
@@ -22,7 +23,7 @@ dataLabel = 'allSessions';
 minpeakdist = 200;
 minpeakh = 1e-4;
 
-if doSetup
+if ~exist('dataArr')
     dataPhase = [];
     dataArr = [];
     timeArr = [];
@@ -63,24 +64,42 @@ if doSetup
             phaseSessions{iSession} = angle(W);
         end
     end
+    % clean
+    t = [];
+    trialCount = 0;
+    for iTrial = 1:size(dataPhase,2)
+        saveIt = true;
+        for iEvent = 1:size(dataPhase,1)
+            if unwrap(squeeze(dataPhase(iEvent,iTrial,:))) < 0
+                saveIt = false;
+            end
+        end
+        if saveIt
+            trialCount = trialCount + 1;
+            t(:,trialCount,:) = squeeze(dataPhase(:,iTrial,:));
+        end
+    end
+    dataPhase = t;
 end
 
 % per session
-doAllSessions = false;
+doAllSessions = true;
 if doAllSessions
     useSessions = 1;
 else
     useSessions = 1:numel(phaseSessions);
 end
 close all;
-useEvents = [3,4,8];
-rows = 4;
+useEvents = [2,3,4];
+rows = 3;
 cols = numel(useEvents);
-lw = 0.5;
+lw = 0.05;
 maxr = 0.3;
-lightColor = [repmat(0.5,[1 3]),0.1];
+colors = lines(2);
+nLines = 75;
+lightColor = [repmat(0.5,[1 3]),0.25];
 for iSession = useSessions
-    h = ff(1200,800);
+    h = ff(800,400);
     iCol = 0;
     lns = [];
     for iEvent = useEvents
@@ -92,149 +111,196 @@ for iSession = useSessions
         end
         t = linspace(-tWindow,tWindow,size(thisPhase,2));
         
-        subplot(rows,cols,prc(cols,[1,iCol]));
-        for iTrial = 1:size(thisPhase,1)
+        subplot_tight(rows,cols,prc(cols,[1,iCol]),subplotMargins);
+        useTrials = randsample(1:size(thisPhase,1),nLines);
+        for iTrial = useTrials %1:size(thisPhase,1)
             plot(t,thisPhase(iTrial,:),'color',lightColor,'lineWidth',lw);
             hold on;
         end
-        plot(t,circ_mean(thisPhase),'color','r','linewidth',2);
+        plot(t,circ_mean(thisPhase),'color',colors(2,:),'linewidth',1);
         xticks([-tWindow 0 tWindow]);
         xlim([-tWindow tWindow]);
         ylim([-4 4]);
         yticks([-pi 0 pi]);
-        yticklabels({'-\pi','0','\pi'});
-        if iCol == 1
-            if doAllSessions
-                title({['allSessions, ',num2str(size(thisPhase,1)),' trials'],eventFieldnames_wFake{iEvent},'Phase'});
+        plot([0,0],ylim,'k:'); % center line
+        if doLabels
+            if iCol == 1
+                if doAllSessions
+                    title({['allSessions, ',num2str(size(thisPhase,1)),' trials'],eventFieldnames_wFake{iEvent},'Phase'});
+                else
+                    title({['session ',num2str(iSession),', ',num2str(size(thisPhase,1)),' trials'],eventFieldnames_wFake{iEvent},'Phase'});
+                end
             else
-                title({['session ',num2str(iSession),', ',num2str(size(thisPhase,1)),' trials'],eventFieldnames_wFake{iEvent},'Phase'});
+                title({eventFieldnames_wFake{iEvent},'Phase'});
             end
+            xlabel('Time (s)');
+            grid on;
+            yticklabels({'-\pi','0','\pi'});
         else
-            title({eventFieldnames_wFake{iEvent},'Phase'});
+            xticks([]);
+            xticklabels([]);
+            yticklabels([]);
         end
-        xlabel('Time (s)');
-        grid on;
         
-        subplot(rows,cols,prc(cols,[2,iCol]));
-        t0 = round(size(thisPhase,2)/2);
-        polarhistogram(thisPhase(:,t0),12,'FaceColor','k','normalization','probability');
-        rlim([0 maxr]);
-        hold on;
-        phaseMean = circ_mean(thisPhase(:,t0));
-        polarplot([phaseMean,phaseMean],[0,maxr],'linewidth',2,'color','r');
+        subplot_tight(rows,cols,prc(cols,[2,iCol]),subplotMargins);
         
-        subplot(rows,cols,prc(cols,[3,iCol]));
-        for iTrial = 1:size(thisPhase,1)
+        useTrials = randsample(1:size(thisPhase,1),nLines);
+        for iTrial = useTrials %1:size(thisPhase,1)
             plot(t,unwrap(thisPhase(iTrial,:)),'color',lightColor,'lineWidth',lw);
             hold on;
         end
-        plot(t,unwrap(circ_mean(thisPhase)),'color','r','linewidth',2);
+        plot(t,mean(unwrap(thisPhase,pi,2)),'color','k','linewidth',1);
         xticks([-tWindow 0 tWindow]);
         xlim([-tWindow tWindow]);
         ylim([-10 40]);
         yticks(sort([0,ylim]));
-        title('Phase Unwrapped');
-        xlabel('Time (s)');
+        plot([0,0],ylim,'k:'); % center line
+        box on;
         grid on;
-        
-        t = linspace(-tWindow,tWindow,size(thisPhase,2)-1);
-        subplot(rows,cols,prc(cols,[4,iCol]));
-        trialData = [];
-        for iTrial = 1:size(thisPhase,1)
-            trialData(iTrial,:) = diff(unwrap(thisPhase(iTrial,:)));
-            plot(t,trialData(iTrial,:),'color',lightColor,'lineWidth',lw);
-            hold on;
+        if doLabels
+            title('Phase Unwrapped');
+            xlabel('Time (s)');
+        else
+            xticks([]);
+            xticklabels([]);
+            yticklabels([]);
         end
-        lns(1) = plot(t,mean(trialData),'color','r','lineWidth',2);
-        lns(2) = plot(t,median(trialData),'color','b','lineWidth',2);
-        xticks([-tWindow 0 tWindow]);
-        xlim([-tWindow tWindow]);
-        ylim([0 0.025]);
-        yticks(ylim);
-        title('Diff(Phase Unwrapped)');
-        xlabel('Time (s)');
-        grid on;
+        
+        subplot_tight(rows,cols,prc(cols,[3,iCol]),subplotMargins);
+        t0 = round(size(thisPhase,2)/2);
+        phaseMean = circ_mean(thisPhase(:,t0));
+% %         polarplot([phaseMean,phaseMean],[0,maxr],'linewidth',1,'color',colors(2,:));
+% %         hold on;
+        polarhistogram(thisPhase(:,t0),12,'FaceColor',colors(2,:),'normalization','probability','FaceAlpha',1);
+        rlim([0 maxr]);
+        pax = gca;
+        pax.ThetaZeroLocation = 'left';
+        thetaticks([0,90,180,270]);
+        rlim([0 0.3]);
+        rticks(rlim);
+        if ~doLabels
+            rticklabels({});
+            thetaticklabels({});
+        end
+        
+% % % %         t = linspace(-tWindow,tWindow,size(thisPhase,2)-1);
+% % % %         subplot(rows,cols,prc(cols,[4,iCol]));
+% % % %         trialData = [];
+% % % %         for iTrial = 1:size(thisPhase,1)
+% % % %             trialData(iTrial,:) = diff(unwrap(thisPhase(iTrial,:)));
+% % % %             plot(t,trialData(iTrial,:),'color',lightColor,'lineWidth',lw);
+% % % %             hold on;
+% % % %         end
+% % % %         lns(1) = plot(t,mean(trialData),'color','r','lineWidth',2);
+% % % %         lns(2) = plot(t,median(trialData),'color','b','lineWidth',2);
+% % % %         xticks([-tWindow 0 tWindow]);
+% % % %         xlim([-tWindow tWindow]);
+% % % %         ylim([0 0.025]);
+% % % %         yticks(ylim);
+% % % %         title('Diff(Phase Unwrapped)');
+% % % %         xlabel('Time (s)');
+% % % %         grid on;
     end
     % add median and mean labels
-    legend(lns,{'mean','median'});
+    if doLabels
+        legend(lns,{'mean','median'});
+    end
+% % % %     if doSave
+% % % %         if doAllSessions
+% % % %             saveas(h,fullfile(savePath,['deltaUnwrapped_allSessions.png']));
+% % % %         else
+% % % %             saveas(h,fullfile(savePath,['deltaUnwrapped_','session',num2str(iSession,'%02d'),'.png']));
+% % % %         end
+% % % %         close(h);
+% % % %     end
+% %     tightfig; % does not work
+    set(gcf,'color','w');
     if doSave
-        if doAllSessions
-            saveas(h,fullfile(savePath,['deltaUnwrapped_allSessions.png']));
-        else
-            saveas(h,fullfile(savePath,['deltaUnwrapped_','session',num2str(iSession,'%02d'),'.png']));
-        end
+        setFig('','',[1.5,1.4]);
+        print(gcf,'-painters','-depsc',fullfile(figPath,'UNWRAPPEDDELTA.eps'));
         close(h);
     end
 end
 
-% single example
-close all;
-nTrials = 100;
-rows = 3;
-cols = 2;
-lightColor = repmat(0.7,[1 4]);
-colors = lines(nTrials);
-lw = 1;
-h = ff(800,700);
-iCol = 0;
-for iEvent = 3:4
-    iCol = iCol + 1;
-    for iTrial = 1:nTrials
-        thisPhase = squeeze(dataPhase(iEvent,iTrial,:));
-        
-        subplot(rows,cols,prc(cols,[1 iCol]));
-        t = linspace(-tWindow,tWindow,size(dataPhase,3));
-        plot(t,thisPhase,'color',colors(iTrial,:),'lineWidth',lw);
-        hold on;
-        xticks([-tWindow 0 tWindow]);
-        xlim([-tWindow tWindow]);
-        ylim([-4 4]);
-        yticks([-pi 0 pi]);
-        yticklabels({'-\pi','0','\pi'});
-        title({[eventFieldnames_wFake{iEvent},', ',num2str(nTrials),' trials'],'Phase'});
-        xlabel('Time (s)');
-        
-        subplot(rows,cols,prc(cols,[2 iCol]));
-        plot(t,unwrap(thisPhase),'color',colors(iTrial,:),'lineWidth',lw);
-        hold on;
-        xticks([-tWindow 0 tWindow]);
-        xlim([-tWindow tWindow]);
-        ylim([-10 40]);
-        yticks(sort([0 ylim]));
-        title('Unwrapped Phase');
-        xlabel('Time (s)');
-        
-        subplot(rows,cols,prc(cols,[3 iCol]));
-        t = linspace(-tWindow,tWindow,size(dataPhase,3)-1);
-        plot(t,diff(unwrap(thisPhase)),'color',colors(iTrial,:),'lineWidth',lw);
-        hold on;
-        xticks([-tWindow 0 tWindow]);
-        xlim([-tWindow tWindow]);
-        ylim([-.03 .03]);
-        yticks(sort([0 ylim]));
-        title("Unwrapped Phase'");
-        xlabel('Time (s)');
-    end
-end
+% OLD CODE
 
-close all;
-t = linspace(-tWindow,tWindow,size(dataArr,3));
-h = ff(1400,300);
-rows = 1;
-cols = 8;
-for iEvent = 4
-    %     subplot(rows,cols,prc(cols,[1,iEvent]));
-    for iTrial = 1:size(dataArr,2)
-        plot(squeeze(dataArr(iEvent,iTrial,:)),'color',repmat(0.7,[1 4]));
-        hold on;
-    end
-    thisData = median(squeeze(dataArr(iEvent,:,:)));
-    plot(thisData,'-','color','k');
-    ylim([-.00001 .00001]);
-end
+% % % % doLabels = false;
+% % % % % single example
+% % % % close all;
+% % % % nTrials = 100;
+% % % % rows = 3;
+% % % % cols = 2;
+% % % % lightColor = repmat(0.7,[1 4]);
+% % % % colors = lines(nTrials);
+% % % % lw = 1;
+% % % % h = ff(800,800);
+% % % % iCol = 0;
+% % % % doLabels = true;
+% % % % for iEvent = 3:4
+% % % %     iCol = iCol + 1;
+% % % %     for iTrial = 1:nTrials
+% % % %         thisPhase = squeeze(dataPhase(iEvent,iTrial,:));
+% % % %         
+% % % %         subplot_tight(rows,cols,prc(cols,[1 iCol]),subplotMargins);
+% % % %         t = linspace(-tWindow,tWindow,size(dataPhase,3));
+% % % %         plot(t,thisPhase,'color',colors(iTrial,:),'lineWidth',lw);
+% % % %         hold on;
+% % % %         xticks([-tWindow 0 tWindow]);
+% % % %         xlim([-tWindow tWindow]);
+% % % %         ylim([-4 4]);
+% % % %         yticks([-pi 0 pi]);
+% % % %         yticklabels({'-\pi','0','\pi'});
+% % % %         if doLabels
+% % % %             title({[eventFieldnames_wFake{iEvent},', ',num2str(nTrials),' trials'],'Phase'});
+% % % %             xlabel('Time (s)');
+% % % %         end
+% % % %         
+% % % %         subplot_tight(rows,cols,prc(cols,[2 iCol]),subplotMargins);
+% % % %         t = linspace(-tWindow,tWindow,size(dataPhase,3)-1);
+% % % %         plot(t,diff(unwrap(thisPhase)),'color',colors(iTrial,:),'lineWidth',lw);
+% % % %         hold on;
+% % % %         xticks([-tWindow 0 tWindow]);
+% % % %         xlim([-tWindow tWindow]);
+% % % %         ylim([-.03 .03]);
+% % % %         yticks(sort([0 ylim]));
+% % % %         if doLabels
+% % % %             title("Unwrapped Phase'");
+% % % %             xlabel('Time (s)');
+% % % %         end
+% % % %         
+% % % %         subplot_tight(rows,cols,prc(cols,[3 iCol]),subplotMargins);
+% % % %         plot(t,unwrap(thisPhase),'color',colors(iTrial,:),'lineWidth',lw);
+% % % %         hold on;
+% % % %         xticks([-tWindow 0 tWindow]);
+% % % %         xlim([-tWindow tWindow]);
+% % % %         ylim([-10 40]);
+% % % %         yticks(sort([0 ylim]));
+% % % %         if doLabels
+% % % %             title('Unwrapped Phase');
+% % % %             xlabel('Time (s)');
+% % % %         end
+% % % %     end
+% % % % end
+
+% % % % close all;
+% % % % t = linspace(-tWindow,tWindow,size(dataArr,3));
+% % % % h = ff(1400,300);
+% % % % rows = 1;
+% % % % cols = 8;
+% % % % for iEvent = 4
+% % % %     %     subplot(rows,cols,prc(cols,[1,iEvent]));
+% % % %     for iTrial = 1:size(dataArr,2)
+% % % %         plot(squeeze(dataArr(iEvent,iTrial,:)),'color',repmat(0.7,[1 4]));
+% % % %         hold on;
+% % % %     end
+% % % %     thisData = median(squeeze(dataArr(iEvent,:,:)));
+% % % %     plot(thisData,'-','color','k');
+% % % %     ylim([-.00001 .00001]);
+% % % % end
 
 % END
 % debug
+doDebug = false;
 if doDebug
     a = angle(squeeze(W(iEvent,:,iTrial)));
     h = ff(400,800);

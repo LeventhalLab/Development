@@ -15,8 +15,8 @@ nSurr = 200;
 % entrain_mus = NaN(nSurr+1,2,366,numel(freqList));
 % entrain_hist = NaN(nSurr+1,2,366,nBins,numel(freqList));
 
-doSave = true;
-doLabels = false;
+doSave = false;
+doLabels = true;
 
 figPath = '/Users/matt/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
 subplotMargins = [.03 .02;];
@@ -24,7 +24,7 @@ subplotMargins = [.03 .02;];
 freqList = logFreqList([1 200],30);
 
 allUnits = 1:366;
-% allUnits = allUnits(~ismember(allUnits,[dirSelUnitIds,ndirSelUnitIds]));
+allUnits = allUnits(~ismember(allUnits,[dirSelUnitIds,ndirSelUnitIds]));
 dirUnits = {allUnits,dirSelUnitIds,ndirSelUnitIds};
 dirLabels = {'allUnits','ndirSel','dirSel'};
 dirLabels_wCount = {['allUnits (n = ',num2str(numel(dirUnits{1})),')'],...
@@ -102,8 +102,8 @@ for iIn = 1:2
                         diffFromShuff(iFreq) = sum(pMat(iFreq) < shuffMat(:,iFreq)) / nShuffle;
                     end
                     pIdx = find(diffFromShuff < pThresh | diffFromShuff >= 1-pThresh);
-                    plot(pIdx,repmat(fromShuffleYs(iDir),[1,numel(pIdx)]),'*','markerfacecolor',...
-                        colors(iDir,:),'MarkerEdgeColor','none','markersize',4);
+                    plot(pIdx,repmat(fromShuffleYs(iDir),[1,numel(pIdx)]),'s','markerfacecolor',...
+                        colors(iDir,:),'MarkerEdgeColor','none','markersize',10);
                 end
             end
         end
@@ -171,8 +171,8 @@ for iIn = 1:2
                         diffFromShuff(iFreq) = sum(pMat(iFreq) < shuffMat(:,iFreq)) / nShuffle;
                     end
                     pIdx = find(diffFromShuff < pThresh | diffFromShuff >= 1-pThresh);
-                    plot(pIdx,repmat(fromShuffleYs(iDir)*maxY,[1,numel(pIdx)]),'*','markerfacecolor',...
-                        colors(iDir,:),'MarkerEdgeColor','none','markersize',4);
+                    plot(pIdx,repmat(fromShuffleYs(iDir)*maxY,[1,numel(pIdx)]),'s','markerfacecolor',...
+                        colors(iDir,:),'MarkerEdgeColor','none','markersize',10);
                 end
             end
         end

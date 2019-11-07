@@ -41,14 +41,11 @@ function eps2pdf(source, dest, crop, append, gray, quality, gs_options)
 % Suggestion of appending pdf files provided by Matt C at:
 % http://www.mathworks.com/matlabcentral/fileexchange/23629
 
-% Thank you to Fabio Viola for pointing out compression artifacts, leading
-% to the quality setting.
-% Thank you to Scott for pointing out the subsampling of very small images,
-% which was fixed for lossless compression settings.
+% Thank you Fabio Viola for pointing out compression artifacts, leading to the quality setting.
+% Thank you Scott for pointing out the subsampling of very small images, which was fixed for lossless compression settings.
 
-% 9/12/2011 Pass font path to ghostscript.
-% 26/02/15: If temp dir is not writable, use the dest folder for temp
-%           destination files (Javier Paredes)
+% 09/12/11: Pass font path to ghostscript
+% 26/02/15: If temp dir is not writable, use the dest folder for temp destination files (Javier Paredes)
 % 28/02/15: Enable users to specify optional ghostscript options (issue #36)
 % 01/03/15: Upon GS error, retry without the -sFONTPATH= option (this might solve
 %           some /findfont errors according to James Rankin, FEX Comment 23/01/15)
@@ -56,35 +53,46 @@ function eps2pdf(source, dest, crop, append, gray, quality, gs_options)
 % 04/10/15: Suggest a workaround for issue #41 (missing font path; thanks Mariia Fedotenkova)
 % 22/02/16: Bug fix from latest release of this file (workaround for issue #41)
 % 20/03/17: Added informational message in case of GS croak (issue #186)
+% 16/01/18: Improved appending of multiple EPS files into single PDF (issue #233; thanks @shartjen)
+% 18/10/19: Workaround for GS 9.51+ .setpdfwrite removal problem (issue #285)
+% 18/10/19: Warn when ignoring GS fontpath or quality options; clarified error messages
 
     % Intialise the options string for ghostscript
     options = ['-q -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -dPDFSETTINGS=/prepress -sOutputFile="' dest '"'];
+
     % Set crop option
     if nargin < 3 || crop
         options = [options ' -dEPSCrop'];
     end
+
     % Set the font path
     fp = font_path();
     if ~isempty(fp)
         options = [options ' -sFONTPATH="' fp '"'];
     end
+
     % Set the grayscale option
     if nargin > 4 && gray
         options = [options ' -sColorConversionStrategy=Gray -dProcessColorModel=/DeviceGray'];
     end
+
     % Set the bitmap quality
+    qualityOptions = '';
     if nargin > 5 && ~isempty(quality)
-        options = [options ' -dAutoFilterColorImages=false -dAutoFilterGrayImages=false'];
+        qualityOptions = ' -dAutoFilterColorImages=false -dAutoFilterGrayImages=false';
         if quality > 100
-            options = [options ' -dColorImageFilter=/FlateEncode -dGrayImageFilter=/FlateEncode -c ".setpdfwrite << /ColorImageDownsampleThreshold 10 /GrayImageDownsampleThreshold 10 >> setdistillerparams"'];
+            qualityOptions = [qualityOptions ' -dColorImageFilter=/FlateEncode -dGrayImageFilter=/FlateEncode'];
+            qualityOptions = [qualityOptions ' -c ".setpdfwrite << /ColorImageDownsampleThreshold 10 /GrayImageDownsampleThreshold 10 >> setdistillerparams"'];
         else
-            options = [options ' -dColorImageFilter=/DCTEncode -dGrayImageFilter=/DCTEncode'];
+            qualityOptions = [qualityOptions ' -dColorImageFilter=/DCTEncode -dGrayImageFilter=/DCTEncode'];
             v = 1 + (quality < 80);
             quality = 1 - quality / 100;
             s = sprintf('<< /QFactor %.2f /Blend 1 /HSample [%d 1 1 %d] /VSample [%d 1 1 %d] >>', quality, v, v, v, v);
-            options = sprintf('%s -c ".setpdfwrite << /ColorImageDict %s /GrayImageDict %s >> setdistillerparams"', options, s, s);
+            qualityOptions = [qualityOptions ' -c ".setpdfwrite << /ColorImageDict ' s ' /GrayImageDict ' s ' >> setdistillerparams"'];
         end
+        options = [options qualityOptions];
     end
+
     % Enable users to specify optional ghostscript options (issue #36)
     if nargin > 6 && ~isempty(gs_options)
         if iscell(gs_options)
@@ -96,10 +104,12 @@ function eps2pdf(source, dest, crop, append, gray, quality, gs_options)
         end
         options = [options gs_options];
     end
+
     % Check if the output file exists
     if nargin > 3 && append && exist(dest, 'file') == 2
         % File exists - append current figure to the end
-        tmp_nam = tempname;
+        tmp_nam = [tempname '.pdf'];
+        [fpath,fname,fext] = fileparts(tmp_nam);
         try
             % Ensure that the temp dir is writable (Javier Paredes 26/2/15)
             fid = fopen(tmp_nam,'w');
@@ -108,31 +118,39 @@ function eps2pdf(source, dest, crop, append, gray, quality, gs_options)
             delete(tmp_nam);
         catch
             % Temp dir is not writable, so use the dest folder
-            [dummy,fname,fext] = fileparts(tmp_nam); %#ok<ASGLU>
             fpath = fileparts(dest);
             tmp_nam = fullfile(fpath,[fname fext]);
         end
-        % Copy the file
+        % Copy the existing (dest) pdf file to temporary folder
         copyfile(dest, tmp_nam);
-        % Add the output file names
-        options = [options ' -f "' tmp_nam '" "' source '"'];
+        % Produce an interim pdf of the source eps, rather than adding the eps directly (issue #233)
+        ghostscript([options ' -f "' source '"']);
+        [~,fname] = fileparts(tempname);
+        tmp_nam2 = fullfile(fpath,[fname fext]); % ensure using a writable folder (not necessarily tempdir)
+        copyfile(dest, tmp_nam2);
+        % Add the existing pdf and interim pdf as inputs to ghostscript
+        %options = [options ' -f "' tmp_nam '" "' source '"'];  % append the source eps to dest pdf
+        options = [options ' -f "' tmp_nam '" "' tmp_nam2 '"']; % append the interim pdf to dest pdf
         try
             % Convert to pdf using ghostscript
             [status, message] = ghostscript(options);
         catch me
-            % Delete the intermediate file
+            % Delete the intermediate files and rethrow the error
             delete(tmp_nam);
+            delete(tmp_nam2);
             rethrow(me);
         end
-        % Delete the intermediate file
+        % Delete the intermediate (temporary) files
         delete(tmp_nam);
+        delete(tmp_nam2);
     else
         % File doesn't exist or should be over-written
-        % Add the output file names
+        % Add the source eps file as input to ghostscript
         options = [options ' -f "' source '"'];
         % Convert to pdf using ghostscript
         [status, message] = ghostscript(options);
     end
+
     % Check for error
     if status
         % Retry without the -sFONTPATH= option (this might solve some GS
@@ -141,12 +159,26 @@ function eps2pdf(source, dest, crop, append, gray, quality, gs_options)
         if ~isempty(fp)
             options = regexprep(options, ' -sFONTPATH=[^ ]+ ',' ');
             status = ghostscript(options);
-            if ~status, return; end  % hurray! (no error)
+            if ~status % hurray! (no error)
+                warning('export_fig:GS:fontpath','Export_fig font option is ignored - not supported by your Ghostscript version')
+                return
+            end
         end
+
+        % Retry without quality options (may solve problems with GS 9.51+, issue #285)
+        if ~isempty(qualityOptions)
+            options = strrep(orig_options, qualityOptions, '');
+            [status, message] = ghostscript(options);
+            if ~status % hurray! (no error)
+                warning('export_fig:GS:quality','Export_fig quality option is ignored - not supported by your Ghostscript version')
+                return
+            end
+        end
+
         % Report error
         if isempty(message)
-            error('Unable to generate pdf. Check destination directory is writable.');
-        elseif ~isempty(strfind(message,'/typecheck in /findfont'))
+            error('Unable to generate pdf. Ensure that the destination folder is writable.');
+        elseif ~isempty(strfind(message,'/typecheck in /findfont')) %#ok<STREMP>
             % Suggest a workaround for issue #41 (missing font path)
             font_name = strtrim(regexprep(message,'.*Operand stack:\s*(.*)\s*Execution.*','$1'));
             fprintf(2, 'Ghostscript error: could not find the following font(s): %s\n', font_name);
@@ -157,7 +189,7 @@ function eps2pdf(source, dest, crop, append, gray, quality, gs_options)
         else
             fprintf(2, '\nGhostscript error: perhaps %s is open by another application\n', dest);
             if ~isempty(gs_options)
-                fprintf(2, '  or maybe the%s option(s) are not accepted by your GS version\n', gs_options);
+                fprintf(2, '  or maybe your Ghostscript version does not accept the extra "%s" option(s) that you requested\n', gs_options);
             end
             fprintf(2, '  or maybe you have another gs executable in your system''s path\n');
             fprintf(2, 'Ghostscript options: %s\n\n', orig_options);

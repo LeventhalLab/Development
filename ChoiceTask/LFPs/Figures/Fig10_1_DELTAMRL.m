@@ -2,11 +2,11 @@
 if ~exist('data_source')
     load('20190416_DELTAMRL.mat')
 end
-figPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
+figPath = '/Users/matt/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
 subplotMargins = [.02 .03];
 
-doSetup = false;
-doSave = true;
+doSetup = true;
+doSave = false;
 doLabels = false;
 
 freqList = 2.5;

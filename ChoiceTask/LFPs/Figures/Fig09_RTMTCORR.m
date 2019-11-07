@@ -2,9 +2,8 @@ if ~exist('eventFieldnames')
     load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
 end
 freqList = logFreqList([1 200],30);
-doSetup = true;
 doLabels = false;
-doSave = false;
+doSave = true;
 close all
 
 figPath = '/Users/matt/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
@@ -14,7 +13,7 @@ subplotMargins = [.03 .02;];
 dirFiles = dir(fullfile(savePath,'*.mat'));
 corrFiles = {dirFiles.name};
 
-if doSetup
+if ~exist('all_pow_rho')
     all_pow_rho = [];
     all_pow_pval = [];
     all_pha_rho = [];
@@ -35,7 +34,7 @@ climVals = [-0.5 0.5;0.15 0.5];
 useEvents = [2:4;4:6];
 % cmap = jupiter;
 cmap = jet; % resubmission
-cmaps = {cmap(1:size(cmap,1),:);cmap(round(size(cmap,1)/2):size(cmap,1),:)};
+cmaps = {cmap(1:size(cmap,1),:);cmap(round(size(cmap,1)/2):size(cmap,1),:)}
 rows = 2;
 cols = size(useEvents,2);
 use_rhos = {all_pow_rho;all_pha_rho};
@@ -67,18 +66,19 @@ for iTiming = 1:2
             plot([0,0],ylim,':','color',repmat(0.5,[1 3])); % center line
             xlim([min(t),max(t)]);
             xticks(sort([xlim,0]));
+            box on;
             
             % % % %             subplot(rows,cols,prc(cols,[iTiming+1 iEvent]));
             data = squeeze(use_pvals{iPower}(:,iTiming,useEvents(iTiming,iEvent),:,lookatFreqs(iPower)));
             pArr = sum(data < pThresh);
-            plot(t,pArr,'w-','linewidth',0.25);
+            plot(t,pArr,'k-','linewidth',0.40);
             % % % %             ylim([0 30]);
             
             ylim([1 size(data,1)]);
             yticks(usexticks);
             yticklabels([]);
-            set(gca,'XColor','w');
-            set(gca,'YColor','w');
+% % % %             set(gca,'XColor','w');
+% % % %             set(gca,'YColor','w');
             
             if doLabels
                 ylabel('Freq (Hz)');
