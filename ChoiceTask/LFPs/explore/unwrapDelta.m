@@ -1,9 +1,14 @@
 savePath = '/Users/matt/Documents/Data/ChoiceTask/LFPs/delta/unwrap';
 
 figPath = '/Users/matt/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
-subplotMargins = [.02 .02];
-doLabels = false;
-doSave = true;
+doLabels = true;
+doSave = false;
+
+if doLabels
+    subplotMargins = [.08 .05];
+else
+    subplotMargins = [.02 .02];
+end
 
 if ~exist('selectedLFPFiles')
     load('session_20181106_entrainmentData.mat', 'selectedLFPFiles');
@@ -89,14 +94,14 @@ if doAllSessions
 else
     useSessions = 1:numel(phaseSessions);
 end
-close all;
-useEvents = [2,3,4];
-rows = 3;
+% close all;
+useEvents = 1:8;%[2,3,4];
+rows = 4;
 cols = numel(useEvents);
 lw = 0.05;
 maxr = 0.3;
 colors = lines(2);
-nLines = 75;
+nLines = 10;
 lightColor = [repmat(0.5,[1 3]),0.25];
 for iSession = useSessions
     h = ff(800,400);
@@ -106,12 +111,14 @@ for iSession = useSessions
         iCol = iCol + 1;
         if doAllSessions
             thisPhase = squeeze(dataPhase(iEvent,:,:));
+            outPhase = squeeze(dataPhase(8,:,:));
         else
             thisPhase = squeeze(phaseSessions{iSession}(iEvent,:,:))';
         end
         t = linspace(-tWindow,tWindow,size(thisPhase,2));
         
-        subplot_tight(rows,cols,prc(cols,[1,iCol]),subplotMargins);
+        iSubplot = 0;
+        subplot_tight(rows,cols,prc(cols,[iSubplot+1,iCol]),subplotMargins);
         useTrials = randsample(1:size(thisPhase,1),nLines);
         for iTrial = useTrials %1:size(thisPhase,1)
             plot(t,thisPhase(iTrial,:),'color',lightColor,'lineWidth',lw);
@@ -141,32 +148,76 @@ for iSession = useSessions
             xticklabels([]);
             yticklabels([]);
         end
+        iSubplot = iSubplot + 1;
         
-        subplot_tight(rows,cols,prc(cols,[2,iCol]),subplotMargins);
+        natPhase = (2*pi)/(size(thisPhase,2)/(tWindow*2)/freqList);
         
-        useTrials = randsample(1:size(thisPhase,1),nLines);
-        for iTrial = useTrials %1:size(thisPhase,1)
-            plot(t,unwrap(thisPhase(iTrial,:)),'color',lightColor,'lineWidth',lw);
-            hold on;
-        end
-        plot(t,mean(unwrap(thisPhase,pi,2)),'color','k','linewidth',1);
-        xticks([-tWindow 0 tWindow]);
+        subplot_tight(rows,cols,prc(cols,[iSubplot+1,iCol]),subplotMargins);
+        nDiff = 1;
+        t_un = diff(unwrap(thisPhase,pi,2),nDiff,2) - natPhase;
+        t = linspace(-tWindow,tWindow,size(t_un,2));
+% %         useTrials = randsample(1:size(thisPhase,1),nLines);
+% %         for iTrial = useTrials %1:size(thisPhase,1)
+% % % %             plot(t,unwrap(thisPhase(iTrial,:)),'color',lightColor,'lineWidth',lw);
+% %             plot(t,abs(diff(unwrap(thisPhase(iTrial,:)),nDiff) - natPhase),'color',lightColor,'lineWidth',lw);
+% %             hold on;
+% %         end
+%         plot(t,mean((unwrap(thisPhase,pi,2))),'color','k','linewidth',1);
+        plot(t,mean(t_un),'k','linewidth',1);
         xlim([-tWindow tWindow]);
-        ylim([-10 40]);
-        yticks(sort([0,ylim]));
+        xticks(sort([0,xlim]));
+        ylim([-0.001 .001]);
+        grid on;
+        title('Steps 1,2,3,5');
+        yvals = linspace(min(ylim),max(ylim),5);
+        hz = phaseShiftToHz(tWindow,size(thisPhase,2),yvals)
+        yhz = 
+        iSubplot = iSubplot + 1;
+        
+        subplot_tight(rows,cols,prc(cols,[iSubplot+1,iCol]),subplotMargins);
+        nDiff = 1;
+        t_un = abs(diff(unwrap(thisPhase,pi,2),nDiff,2) - natPhase);
+        t_un_out = abs(diff(unwrap(outPhase,pi,2),nDiff,2) - natPhase);
+        zMean = mean(mean(t_un_out));
+        zStd = mean(std(t_un_out));
+        t = linspace(-tWindow,tWindow,size(t_un,2));
+% %         useTrials = randsample(1:size(thisPhase,1),nLines);
+% %         for iTrial = useTrials %1:size(thisPhase,1)
+% % % %             plot(t,unwrap(thisPhase(iTrial,:)),'color',lightColor,'lineWidth',lw);
+% %             plot(t,abs(diff(unwrap(thisPhase(iTrial,:)),nDiff) - natPhase),'color',lightColor,'lineWidth',lw);
+% %             hold on;
+% %         end
+%         plot(t,mean((unwrap(thisPhase,pi,2))),'color','k','linewidth',1);
+        plot(t,mean(t_un),'k','linewidth',1);
+        xlim([-tWindow tWindow]);
+        xticks(sort([0,xlim]));
+        ylim([0.0008 0.003]);
+        ax = gca;
+        ax.YRuler.Exponent = 0;
+        ytickformat('%.4f');
+        
+% %         yyaxis right;
+% %         plot(t,(mean(t_un)-zMean)/zStd,'linewidth',1);
+% %         ylim([-.5 .5]);
+% % % %         hold on;
+% % % %         plot(xlim,[natPhase,natPhase],'r:')
+%         ylim([-10 40]);
+%         yticks(sort([0,ylim]));
+        hold on;
         plot([0,0],ylim,'k:'); % center line
         box on;
         grid on;
         if doLabels
-            title('Phase Unwrapped');
+            title('Steps 1,2,3,4,5');
             xlabel('Time (s)');
         else
             xticks([]);
             xticklabels([]);
             yticklabels([]);
         end
+        iSubplot = iSubplot + 1;
         
-        subplot_tight(rows,cols,prc(cols,[3,iCol]),subplotMargins);
+        subplot_tight(rows,cols,prc(cols,[iSubplot+1,iCol]),subplotMargins);
         t0 = round(size(thisPhase,2)/2);
         phaseMean = circ_mean(thisPhase(:,t0));
 % %         polarplot([phaseMean,phaseMean],[0,maxr],'linewidth',1,'color',colors(2,:));
@@ -175,6 +226,7 @@ for iSession = useSessions
         rlim([0 maxr]);
         pax = gca;
         pax.ThetaZeroLocation = 'left';
+        set(pax,'Position',[pax.Position(1) pax.Position(2) pax.Position(3) pax.Position(4)*.8]);
         thetaticks([0,90,180,270]);
         rlim([0 0.3]);
         rticks(rlim);
@@ -182,6 +234,7 @@ for iSession = useSessions
             rticklabels({});
             thetaticklabels({});
         end
+        iSubplot = iSubplot + 1;
         
 % % % %         t = linspace(-tWindow,tWindow,size(thisPhase,2)-1);
 % % % %         subplot(rows,cols,prc(cols,[4,iCol]));
@@ -202,9 +255,9 @@ for iSession = useSessions
 % % % %         grid on;
     end
     % add median and mean labels
-    if doLabels
-        legend(lns,{'mean','median'});
-    end
+% %     if doLabels
+% %         legend(lns,{'mean','median'});
+% %     end
 % % % %     if doSave
 % % % %         if doAllSessions
 % % % %             saveas(h,fullfile(savePath,['deltaUnwrapped_allSessions.png']));
@@ -218,7 +271,7 @@ for iSession = useSessions
     if doSave
         setFig('','',[1.5,1.4]);
         print(gcf,'-painters','-depsc',fullfile(figPath,'UNWRAPPEDDELTA.eps'));
-        close(h);
+%         close(h);
     end
 end
 
