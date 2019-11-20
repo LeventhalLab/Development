@@ -150,7 +150,7 @@ for iSession = useSessions
         end
         iSubplot = iSubplot + 1;
         
-        natPhase = (2*pi)/(size(thisPhase,2)/(tWindow*2)/freqList);
+        natPhase = hzToPhaseShift(tWindow,size(thisPhase,2),freqList);
         
         subplot_tight(rows,cols,prc(cols,[iSubplot+1,iCol]),subplotMargins);
         nDiff = 1;
@@ -169,9 +169,6 @@ for iSession = useSessions
         ylim([-0.001 .001]);
         grid on;
         title('Steps 1,2,3,5');
-        yvals = linspace(min(ylim),max(ylim),5);
-        hz = phaseShiftToHz(tWindow,size(thisPhase,2),yvals)
-        yhz = 
         iSubplot = iSubplot + 1;
         
         subplot_tight(rows,cols,prc(cols,[iSubplot+1,iCol]),subplotMargins);
