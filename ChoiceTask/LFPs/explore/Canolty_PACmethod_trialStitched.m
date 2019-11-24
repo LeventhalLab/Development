@@ -21,7 +21,7 @@ load('LFPfiles_local_matt');
 % dbclear all
 
 tWindow = 0.5;
-freqList = logFreqList([1 2000],30);
+freqList = logFreqList([1 300],30);
 % % freqList_p = logFreqList([2 10],10);
 % % freqList_a = logFreqList([10 200],10);
 % % freqList = unique([freqList_p freqList_a]);
@@ -46,7 +46,7 @@ if doSetup
     all_shuff_MImatrix_mean = {};
     all_shuff_MImatrix_pvals = {};
 
-    for iNeuron = selectedLFPFiles(12)'
+    for iNeuron = selectedLFPFiles'
         iSession = iSession + 1;
         disp(['Session #',num2str(iSession)]);
     
@@ -105,7 +105,7 @@ if doSetup
         shuff_MImatrix_mean = MImatrix;
         shuff_MImatrix_pvals = MImatrix;
         surr_ifA = NaN(numel(freqList_a),nSurr); % #save
-        for iEvent = [4] % 1:size(W,1)
+        for iEvent = 1:size(W,1)
             disp(['working on event #',num2str(iEvent)]);
             for ifp = 1:numel(freqList_p)
                 pIdx = ifp;%find(freqList == freqList_p(ifp));
@@ -165,7 +165,7 @@ end
 % % 'eventFieldnames_wFake','freqList_p','freqList_a','freqList');
 
 if doPlot
-    useSessions = [1]; % [1:30]
+    useSessions = [1:30];
     h = CanoltyPAC_trialStitched_print(all_MImatrix,all_shuff_MImatrix_mean,all_shuff_MImatrix_pvals,useSessions,...
     eventFieldnames_wFake,freqList_p,freqList_a,freqList);
     if doSave

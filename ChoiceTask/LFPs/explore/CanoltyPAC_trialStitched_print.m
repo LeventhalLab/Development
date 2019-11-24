@@ -65,7 +65,7 @@ if doPlot_allEvents
     zLims = [0 10];
     rows = 2;
     cols = numel(eventFieldnames);
-    h = figuree(1400,450);
+    h = figuree(1400,650);
 
     for iEvent = 1:cols
         curMat = squeeze(MImatrix(iEvent,:,:));
