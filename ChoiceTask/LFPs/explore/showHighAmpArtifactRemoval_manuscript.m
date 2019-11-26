@@ -8,7 +8,7 @@ if ~exist('all_trials')
     load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local_altLookup')
     load('session_20180919_NakamuraMRL.mat', 'analysisConf')
 end
-
+load('LFPfiles_local_matt');
 nexPath = '/Users/matt/Documents/Data/ChoiceTask/NEX Files';
 
 loc_count = [];
@@ -35,13 +35,13 @@ for iNeuron = selectedLFPFiles'
     if iSession == 11
         xs = round([7.430876e+04, 2.816820e+05]);
         xt = round(7.9616e+04) / Fs;
-        t = linspace(0,diff(xs)/Fs,diff(xs)+1);
+        tplot = linspace(0,diff(xs)/Fs,diff(xs)+1);
         for iPlot = 1:2
             subplot(rows,cols,iPlot);
-            plot(t,sevFilt(xs(1):xs(2)));
+            plot(tplot,sevFilt(xs(1):xs(2)));
             hold on;
-            plot(t,sevFilta(xs(1):xs(2)));
-            xlim([0 max(t)]);
+            plot(tplot,sevFilta(xs(1):xs(2)));
+            xlim([0 max(tplot)]);
             xlabel('Time (s)')
             ylabel('uV');
             title('Session 11 Line pop');
@@ -56,16 +56,24 @@ for iNeuron = selectedLFPFiles'
         id = closest(t,ts);
         bin_mat(iSession,id) = 2;
     end
-    ts = trials(1).timestamps.cueOn + behaviorStartTime;
-    id = closest(t,ts);
-    bin_mat(iSession,id) = 1;
-    for iTrial = 2:numel(trials)
+% % % %     ts = trials(1).timestamps.cueOn + behaviorStartTime;
+% % % %     id = closest(t,ts);
+% % % %     bin_mat(iSession,id) = 1;
+    startFlag = 0;
+    for iTrial = 1:numel(trials)
         if trials(iTrial).valid
             ts = trials(iTrial).timestamps.cueOn + behaviorStartTime;
             id = closest(t,ts);
-            if bin_mat(iSession,id) == 2
-                bin_mat(iSession,id) = 3; % escalate to conflict
-                affectedTrials = affectedTrials + 1;
+            if id <= size(bin_mat,2)
+                if startFlag
+                    if bin_mat(iSession,id) == 2
+                        bin_mat(iSession,id) = 3; % escalate to conflict
+                        affectedTrials = affectedTrials + 1;
+                    end
+                else
+                    bin_mat(iSession,id) = 1;
+                    startFlag = 1;
+                end
             end
         end
     end
