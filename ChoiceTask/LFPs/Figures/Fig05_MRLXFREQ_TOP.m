@@ -29,10 +29,10 @@ nBins = 20;
 rlimVal = .14;
 dirColor = lines(4);
 edges = linspace(-pi,pi,13);
-rows = 2;
+rows = 1; % controls visibility of distributions
 cols = 2;
 close all;
-h = ff(1000,600);
+h = ff(1000,350*rows);
 for iCond = 1:2
     min_hist = squeeze(entrain_hist(1,iCond,k_min,:,iFreq));
     mid_hist = squeeze(entrain_hist(1,iCond,k_mid,:,iFreq));
@@ -89,53 +89,55 @@ for iCond = 1:2
         set(gca,'fontSize',fontSize);
     end
     
-    subplotMargins = [.3 .02];
-    subtightplot(rows,cols,prc(cols,[2,1]),subplotMargins);
-    histogram(all_p,linspace(0,1,nBins),'DisplayStyle','stairs','EdgeColor',dirColor(iCond+2,:),...
-        'Normalization','probability','LineWidth',lineWidth);
-    hold on;
-    xticks(xlim);
-    ylim([0 0.5]);
-    yticks(ylim);
-    if doLabels
-        ylabel('Fraction of Units');
-        xlabel('p-value');
-        title('P-value Distribution');
-    else
-        yticklabels({});
-        xticklabels({});
-% %         box off;
-    end
-    if iCond == 2 && doLabels
-        legend(inLabels);
-        set(gca,'fontSize',fontSize);
-    end
-    
-    subtightplot(rows,cols,prc(cols,[2,2]),subplotMargins);
-    histogram(all_r,linspace(0,0.15,nBins),'DisplayStyle','stairs','EdgeColor',dirColor(iCond+2,:),...
-        'Normalization','probability','LineWidth',lineWidth);
-    hold on;
-    xticks(xlim);
-    ylim([0 0.5]);
-    yticks(ylim);
-    if doLabels
-        ylabel('Fraction of Units');
-        xlabel('MRL');
-        title('MRL Distribution');
-    else
-        yticklabels({});
-        xticklabels({});
-% %         box off;
-    end
-    if iCond == 2 && doLabels
-        legend(inLabels);
-        set(gca,'fontSize',fontSize);
+    if rows > 1 % do distributions
+        subplotMargins = [.3 .02];
+        subtightplot(rows,cols,prc(cols,[2,1]),subplotMargins);
+        histogram(all_p,linspace(0,1,nBins),'DisplayStyle','stairs','EdgeColor',dirColor(iCond+2,:),...
+            'Normalization','probability','LineWidth',lineWidth);
+        hold on;
+        xticks(xlim);
+        ylim([0 0.5]);
+        yticks(ylim);
+        if doLabels
+            ylabel('Fraction of Units');
+            xlabel('p-value');
+            title('P-value Distribution');
+        else
+            yticklabels({});
+            xticklabels({});
+    % %         box off;
+        end
+        if iCond == 2 && doLabels
+            legend(inLabels);
+            set(gca,'fontSize',fontSize);
+        end
+
+        subtightplot(rows,cols,prc(cols,[2,2]),subplotMargins);
+        histogram(all_r,linspace(0,0.15,nBins),'DisplayStyle','stairs','EdgeColor',dirColor(iCond+2,:),...
+            'Normalization','probability','LineWidth',lineWidth);
+        hold on;
+        xticks(xlim);
+        ylim([0 0.5]);
+        yticks(ylim);
+        if doLabels
+            ylabel('Fraction of Units');
+            xlabel('MRL');
+            title('MRL Distribution');
+        else
+            yticklabels({});
+            xticklabels({});
+    % %         box off;
+        end
+        if iCond == 2 && doLabels
+            legend(inLabels);
+            set(gca,'fontSize',fontSize);
+        end
     end
 end
 
 set(gcf,'color','w');
 if doSave
-    setFig('','',[1.5,1.5]);
+    setFig('','',[1.5,0.5]);
     print(gcf,'-painters','-depsc',fullfile(figPath,['MRLXFREQ_TOP.eps']));
     close(h);
 end
