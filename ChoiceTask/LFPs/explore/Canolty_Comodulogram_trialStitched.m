@@ -15,7 +15,7 @@ doSave = false;
 doPlot = false;
 
 if ismac
-    savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/PAC/canoltyMethod/bySession';
+    savePath = '/Users/matt/Documents/Data/ChoiceTask/LFPs/PAC/canoltyMethod/bySession';
 else
     savePath = '\\172.20.138.142\RecordingsLeventhal2\ChoiceTask\MthalLFPs\CanoltySessions';
 end

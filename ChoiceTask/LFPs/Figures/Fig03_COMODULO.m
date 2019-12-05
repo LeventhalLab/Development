@@ -8,14 +8,14 @@ corrMatrix_shuf = squeeze(mean(shuff_corrMatrix_rho_mean));
 
 close all
 
-figPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
+figPath = '/Users/matt/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
 subplotMargins = [.03 .01];
 
-doSave = true;
+doSave = false;
 
-h = ff(1200,285);
+h = ff(1200,600);
 cLims = [-.4 0.4];
-rows = 2;
+rows = 4;
 cols = numel(eventFieldnames_wFake);
 xmarks = round(logFreqList([1 200],6),0);
 usexticks = [];
@@ -35,12 +35,34 @@ for iEvent = 1:cols
     yticks(usexticks);
     yticklabels([]);
     
-    curMat = squeeze(corrMatrix_shuf(iEvent,:,:))';
+    curMat = squeeze(median(corrMatrix_pval(:,iEvent,:,:)))';
     subplot_tight(rows,cols,prc(cols,[2 iEvent]),subplotMargins);
+    imagesc(curMat,'AlphaData',~isnan(curMat));
+    colormap(gca,gray);
+    set(gca,'ydir','normal');
+    caxis([0 1]);
+    xticks(usexticks);
+    xticklabels([]);
+    yticks(usexticks);
+    yticklabels([]);
+    
+    curMat = squeeze(corrMatrix_shuf(iEvent,:,:))';
+    subplot_tight(rows,cols,prc(cols,[3 iEvent]),subplotMargins);
     imagesc(curMat,'AlphaData',~isnan(curMat));
     colormap(gca,jet);
     set(gca,'ydir','normal');
     caxis(cLims);
+    xticks(usexticks);
+    xticklabels([]);
+    yticks(usexticks);
+    yticklabels([]);
+    
+    curMat = squeeze(median(shuff_corrMatrix_pval(:,iEvent,:,:)))';
+    subplot_tight(rows,cols,prc(cols,[4 iEvent]),subplotMargins);
+    imagesc(curMat,'AlphaData',~isnan(curMat));
+    colormap(gca,gray);
+    set(gca,'ydir','normal');
+    caxis([0 1]);
     xticks(usexticks);
     xticklabels([]);
     yticks(usexticks);

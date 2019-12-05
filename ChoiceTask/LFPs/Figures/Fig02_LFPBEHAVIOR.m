@@ -1,6 +1,7 @@
 % LFPBEHAVIOR
 if ~exist('session_Wz_power')
     load('fig__spectrum_MRL_20181108');
+    load('session_20191124.mat')
 end
 % raw data was compiled with LFP_byX.m (doSetup = true)
 % freqList = logFreqList([1 200],30);
@@ -8,7 +9,7 @@ end
 do_linePlot = false;
 do_lineSupp = false;
 
-doSave = false;
+doSave = true;
 figPath = '/Users/matt/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
 subplotMargins = [.03 .01];
 
@@ -160,7 +161,7 @@ ptest(all_ptests < .001) = 0;
 
 phaseColors = [0 0 0;1 0 0;0 0 1;1 1 1];
 close all
-h = ff(1000,750);
+h = ff(1000,650);
 rows = 4;
 cols = 8;
 caxisVals = [-0.5 3];
@@ -226,7 +227,7 @@ end
 tightfig;
 setFig('','',[2,3.5]);
 if doSave
-    print(gcf,'-painters','-depsc',fullfile(figPath,'LFPBEHAVIOR.eps'));
+    print(gcf,'-painters','-depsc',fullfile(figPath,'re_LFPBEHAVIOR.eps'));
     close(h);
 end
 
