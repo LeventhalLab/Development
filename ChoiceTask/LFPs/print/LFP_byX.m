@@ -1,8 +1,11 @@
-% load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local')
-% load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local_alt')
-% load('session_20180919_NakamuraMRL.mat', 'selectedLFPFiles')
-% load('session_20180919_NakamuraMRL.mat', 'all_trials')
-% load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
+if ~exist('all_trials')
+    load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local')
+    load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local_alt')
+    load('session_20180919_NakamuraMRL.mat', 'selectedLFPFiles')
+    load('session_20180919_NakamuraMRL.mat', 'all_trials')
+    load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
+end
+load('LFPfiles_local_matt');
 % load('session_20180925_entrainmentSurrogates.mat', 'session_Wz_phase')
 % load('session_20180925_entrainmentSurrogates.mat', 'session_Wz_power')
 % load('session_20180925_entrainmentSurrogates.mat', 'session_Wz_rayleigh_pval')
@@ -16,47 +19,57 @@ zThresh = 5;
 tWindow = 2;
 freqList = logFreqList([1 200],30);
 Wlength = 400;
+eventFieldnames_wFake = {eventFieldnames{:} 'interTrial'};
 
 if doSetup
+    all_Wz_power = [];
+    all_Wz_phase = [];
     session_Wz_power = [];
     session_Wz_power_med = [];
     session_Wz_phase = [];
     session_Wz_rayleigh_pval = [];
     iSession = 0;
+    trialCount = 0;
     for iNeuron = selectedLFPFiles'
         iSession = iSession + 1;
         sevFile = LFPfiles_local{iNeuron};
         disp(sevFile);
         [~,name,~] = fileparts(sevFile);
         subjectName = name(1:5);
-        curTrials = all_trials{iNeuron};
-        [trialIds,allTimes] = sortTrialsBy(curTrials,'RT');
+        trials = all_trials{iNeuron};
+        trials = addEventToTrials(trials,'interTrial');
+        [trialIds,allTimes] = sortTrialsBy(trials,'RT');
         [sevFilt,Fs,decimateFactor] = loadCompressedSEV(sevFile,[]);
-        [W,all_data] = eventsLFPv2(curTrials(trialIds),sevFilt,tWindow,Fs,freqList,eventFieldnames);
+        sevFilt = artifactThreshv2(sevFilt,2000);
+        [W,all_data] = eventsLFPv2(trials(trialIds),sevFilt,tWindow,Fs,freqList,eventFieldnames_wFake);
         keepTrials = threshTrialData(all_data,zThresh);
         W = W(:,:,keepTrials,:);
         
-        [Wz_power,Wz_phase] = zScoreW(W,Wlength,tWindow); % power Z-score
+        [Wz_power,Wz_phase] = zScoreW(W,Wlength); % power Z-score
         
         if false
             ff(600,600);
             plot(squeeze(Wz_power(1,:,:,4)));
             plot(mean(squeeze(Wz_power(1,:,:,4)),2));
         end
-
-        session_Wz_power(iSession,:,:,:) = squeeze(mean(Wz_power,3));
-        session_Wz_power_med(iSession,:,:,:) = squeeze(median(Wz_power,3));
-        session_Wz_phase(iSession,:,:,:) = squeeze(circ_r(Wz_phase,[],[],3));
-        
-        for iEvent = 1:size(Wz_phase,1)
-            for iBin = 1:size(Wz_phase,2)
-                for iFreq = 1:size(Wz_phase,4)
-                    alpha = squeeze(Wz_phase(iEvent,iBin,:,iFreq));
-                    [pval,rho] = circ_rtest(alpha);
-                    session_Wz_rayleigh_pval(iSession,iEvent,iBin,iFreq) = pval;
-                end
-            end
+        for iTrial = 1:size(Wz_power,3)
+            trialCount = trialCount + 1;
+            all_Wz_power(trialCount,:,:,:) = squeeze(Wz_power(:,:,iTrial,:));
+            all_Wz_phase(trialCount,:,:,:) = squeeze(Wz_phase(:,:,iTrial,:));
         end
+        session_Wz_power(iSession,:,:,:) = squeeze(mean(Wz_power,3));
+% %         session_Wz_power_med(iSession,:,:,:) = squeeze(median(Wz_power,3));
+        session_Wz_phase(iSession,:,:,:) = squeeze(circ_r(Wz_phase,[],[],3));
+% %         
+% %         for iEvent = 1:size(Wz_phase,1)
+% %             for iBin = 1:size(Wz_phase,2)
+% %                 for iFreq = 1:size(Wz_phase,4)
+% %                     alpha = squeeze(Wz_phase(iEvent,iBin,:,iFreq));
+% %                     [pval,rho] = circ_rtest(alpha);
+% %                     session_Wz_rayleigh_pval(iSession,iEvent,iBin,iFreq) = pval;
+% %                 end
+% %             end
+% %         end
     end
 end
 

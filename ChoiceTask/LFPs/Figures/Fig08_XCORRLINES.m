@@ -36,8 +36,8 @@ for iFreq = 1:size(useFreqs,1)
         for iIn = 1:2
             poisson_data = squeeze(nanmean(all_acors_poisson_mean(:,condUnits{iDir},iIn,iFreq,:),2));
             plot(tlag,min(poisson_data)','color',[colors{iIn}(iFreq,:) 0.8]);
-            plot(tlag,max(poisson_data)','color',[colors{iIn}(iFreq,:) 0.8]);
             hold on;
+            plot(tlag,max(poisson_data)','color',[colors{iIn}(iFreq,:) 0.8]);
             data = squeeze(nanmean(all_acors(useUnits,iIn,useFreqs(iFreq),:)));
             plot(tlag,data,'color',colors{iIn}(iFreq,:),'linewidth',1);
             

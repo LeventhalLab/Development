@@ -1,14 +1,17 @@
+
 % LFPBEHAVIOR
 if ~exist('session_Wz_power')
     load('fig__spectrum_MRL_20181108');
+    load('session_20191124.mat')
 end
 % raw data was compiled with LFP_byX.m (doSetup = true)
 % freqList = logFreqList([1 200],30);
 
 do_linePlot = false;
+do_lineSupp = false;
 
 doSave = true;
-figPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
+figPath = '/Users/matt/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
 subplotMargins = [.03 .01];
 
 eventfields = {'Cue','Nose In','Tone','Nose Out','Side In','Side Out','Reward'};
@@ -80,10 +83,89 @@ if do_linePlot
     end
 end
 
-h = ff(1000,350);
-rows = 2;
-cols = 7;
-caxisVals = [-1 4];
+if do_lineSupp
+    useFreqs = [closest(freqList,2.5),closest(freqList,20),closest(freqList,55),closest(freqList,100)];
+    colors = lines(4);
+    h = ff(500,350);
+    useEvents = [3:4];
+    rows = 1;
+    cols = numel(useEvents);
+    iSubplot = 1;
+    for iEvent = useEvents
+        subplot_tight(rows,cols,iSubplot,subplotMargins);
+        freqCount = 1;
+        for iFreq = useFreqs
+            plot(t,squeeze(scaloPower(iEvent,:,iFreq)),'color',colors(freqCount,:),...
+                'LineWidth',1);
+            hold on;
+            freqCount = freqCount + 1;
+        end
+        xlim([min(t) max(t)]);
+        xticks(sort([xlim,0]));
+        ylim([-0.5 2.5]);
+        yticks(sort([ylim,0]));
+        if ~doLabels
+            xticklabels({});
+            yticklabels({});
+        end
+        grid on;
+        iSubplot = iSubplot + 1;
+    end
+
+    tightfig;
+    set(gcf,'color','w');
+    if doSave
+        setFig('','',[1,0.5]);
+        print(gcf,'-painters','-depsc',fullfile(figPath,'LFPLINES.eps'));
+        close(h);
+    end
+end
+
+% setup
+if true
+    scaloPower2 = squeeze(mean(all_Wz_power));
+    scaloPhase2 = zeros(size(scaloPower2));
+    
+    all_rtests = zeros([size(all_Wz_phase,2),size(all_Wz_phase,3),size(all_Wz_phase,4)]);
+    for iEvent = 1:size(all_Wz_phase,2)
+        for iTime = 1:size(all_Wz_phase,3)
+            for iFreq = 1:size(all_Wz_phase,4)
+                theseTrials = squeeze(all_Wz_phase(:,iEvent,iTime,iFreq));
+                scaloPhase2(iEvent,iTime,iFreq) = circ_r(theseTrials);
+                all_rtests(iEvent,iTime,iFreq) = circ_rtest(theseTrials);
+            end
+        end
+    end
+    
+    all_ptests = zeros([size(all_Wz_power,2),size(all_Wz_power,3),size(all_Wz_power,4)]);
+    for iEvent = 1:size(all_Wz_power,2)
+        for iTime = 1:size(all_Wz_power,3)
+            for iFreq = 1:size(all_Wz_power,4)
+                thisTrial = squeeze(mean(abs(squeeze(all_Wz_power(:,iEvent,iTime,iFreq)))));
+% %                 theseSurr = abs(squeeze(all_Wz_power(:,1,iTime,iFreq)));
+% %                 all_ptests(iEvent,iTime,iFreq) = 1 - (sum(thisTrial > theseSurr) / numel(theseSurr));
+                all_ptests(iEvent,iTime,iFreq) = normcdf(thisTrial,'upper');%*size(all_Wz_power,1);
+            end
+        end
+    end
+end
+
+rtest = ones(size(all_rtests))*3;
+rtest(all_rtests < .05) = 2;
+rtest(all_rtests < .01) = 1;
+rtest(all_rtests < .001) = 0;
+
+ptest = ones(size(all_ptests))*3;
+ptest(all_ptests < .05) = 2;
+ptest(all_ptests < .01) = 1;
+ptest(all_ptests < .001) = 0;
+
+phaseColors = [0 0 0;1 0 0;0 0 1;1 1 1];
+close all
+h = ff(1000,650);
+rows = 4;
+cols = 8;
+caxisVals = [-0.5 3];
 xmarks = round(logFreqList([1 200],6),0);
 usexticks = [];
 for ii = 1:numel(xmarks)
@@ -92,7 +174,7 @@ end
 
 for iEvent = 1:7
     subplot_tight(rows,cols,prc(cols,[1,iEvent]),subplotMargins);
-    imagesc(t,1:numel(freqList),squeeze(scaloPower(iEvent,:,:))');
+    imagesc(t,1:numel(freqList),squeeze(scaloPower2(iEvent,:,:))');
     hold on;
     colormap(gca,jet);
     caxis(caxisVals);
@@ -105,10 +187,36 @@ for iEvent = 1:7
     set(gca,'YDir','normal');
     
     subplot_tight(rows,cols,prc(cols,[2,iEvent]),subplotMargins);
-    imagesc(linspace(-1,1,size(scaloPhase,2)),1:numel(freqList),squeeze(scaloPhase(iEvent,:,:))');
+    imagesc(linspace(-1,1,size(ptest,2)),1:numel(freqList),squeeze(ptest(iEvent,:,:))');
+    hold on;
+    colormap(gca,phaseColors);
+    caxis([0 3]);
+    xlim([-1 1]);
+    xticks(0);
+    xticklabels([]);
+    yticks(usexticks);
+    yticklabels([]);
+    plot([0,0],ylim,'k:'); % center line
+    set(gca,'YDir','normal');
+    
+    subplot_tight(rows,cols,prc(cols,[3,iEvent]),subplotMargins);
+    imagesc(linspace(-1,1,size(scaloPhase2,2)),1:numel(freqList),squeeze(scaloPhase2(iEvent,:,:))');
     hold on;
     colormap(gca,hot);
     caxis([0 1]);
+    xlim([-1 1]);
+    xticks(0);
+    xticklabels([]);
+    yticks(usexticks);
+    yticklabels([]);
+    plot([0,0],ylim,'k:'); % center line
+    set(gca,'YDir','normal');
+    
+    subplot_tight(rows,cols,prc(cols,[4,iEvent]),subplotMargins);
+    imagesc(linspace(-1,1,size(rtest,2)),1:numel(freqList),squeeze(rtest(iEvent,:,:))');
+    hold on;
+    colormap(gca,phaseColors);
+    caxis([0 3]);
     xlim([-1 1]);
     xticks(0);
     xticklabels([]);
@@ -120,7 +228,7 @@ end
 tightfig;
 setFig('','',[2,3.5]);
 if doSave
-    print(gcf,'-painters','-depsc',fullfile(figPath,'LFPBEHAVIOR.eps'));
+    print(gcf,'-painters','-depsc',fullfile(figPath,'re_LFPBEHAVIOR.eps'));
     close(h);
 end
 

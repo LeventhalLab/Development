@@ -1,21 +1,19 @@
-% load('session_20180925_entrainmentSurrogates.mat', 'eventFieldnames')
-% load('session_20180925_entrainmentSurrogates.mat', 'all_trials')
-% load('session_20180925_entrainmentSurrogates.mat', 'LFPfiles_local')
-% load('session_20180925_entrainmentSurrogates.mat', 'selectedLFPFiles')
-% 
-% load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
-% load('session_20180919_NakamuraMRL.mat', 'all_trials')
-% load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local')
-% load('session_20180919_NakamuraMRL.mat', 'selectedLFPFiles')
-% load('session_20180919_NakamuraMRL.mat', 'all_ts')
-% load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local_altLookup')
+if ~exist('eventFieldnames')
+    load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
+    load('session_20180919_NakamuraMRL.mat', 'all_trials')
+    load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local')
+    load('session_20180919_NakamuraMRL.mat', 'selectedLFPFiles')
+    load('session_20180919_NakamuraMRL.mat', 'all_ts')
+    load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local_altLookup')
+end
+load('LFPfiles_local_matt');
 
 doSetup = true;
 doSave = false;
 doPlot = false;
 
 if ismac
-    savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/PAC/canoltyMethod/bySession';
+    savePath = '/Users/matt/Documents/Data/ChoiceTask/LFPs/PAC/canoltyMethod/bySession';
 else
     savePath = '\\172.20.138.142\RecordingsLeventhal2\ChoiceTask\MthalLFPs\CanoltySessions';
 end
@@ -64,7 +62,7 @@ for iNeuron = selectedLFPFiles'
                     [rho,pval] = corr(A1,A2);
                     corrMatrix_rho(iSession,iEvent,iA1,iA2) = rho;
                     corrMatrix_pval(iSession,iEvent,iA1,iA2) = pval;
-                    
+ 
                     all_shuff_rho = NaN(nShuff,1);
                     for iShuff = 1:nShuff
                         shuff_A2 = squeeze(abs(W(iEvent,:,randperm(size(W,3),size(W,3)),iA2)).^2);

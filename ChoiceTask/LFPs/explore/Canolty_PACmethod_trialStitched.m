@@ -6,9 +6,14 @@ if ~exist('all_ts')
     load('session_20180919_NakamuraMRL.mat', 'all_ts')
     load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local_altLookup')
 end
-% load('Canolt_PAC_20190120.mat')
 
-doSetup = true;
+% load('Canolt_PAC_20190120.mat') % 300 Hz
+% freqList = logFreqList([1 300],30);
+
+% load('Canolt_PAC_20191127.mat') % 100 Hz
+% freqList = logFreqList([1 100],30);
+
+doSetup = false;
 doSave = false;
 doPlot = true;
 
@@ -23,7 +28,7 @@ end
 % dbclear all
 
 tWindow = 0.5;
-freqList = logFreqList([1 300],30);
+
 % % freqList_p = logFreqList([2 10],10);
 % % freqList_a = logFreqList([10 200],10);
 % % freqList = unique([freqList_p freqList_a]);
@@ -34,6 +39,7 @@ freqList_a = [1:numel(freqList)];
 % % bandLabels = {'\delta','\theta','\beta','\gamma','\gamma_H'};
 
 eventFieldnames_wFake = {eventFieldnames{:} 'outTrial'};
+eventFieldlabels = {'Cue','Nose In','Tone','Nose Out','Side In','Side Out','Reward'};
 
 nSurr = 200; % 200
 nShuff = 100; % 100
@@ -169,7 +175,7 @@ save('Canolt_PAC_20191202','all_MImatrix','all_shuff_MImatrix_mean','all_shuff_M
 if doPlot
     useSessions = [1:30];
     h = CanoltyPAC_trialStitched_print(all_MImatrix,all_shuff_MImatrix_mean,all_shuff_MImatrix_pvals,useSessions,...
-    eventFieldnames_wFake,freqList_p,freqList_a,freqList);
+    eventFieldlabels,freqList_p,freqList_a,freqList);
     if doSave
         saveFile = ['PAC_s',num2str(useSessions(1)),'-',num2str(useSessions(end)),'_allEvent.png'];
         saveas(h,fullfile(savePath,saveFile));
