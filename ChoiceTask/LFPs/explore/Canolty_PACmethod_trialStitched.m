@@ -1,9 +1,11 @@
-load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
-load('session_20180919_NakamuraMRL.mat', 'all_trials')
-load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local')
-load('session_20180919_NakamuraMRL.mat', 'selectedLFPFiles')
-load('session_20180919_NakamuraMRL.mat', 'all_ts')
-load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local_altLookup')
+if ~exist('all_ts')
+    load('session_20180919_NakamuraMRL.mat', 'eventFieldnames')
+    load('session_20180919_NakamuraMRL.mat', 'all_trials')
+    load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local')
+    load('session_20180919_NakamuraMRL.mat', 'selectedLFPFiles')
+    load('session_20180919_NakamuraMRL.mat', 'all_ts')
+    load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local_altLookup')
+end
 % load('Canolt_PAC_20190120.mat')
 
 doSetup = true;
@@ -15,7 +17,7 @@ if ismac
 else
     savePath = '\\172.20.138.142\RecordingsLeventhal2\ChoiceTask\MthalLFPs\CanoltySessions';
 end
-load('LFPfiles_local_matt');
+% load('LFPfiles_local_matt');
 
 % dbstop if error
 % dbclear all
@@ -34,7 +36,7 @@ freqList_a = [1:numel(freqList)];
 eventFieldnames_wFake = {eventFieldnames{:} 'outTrial'};
 
 nSurr = 200; % 200
-nShuff = 10; % 100
+nShuff = 100; % 100
 oversampleBy = 5; % has to be high for eegfilt() (> 14,000 samples)
 zThresh = 5;
 maxTrialTime = 5;
@@ -62,7 +64,7 @@ if doSetup
         % use despiked LFP here!
 % %         load(LFPfiles_local_despiked{iNeuron});
         
-        sevFilt = artifactThresh(sevFilt,[1],2000);
+        sevFilt = artifactThreshv2(sevFilt,2000);
         sevFilt = sevFilt - mean(sevFilt);
         [W,all_data] = eventsLFPv2(curTrials(trialIds),sevFilt,tWindow,Fs,freqList,eventFieldnames);
         keepTrials = threshTrialData(all_data,zThresh);
@@ -161,8 +163,8 @@ if doSetup
     end
 end
 
-% % save('Canolt_PAC_20190120','all_MImatrix','all_shuff_MImatrix_mean','all_shuff_MImatrix_pvals',...
-% % 'eventFieldnames_wFake','freqList_p','freqList_a','freqList');
+save('Canolt_PAC_20191202','all_MImatrix','all_shuff_MImatrix_mean','all_shuff_MImatrix_pvals',...
+'eventFieldnames_wFake','freqList_p','freqList_a','freqList');
 
 if doPlot
     useSessions = [1:30];
