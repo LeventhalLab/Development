@@ -55,7 +55,7 @@ end
 % save('20191201_PACPVAL','MImatrix','shuff_MImatrix_mean','shuff_MImatrix_pvals');
 
 if doPlot_allEvents
-    fontSize = 7;
+    fontSize = 9;
     pLims = [0 0.001];
     pThresh = 0.05; % alpha
     SE = strel('sphere',1);
@@ -85,9 +85,9 @@ if doPlot_allEvents
         set(gca,'fontsize',fontSize);
         set(gca,'TitleFontSizeMultiplier',2);
         if iEvent == 1
-            title({'mean real Z',[num2str(useSessions(1)),'-',num2str(useSessions(end))],eventFieldnames{iEvent}});
+            title({[num2str(useSessions(1)),'-',num2str(useSessions(end))],eventFieldnames{iEvent}});
         else
-            title({'mean real Z',eventFieldnames{iEvent}});
+            title({eventFieldnames{iEvent}});
         end
         if iEvent == cols
             cbAside(gca,'Z-MI','k');

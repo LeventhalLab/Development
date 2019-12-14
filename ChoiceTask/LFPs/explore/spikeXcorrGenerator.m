@@ -12,18 +12,18 @@ end
 
 % load('20190402_xcorr.mat') % instead of setup/load/shuffle
 
-doSetup = false;
+doSetup = true;
 doDebug = false;
 doAlt = true;
-doWrite = false;
+doWrite = true;
 doLoad = false;
 doShuffle = false;
 doSave = true;
 doPlot1 = false;
 doPlot2 = true;
-dataPath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/datastore/xcorr';
-dataPath_shuff = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/datastore/xcorr_shuffle';
-savePath = '/Users/mattgaidica/Documents/Data/ChoiceTask/LFPs/wholeSession/xcorr';
+dataPath = '/Users/matt/Documents/Data/ChoiceTask/LFPs/datastore/xcorr';
+dataPath_shuff = '/Users/matt/Documents/Data/ChoiceTask/LFPs/datastore/xcorr_shuffle';
+savePath = '/Users/matt/Documents/Data/ChoiceTask/LFPs/wholeSession/xcorr';
 
 % freqList = logFreqList([1 200],30);
 freqList = [2.5,20,55,180];
@@ -35,12 +35,12 @@ inLabels = {'in-trial','inter-trial'};
 
 doTrialOrder = false;
 doPoisson = true;
-nPoisson = 20;
+nPoisson = 100; %from 20
 if doSetup
     xcorrUnits = [];
     all_acors_poisson_median = [];
     all_acors_poisson_mean = [];
-    for iNeuron = 207:numel(all_ts)
+    for iNeuron = 1:numel(all_ts)
         sevFile = LFPfiles_local{iNeuron};
         disp(['--> iNeuron ',num2str(iNeuron)]);
         ts = all_ts{iNeuron};
@@ -141,10 +141,9 @@ if doSetup
                     all_acors_poisson_mean(iPoisson,iNeuron,iIn,:,:) = squeeze(mean(acors_poisson(iIn,:,:,:),2));
                 end
             end
-
-            if doWrite
-                save('20190321_xcorr_poisson_allUnits','all_acors_poisson_median','all_acors_poisson_mean','lag','tXcorr');
-            end
+        end
+        if doWrite
+            save('20191213_xcorr_poisson_allUnits','all_acors_poisson_median','all_acors_poisson_mean','lag','tXcorr');
         end
     end
 end

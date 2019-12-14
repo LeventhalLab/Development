@@ -5,7 +5,7 @@ if ~exist('entrain_hist')
 end
 
 figPath = '/Users/matt/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
-doSave = true;
+doSave = false;
 doLabels = false;
 
 inLabels = {'IN Trial','INTER Trial'};
@@ -22,11 +22,12 @@ all_r = squeeze(entrain_rs(1,1,:,iFreq));
 [p_min,k_min] = min(all_p);
 [k_mid,p_mid] = closest(all_p,0.08);
 
-lineStyle = ':';
+lineStyle = '-';
 lineWidth = 1;
 fontSize = 16;
 nBins = 20;
 rlimVal = .14;
+MRLfactor = 0.7;
 dirColor = lines(4);
 edges = linspace(-pi,pi,13);
 rows = 1; % controls visibility of distributions
@@ -46,15 +47,15 @@ for iCond = 1:2
     p_mid = all_p(k_mid);
     
     disp(iCond);
-    fprintf('MIN p = %d, MRL = %1.2f\n',p_min,r_min);
-    fprintf('MID p = %d, MRL = %1.2f\n',p_mid,r_mid);
+    fprintf('MIN p = %1.2d, MRL = %1.2f\n',p_min,r_min);
+    fprintf('MID p = %1.2d, MRL = %1.2f\n',p_mid,r_mid);
     
     subplotMargins = [.02 .02];
     subtightplot(rows,cols,prc(cols,[1,1]),subplotMargins);
     polarhistogram('BinEdges',edges,'BinCounts',min_hist,'DisplayStyle','stairs','EdgeColor',dirColor(iCond+2,:),...
         'Normalization','probability','LineWidth',lineWidth);
     hold on;
-    polarplot([mu_min,mu_min],[0 rlimVal],lineStyle,'color',dirColor(iCond+2,:),'linewidth',lineWidth);
+    polarplot([mu_min,mu_min],[0 r_min*MRLfactor],lineStyle,'color',dirColor(iCond+2,:),'linewidth',lineWidth);
     pax = gca;
     pax.ThetaZeroLocation = 'left';
     thetaticks([0,90,180,270]);
@@ -74,7 +75,7 @@ for iCond = 1:2
     polarhistogram('BinEdges',edges,'BinCounts',mid_hist,'DisplayStyle','stairs','EdgeColor',dirColor(iCond+2,:),...
         'Normalization','probability','LineWidth',lineWidth);
     hold on;
-    polarplot([mu_mid,mu_mid],[0 rlimVal],lineStyle,'color',dirColor(iCond+2,:),'linewidth',lineWidth);
+    polarplot([mu_mid,mu_mid],[0 r_mid*MRLfactor],lineStyle,'color',dirColor(iCond+2,:),'linewidth',lineWidth);
     pax.ThetaZeroLocation = 'left';
     thetaticks([0,90,180,270]);
     rlim([0 rlimVal]);
