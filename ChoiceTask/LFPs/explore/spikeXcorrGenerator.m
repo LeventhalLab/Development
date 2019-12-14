@@ -1,16 +1,18 @@
 % SPIKEXCORR, XCORRLINES
 % [ ] remove debug figures
 
-% load('session_20181218_highresEntrainment.mat', 'LFPfiles_local')
+load('session_20181218_highresEntrainment.mat', 'LFPfiles_local')
 if ~exist('primSec')
     load('session_20181218_highresEntrainment.mat','dirSelUnitIds','ndirSelUnitIds','primSec');
     load('session_20181218_highresEntrainment.mat', 'eventFieldnames');
 end
-% load('session_20181218_highresEntrainment.mat', 'LFPfiles_local_altLookup')
-% load('session_20180919_NakamuraMRL.mat', 'all_trials')
-% load('session_20180919_NakamuraMRL.mat', 'all_ts')
+load('session_20181218_highresEntrainment.mat', 'LFPfiles_local_altLookup')
+load('session_20180919_NakamuraMRL.mat', 'all_trials')
+load('session_20180919_NakamuraMRL.mat', 'all_ts')
 
 % load('20190402_xcorr.mat') % instead of setup/load/shuffle
+
+% load('LFPfiles_local_matt');
 
 doSetup = true;
 doDebug = false;
@@ -54,6 +56,7 @@ if doSetup
         if doAlt
             sevFile = LFPfiles_local_altLookup{strcmp(sevFile,{LFPfiles_local_altLookup{:,1}}),2};
         end
+%         sevFile = strrep(sevFile,'mattgaidica','matt');
         % only load unique sessions
         if isempty(loadedFile) || ~strcmp(loadedFile,sevFile)
             [sevFilt,Fs,decimateFactor,loadedFile] = loadCompressedSEV(sevFile,[]);
@@ -115,6 +118,7 @@ if doSetup
         if doPoisson
             acors_poisson = [];
             for iPoisson = 1:nPoisson
+                tic;
                 disp(['shuffling u',num2str(iNeuron,'%03d'),', iShuffle = ',num2str(iPoisson)]);
                 ts = all_ts{iNeuron};
                 spiketrain_duration = max(ts) * 1000; % ms
@@ -140,6 +144,7 @@ if doSetup
                     all_acors_poisson_median(iPoisson,iNeuron,iIn,:,:) = squeeze(median(acors_poisson(iIn,:,:,:),2));
                     all_acors_poisson_mean(iPoisson,iNeuron,iIn,:,:) = squeeze(mean(acors_poisson(iIn,:,:,:),2));
                 end
+                toc
             end
         end
         if doWrite
