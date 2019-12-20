@@ -17,7 +17,7 @@ load('session_20180919_NakamuraMRL.mat', 'all_ts')
 doSetup = true;
 doDebug = false;
 doAlt = true;
-doWrite = true;
+doWrite = false;
 doLoad = false;
 doShuffle = false;
 doSave = true;
@@ -146,9 +146,10 @@ if doSetup
                 end
                 toc
             end
-        end
-        if doWrite
-            save('20191213_xcorr_poisson_allUnits','all_acors_poisson_median','all_acors_poisson_mean','lag','tXcorr');
+            % write a lot in case loop stops?
+            if doWrite
+                save('20191213_xcorr_poisson_allUnits','all_acors_poisson_median','all_acors_poisson_mean','lag','tXcorr');
+            end
         end
     end
 end
