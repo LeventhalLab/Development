@@ -6,7 +6,7 @@ if ~exist('entrain_hist')
     load('session_20181218_highresEntrainment.mat', 'eventFieldnames')
 end
 
-doSave = true;
+doSave = false;
 doLabels = false;
 
 figPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';

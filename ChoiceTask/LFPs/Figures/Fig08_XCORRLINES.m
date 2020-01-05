@@ -3,12 +3,13 @@ if ~exist('tXcorr')
     load('20190402_xcorr.mat')
     load('20190321_xcorr_poisson_allUnits.mat', 'tXcorr', 'lag')
     load('session_20181218_highresEntrainment.mat','dirSelUnitIds','ndirSelUnitIds','primSec');
-    load('20190321_xcorr_poisson_allUnits')
+%     load('20190321_xcorr_poisson_allUnits')
+    load('20191213_xcorr_poisson_allUnits','all_acors_poisson_mean','lag','tXcorr')
 end
 
 close all
 
-figPath = '/Users/mattgaidica/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
+figPath = '/Users/matt/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
 subplotMargins = [.05 .02];
 nShuffle = 1000;
 
@@ -27,7 +28,7 @@ freqLabels = {'\delta','\beta','\gamma_L','\gamma_H'};
 rows = 2;
 cols = size(useFreqs,1);
 colors = {lines(size(useFreqs,1)),lines(size(useFreqs,1))*.3};
-pThresh = 0.05;
+pThresh = 0.01;
 ylimVals = [-0.05,0.05];
 for iFreq = 1:size(useFreqs,1)
     for iDir = 2:3

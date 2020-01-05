@@ -144,7 +144,7 @@ if true
                 thisTrial = squeeze(mean(abs(squeeze(all_Wz_power(:,iEvent,iTime,iFreq)))));
 % %                 theseSurr = abs(squeeze(all_Wz_power(:,1,iTime,iFreq)));
 % %                 all_ptests(iEvent,iTime,iFreq) = 1 - (sum(thisTrial > theseSurr) / numel(theseSurr));
-                all_ptests(iEvent,iTime,iFreq) = normcdf(thisTrial,'upper');%*size(all_Wz_power,1);
+                all_ptests(iEvent,iTime,iFreq) = 2*normcdf(-abs(thisTrial));%*size(all_Wz_power,1);
             end
         end
     end

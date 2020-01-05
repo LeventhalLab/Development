@@ -7,13 +7,14 @@
 
 doSetup = true;
 doAlt = true;
-doWrite = true;
+doWrite = false;
 
-freqList = logFreqList([1 200],30);
+% freqList = logFreqList([1 200],30);
+freqList = [2.5,20];
 nBins = 12;
 binEdges = linspace(-pi,pi,nBins+1);
 loadedFile = [];
-nSurr = 1000;
+nSurr = 1; % orig: 1000
 minFR = 5;
 
 if doSetup
@@ -22,6 +23,7 @@ if doSetup
     entrain_rs = NaN(nSurr,2,numel(all_ts),numel(freqList));
     entrain_mus = NaN(nSurr,2,numel(all_ts),numel(freqList));
     entrain_hist = NaN(nSurr,2,numel(all_ts),nBins,numel(freqList));
+    entrain_all_alpha = {};
     for iNeuron = 1:numel(all_ts)
         sevFile = LFPfiles_local{iNeuron};
         disp(['--> iNeuron ',num2str(iNeuron)]);
@@ -36,6 +38,7 @@ if doSetup
         if doAlt
             sevFile = LFPfiles_local_altLookup{strcmp(sevFile,{LFPfiles_local_altLookup{:,1}}),2};
         end
+        sevFile = strrep(sevFile,'mattgaidica','matt');
         % only load unique sessions
         if isempty(loadedFile) || ~strcmp(loadedFile,sevFile)
             [sevFilt,Fs,decimateFactor,loadedFile] = loadCompressedSEV(sevFile,[]);
@@ -78,12 +81,13 @@ if doSetup
                     limitSamples = randsample(useSamples,numel(inTrial_ids));
                     spikeAngles = angle(W(limitSamples,:));
                 end
-                for iFreq = 1:numel(freqList)
+                for iFreq = 1%:numel(freqList)
                     alpha = spikeAngles(:,iFreq);
                     entrain_pvals(iSurr,iIn,iNeuron,iFreq) = circ_rtest(alpha);
                     entrain_rs(iSurr,iIn,iNeuron,iFreq) = circ_r(alpha);
                     entrain_mus(iSurr,iIn,iNeuron,iFreq) = circ_mean(alpha);
                     entrain_hist(iSurr,iIn,iNeuron,:,iFreq) = histcounts(alpha,binEdges);
+                    entrain_all_alpha{iIn,iNeuron,iFreq} = alpha; % temporary use!!!
                 end
             end
         end

@@ -1,8 +1,8 @@
 savePath = '/Users/matt/Documents/Data/ChoiceTask/LFPs/delta/unwrap';
 
 figPath = '/Users/matt/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
-doLabels = true;
-doSave = false;
+doLabels = false;
+doSave = true;
 
 if doLabels
     subplotMargins = [.08 .05];
