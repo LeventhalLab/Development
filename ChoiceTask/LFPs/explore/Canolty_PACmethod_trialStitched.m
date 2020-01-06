@@ -7,8 +7,8 @@ if ~exist('all_ts')
     load('session_20180919_NakamuraMRL.mat', 'LFPfiles_local_altLookup')
 end
 
-% load('Canolt_PAC_20190120.mat') % 300 Hz
-% freqList = logFreqList([1 300],30);
+load('Canolt_PAC_20190120.mat') % 300 Hz
+freqList = logFreqList([1 300],30);
 
 % load('Canolt_PAC_20191127.mat') % 100 Hz
 % freqList = logFreqList([1 100],30);
@@ -169,8 +169,8 @@ if doSetup
     end
 end
 
-save('Canolt_PAC_20191202','all_MImatrix','all_shuff_MImatrix_mean','all_shuff_MImatrix_pvals',...
-'eventFieldnames_wFake','freqList_p','freqList_a','freqList');
+% save('Canolt_PAC_20191202','all_MImatrix','all_shuff_MImatrix_mean','all_shuff_MImatrix_pvals',...
+% 'eventFieldnames_wFake','freqList_p','freqList_a','freqList');
 
 if doPlot
     useSessions = [1:30];

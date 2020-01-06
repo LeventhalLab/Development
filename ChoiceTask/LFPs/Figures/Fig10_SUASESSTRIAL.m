@@ -11,7 +11,7 @@ load('LFPfiles_local_matt');
 figPath = '/Users/matt/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
 subplotMargins = [.02 .02];
 
-doSave1 = false;
+doSave1 = true;
 doSave2 = false;
 doLabels = false;
 
@@ -82,9 +82,7 @@ for iEvent = 1:numel(useEvents)
     yyaxis left;
     x = all_data(useEvents(iEvent),:,iTrial);
     plot(t,all_data(useEvents(iEvent),:,iTrial),'k-','lineWidth',0.5);
-    
-    
-    
+
     hold on;
     plot([0,0],ylim,'k:'); % center line
     ylim([-250 250]);
@@ -159,25 +157,26 @@ for iEvent = 1:numel(useEvents)
     end
     
     % add spike MRL
-    subplot_tight(rows,cols,prc(cols,[3 iEvent]),subplotMargins);
-    theta = [];
-    for iTs = 1:numel(ts)
-        tIdx = closest(tz,ts(iTs));
-        theta(iTs) = Wz_phase(useEvents(iEvent),tIdx,iTrial);
-    end
-    colors = lines(2);
-    polarhistogram(theta,10,'FaceColor',colors(2,:),'normalization','probability','FaceAlpha',1);
-    pax = gca;
-    pax.ThetaZeroLocation = 'left';
-    thetaticks([0,90,180,270]);
-    rlim([0 0.3]);
-    rticks(rlim);
-    if doLabels
-        title({eventFieldnames{useEvents(iEvent)},['MRL trial ',num2str(iTrial),', unit ',num2str(iNeuron)]});
-    else
-        rticklabels({});
-        thetaticklabels({});
-    end
+    % REMOVE FOR RESUBMISSION
+% % % %     subplot_tight(rows,cols,prc(cols,[3 iEvent]),subplotMargins);
+% % % %     theta = [];
+% % % %     for iTs = 1:numel(ts)
+% % % %         tIdx = closest(tz,ts(iTs));
+% % % %         theta(iTs) = Wz_phase(useEvents(iEvent),tIdx,iTrial);
+% % % %     end
+% % % %     colors = lines(2);
+% % % %     polarhistogram(theta,10,'FaceColor',colors(2,:),'normalization','probability','FaceAlpha',1);
+% % % %     pax = gca;
+% % % %     pax.ThetaZeroLocation = 'left';
+% % % %     thetaticks([0,90,180,270]);
+% % % %     rlim([0 0.3]);
+% % % %     rticks(rlim);
+% % % %     if doLabels
+% % % %         title({eventFieldnames{useEvents(iEvent)},['MRL trial ',num2str(iTrial),', unit ',num2str(iNeuron)]});
+% % % %     else
+% % % %         rticklabels({});
+% % % %         thetaticklabels({});
+% % % %     end
     
     % %     subplot_tight(rows,cols,prc(cols,[1 iEvent]));
     subplot_tight(rows,cols,[topRows(iEvent,1) topRows(iEvent,2)],subplotMargins);

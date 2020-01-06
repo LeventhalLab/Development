@@ -55,7 +55,7 @@ end
 % save('20191201_PACPVAL','MImatrix','shuff_MImatrix_mean','shuff_MImatrix_pvals');
 
 if doPlot_allEvents
-    fontSize = 9;
+    fontSize = 14;
     pLims = [0 0.001];
     pThresh = 0.05; % alpha
     SE = strel('sphere',1);
@@ -66,7 +66,8 @@ if doPlot_allEvents
     rows = 2;
     cols = numel(eventFieldnames);
     h = figuree(1400,650);
-
+    
+    useFreqs = floor(linspace(1,numel(freqList),5));
     for iEvent = 1:cols
         curMat = squeeze(MImatrix(iEvent,:,:));
         subplot(rows,cols,prc(cols,[1 iEvent]));
@@ -75,15 +76,15 @@ if doPlot_allEvents
         colormap(gca,parula);
         set(gca,'ydir','normal');
         caxis(zLims);
-        xticks(1:numel(freqList_p));
-        xticklabels(compose('%3.1f',freqList));
+        xticks(useFreqs);
+        xticklabels(compose('%3.1f',freqList(useFreqs)));
         xtickangle(270);
         xlabel('phase (Hz)');
-        yticks(1:numel(freqList_a));
-        yticklabels(compose('%3.1f',freqList));
+        yticks(useFreqs);
+        yticklabels(compose('%3.1f',freqList(useFreqs)));
         ylabel('amp (Hz)');
         set(gca,'fontsize',fontSize);
-        set(gca,'TitleFontSizeMultiplier',2);
+        set(gca,'TitleFontSizeMultiplier',1.2);
         if iEvent == 1
             title({[num2str(useSessions(1)),'-',num2str(useSessions(end))],eventFieldnames{iEvent}});
         else
@@ -132,15 +133,15 @@ if doPlot_allEvents
         colormap(gca,parula);
         set(gca,'ydir','normal');
         caxis(zLims);
-        xticks(1:numel(freqList_p));
-        xticklabels(compose('%3.1f',freqList));
+        xticks(useFreqs);
+        xticklabels(compose('%3.1f',freqList(useFreqs)));
         xtickangle(270);
         xlabel('phase (Hz)');
-        yticks(1:numel(freqList_a));
-        yticklabels(compose('%3.1f',freqList));
+        yticks(useFreqs);
+        yticklabels(compose('%3.1f',freqList(useFreqs)));
         ylabel('amp (Hz)');
         set(gca,'fontsize',fontSize);
-        set(gca,'TitleFontSizeMultiplier',2);
+        set(gca,'TitleFontSizeMultiplier',1.2);
         title('mean shuff Z');
         if iEvent == cols
             cbAside(gca,'Z-MI','k');
@@ -207,7 +208,7 @@ if doPlot_singleEvent
         yticklabels(compose('%3.1f',freqList));
         ylabel('amp (Hz)');
         set(gca,'fontsize',fontSize);
-        set(gca,'TitleFontSizeMultiplier',2);
+        set(gca,'TitleFontSizeMultiplier',1.2);
         if iEvent == 1
             title({'mean real Z',[num2str(useSessions(1)),'-',num2str(useSessions(end))],eventFieldnames{iEvent}});
         else
@@ -231,7 +232,7 @@ if doPlot_singleEvent
         yticklabels(compose('%3.1f',freqList));
         ylabel('amp (Hz)');
         set(gca,'fontsize',fontSize);
-        set(gca,'TitleFontSizeMultiplier',2);
+        set(gca,'TitleFontSizeMultiplier',1.2);
         title('mean shuff Z');
         if iEvent == cols
             cbAside(gca,'Z-MI','k');

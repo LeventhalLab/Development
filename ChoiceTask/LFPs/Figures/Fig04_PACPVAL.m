@@ -2,10 +2,13 @@
 % from /Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/LFPs/explore/CanoltyPAC_trialStitched_print.m
 eventFieldnames = {'cueOn';'centerIn';'tone';'centerOut';'sideIn';'sideOut';'foodRetrieval'};
 eventFieldnames_wFake = {eventFieldnames{:} 'interTrial'};
-freqList = logFreqList([1 100],30);
 
+freqList = logFreqList([1 300],30);
+% Canolt_PAC_20191127_100Hz.mat
+% Canolt_PAC_20191202_300Hz.mat
 if ~exist('MImatrix')
-    load('20191201_PACPVAL.mat')
+    load('Canolt_PAC_20191202_300Hz.mat');
+%     load('20191201_PACPVAL.mat')
 %     load('Canolt_PAC_20191127.mat') % generated this from other laptop
 end
 
@@ -25,7 +28,7 @@ lineWidth = 0.5;
 zLims = [0 13];
 rows = 2;
 cols = numel(eventFieldnames_wFake);
-xmarks = round(logFreqList([1 100],6),0);
+xmarks = round(logFreqList([1 300],6),0);
 usexticks = [];
 for ii = 1:numel(xmarks)
     usexticks(ii) = closest(freqList,xmarks(ii));
@@ -91,6 +94,6 @@ tightfig;
 set(gcf,'color','w');
 if doSave
     setFig('','',[2,1.75]);
-    print(gcf,'-painters','-depsc',fullfile(figPath,'PACPVAL_100Hz.eps'));
+    print(gcf,'-painters','-depsc',fullfile(figPath,'PACPVAL_300Hz.eps'));
     close(h);
 end

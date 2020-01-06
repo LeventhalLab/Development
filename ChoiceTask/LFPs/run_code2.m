@@ -1,4 +1,4 @@
-% load('session_20191014_spikePhaseResubmit')
+op% load('session_20191014_spikePhaseResubmit')
 % load('analysisConf');
 freqList = logFreqList([1 2000],30);
 
