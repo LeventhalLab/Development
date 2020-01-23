@@ -34,7 +34,8 @@ rows = 1; % controls visibility of distributions
 cols = 2;
 close all;
 h = ff(1000,350*rows);
-for iCond = 1:2
+condLabels = {"in-trial", "inter-trial"};
+for iCond = [2,1]
     min_hist = squeeze(entrain_hist(1,iCond,k_min,:,iFreq));
     mid_hist = squeeze(entrain_hist(1,iCond,k_mid,:,iFreq));
     mu_min = squeeze(entrain_mus(1,iCond,k_min,iFreq));
@@ -46,11 +47,12 @@ for iCond = 1:2
     p_min = all_p(k_min);
     p_mid = all_p(k_mid);
     
-    disp(iCond);
-    fprintf('MIN p = %1.2d, MRL = %1.2f\n',p_min,r_min);
-    fprintf('MID p = %1.2d, MRL = %1.2f\n',p_mid,r_mid);
+    disp(condLabels{iCond});
+    fprintf('A p = %1.2d, MRL = %1.2f\n',p_min,r_min);
+    fprintf('B p = %1.2d, MRL = %1.2f\n',p_mid,r_mid);
     
     subplotMargins = [.02 .02];
+    
     subtightplot(rows,cols,prc(cols,[1,1]),subplotMargins);
     polarhistogram('BinEdges',edges,'BinCounts',min_hist,'DisplayStyle','stairs','EdgeColor',dirColor(iCond+2,:),...
         'Normalization','probability','LineWidth',lineWidth);
