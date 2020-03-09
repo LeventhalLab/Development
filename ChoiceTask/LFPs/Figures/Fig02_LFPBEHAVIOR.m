@@ -10,7 +10,7 @@ end
 do_linePlot = false;
 do_lineSupp = false;
 
-doSave = true;
+doSave = false;
 figPath = '/Users/matt/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
 subplotMargins = [.03 .01];
 
@@ -138,13 +138,16 @@ if true
     end
     
     all_ptests = zeros([size(all_Wz_power,2),size(all_Wz_power,3),size(all_Wz_power,4)]);
-    for iEvent = 1:size(all_Wz_power,2)
+    for iEvent = 4%1:size(all_Wz_power,2)
         for iTime = 1:size(all_Wz_power,3)
             for iFreq = 1:size(all_Wz_power,4)
+                X = rmoutliers(squeeze(all_Wz_power(:,iEvent,iTime,iFreq)));
+                parmhat = gevfit(X);
                 thisTrial = squeeze(mean(abs(squeeze(all_Wz_power(:,iEvent,iTime,iFreq)))));
+                all_ptests(iEvent,iTime,iFreq) = gevcdf(thisTrial,parmhat(1),parmhat(2),parmhat(3));
 % %                 theseSurr = abs(squeeze(all_Wz_power(:,1,iTime,iFreq)));
 % %                 all_ptests(iEvent,iTime,iFreq) = 1 - (sum(thisTrial > theseSurr) / numel(theseSurr));
-                all_ptests(iEvent,iTime,iFreq) = 2*normcdf(-abs(thisTrial));%*size(all_Wz_power,1);
+%                 all_ptests(iEvent,iTime,iFreq) = 2*normcdf(-abs(thisTrial));%*size(all_Wz_power,1);
             end
         end
     end
