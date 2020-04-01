@@ -1,9 +1,8 @@
-
 % LFPBEHAVIOR
-if ~exist('session_Wz_power')
-    load('fig__spectrum_MRL_20181108');
-    load('session_20191124.mat')
-end
+% if ~exist('session_Wz_power')
+%     load('fig__spectrum_MRL_20181108');
+%     load('session_20191124.mat')
+% end
 % raw data was compiled with LFP_byX.m (doSetup = true)
 % freqList = logFreqList([1 200],30);
 
@@ -111,7 +110,7 @@ if do_lineSupp
         grid on;
         iSubplot = iSubplot + 1;
     end
-
+    
     tightfig;
     set(gcf,'color','w');
     if doSave
@@ -138,16 +137,22 @@ if true
     end
     
     all_ptests = zeros([size(all_Wz_power,2),size(all_Wz_power,3),size(all_Wz_power,4)]);
-    for iEvent = 4%1:size(all_Wz_power,2)
+    for iEvent = 1:size(all_Wz_power,2)
         for iTime = 1:size(all_Wz_power,3)
             for iFreq = 1:size(all_Wz_power,4)
-                X = rmoutliers(squeeze(all_Wz_power(:,iEvent,iTime,iFreq)));
-                parmhat = gevfit(X);
+                %                 X = rmoutliers(squeeze(all_Wz_power(:,iEvent,iTime,iFreq)));
+                %                 parmhat = gevfit(X);
                 thisTrial = squeeze(mean(abs(squeeze(all_Wz_power(:,iEvent,iTime,iFreq)))));
-                all_ptests(iEvent,iTime,iFreq) = gevcdf(thisTrial,parmhat(1),parmhat(2),parmhat(3));
-% %                 theseSurr = abs(squeeze(all_Wz_power(:,1,iTime,iFreq)));
-% %                 all_ptests(iEvent,iTime,iFreq) = 1 - (sum(thisTrial > theseSurr) / numel(theseSurr));
-%                 all_ptests(iEvent,iTime,iFreq) = 2*normcdf(-abs(thisTrial));%*size(all_Wz_power,1);
+                %                 all_ptests(iEvent,iTime,iFreq) = gevcdf(thisTrial,parmhat(1),parmhat(2),parmhat(3));
+                y = rmoutliers(squeeze(all_Wz_power(:,8,iTime,iFreq)));
+                %                 theseSurr = abs(y);
+                if thisTrial > 0
+                    all_ptests(iEvent,iTime,iFreq) = 1 - (sum(thisTrial > y) / numel(y));
+                else
+                    all_ptests(iEvent,iTime,iFreq) = 1 - (sum(thisTrial < y) / numel(y));
+                end
+                
+                %                 all_ptests(iEvent,iTime,iFreq) = 2*normcdf(-abs(thisTrial));%*size(all_Wz_power,1);
             end
         end
     end

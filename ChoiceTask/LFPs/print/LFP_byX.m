@@ -37,13 +37,13 @@ if doSetup
         [~,name,~] = fileparts(sevFile);
         subjectName = name(1:5);
         trials = all_trials{iNeuron};
-        trials = addEventToTrials(trials,'interTrial');
-        [trialIds,allTimes] = sortTrialsBy(trials,'RT');
         [sevFilt,Fs,decimateFactor] = loadCompressedSEV(sevFile,[]);
-        sevFilt = artifactThreshv2(sevFilt,2000);
-        [W,all_data] = eventsLFPv2(trials(trialIds),sevFilt,tWindow,Fs,freqList,eventFieldnames_wFake);
-        keepTrials = threshTrialData(all_data,zThresh);
-        W = W(:,:,keepTrials,:);
+        [trialIds,allTimes] = sortTrialsBy(trials,'RT');
+        trials = curateTrials(trials(trialIds),sevFilt,Fs,'interTrial');
+%         sevFilt = artifactThreshv2(sevFilt,2000);
+        [W,all_data] = eventsLFPv2(trials,sevFilt,tWindow,Fs,freqList,eventFieldnames_wFake);
+%         keepTrials = threshTrialData(all_data,zThresh);
+%         W = W(:,:,keepTrials,:);
         
         [Wz_power,Wz_phase] = zScoreW(W,Wlength); % power Z-score
         

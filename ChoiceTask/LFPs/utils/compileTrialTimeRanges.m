@@ -1,10 +1,13 @@
 function trialTimeRanges = compileTrialTimeRanges(trials,maxTrialTime)
+break; % see curateTrials
 % maxTrialTime = 5;
 trialTimeRanges = [];
 trialCount = 0;
 for iTrial = 1:numel(trials)
     fields = fieldnames(trials(iTrial).timestamps);
     trialTimes = [];
+    noseIn = [];
+    foodRetrieval = [];
     for ii = 1:numel(fields)
         ts = trials(iTrial).timestamps.(fields{ii});
         if ~isempty(ts)

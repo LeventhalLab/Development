@@ -18,11 +18,15 @@ Wz_power = [];
 for iFreq = 1:size(W_power,4)
     refW = squeeze(W_power(1,1:Wlength,:,iFreq)); % cue event
     refStd = mean(std(refW));
+    refMean = mean(mean(refW));
     for iEvent = 1:size(W_power,1)
         for iTrial = 1:size(W_power,3)
-            refMean = mean(refW(:,iTrial));
+%             refMean = mean(refW(:,iTrial));
             theseW = squeeze(W_power(iEvent,returnRange,iTrial,iFreq));
             theseWz = (theseW - refMean) ./ refStd;
+            if max(theseWz > 50)
+                disp(sprintf('z=%4.0f : f%i, e%i, t%i',max(theseWz),iFreq,iEvent,iTrial));
+            end
             Wz_power(iEvent,:,iTrial,iFreq) = theseWz;
         end
     end
