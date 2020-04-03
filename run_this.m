@@ -1,15 +1,10 @@
-close all
-for iTrial = 1:size(Wz_power,3)
-    if find(squeeze(Wz_power(:,:,iTrial,:)) > 50)
-        ff(1200,300);
-        for iEvent = 1:8
-            subplot(1,8,iEvent);
-            theseData = squeeze(Wz_power(iEvent,:,iTrial,:));
-            imagesc(theseData');
-            colormap(jet);
-            title(sprintf('%i %i',iTrial,iEvent));
-            set(gca,'YDir','normal');
-            caxis([1 30]);
-        end
-    end
+workingDir = '/Users/matt/Documents/Data/ChoiceTask/LFPs/surrogates/rawdata';
+iSession = 0;
+for iNeuron = selectedLFPFiles'
+    iSession = iSession + 1;
+    sevFile = LFPfiles_local{iNeuron};
+    disp(sevFile);
+    [~,~,~,~,compressedPath] = loadCompressedSEV(sevFile,[]);
+    [~,name,ext] = fileparts(compressedPath);
+    copyfile(compressedPath,fullfile(workingDir,sprintf('session%02d_%s%s',iSession,name,ext)));
 end

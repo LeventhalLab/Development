@@ -1,4 +1,4 @@
-function [sevFilt,Fs,decimateFactor,loadedFile] = loadCompressedSEV(sevFile,unitId)
+function [sevFilt,Fs,decimateFactor,loadedFile,compressedPath] = loadCompressedSEV(sevFile,unitId)
 compressor = 'x16';
 % compressor = 'x16_despiked';
 
