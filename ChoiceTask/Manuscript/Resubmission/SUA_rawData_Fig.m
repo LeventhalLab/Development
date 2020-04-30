@@ -3,10 +3,10 @@ figPath = '/Users/matt/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
 subplotMargins = [.03 .01];
 
 if ~exist('nexStruct','var')
-    load('~/Downloads/R0088_20151030a.nex.mat');
+    load('/Users/matt/Documents/Data/ChoiceTask/LFPs/R0088_20151030a.nex.mat');
 end
-folders = {'/Users/matt/Downloads/R0088_20151030a-selected',...
-    '/Users/matt/Downloads/R0088_20151030a-selected 3'};
+folders = {'/Users/matt/Documents/Data/ChoiceTask/LFPs/R0088_20151030a-selected',...
+    '/Users/matt/Documents/Data/ChoiceTask/LFPs/R0088_20151030a-selected 3'};
 plotSec = 3;
 [b,a] = butter(4, [0.016 0.16]); % 200Hz-2kHz
 
