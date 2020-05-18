@@ -7,10 +7,10 @@ end
 freqList = logFreqList([1 200],30);
 
 do_linePlot = false;
-do_lineSupp = true;
+do_lineSupp = false;
 doLabels = false;
-
 doSave = true;
+
 figPath = '/Users/matt/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
 subplotMargins = [.03 .01];
 
@@ -130,7 +130,7 @@ end
 
 % setup
 if true
-    scaloPower2 = squeeze(mean(all_Wz_power));
+% % % %     scaloPower2 = squeeze(mean(all_Wz_power));
     scaloPhase2 = zeros(size(scaloPower2));
     
     all_rtests = zeros([size(all_Wz_phase,2),size(all_Wz_phase,3),size(all_Wz_phase,4)]);
@@ -144,44 +144,47 @@ if true
         end
     end
     
-    all_ptests = zeros([size(all_Wz_power,2),size(all_Wz_power,3),size(all_Wz_power,4)]);
-    for iEvent = 1:size(all_Wz_power,2)
-        for iTime = 1:size(all_Wz_power,3)
-            for iFreq = 1:size(all_Wz_power,4)
-                % % % %                 %                 X = rmoutliers(squeeze(all_Wz_power(:,iEvent,iTime,iFreq)));
-                % % % %                 %                 parmhat = gevfit(X);
-                thisTrial = squeeze(mean(abs(squeeze(all_Wz_power(:,iEvent,iTime,iFreq)))));
-                % % % %                 %                 all_ptests(iEvent,iTime,iFreq) = gevcdf(thisTrial,parmhat(1),parmhat(2),parmhat(3));
-                % % % %                 y = rmoutliers(squeeze(all_Wz_power(:,8,iTime,iFreq)));
-                % % % %                 %                 theseSurr = abs(y);
-                % % % %                 if thisTrial > 0
-                % % % %                     all_ptests(iEvent,iTime,iFreq) = 1 - (sum(thisTrial > y) / numel(y));
-                % % % %                 else
-                % % % %                     all_ptests(iEvent,iTime,iFreq) = 1 - (sum(thisTrial < y) / numel(y));
-                % % % %                 end
-                % % % %
-                all_ptests(iEvent,iTime,iFreq) = normcdf(-abs(thisTrial));
-            end
-        end
-    end
-end
+% % % %     all_ptests = zeros([size(all_Wz_power,2),size(all_Wz_power,3),size(all_Wz_power,4)]);
+% % % %     for iEvent = 1:size(all_Wz_power,2)
+% % % %         for iTime = 1:size(all_Wz_power,3)
+% % % %             for iFreq = 1:size(all_Wz_power,4)
+% % % %                 % % % %                 %                 X = rmoutliers(squeeze(all_Wz_power(:,iEvent,iTime,iFreq)));
+% % % %                 % % % %                 %                 parmhat = gevfit(X);
+% % % %                 thisTrial = squeeze(mean(abs(squeeze(all_Wz_power(:,iEvent,iTime,iFreq)))));
+% % % %                 % % % %                 %                 all_ptests(iEvent,iTime,iFreq) = gevcdf(thisTrial,parmhat(1),parmhat(2),parmhat(3));
+% % % %                 % % % %                 y = rmoutliers(squeeze(all_Wz_power(:,8,iTime,iFreq)));
+% % % %                 % % % %                 %                 theseSurr = abs(y);
+% % % %                 % % % %                 if thisTrial > 0
+% % % %                 % % % %                     all_ptests(iEvent,iTime,iFreq) = 1 - (sum(thisTrial > y) / numel(y));
+% % % %                 % % % %                 else
+% % % %                 % % % %                     all_ptests(iEvent,iTime,iFreq) = 1 - (sum(thisTrial < y) / numel(y));
+% % % %                 % % % %                 end
+% % % %                 % % % %
+% % % %                 all_ptests(iEvent,iTime,iFreq) = normcdf(-abs(thisTrial));
+% % % %             end
+% % % %         end
+% % % %     end
 
+    mean_zscoreSessions = squeeze(mean(zscoreSessions));
+    all_ptests = normcdf(-abs(mean_zscoreSessions));
+end
+nSurr = 1000;
 rtest = ones(size(all_rtests))*3;
-rtest(all_rtests < .05) = 2;
-rtest(all_rtests < .01) = 1;
-rtest(all_rtests < .001) = 0;
+rtest(all_rtests < .05/numel(theseTrials)) = 2;
+rtest(all_rtests < .01/numel(theseTrials)) = 1;
+rtest(all_rtests < .001/numel(theseTrials)) = 0;
 
 ptest = ones(size(all_ptests))*3;
-ptest(all_ptests < .05) = 2;
-ptest(all_ptests < .01) = 1;
-ptest(all_ptests < .001) = 0;
+ptest(all_ptests < .05/nSurr) = 2;
+ptest(all_ptests < .01/nSurr) = 1;
+ptest(all_ptests < .001/nSurr) = 0;
 
 phaseColors = [0 0 0;1 0 0;0 0 1;1 1 1];
 close all
 h = ff(1000,650);
 rows = 4;
 cols = 8;
-caxisVals = [-0.5 3];
+caxisVals = [-10 10];
 xmarks = round(logFreqList([1 200],6),0);
 usexticks = [];
 for ii = 1:numel(xmarks)
@@ -190,7 +193,7 @@ end
 
 for iEvent = 1:7
     subplot_tight(rows,cols,prc(cols,[1,iEvent]),subplotMargins);
-    imagesc(t,1:numel(freqList),squeeze(scaloPower2(iEvent,:,:))');
+    imagesc(t,1:numel(freqList),squeeze(mean_zscoreSessions(iEvent,:,:))');
     hold on;
     colormap(gca,jet);
     caxis(caxisVals);

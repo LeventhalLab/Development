@@ -1,3 +1,3 @@
 function cmap = jupiter
-cmapPath = '/Users/mattgaidica/Documents/MATLAB/LeventhalLab/Development/ChoiceTask/LFPs/utils/jupiter.jpg';
+cmapPath = '/Users/matt/Documents/MATLAB/Development/ChoiceTask/LFPs/utils/jupiter.jpg';
 cmap = mycmap(cmapPath);
