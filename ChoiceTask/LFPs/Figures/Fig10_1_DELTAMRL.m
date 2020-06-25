@@ -1,5 +1,5 @@
 % DELTAMRL
-if ~exist('data_source')
+if ~exist('data_source') % see deltaRTchaos_simpleCorr.m
     load('20190416_DELTAMRL.mat')
 end
 figPath = '/Users/matt/Box Sync/Leventhal Lab/Manuscripts/Mthal LFPs/Figures';
@@ -53,7 +53,7 @@ end
 
 [RTv,RTk] = sort(compiledRTs);
 
-iCond = 2;
+iCond = 2; % {RT_power, RT_phase}
 iFreq = 1;
 allMRLs = [];
 for iEvent = 1:7
