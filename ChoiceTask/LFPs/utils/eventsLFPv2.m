@@ -24,26 +24,25 @@ for iFreq = 1:nLoop
         data = [];
         return_data = [];
         for iTrial = 1:numel(trials)
-            try
-                centerTs = getfield(trials(iTrial).timestamps,eventFieldnames{iField});
-                centerSample = round(centerTs*Fs);
-                centerRangeSamples = (centerSample - tWindow_oversamples):(centerSample + tWindow_oversamples - 1);
-                if centerRangeSamples(1) > 0 && centerRangeSamples(end) < length(sevFiltFilt)
-                    lfp = sevFiltFilt(centerRangeSamples);
-                    lfp = lfp - mean(lfp);
-                    
-                    rlfp = sevFilt(centerRangeSamples); % same for scalo method
-                    rlfp = rlfp - mean(rlfp);
-                    
-                    if sign(eliminateData) == 1
-                        lfp(ceil(numel(lfp)/2):end) = 0; % after t0
-                        rlfp(ceil(numel(rlfp)/2):end) = 0; % after t0
-                    elseif sign(eliminateData) == -1
-                        lfp(1:floor(numel(lfp)/2)) = 0; % before t0
-                        rlfp(1:floor(numel(rlfp)/2)) = 0; % before t0
-                    end
+            
+            centerTs = getfield(trials(iTrial).timestamps,eventFieldnames{iField});
+            centerSample = round(centerTs*Fs);
+            centerRangeSamples = (centerSample - tWindow_oversamples):(centerSample + tWindow_oversamples - 1);
+            if centerRangeSamples(1) > 0 && centerRangeSamples(end) < length(sevFiltFilt)
+                lfp = sevFiltFilt(centerRangeSamples);
+                lfp = lfp - mean(lfp);
+                
+                rlfp = sevFilt(centerRangeSamples); % same for scalo method
+                rlfp = rlfp - mean(rlfp);
+                
+                if sign(eliminateData) == 1
+                    lfp(ceil(numel(lfp)/2):end) = 0; % after t0
+                    rlfp(ceil(numel(rlfp)/2):end) = 0; % after t0
+                elseif sign(eliminateData) == -1
+                    lfp(1:floor(numel(lfp)/2)) = 0; % before t0
+                    rlfp(1:floor(numel(rlfp)/2)) = 0; % before t0
                 end
-            catch % for trials without all events
+            else
                 centerRangeSamples = -tWindow_oversamples:tWindow_oversamples - 1;
                 lfp = NaN(1,numel(centerRangeSamples));
                 rlfp = NaN(1,numel(centerRangeSamples));

@@ -32,14 +32,17 @@ trials = trials(trialsMap);
 end
 
 function compliant = isTrialCompliant(startTime,endTime,sevFilt,Fs)
-snippet = sevFilt(round(startTime*Fs):round(endTime*Fs));
-[b,a] = butter(4, [1/(Fs/2) 100/(Fs/2)]); % 1-200Hz
-lpfilt = filtfilt(b,a,double(snippet));
-[b,a] = butter(4, [200/(Fs/2) .9999]); % 1-200Hz
-hpfilt = filtfilt(b,a,double(snippet));
-compliant = true;
-if any(abs(diff(lpfilt)).^2 > 6000)
-    compliant = false;
+compliant = false;
+if round(startTime*Fs) >= 1 && round(endTime*Fs) <= numel(sevFilt)
+    compliant = true;
+    snippet = sevFilt(round(startTime*Fs):round(endTime*Fs));
+    [b,a] = butter(4, [1/(Fs/2) 100/(Fs/2)]); % 1-200Hz
+    lpfilt = filtfilt(b,a,double(snippet));
+    [b,a] = butter(4, [200/(Fs/2) .9999]); % 1-200Hz
+    hpfilt = filtfilt(b,a,double(snippet));
+    if any(abs(diff(lpfilt)).^2 > 6000)
+        compliant = false;
+    end
 end
 
 % h1 = ff(1200,800);

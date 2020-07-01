@@ -6,7 +6,7 @@ if ~exist('selectedLFPFiles')
 end
 load('LFPfiles_local_matt.mat');
 
-doSetup = false;
+doSetup = true;
 
 iSession = 0;
 for iNeuron = selectedLFPFiles'
@@ -33,7 +33,7 @@ if doSetup
         sevFilt = artifactThreshv2(sevFilt,2000);
         sevFilt = sevFilt - mean(sevFilt);
         
-        [W,all_data] = eventsLFPv2(trials,sevFilt,tWindow*2,Fs,freqList,eventNames);
+        [W,all_data] = eventsLFPv2(trials(trialIds),sevFilt,tWindow*2,Fs,freqList,eventNames);
         [Wz_power,~] = zScoreW(W,Wlength); % power Z-score
         WRT(iSession).trialIds = trialIds;
         WRT(iSession).allTimes = allTimes;
@@ -41,12 +41,12 @@ if doSetup
     end
 end
 
-% % totalTrials = 0;
-% % totalRts = 0;
-% % for iSession = 1%:numel(WRT)
-% %     totalTrials = totalTrials + size(WRT(iSession).Wz_power,3);
-% %     totalRts = totalRts + numel(WRT(iSession).trialIds);
-% % end
+% % % % totalTrials = 0;
+% % % % totalRts = 0;
+% % % % for iSession = 1%:numel(WRT)
+% % % %     totalTrials = totalTrials + size(WRT(iSession).Wz_power,3);
+% % % %     totalRts = totalRts + numel(WRT(iSession).trialIds);
+% % % % end
 
 close all
 ff(1200,400);
@@ -115,7 +115,7 @@ for iSession = 1:numel(WRT)
         plot(-find(ps < 0.05),r_plot(iEvent,ps < 0.05),'*','color',[1 0 0 op]);
         title(prettyNames{iEvent});
         xlabel('Trials back');
-        ylabel('Corr. Coeff');
+        ylabel('\delta Power Corr. Coeff');
         xlim([min(t) max(t)]);
         xticks(t);
         ylim([-1 1]);
@@ -134,7 +134,7 @@ for iSession = 1:numel(WRT)
     title('Reaction Time');
     xlabel('Trials back');
     xticks(t);
-    ylabel('Corr. Coeff');
+    ylabel('RT Corr. Coeff');
     xlim([min(t) max(t)]);
     ylim([-1 1]);
     set(gca,'fontsize',14);

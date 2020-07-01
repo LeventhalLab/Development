@@ -3,7 +3,7 @@ if ~exist('session_Wz_power')
     load('fig__spectrum_MRL_20181108');
     load('session_20191124.mat')
 end
-% raw data was compiled with LFP_byX.m (doSetup = true)
+% raw data was compiled with   (doSetup = true)
 freqList = logFreqList([1 200],30);
 
 do_linePlot = false;
