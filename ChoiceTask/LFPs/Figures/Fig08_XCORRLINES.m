@@ -30,6 +30,7 @@ cols = size(useFreqs,1);
 colors = {lines(size(useFreqs,1)),lines(size(useFreqs,1))*.3};
 pThresh = 0.01;
 ylimVals = [-0.05,0.05];
+clc
 for iFreq = 1:size(useFreqs,1)
     for iDir = 2:3
         useUnits = ismember(xcorrUnits,condUnits{iDir});
@@ -43,11 +44,11 @@ for iFreq = 1:size(useFreqs,1)
             plot(tlag,data,'color',colors{iIn}(iFreq,:),'linewidth',1);
             
             % display
-% % % %             disp([condLabels{iDir},' ',inLabels{iIn},', ',num2str(iFreq)]);
-% % % %             [v,k] = min(data);
-% % % %             disp(['--> MIN: r = ',num2str(v,3),', t = ',num2str(tlag(k)*1000,3)]);
-% % % %             [v,k] = max(data);
-% % % %             disp(['--> MAX: r = ',num2str(v,3),', t = ',num2str(tlag(k)*1000,3)]);
+            disp([condLabels{iDir},' ',inLabels{iIn},', ',freqLabels{iFreq}]);
+            [v,k] = min(data);
+            fprintf('--> MIN: r = %1.3f, t = %1.3f s\n',v,tlag(k));
+            [v,k] = max(data);
+            fprintf('--> MAX: r = %1.3f, t = %1.3f s\n',v,tlag(k));
 % % % %             
             
 % %             if iDir > 1
