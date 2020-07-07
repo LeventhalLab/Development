@@ -44,11 +44,16 @@ end
 close all
 ff(1200,500);
 subplot(121);
-histogram(trialTimeRanges(:,2)-trialTimeRanges(:,1),1:0.5:20);
+histogram(trialTimeRanges(:,2)-trialTimeRanges(:,1),1:2:200);
 title('in-trial times');
+ylabel('count');
+xlabel('seconds');
+
 subplot(122);
-histogram(intertrialTimes,1:2:120);
+histogram(intertrialTimes,1:2:200);
 title('inter-trial times');
+ylabel('count');
+xlabel('seconds');
 
 fprintf('inter-trial mean: %1.3f, median: %1.3f, std: %1.3f\n',...
     mean(intertrialTimes),median(intertrialTimes),std(intertrialTimes));
